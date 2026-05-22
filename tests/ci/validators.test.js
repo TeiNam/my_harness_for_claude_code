@@ -15,9 +15,6 @@ const { execFileSync, spawnSync } = require('child_process');
 
 const validatorsDir = path.join(__dirname, '..', '..', 'scripts', 'ci');
 const repoRoot = path.join(__dirname, '..', '..');
-const modulesSchemaPath = path.join(repoRoot, 'schemas', 'install-modules.schema.json');
-const profilesSchemaPath = path.join(repoRoot, 'schemas', 'install-profiles.schema.json');
-const componentsSchemaPath = path.join(repoRoot, 'schemas', 'install-components.schema.json');
 
 // Test helpers
 function test(name, fn) {
@@ -40,17 +37,7 @@ function cleanupTestDir(testDir) {
   fs.rmSync(testDir, { recursive: true, force: true });
 }
 
-function writeJson(filePath, value) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, JSON.stringify(value, null, 2));
-}
 
-function writeInstallComponentsManifest(testDir, components) {
-  writeJson(path.join(testDir, 'manifests', 'install-components.json'), {
-    version: 1,
-    components,
-  });
-}
 
 function stripShebang(source) {
   let s = source;
@@ -152,35 +139,6 @@ function runValidator(validatorName) {
   }
 }
 
-function runCatalogValidator(overrides = {}) {
-  const validatorPath = path.join(validatorsDir, 'catalog.js');
-  let source = fs.readFileSync(validatorPath, 'utf8');
-  source = stripShebang(source);
-  const argv = Array.isArray(overrides.argv) && overrides.argv.length > 0
-    ? overrides.argv
-    : ['--text'];
-  const argvPreamble = argv.map(arg => `process.argv.push(${JSON.stringify(arg)});`).join('\n');
-  source = `${argvPreamble}\n${source}`;
-
-  const resolvedOverrides = {
-    ROOT: repoRoot,
-    README_PATH: path.join(repoRoot, 'README.md'),
-    AGENTS_PATH: path.join(repoRoot, 'AGENTS.md'),
-    README_ZH_CN_PATH: path.join(repoRoot, 'README.zh-CN.md'),
-    DOCS_ZH_CN_README_PATH: path.join(repoRoot, 'docs', 'zh-CN', 'README.md'),
-    DOCS_ZH_CN_AGENTS_PATH: path.join(repoRoot, 'docs', 'zh-CN', 'AGENTS.md'),
-    PLUGIN_JSON_PATH: path.join(repoRoot, '.claude-plugin', 'plugin.json'),
-    MARKETPLACE_JSON_PATH: path.join(repoRoot, '.claude-plugin', 'marketplace.json'),
-    ...overrides,
-  };
-
-  for (const [constant, overridePath] of Object.entries(resolvedOverrides)) {
-    const dirRegex = new RegExp(`const ${constant} = .*?;`);
-    source = source.replace(dirRegex, `const ${constant} = ${JSON.stringify(overridePath)};`);
-  }
-
-  return runSourceViaTempFile(source);
-}
 
 // Run validate-skills.js against a fixture dir, optionally passing
 // extra argv (e.g. '--strict') and env overrides (e.g.
@@ -222,71 +180,6 @@ function runSkillsValidator(testDir, argv = [], envOverrides = {}) {
   } finally {
     try { fs.unlinkSync(tmpFile); } catch (_) { /* ignore */ }
   }
-}
-
-function writeCatalogFixture(testDir, options = {}) {
-  const {
-    readmeCounts = { agents: 1, skills: 1, commands: 1 },
-    readmeProjectTreeAgents = readmeCounts.agents,
-    readmeTableCounts = readmeCounts,
-    readmeParityCounts = readmeCounts,
-    readmeUnrelatedSkillsCount = 16,
-    summaryCounts = { agents: 1, skills: 1, commands: 1 },
-    structureLines = [
-      'agents/          — 1 specialized subagents',
-      'skills/          — 1 workflow skills and domain knowledge',
-      'commands/        — 1 slash commands',
-    ],
-    zhRootReadmeCounts = { agents: 1, skills: 1, commands: 1 },
-    zhDocsReadmeCounts = { agents: 1, skills: 1, commands: 1 },
-    zhDocsTableCounts = zhDocsReadmeCounts,
-    zhDocsParityCounts = zhDocsReadmeCounts,
-    zhDocsUnrelatedSkillsCount = 16,
-    zhAgentsSummaryCounts = { agents: 1, skills: 1, commands: 1 },
-    zhAgentsStructureLines = [
-      'agents/          — 1 个专业子代理',
-      'skills/          — 1 个工作流技能和领域知识',
-      'commands/        — 1 个斜杠命令',
-    ],
-    pluginCounts = { agents: 1, skills: 1, commands: 1 },
-    marketplaceCounts = { agents: 1, skills: 1, commands: 1 },
-  } = options;
-
-  const readmePath = path.join(testDir, 'README.md');
-  const agentsPath = path.join(testDir, 'AGENTS.md');
-  const zhRootReadmePath = path.join(testDir, 'README.zh-CN.md');
-  const zhDocsReadmePath = path.join(testDir, 'docs', 'zh-CN', 'README.md');
-  const zhAgentsPath = path.join(testDir, 'docs', 'zh-CN', 'AGENTS.md');
-  const pluginJsonPath = path.join(testDir, '.claude-plugin', 'plugin.json');
-  const marketplaceJsonPath = path.join(testDir, '.claude-plugin', 'marketplace.json');
-
-  fs.mkdirSync(path.join(testDir, 'agents'), { recursive: true });
-  fs.mkdirSync(path.join(testDir, 'commands'), { recursive: true });
-  fs.mkdirSync(path.join(testDir, 'skills', 'demo-skill'), { recursive: true });
-  fs.mkdirSync(path.join(testDir, 'docs', 'zh-CN'), { recursive: true });
-  fs.mkdirSync(path.join(testDir, '.claude-plugin'), { recursive: true });
-
-  fs.writeFileSync(path.join(testDir, 'agents', 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
-  fs.writeFileSync(path.join(testDir, 'commands', 'plan.md'), '---\ndescription: Plan\n---\n# Plan');
-  fs.writeFileSync(path.join(testDir, 'skills', 'demo-skill', 'SKILL.md'), '---\nname: demo-skill\ndescription: Demo skill\norigin: harness\n---\n# Demo Skill');
-
-  fs.writeFileSync(readmePath, `Access to ${readmeCounts.agents} agents, ${readmeCounts.skills} skills, and ${readmeCounts.commands} commands.\n- **Public surface synced to the live repo** - metadata, catalog counts, plugin manifests, and install-facing docs now match the actual OSS surface: ${readmeCounts.agents} agents, ${readmeCounts.skills} skills, and ${readmeCounts.commands} legacy command shims.\n|-- agents/           # ${readmeProjectTreeAgents} specialized subagents for delegation\n| Feature | Claude Code | Cursor IDE | Codex CLI | OpenCode |\n|---------|------------|------------|-----------|----------|\n| Agents | PASS: ${readmeTableCounts.agents} agents | Shared | Shared | 1 |\n| Commands | PASS: ${readmeTableCounts.commands} commands | Shared | Shared | 1 |\n| Skills | PASS: ${readmeTableCounts.skills} skills | Shared | Shared | 1 |\n\n| Feature | Count | Format |\n|-----------|-------|---------|\n| Skills | ${readmeUnrelatedSkillsCount} | .agents/skills/ |\n\n## Cross-Tool Feature Parity\n\n| Feature | Claude Code | Cursor IDE | Codex CLI | OpenCode |\n|---------|------------|------------|-----------|----------|\n| **Agents** | ${readmeParityCounts.agents} | Shared (AGENTS.md) | Shared (AGENTS.md) | 12 |\n| **Commands** | ${readmeParityCounts.commands} | Shared | Instruction-based | 31 |\n| **Skills** | ${readmeParityCounts.skills} | Shared | 10 (native format) | 37 |\n`);
-  fs.writeFileSync(agentsPath, `This is a **production-ready AI coding plugin** providing ${summaryCounts.agents} specialized agents, ${summaryCounts.skills} skills, ${summaryCounts.commands} commands, and automated hook workflows for software development.\n\n\`\`\`\n${structureLines.join('\n')}\n\`\`\`\n`);
-  fs.writeFileSync(zhRootReadmePath, `**完成！** 你现在可以使用 ${zhRootReadmeCounts.agents} 个代理、${zhRootReadmeCounts.skills} 个技能和 ${zhRootReadmeCounts.commands} 个命令。\n`);
-  fs.writeFileSync(zhDocsReadmePath, `**搞定！** 你现在可以使用 ${zhDocsReadmeCounts.agents} 个智能体、${zhDocsReadmeCounts.skills} 项技能和 ${zhDocsReadmeCounts.commands} 个命令了。\n| 功能特性 | Claude Code | OpenCode | 状态 |\n|---------|-------------|----------|--------|\n| 智能体 | \u2705 ${zhDocsTableCounts.agents} 个 | \u2705 12 个 | **Claude Code 领先** |\n| 命令 | \u2705 ${zhDocsTableCounts.commands} 个 | \u2705 31 个 | **Claude Code 领先** |\n| 技能 | \u2705 ${zhDocsTableCounts.skills} 项 | \u2705 37 项 | **Claude Code 领先** |\n\n| 功能特性 | 数量 | 格式 |\n|-----------|-------|---------|\n| 技能 | ${zhDocsUnrelatedSkillsCount} | .agents/skills/ |\n\n## 跨工具功能对等\n\n| 功能特性 | Claude Code | Cursor IDE | Codex CLI | OpenCode |\n|---------|------------|------------|-----------|----------|\n| **智能体** | ${zhDocsParityCounts.agents} | 共享 (AGENTS.md) | 共享 (AGENTS.md) | 12 |\n| **命令** | ${zhDocsParityCounts.commands} | 共享 | 基于指令 | 31 |\n| **技能** | ${zhDocsParityCounts.skills} | 共享 | 10 (原生格式) | 37 |\n`);
-  fs.writeFileSync(zhAgentsPath, `这是一个**生产就绪的 AI 编码插件**，提供 ${zhAgentsSummaryCounts.agents} 个专业代理、${zhAgentsSummaryCounts.skills} 项技能、${zhAgentsSummaryCounts.commands} 条命令以及自动化钩子工作流，用于软件开发。\n\n\`\`\`\n${zhAgentsStructureLines.join('\n')}\n\`\`\`\n`);
-  fs.writeFileSync(pluginJsonPath, JSON.stringify({
-    name: 'harness',
-    description: `Battle-tested plugin — ${pluginCounts.agents} agents, ${pluginCounts.skills} skills, ${pluginCounts.commands} legacy command shims`,
-  }, null, 2));
-  fs.writeFileSync(marketplaceJsonPath, JSON.stringify({
-    plugins: [{
-      name: 'harness',
-      description: `Marketplace plugin — ${marketplaceCounts.agents} agents, ${marketplaceCounts.skills} skills, ${marketplaceCounts.commands} legacy command shims`,
-    }],
-  }, null, 2));
-
-  return { readmePath, agentsPath, zhRootReadmePath, zhDocsReadmePath, zhAgentsPath, pluginJsonPath, marketplaceJsonPath };
 }
 
 function runTests() {
