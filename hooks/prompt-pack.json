@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_note": "Reference-only prompt pack. These entries are NOT runnable Claude Code hooks — they are short reminders you can paste into a session at the relevant moment, fold into CLAUDE.md as durable instructions, or wrap in a small Node hook that prints the text to stderr from a PreToolUse/Stop hook.",
+  "_overlap": "Functionally redundant with the active stack: pre-write-guard overlaps with scripts/hooks/doc-file-warning.js plus the 'Block large file creation' recipe in hooks/README.md; review-on-stop overlaps with scripts/hooks/check-console-log.js and the quality-gate post-edit hook. Keep this file only as a quick prompt source.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "id": "ref:pre-write-guard",
+        "matcher": "Write",
+        "_prompt": "Before this write, check ALL of the following in one pass:\n1. SIZE — If the content exceeds 800 lines, BLOCK the write. Split into focused modules under 400 lines.\n2. SECRETS — No hardcoded API keys, tokens, passwords, or connection strings. Use env vars.\n3. DOC LOCATION — If creating a .md or .txt file outside docs/, README.md, CONTRIBUTING.md, CHANGELOG.md, or LICENSE, warn that docs should go in docs/.\nOnly report issues found. If all checks pass, proceed silently."
+      }
+    ],
+    "Stop": [
+      {
+        "id": "ref:review-on-stop",
+        "matcher": "*",
+        "_prompt": "Briefly review the completed work: 1) any security issues 2) proper error handling 3) no leftover console.log 4) tests needed for changes. Report issues only."
+      }
+    ]
+  }
+}

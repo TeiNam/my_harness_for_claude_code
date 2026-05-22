@@ -1,0 +1,29 @@
+{
+  "name": "my-harness-for-claude-code",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal Claude Code harness — agents, skills, commands, hooks, rules, and MCP configs tailored to my workloads",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "node scripts/ci/check-unicode-safety.js && node scripts/ci/validate-agents.js && node scripts/ci/validate-commands.js && node scripts/ci/validate-rules.js && node scripts/ci/validate-skills.js && node scripts/ci/validate-hooks.js && node scripts/ci/validate-no-personal-paths.js && node scripts/ci/generate-command-registry.js --check && node tests/run-all.js",
+    "command-registry:write": "node scripts/ci/generate-command-registry.js --write",
+    "command-registry:check": "node scripts/ci/generate-command-registry.js --check",
+    "install:link": "bash ./install.sh",
+    "uninstall:link": "bash ./install.sh --uninstall"
+  },
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "ajv": "^8.18.0",
+    "sql.js": "^1.14.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.2",
+    "@types/node": "25.7.0",
+    "eslint": "^9.39.2",
+    "globals": "^17.4.0"
+  }
+}

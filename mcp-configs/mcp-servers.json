@@ -1,0 +1,45 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PAT_HERE"
+      },
+      "description": "GitHub operations - PRs, issues, repos"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Live documentation lookup — use with /docs command and documentation-lookup skill (resolve-library-id, query-docs)."
+    },
+    "exa": {
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"],
+      "env": {
+        "EXA_API_KEY": "YOUR_EXA_API_KEY_HERE"
+      },
+      "description": "Web search and research via Exa API — prefer task-scoped use for broader research after GitHub search and primary docs"
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent memory across sessions"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp", "--browser", "chrome"],
+      "description": "Browser automation and testing via Playwright"
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Chain-of-thought reasoning"
+    }
+  },
+  "_comments": {
+    "usage": "Copy the servers you need to your ~/.claude.json mcpServers section",
+    "env_vars": "Replace YOUR_*_HERE placeholders with actual values",
+    "context_warning": "Keep under 10 MCPs enabled to preserve context window"
+  }
+}
