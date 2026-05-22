@@ -1,6 +1,6 @@
 ---
 name: fastapi-backend-best-practices
-description: |
+description: >
   Best practices guide for FastAPI asynchronous backend development. Includes project structure, async patterns, domain modeling (CRUD/CQRS/Event-Driven/Saga), API design, testing, security, and deployment. Database implementation is delegated to a separate DB skill, and this skill provides DB-agnostic patterns and interfaces.
 
   Use this skill in the following situations:

@@ -4,7 +4,7 @@ description: >
   Creative writing craft — voice, scene, structure, revision — for fiction,
   essays, narrative non-fiction. Trigger: short story, novel chapter,
   personal essay, memoir, narrative non-fiction, scene revision, POV switch,
-  show-don't-tell, line edit, Korean ↔ English literary writing.
+  show-don't-tell, line edit, Korean <-> English literary writing.
 origin: custom
 ---
 
@@ -21,7 +21,7 @@ and `docs/the-shortform-guide.md` (short-form punch).
 - Personal essays, memoir, narrative non-fiction
 - Revising scenes for voice / pacing / POV
 - Choosing between outlining vs discovery drafting
-- Korean ↔ English literary writing (translation, original in either)
+- Korean <-> English literary writing (translation, original in either)
 
 ## Voice First
 
@@ -109,7 +109,7 @@ connections.
 - Dialogue tags: `said` is invisible and good. `exclaimed`, `retorted`,
   `intoned` are speed bumps.
 
-## Korean ↔ English Literary Writing
+## Korean <-> English Literary Writing
 
 - **Sentence length**: Korean tolerates much longer sentences than English
   prose; subordinate clauses chain naturally. English literary prose

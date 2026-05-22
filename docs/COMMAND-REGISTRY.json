@@ -234,7 +234,9 @@
       "type": "testing",
       "primaryAgents": [],
       "allAgents": [],
-      "skills": [],
+      "skills": [
+        "postgres-guideline"
+      ],
       "path": "commands/project-init.md"
     },
     {
@@ -541,6 +543,10 @@
       {
         "skill": "rust-testing",
         "count": 2
+      },
+      {
+        "skill": "postgres-guideline",
+        "count": 1
       },
       {
         "skill": "python-patterns",

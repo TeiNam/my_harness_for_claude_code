@@ -24,7 +24,7 @@ infrastructure.
 - Replacing a pandas script with SQL for clarity, joins, or window functions
 - Embedded OLAP inside Python / Node code (no separate server)
 - Federated queries: parquet on disk + S3 + Postgres in one statement
-- DataFrame ↔ SQL interop with Arrow zero-copy (no serialisation cost)
+- DataFrame <-> SQL interop with Arrow zero-copy (no serialisation cost)
 
 Don't reach for it as a transactional store — it's an OLAP engine, single
 writer. Use Postgres / SQLite for OLTP.
@@ -145,7 +145,7 @@ SELECT
   ) AS rolling_7d
 FROM transactions;
 
--- ASOF JOIN: nearest-prior match (perfect for prices ↔ trades)
+-- ASOF JOIN: nearest-prior match (perfect for prices <-> trades)
 SELECT trades.*, prices.price
 FROM trades
 ASOF LEFT JOIN prices
@@ -192,7 +192,7 @@ UNPIVOT wide_table
 ## Federated Queries
 
 ```sql
--- Postgres ↔ DuckDB in one query
+-- Postgres <-> DuckDB in one query
 INSTALL postgres; LOAD postgres;
 ATTACH 'host=localhost dbname=app user=me' AS pg (TYPE POSTGRES, READ_ONLY);
 SELECT count(*) FROM pg.public.users;
