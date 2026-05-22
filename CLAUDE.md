@@ -82,6 +82,14 @@ node tests/hooks/hooks.test.js
 - `/skill-create` / `/skill-health` / `/learn`
 - `/save-session` / `/resume-session` / `/checkpoint`
 
+## Language
+
+@rules/common/korean-language.md
+
+## README Conventions
+
+@rules/common/readme-rule.md
+
 ## Code Style (Node parts)
 
 - Node.js >=18, plain CommonJS in `scripts/`
