@@ -2,6 +2,7 @@
 name: projects
 description: List known projects and their instinct statistics
 command: true
+workloads: [core]
 ---
 
 # Projects Command

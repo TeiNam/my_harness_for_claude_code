@@ -4,6 +4,7 @@ paths:
   - "**/*.tsx"
   - "**/*.js"
   - "**/*.jsx"
+workloads: [frontend]
 ---
 # TypeScript/JavaScript Testing
 

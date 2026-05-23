@@ -2,6 +2,7 @@
 name: research-ops
 description: Evidence-first current-state research workflow for the harness. Use when the user wants fresh facts, comparisons, enrichment, or a recommendation built from current public evidence and any supplied local context.
 origin: harness
+workloads: [core]
 ---
 
 # Research Ops

@@ -7,6 +7,7 @@ description: >
   reveal.js, python-pptx, slide deck, pitch, talk, conference talk,
   webinar, internal review.
 origin: custom
+workloads: [writing]
 ---
 
 # Presentation Authoring

@@ -1,5 +1,6 @@
 ---
 description: "Extract reusable patterns from the session, self-evaluate quality before saving, and determine the right save location (Global vs Project)."
+workloads: [core]
 ---
 
 # /learn-eval - Extract, Evaluate, then Save

@@ -4,6 +4,7 @@ description: Best practices for Remotion - Video creation in React. 29 domain-sp
 metadata:
   tags: remotion, video, react, animation, composition, three.js, lottie
 origin: community
+workloads: [frontend]
 ---
 
 ## When to use

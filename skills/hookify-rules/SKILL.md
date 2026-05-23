@@ -2,6 +2,7 @@
 name: hookify-rules
 description: This skill should be used when the user asks to create a hookify rule, write a hook rule, configure hookify, add a hookify rule, or needs guidance on hookify rule syntax and patterns.
 origin: harness
+workloads: [core]
 ---
 
 # Writing Hookify Rules

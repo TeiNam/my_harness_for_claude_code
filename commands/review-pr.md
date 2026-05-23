@@ -1,5 +1,6 @@
 ---
 description: Comprehensive PR review using specialized agents
+workloads: [core]
 ---
 
 Run a comprehensive multi-perspective review of a pull request.

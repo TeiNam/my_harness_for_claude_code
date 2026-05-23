@@ -1,6 +1,7 @@
 ---
 description: Generate a local Claude Code cost report from a cost-tracker SQLite database.
 argument-hint: [csv]
+workloads: [core]
 ---
 
 # Cost Report

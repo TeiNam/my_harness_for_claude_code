@@ -1,5 +1,6 @@
 ---
 description: Inspect active loop state, progress, failure signals, and recommended intervention.
+workloads: [core]
 ---
 
 # Loop Status Command

@@ -1,6 +1,7 @@
 ---
 description: Configure your preferred package manager (npm/pnpm/yarn/bun)
 disable-model-invocation: true
+workloads: [core]
 ---
 
 # Package Manager Setup

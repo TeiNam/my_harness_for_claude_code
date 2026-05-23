@@ -14,6 +14,7 @@ description: >-
   session (maintain it), the request is clearly a one-word answer, or
   "token" refers to auth/session/payment tokens rather than response size.
 origin: community
+workloads: [core]
 ---
 
 # Token Budget Advisor (TBA)

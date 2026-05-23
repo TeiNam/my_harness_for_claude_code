@@ -6,6 +6,7 @@ description: >
   substack, hashnode, hacker news, mermaid / excalidraw diagram, code
   sample, canonical URL, RSS, OpenGraph, Korean tech blog.
 origin: custom
+workloads: [writing]
 ---
 
 # Tech Blogging

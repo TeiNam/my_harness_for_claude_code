@@ -3,6 +3,7 @@ name: silent-failure-hunter
 description: Review code for silent failures, swallowed errors, bad fallbacks, and missing error propagation.
 model: sonnet
 tools: [Read, Grep, Glob, Bash]
+workloads: [core]
 ---
 
 ## Prompt Defense Baseline

@@ -6,6 +6,7 @@ description: >
   IAM policy review, S3 lifecycle/signed URL, Lambda cold start, Fargate task
   definition, RDS IAM auth, VPC endpoint, cost anomaly, Savings Plan.
 origin: custom
+workloads: [cloud]
 ---
 
 # AWS Cloud Patterns

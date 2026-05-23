@@ -1,5 +1,6 @@
 ---
 description: Run a deterministic repository harness audit and return a prioritized scorecard.
+workloads: [core]
 ---
 
 # Harness Audit Command

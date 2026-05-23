@@ -1,5 +1,6 @@
 ---
 description: Create hooks to prevent unwanted behaviors from conversation analysis or explicit instructions
+workloads: [core]
 ---
 
 Create hook rules to prevent unwanted Claude Code behaviors by analyzing conversation patterns or explicit user instructions.

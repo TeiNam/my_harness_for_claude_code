@@ -2,6 +2,7 @@
 paths:
   - "**/*.py"
   - "**/*.pyi"
+workloads: [python-backend, python-data]
 ---
 # Python Testing
 

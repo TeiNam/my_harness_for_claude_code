@@ -8,6 +8,7 @@ description: >
   caplog, capsys, hypothesis, freezegun, factory_boy, coverage, --cov,
   TDD, red-green-refactor, test python, write tests, assert.
 origin: harness (restructured)
+workloads: [python-backend, python-data]
 ---
 
 # Python Testing Patterns

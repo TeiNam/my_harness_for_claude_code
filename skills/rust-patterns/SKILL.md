@@ -11,6 +11,7 @@ description: >
   RwLock, unsafe, FFI, Cargo.toml, clippy, rustfmt, cargo bench, miri,
   refactor rust, review rust.
 origin: harness (restructured)
+workloads: [rust]
 ---
 
 # Rust Development Patterns

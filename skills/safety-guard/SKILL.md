@@ -2,6 +2,7 @@
 name: safety-guard
 description: Use this skill to prevent destructive operations when working on production systems or running agents autonomously.
 origin: harness
+workloads: [core]
 ---
 
 # Safety Guard — Prevent Destructive Operations

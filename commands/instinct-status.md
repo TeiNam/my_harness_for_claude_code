@@ -2,6 +2,7 @@
 name: instinct-status
 description: Show learned instincts (project + global) with confidence
 command: true
+workloads: [core]
 ---
 
 # Instinct Status Command

@@ -1,5 +1,6 @@
 ---
 description: Get help with the hookify system
+workloads: [core]
 ---
 
 Display comprehensive hookify documentation.

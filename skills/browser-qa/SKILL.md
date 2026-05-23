@@ -2,6 +2,7 @@
 name: browser-qa
 description: Use this skill to automate visual testing and UI interaction verification using browser automation after deploying features.
 origin: harness
+workloads: [frontend]
 ---
 
 # Browser QA — Automated Visual Testing & Interaction

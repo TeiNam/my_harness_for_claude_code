@@ -1,6 +1,7 @@
 ---
 description: Restate requirements, assess risks, and create step-by-step implementation plan. WAIT for user CONFIRM before touching any code.
 argument-hint: "[feature description | path/to/*.prd.md]"
+workloads: [core]
 ---
 
 # Plan Command

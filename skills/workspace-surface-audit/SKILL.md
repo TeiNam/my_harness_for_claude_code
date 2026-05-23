@@ -2,6 +2,7 @@
 name: workspace-surface-audit
 description: Audit the active repo, MCP servers, plugins, connectors, env surfaces, and harness setup, then recommend the highest-value harness-native skills, hooks, agents, and operator workflows. Use when the user wants help setting up Claude Code or understanding what capabilities are actually available in their environment.
 origin: harness
+workloads: [core]
 ---
 
 # Workspace Surface Audit

@@ -8,6 +8,7 @@ description: >
   zero-copy, polars/pandas DataFrame interop, EXPLAIN ANALYZE, threads /
   memory_limit / temp_directory tuning.
 origin: custom
+workloads: [python-data]
 ---
 
 # DuckDB Patterns

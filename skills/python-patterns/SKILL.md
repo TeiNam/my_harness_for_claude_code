@@ -10,6 +10,7 @@ description: >
   ThreadPoolExecutor, __slots__, pyproject.toml, ruff, mypy, isort,
   pythonic, refactor python, review python.
 origin: harness (restructured)
+workloads: [python-backend, python-data]
 ---
 
 # Python Development Patterns

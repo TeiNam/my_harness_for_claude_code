@@ -1,5 +1,6 @@
 ---
 description: Comprehensive Python code review for PEP 8 compliance, type hints, security, and Pythonic idioms. Invokes the python-reviewer agent.
+workloads: [python-backend, python-data]
 ---
 
 # Python Code Review

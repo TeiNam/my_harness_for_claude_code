@@ -59,6 +59,22 @@ Filled-in (real content, not placeholder):
 None — all previously-scaffolded skills are now filled in. If new placeholders
 are added later, list them here so they're easy to find and complete.
 
+## Workload-based Install (2-tier 메뉴)
+
+설치는 6개 톱레벨 카테고리(**backend / frontend / plugin / data-analysis / data-design / writing**) 와 sub-옵션으로 결정된다. sub-옵션이 곧 워크로드 키와 1:1 매칭되어, 예컨대 "데이터 설계 → MySQL" 만 골랐을 때 Postgres 가이드까지 끌려오지 않는다.
+
+- 톱레벨 카테고리와 sub-옵션 → 워크로드 매핑은 `scripts/install/menu.js` 한 곳에서 정의된다.
+- 워크로드 키 카탈로그는 `scripts/install/workloads.js` (`core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing`). `core` 는 항상 포함된다.
+- 진입점은 `scripts/install/select-workloads.js` 로, 다음 셋 중 하나를 자동으로 고른다:
+  - 메뉴 CLI 플래그(`--category=`, `--backend=`, `--data-design=` …) 가 있으면 비대화형으로 그 값 사용
+  - 인자가 없고 TTY 면 stdin 기반 체크박스 메뉴
+  - 그 외엔 `--all` 폴백
+- 결정된 워크로드는 `scripts/install/select-assets.js` 로 넘어가 자산 frontmatter `workloads:` 와 교집합 매칭 → `kind\tsource\ttarget` 라인 출력 → install.sh / install.ps1 가 파일별 심볼릭 링크로 `~/.claude/<kind>s/_harness/...` 에 설치한다.
+- repo-root 링크 `~/.claude/_harness` 는 항상 생성된다 — `hooks/hooks.json` inline bootstrap 이 `~/.claude/_harness/scripts/lib/utils.js` 를 찾는다.
+- 자산 추가: 파일을 두고 frontmatter 에 `workloads: [...]` 만 적으면 끝. 휴리스틱에 맡길 수도 있다. 일괄 재태깅은 `node scripts/install/tag-assets.js --apply --force`.
+- 저수준 모드: `--workload=python-backend,mysql` 를 직접 지정하면 메뉴를 무시하고 그 값만 사용한다.
+- 테스트: `tests/scripts/install/{workloads,menu,select-workloads,select-assets,tag-assets,merge-hooks}.test.js`.
+
 ## Hooks (status)
 
 - `hooks/hooks.json` — main hook stack. Install via `./install.sh --with-hooks` (or `install.ps1 -WithHooks`), which merges entries into `~/.claude/settings.json` keyed by `id`. Re-runs are idempotent; user-added entries are preserved. `--with-hooks --dry-run` previews the change; `--with-hooks --uninstall` removes only harness-owned ids.

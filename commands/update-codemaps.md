@@ -1,5 +1,6 @@
 ---
 description: Scan project structure and generate token-lean architecture codemaps.
+workloads: [core]
 ---
 
 # Update Codemaps

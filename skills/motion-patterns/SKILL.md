@@ -6,6 +6,7 @@ tags: [motion, animation, ui-patterns]
 category: frontend
 author: jeff
 origin: community
+workloads: [frontend]
 ---
 
 # Motion Patterns

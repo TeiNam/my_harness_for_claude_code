@@ -1,5 +1,6 @@
 ---
 description: Create, verify, or list workflow checkpoints after running verification checks.
+workloads: [core]
 ---
 
 # Checkpoint Command

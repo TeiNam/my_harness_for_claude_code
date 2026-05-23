@@ -5,6 +5,7 @@ origin: community
 version: 2.0.0
 author: sreedhargs89
 repo: https://github.com/sreedhargs89/context-keeper
+workloads: [core]
 ---
 
 # ck — Context Keeper

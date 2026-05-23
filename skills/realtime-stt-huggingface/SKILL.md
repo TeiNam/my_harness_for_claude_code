@@ -7,6 +7,7 @@ description: >
   audio, partial hypotheses, WebSocket / gRPC ASR server, mic capture, Korean
   STT, latency budget, Metal / CUDA / CPU deployment.
 origin: custom
+workloads: [ai]
 ---
 
 # Real-time STT with Hugging Face

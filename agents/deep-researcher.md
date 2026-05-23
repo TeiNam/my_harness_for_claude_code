@@ -3,6 +3,7 @@ name: deep-researcher
 description: Multi-source deep research specialist. Searches the web, synthesizes findings, and delivers cited reports. Use for thorough research on any topic with evidence and citations.
 tools: ["Read", "Write", "WebSearch", "WebFetch"]
 model: opus
+workloads: [core]
 ---
 
 # Deep Researcher

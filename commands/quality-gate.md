@@ -1,5 +1,6 @@
 ---
 description: Run the harness quality pipeline for a file or project scope and report remediation steps.
+workloads: [core]
 ---
 
 # Quality Gate Command

@@ -1,5 +1,6 @@
 ---
 description: Detect a project's stack and produce a dry-run harness onboarding plan.
+workloads: [core]
 ---
 
 # /project-init

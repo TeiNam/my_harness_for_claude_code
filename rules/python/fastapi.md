@@ -3,6 +3,7 @@ paths:
   - "**/app/**/*.py"
   - "**/fastapi/**/*.py"
   - "**/*_api.py"
+workloads: [python-backend]
 ---
 # FastAPI Rules
 

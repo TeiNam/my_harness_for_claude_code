@@ -1,5 +1,6 @@
 ---
 description: List all configured hookify rules
+workloads: [core]
 ---
 
 Find and display all hookify rules in a formatted table.

@@ -6,6 +6,7 @@ tags: [motion, animation, performance, accessibility]
 category: frontend
 author: jeff
 origin: community
+workloads: [frontend]
 ---
 
 # Motion Foundations

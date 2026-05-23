@@ -3,6 +3,7 @@ name: comment-analyzer
 description: Analyze code comments for accuracy, completeness, maintainability, and comment rot risk.
 model: sonnet
 tools: [Read, Grep, Glob]
+workloads: [core]
 ---
 
 ## Prompt Defense Baseline

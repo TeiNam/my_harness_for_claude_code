@@ -3,6 +3,7 @@ name: article-writer
 description: Long-form content writing specialist. Write articles, guides, blog posts, tutorials, and newsletters in a distinctive voice. Use when drafting polished written content, matching brand voice, or turning notes into articles.
 tools: ["Read", "Write", "Edit"]
 model: sonnet
+workloads: [writing]
 ---
 
 # Article Writer

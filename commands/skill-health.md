@@ -2,6 +2,7 @@
 name: skill-health
 description: Show skill portfolio health dashboard with charts and analytics
 command: true
+workloads: [core]
 ---
 
 # Skill Health Dashboard

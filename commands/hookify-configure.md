@@ -1,5 +1,6 @@
 ---
 description: Enable or disable hookify rules interactively
+workloads: [core]
 ---
 
 Interactively enable or disable existing hookify rules.

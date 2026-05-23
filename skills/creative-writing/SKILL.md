@@ -6,6 +6,7 @@ description: >
   personal essay, memoir, narrative non-fiction, scene revision, POV switch,
   show-don't-tell, line edit, Korean <-> English literary writing.
 origin: custom
+workloads: [writing]
 ---
 
 # Creative Writing

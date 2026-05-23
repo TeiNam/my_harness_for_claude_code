@@ -1,5 +1,6 @@
 ---
 description: Start a managed autonomous loop pattern with safety defaults and explicit stop conditions.
+workloads: [core]
 ---
 
 # Loop Start Command

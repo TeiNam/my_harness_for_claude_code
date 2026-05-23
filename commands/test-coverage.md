@@ -1,5 +1,6 @@
 ---
 description: Analyze coverage, identify gaps, and generate missing tests toward the target threshold.
+workloads: [core]
 ---
 
 # Test Coverage

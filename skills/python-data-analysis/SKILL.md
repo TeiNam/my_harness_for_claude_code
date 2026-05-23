@@ -7,6 +7,7 @@ description: >
   checkpoint, joblib cache, papermill, nbstripout, plotly/altair charts,
   Korean locale text plotting.
 origin: custom
+workloads: [python-data]
 ---
 
 # Python Data Analysis

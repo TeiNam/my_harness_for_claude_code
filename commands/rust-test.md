@@ -1,5 +1,6 @@
 ---
 description: Enforce TDD workflow for Rust. Write tests first, then implement. Verify 80%+ coverage with cargo-llvm-cov.
+workloads: [rust]
 ---
 
 # Rust TDD Command

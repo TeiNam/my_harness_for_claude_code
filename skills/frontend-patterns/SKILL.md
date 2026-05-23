@@ -10,6 +10,7 @@ description: >
   ARIA, keyboard navigation, focus management, refactor react,
   review component, frontend review.
 origin: harness (restructured)
+workloads: [frontend]
 ---
 
 # Frontend Patterns (React + TypeScript)

@@ -1,5 +1,6 @@
 ---
 description: Review a FastAPI application for architecture, async correctness, dependency injection, Pydantic schemas, security, performance, and testability.
+workloads: [python-backend]
 ---
 
 # FastAPI Review

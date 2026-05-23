@@ -2,6 +2,7 @@
 name: frontend-design-direction
 description: Set an harness-specific frontend design direction for production UI work. Use when building or improving websites, dashboards, applications, components, landing pages, visual tools, or any web UI that needs stronger product-specific design judgment.
 origin: community
+workloads: [frontend]
 ---
 
 # Frontend Design Direction

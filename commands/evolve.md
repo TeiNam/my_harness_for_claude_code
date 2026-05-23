@@ -2,6 +2,7 @@
 name: evolve
 description: Analyze instincts and suggest or generate evolved structures
 command: true
+workloads: [core]
 ---
 
 # Evolve Command

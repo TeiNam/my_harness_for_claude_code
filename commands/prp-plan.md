@@ -1,6 +1,7 @@
 ---
 description: Create comprehensive feature implementation plan with codebase analysis and pattern extraction
 argument-hint: <feature description | path/to/prd.md>
+workloads: [core]
 ---
 
 > Adapted from PRPs-agentic-eng by Wirasm. Part of the PRP workflow series.

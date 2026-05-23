@@ -8,6 +8,7 @@ description: >
   inference profile, model arn, embedding (Titan / Cohere), provisioned
   throughput.
 origin: custom
+workloads: [ai, cloud]
 ---
 
 # AWS Bedrock

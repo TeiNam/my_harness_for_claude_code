@@ -9,6 +9,7 @@ description: >
   rolldown, rollup, esbuild, oxc, HMR, import.meta.hot, vite preview,
   vite build, monorepo, docker vite, type check vite.
 origin: harness (restructured)
+workloads: [frontend]
 ---
 
 # Vite Patterns

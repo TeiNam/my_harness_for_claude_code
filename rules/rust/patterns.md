@@ -1,6 +1,7 @@
 ---
 paths:
   - "**/*.rs"
+workloads: [rust]
 ---
 # Rust Patterns
 

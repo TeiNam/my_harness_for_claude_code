@@ -1,5 +1,6 @@
 ---
 description: Extract reusable patterns from the current session and save them as candidate skills or guidance.
+workloads: [core]
 ---
 
 # /learn - Extract Reusable Patterns
