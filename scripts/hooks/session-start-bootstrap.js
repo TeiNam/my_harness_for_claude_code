@@ -30,9 +30,6 @@ const fs = require('fs');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-// Read the raw JSON event from stdin
-const raw = fs.readFileSync(0, 'utf8');
-
 // Path (relative to harness root) to the hook runner
 const rel = path.join('scripts', 'hooks', 'run-with-flags.js');
 
@@ -51,10 +48,12 @@ function hasRunnerRoot(candidate) {
 /**
  * Resolves the harness root using the following priority order:
  *   1. CLAUDE_PLUGIN_ROOT environment variable
- *   2. ~/.claude (direct install)
- *   3. ~/.claude/_harness (root-level symlink created by install.sh)
- *   4. ~/.claude/plugins/_harness (alternative install layout)
- *   5. Falls back to ~/.claude if nothing else matches
+ *   2. $CLAUDE_PROJECT_DIR/.claude/_harness (project-local install)
+ *   3. $CLAUDE_PROJECT_DIR/.claude (direct project-local install)
+ *   4. ~/.claude (direct install)
+ *   5. ~/.claude/_harness (root-level symlink created by install.sh)
+ *   6. ~/.claude/plugins/_harness (alternative install layout)
+ *   7. Falls back to ~/.claude if nothing else matches
  *
  * @returns {string}
  */
@@ -64,17 +63,23 @@ function resolvePluginRoot() {
     return path.resolve(envRoot.trim());
   }
 
-  const home = require('os').homedir();
-  const claudeDir = path.join(home, '.claude');
+  const candidates = [];
 
-  if (hasRunnerRoot(claudeDir)) {
-    return claudeDir;
+  const projectDir = process.env.CLAUDE_PROJECT_DIR;
+  if (projectDir) {
+    const projectClaude = path.join(projectDir, '.claude');
+    candidates.push(path.join(projectClaude, '_harness'), projectClaude);
   }
 
-  for (const candidate of [
+  const home = require('os').homedir();
+  const claudeDir = path.join(home, '.claude');
+  candidates.push(
+    claudeDir,
     path.join(claudeDir, '_harness'),
     path.join(claudeDir, 'plugins', '_harness'),
-  ]) {
+  );
+
+  for (const candidate of candidates) {
     if (hasRunnerRoot(candidate)) {
       return candidate;
     }
@@ -83,47 +88,57 @@ function resolvePluginRoot() {
   return claudeDir;
 }
 
-const root = resolvePluginRoot();
-const script = path.join(root, rel);
+function main() {
+  // Read the raw JSON event from stdin
+  const raw = fs.readFileSync(0, 'utf8');
+  const root = resolvePluginRoot();
+  const script = path.join(root, rel);
 
-if (fs.existsSync(script)) {
-  const result = spawnSync(
-    process.execPath,
-    [script, 'session:start', 'scripts/hooks/session-start.js', 'minimal,standard,strict'],
-    {
-      input: raw,
-      encoding: 'utf8',
-      env: process.env,
-      cwd: process.cwd(),
-      timeout: 30000,
+  if (fs.existsSync(script)) {
+    const result = spawnSync(
+      process.execPath,
+      [script, 'session:start', 'scripts/hooks/session-start.js', 'minimal,standard,strict'],
+      {
+        input: raw,
+        encoding: 'utf8',
+        env: process.env,
+        cwd: process.cwd(),
+        timeout: 30000,
+      }
+    );
+
+    const stdout = typeof result.stdout === 'string' ? result.stdout : '';
+    if (stdout) {
+      process.stdout.write(stdout);
+    } else {
+      process.stdout.write(raw);
     }
+
+    if (result.stderr) {
+      process.stderr.write(result.stderr);
+    }
+
+    if (result.error || result.status === null || result.signal) {
+      const reason = result.error
+        ? result.error.message
+        : result.signal
+          ? 'signal ' + result.signal
+          : 'missing exit status';
+      process.stderr.write('[SessionStart] ERROR: session-start hook failed: ' + reason + '\n');
+      process.exit(1);
+    }
+
+    process.exit(Number.isInteger(result.status) ? result.status : 0);
+  }
+
+  process.stderr.write(
+    '[SessionStart] WARNING: could not resolve harness root; skipping session-start hook\n'
   );
-
-  const stdout = typeof result.stdout === 'string' ? result.stdout : '';
-  if (stdout) {
-    process.stdout.write(stdout);
-  } else {
-    process.stdout.write(raw);
-  }
-
-  if (result.stderr) {
-    process.stderr.write(result.stderr);
-  }
-
-  if (result.error || result.status === null || result.signal) {
-    const reason = result.error
-      ? result.error.message
-      : result.signal
-        ? 'signal ' + result.signal
-        : 'missing exit status';
-    process.stderr.write('[SessionStart] ERROR: session-start hook failed: ' + reason + '\n');
-    process.exit(1);
-  }
-
-  process.exit(Number.isInteger(result.status) ? result.status : 0);
+  process.stdout.write(raw);
 }
 
-process.stderr.write(
-  '[SessionStart] WARNING: could not resolve harness root; skipping session-start hook\n'
-);
-process.stdout.write(raw);
+if (require.main === module) {
+  main();
+}
+
+module.exports = { hasRunnerRoot, resolvePluginRoot };

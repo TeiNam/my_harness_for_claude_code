@@ -18,6 +18,10 @@
 #   -DataAnalysis duckdb, python
 #   -DataDesign  mysql, postgres, mongodb, dynamodb
 #
+# 그 외 옵션:
+#   -NoHomeLink  $env:CLAUDE_HOME 이 %USERPROFILE%\.claude 가 아닐 때도
+#                %USERPROFILE%\.claude\_harness 보조 링크를 만들지 않음
+#
 # 요구사항: Windows 10+ + Developer Mode 또는 관리자 권한, Node.js on PATH.
 
 [CmdletBinding()]
@@ -26,6 +30,7 @@ param(
     [switch]$Uninstall,
     [switch]$Force,
     [switch]$WithHooks,
+    [switch]$NoHomeLink,
     [switch]$All,
     [string[]]$Workload,
     [string[]]$SkipWorkload,
@@ -216,12 +221,33 @@ if (-not $Uninstall) {
     Write-Host ''
 }
 
-# 항상 repo-root 를 링크 — hooks.json 의 inline bootstrap 이
-# %USERPROFILE%\.claude\_harness\scripts\lib\utils.js 를 찾는다.
+# repo-root 를 $ClaudeDir\_harness 로 링크.
+# hooks.json 의 inline bootstrap 은 다음 순서로 harness root 를 찾는다:
+#   1) $env:CLAUDE_PLUGIN_ROOT (claude-code 가 직접 주입)
+#   2) $env:CLAUDE_PROJECT_DIR\.claude\_harness, $env:CLAUDE_PROJECT_DIR\.claude
+#   3) %USERPROFILE%\.claude, %USERPROFILE%\.claude\_harness, %USERPROFILE%\.claude\plugins\_harness
 if ($Uninstall) {
     Remove-HarnessSymlink -SourceRel '' -TargetRel '_harness'
 } else {
     New-HarnessSymlink -SourceRel '' -TargetRel '_harness'
+}
+
+# 보조 링크: CLAUDE_HOME 이 %USERPROFILE%\.claude 가 아니고 hooks 도 같이 머지할 때,
+# 일부 환경 (CLAUDE_PROJECT_DIR 미주입 등) 을 위한 안전망으로
+# %USERPROFILE%\.claude\_harness 를 함께 만들어 둔다. -NoHomeLink 로 끌 수 있다.
+$DefaultClaudeDir = Join-Path $env:USERPROFILE '.claude'
+if (-not $Uninstall -and $WithHooks -and -not $NoHomeLink -and ($ClaudeDir -ne $DefaultClaudeDir)) {
+    $homeLink = Join-Path $DefaultClaudeDir '_harness'
+    if (-not (Test-Path -LiteralPath $homeLink)) {
+        Write-Host ''
+        Write-Host "note: `$ClaudeDir=$ClaudeDir (not $DefaultClaudeDir)."
+        Write-Host "note: creating safety link $homeLink -> $HarnessDir"
+        Write-Host 'note: (re-run with -NoHomeLink to skip)'
+        if (-not (Test-Path -LiteralPath $DefaultClaudeDir)) {
+            Invoke-Step -Action { New-Item -ItemType Directory -Path $DefaultClaudeDir -Force | Out-Null } -Description "mkdir $DefaultClaudeDir"
+        }
+        Invoke-Step -Action { New-Item -ItemType SymbolicLink -Path $homeLink -Target $HarnessDir | Out-Null } -Description "link $homeLink -> $HarnessDir"
+    }
 }
 
 foreach ($line in Get-Selection -WlCsv $ResolvedWorkloads) {

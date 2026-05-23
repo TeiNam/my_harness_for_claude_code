@@ -19,6 +19,9 @@
 #   --uninstall      모든 하네스 심볼릭 링크 제거 (선택과 무관하게 전체 정리)
 #   --force          기존 파일/링크 덮어쓰기
 #   --with-hooks     hooks/hooks.json 을 ~/.claude/settings.json 에 병합
+#   --no-home-link   CLAUDE_HOME 이 ~/.claude 가 아닐 때도 ~/.claude/_harness
+#                    보조 링크를 만들지 않음 (자세한 내용은 main() 의 보조 링크
+#                    블록 주석을 참고)
 
 set -euo pipefail
 
@@ -29,6 +32,7 @@ DRY_RUN=0
 UNINSTALL=0
 FORCE=0
 WITH_HOOKS=0
+NO_HOME_LINK=0
 WORKLOAD=""
 SKIP_WORKLOAD=""
 
@@ -41,6 +45,7 @@ for arg in "$@"; do
         --uninstall)            UNINSTALL=1 ;;
         --force)                FORCE=1 ;;
         --with-hooks)           WITH_HOOKS=1 ;;
+        --no-home-link)         NO_HOME_LINK=1 ;;
         --workload=*)           WORKLOAD="${arg#--workload=}" ;;
         --workloads=*)          WORKLOAD="${arg#--workloads=}" ;;
         --skip-workload=*)      SKIP_WORKLOAD="${arg#--skip-workload=}" ;;
@@ -212,12 +217,33 @@ main() {
     fi
     echo
 
-    # 항상 repo root 를 링크 — hooks.json 의 inline bootstrap 이
-    # ~/.claude/_harness/scripts/lib/utils.js 를 찾는다.
+    # repo root 를 $CLAUDE_DIR/_harness 로 링크.
+    # hooks.json 의 inline bootstrap 은 다음 순서로 harness root 를 찾는다:
+    #   1) $CLAUDE_PLUGIN_ROOT (claude-code 가 직접 주입)
+    #   2) $CLAUDE_PROJECT_DIR/.claude/_harness, $CLAUDE_PROJECT_DIR/.claude
+    #   3) $HOME/.claude, $HOME/.claude/_harness, $HOME/.claude/plugins/_harness
+    # CLAUDE_HOME 을 통해 프로젝트 로컬 설치한 경우라면 (2) 가 잡아준다.
     if [ "$UNINSTALL" -eq 1 ]; then
         unlink_one "" "_harness"
     else
         symlink_one "" "_harness"
+    fi
+
+    # 보조 링크: 일부 환경 (CLAUDE_PROJECT_DIR 미주입, 또는 inline bootstrap 이
+    # 갱신되지 않은 기존 settings.json 사용) 에서는 여전히 ~/.claude/_harness 만
+    # 본다. CLAUDE_HOME 이 ~/.claude 가 아니고 hooks 도 같이 머지하는 경우라면
+    # 안전망으로 ~/.claude/_harness 를 함께 만들어둔다. --no-home-link 로 끌 수 있다.
+    if [ "$UNINSTALL" -eq 0 ] && [ "$WITH_HOOKS" -eq 1 ] \
+       && [ "$NO_HOME_LINK" -eq 0 ] && [ "$CLAUDE_DIR" != "$HOME/.claude" ]; then
+        home_link="$HOME/.claude/_harness"
+        if [ ! -e "$home_link" ] && [ ! -L "$home_link" ]; then
+            echo
+            echo "note: \$CLAUDE_HOME=$CLAUDE_DIR (not \$HOME/.claude)."
+            echo "note: creating safety link $home_link -> $HARNESS_DIR"
+            echo "note: (re-run with --no-home-link to skip)"
+            run mkdir -p "\"$HOME/.claude\""
+            run ln -s "\"$HARNESS_DIR\"" "\"$home_link\""
+        fi
     fi
 
     while IFS=$'\t' read -r kind src_rel dest_rel; do
