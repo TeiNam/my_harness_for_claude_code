@@ -82,6 +82,16 @@ are added later, list them here so they're easy to find and complete.
 - `scripts/install/merge-hooks.js` — the underlying merger; can be called directly when you don't want the symlink step. Tests live at `tests/scripts/install/merge-hooks.test.js`.
 - `hooks/prompt-pack.json` — two reference-only prompts (`ref:pre-write-guard`, `ref:review-on-stop`). Not runnable; see `hooks/README-prompt-pack.md` for what they overlap with and how to wire them up if needed.
 
+## Self-evolution (학습 메커니즘)
+
+세 층위로 무게가 다르다. 가벼운 것부터 무거운 것 순:
+
+- **lessons-learned** (경량, 한 줄 교훈 로그) — `skills/lessons-learned/SKILL.md` (manual inclusion) 에 반복 교정 교훈을 한 줄씩 누적. `scripts/hooks/capture-lessons.js` (Stop hook, id `stop:capture-lessons`) 가 transcript 에서 반복 교정 신호(사용자 정정 / 빌드·테스트 실패 / 리뷰 지적)를 휴리스틱 감지하면 `additionalContext` 로 한 줄 교훈을 **제안만** 한다 — 파일은 사용자 확인 후 `/lessons` 로만 기록(자동 편집 안 함). kiro-with-harness 의 Kiro `askAgent` hook 을 Claude Code 의 additionalContext 주입으로 재해석한 것. 테스트: `tests/hooks/capture-lessons.test.js`.
+- **`/learn`** (중간, 패턴→skill) — 비자명한 문제 해결을 재사용 skill 파일 1개로 추출.
+- **continuous-learning-v2** (자동, instinct) — 상시 관찰(`observe-runner.js`) → instinct 누적 → `/promote`·`/evolve` 로 command/skill/agent 승격.
+
+안정적으로 반복되는 lesson 은 `/lessons promote` 로 `rules/` steering 규칙으로 올린다.
+
 ## Running Tests
 
 ```bash
@@ -96,7 +106,7 @@ node tests/hooks/hooks.test.js
 - `/code-review` / `/python-review` / `/rust-review` / `/fastapi-review`
 - `/build-fix` / `/rust-build` / `/test-coverage`
 - `/refactor-clean` / `/security-scan` / `/quality-gate`
-- `/skill-create` / `/skill-health` / `/learn`
+- `/skill-create` / `/skill-health` / `/learn` / `/lessons` / `/evolve` / `/promote`
 - `/save-session` / `/resume-session` / `/checkpoint`
 
 ## Language
