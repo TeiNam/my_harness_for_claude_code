@@ -15,8 +15,11 @@ const os = require('os');
 const path = require('path');
 const { sanitizeSessionId, readBridge, renameWithRetry } = require('../lib/session-bridge');
 
-const CONTEXT_WARNING_PCT = 35;
-const CONTEXT_CRITICAL_PCT = 25;
+// 1M 컨텍스트 모델 기준. 퍼센트로 두면 200k 시절과 동일한 절대 여유(약 70k/50k
+// 남음)에서 경고가 뜬다. 200k 가정(35/25)을 그대로 쓰면 1M 에서 350k 가 남았는데도
+// "복잡한 작업 시작 금지" 경고가 떠 작업이 불필요하게 끊긴다.
+const CONTEXT_WARNING_PCT = 7;
+const CONTEXT_CRITICAL_PCT = 5;
 const COST_NOTICE_USD = 5;
 const COST_WARNING_USD = 10;
 const COST_CRITICAL_USD = 50;
@@ -36,8 +39,7 @@ function isEnabledEnv(value, defaultValue = true) {
 }
 
 function costWarningsEnabled(env = process.env) {
-  const raw =
-    env.HARNESS_CONTEXT_MONITOR_COST_WARNINGS;
+  const raw = env.HARNESS_CONTEXT_MONITOR_COST_WARNINGS;
   return isEnabledEnv(raw, true);
 }
 
@@ -85,7 +87,11 @@ function writeWarnState(sessionId, state) {
   try {
     renameWithRetry(tmp, target);
   } catch (err) {
-    try { fs.unlinkSync(tmp); } catch { /* ignore */ }
+    try {
+      fs.unlinkSync(tmp);
+    } catch {
+      /* ignore */
+    }
     throw err;
   }
 }
