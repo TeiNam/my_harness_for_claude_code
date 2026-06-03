@@ -45,7 +45,7 @@ function transcript(lines) {
 
 // --- 모듈 단위 테스트 -------------------------------------------------------
 
-test('반복 사용자 정정 + 빌드 실패 신호를 감지해 additionalContext 를 주입', () => {
+test('반복 사용자 정정 + 빌드 실패 신호를 감지해 systemMessage 로 알린다', () => {
   const lines = [];
   for (let i = 0; i < 6; i++) lines.push(JSON.stringify({ type: 'user', message: 'no, that is wrong, do it again' }));
   for (let i = 0; i < 3; i++) lines.push(JSON.stringify({ type: 'assistant', message: 'TypeError: cannot find module, build failed with exit code 1' }));
@@ -53,10 +53,12 @@ test('반복 사용자 정정 + 빌드 실패 신호를 감지해 additionalCont
 
   const out = run(JSON.stringify({ transcript_path: file }));
   const parsed = JSON.parse(out);
-  assert.strictEqual(parsed.hookSpecificOutput.hookEventName, 'Stop');
-  assert.match(parsed.hookSpecificOutput.additionalContext, /LESSONS CHECK/);
-  assert.match(parsed.hookSpecificOutput.additionalContext, /User corrections/);
-  assert.match(parsed.hookSpecificOutput.additionalContext, /Build failure patterns/);
+  // Stop 이벤트는 hookSpecificOutput.additionalContext 를 허용하지 않으므로
+  // systemMessage 로만 알린다 (Stop 스키마 준수).
+  assert.ok(!('hookSpecificOutput' in parsed), 'Stop hook 은 hookSpecificOutput 을 내면 안 된다');
+  assert.match(parsed.systemMessage, /\/lessons add/);
+  assert.match(parsed.systemMessage, /User corrections/);
+  assert.match(parsed.systemMessage, /Build failure patterns/);
 });
 
 test('한국어 정정 표현도 user_correction 으로 센다', () => {
@@ -94,7 +96,7 @@ test('잘못된 JSON 입력에서도 throw 하지 않고 원본을 돌려준다'
 
 // --- run-with-flags.js 실제 실행 경로 테스트 --------------------------------
 
-test('run-with-flags 경유 실행 시 exit 0 + additionalContext 출력', () => {
+test('run-with-flags 경유 실행 시 exit 0 + systemMessage 출력', () => {
   const lines = [];
   for (let i = 0; i < 6; i++) lines.push(JSON.stringify({ type: 'user', message: 'no that is wrong, do not, try again' }));
   for (let i = 0; i < 3; i++) lines.push(JSON.stringify({ type: 'assistant', message: 'eslint error, tsc failed, exit code 2' }));
@@ -110,7 +112,7 @@ test('run-with-flags 경유 실행 시 exit 0 + additionalContext 출력', () =>
 
   assert.strictEqual(result.status, 0, `exit code should be 0, got ${result.status}`);
   const parsed = JSON.parse(result.stdout);
-  assert.match(parsed.hookSpecificOutput.additionalContext, /LESSONS CHECK/);
+  assert.match(parsed.systemMessage, /\/lessons add/);
 });
 
 // --- 정리 ------------------------------------------------------------------

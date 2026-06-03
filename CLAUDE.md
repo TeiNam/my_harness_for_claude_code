@@ -86,7 +86,7 @@ are added later, list them here so they're easy to find and complete.
 
 세 층위로 무게가 다르다. 가벼운 것부터 무거운 것 순:
 
-- **lessons-learned** (경량, 한 줄 교훈 로그) — `skills/lessons-learned/SKILL.md` (manual inclusion) 에 반복 교정 교훈을 한 줄씩 누적. `scripts/hooks/capture-lessons.js` (Stop hook, id `stop:capture-lessons`) 가 transcript 에서 반복 교정 신호(사용자 정정 / 빌드·테스트 실패 / 리뷰 지적)를 휴리스틱 감지하면 `additionalContext` 로 한 줄 교훈을 **제안만** 한다 — 파일은 사용자 확인 후 `/lessons` 로만 기록(자동 편집 안 함). kiro-with-harness 의 Kiro `askAgent` hook 을 Claude Code 의 additionalContext 주입으로 재해석한 것. 테스트: `tests/hooks/capture-lessons.test.js`.
+- **lessons-learned** (경량, 한 줄 교훈 로그) — `skills/lessons-learned/SKILL.md` (manual inclusion) 에 반복 교정 교훈을 한 줄씩 누적. `scripts/hooks/capture-lessons.js` (Stop hook, id `stop:capture-lessons`) 가 transcript 에서 반복 교정 신호(사용자 정정 / 빌드·테스트 실패 / 리뷰 지적)를 휴리스틱 감지하면 `systemMessage` 로 "`/lessons add` 권장" 한 줄 알림을 띄운다 — 파일은 사용자 확인 후 `/lessons` 로만 기록(자동 편집 안 함). Stop 이벤트는 `additionalContext` 를 허용하지 않으므로 systemMessage 로만 알린다. kiro-with-harness 의 Kiro `askAgent` hook 을 재해석한 것. 테스트: `tests/hooks/capture-lessons.test.js`.
 - **`/learn`** (중간, 패턴→skill) — 비자명한 문제 해결을 재사용 skill 파일 1개로 추출.
 - **continuous-learning-v2** (자동, instinct) — 상시 관찰(`observe-runner.js`) → instinct 누적 → `/promote`·`/evolve` 로 command/skill/agent 승격.
 

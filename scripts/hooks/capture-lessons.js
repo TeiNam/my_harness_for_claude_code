@@ -6,21 +6,24 @@
  *
  * 자기진화 메커니즘의 경량 단계. 세션 transcript 에서 "반복 교정" 신호
  * (사용자 정정, 빌드/린트/테스트 재시도, 리뷰 지적 반복) 를 휴리스틱으로
- * 감지한다. 신호가 충분하면 hookSpecificOutput.additionalContext 로 Claude
- * 에게 "한 줄 교훈을 제안하고, 사용자 확인 후 lessons-learned 로그에
- * 추가하라" 는 지시를 주입한다.
+ * 감지한다. 신호가 충분하면 systemMessage 로 "교훈을 남기려면 /lessons add"
+ * 한 줄 알림을 띄운다.
+ *
+ * Stop 이벤트는 hookSpecificOutput.additionalContext 를 허용하지 않으므로
+ * (PreToolUse/UserPromptSubmit/PostToolUse/PostToolBatch 만 가능) Claude 에
+ * 컨텍스트를 자동 주입하지 않고 사용자에게 systemMessage 로만 알린다.
  *
  * - 이 hook 은 lessons-learned 파일을 직접 편집하지 않는다 (제안만).
- * - 사용자 자산 변경은 Claude 가 사용자 확인을 받은 뒤에만 한다.
+ * - 사용자 자산 변경은 /lessons add 로 사용자 확인을 받은 뒤에만 한다.
  * - 신호가 약하면 조용히 통과한다 (pass-through).
  * - 비크리티컬 에러에서도 항상 exit 0 — 사용자 흐름을 막지 않는다.
  *
  * kiro-with-harness 의 `capture-lessons` (Kiro `action: askAgent` hook) 를
- * Claude Code 의 additionalContext 주입 방식으로 재해석한 것.
+ * Claude Code 의 Stop systemMessage 방식으로 재해석한 것.
  */
 
 const fs = require('fs');
-const { getDateString, log } = require('../lib/utils');
+const { log } = require('../lib/utils');
 
 const MAX_STDIN = 1024 * 1024;
 
@@ -94,23 +97,19 @@ function candidateCategories(counts) {
 }
 
 /**
- * Claude 에 주입할 additionalContext 메시지를 만든다.
+ * 사용자에게 보여줄 한 줄 알림(systemMessage)을 만든다.
+ *
+ * Stop 이벤트는 hookSpecificOutput.additionalContext 를 허용하지 않는다
+ * (PreToolUse/UserPromptSubmit/PostToolUse/PostToolBatch 만 가능). 따라서
+ * Claude 에 컨텍스트를 자동 주입하는 대신, 사용자에게 `/lessons add` 를
+ * 권하는 systemMessage 만 띄운다 — "제안만 한다" 는 원래 철학과도 맞다.
+ *
  * @param {string[]} categories
  * @returns {string}
  */
 function buildSuggestion(categories) {
-  const date = getDateString();
   const cats = categories.join(', ');
-  return [
-    'LESSONS CHECK: 이번 세션에서 반복된 교정 신호가 감지되었다',
-    `(${cats}).`,
-    '다음을 수행하라:',
-    '1) 이번 작업에서 같은 유형으로 반복된 교정(동일 리뷰 지적 / 빌드·테스트 실패 패턴 / 사용자가 두 번 이상 준 정정)이 실제로 있었는지 판단한다.',
-    '2) 있다면, lessons-learned 로그에 추가할 한 줄 교훈을 제안한다.',
-    `   포맷: "- [${date}] (category) <트리거/맥락> -> <규칙으로 진술한 교훈>".`,
-    '3) 사용자에게 제안을 보여주고 확인을 받은 뒤에만 lessons-learned SKILL.md 의 해당 카테고리에 추가한다 (자동 편집 금지).',
-    '실제 반복이 없으면 아무것도 하지 말고 조용히 넘어간다.'
-  ].join(' ');
+  return `📝 반복 교정 신호 감지(${cats}). 교훈을 남기려면 /lessons add 를 실행하세요.`;
 }
 
 /**
@@ -140,12 +139,8 @@ function run(rawInput) {
 
     log(`[CaptureLessons] 반복 교정 신호 감지: ${categories.join(', ')}`);
 
-    return JSON.stringify({
-      hookSpecificOutput: {
-        hookEventName: 'Stop',
-        additionalContext: buildSuggestion(categories)
-      }
-    });
+    // Stop 이벤트에서 유효한 필드는 systemMessage (additionalContext 불가).
+    return JSON.stringify({ systemMessage: buildSuggestion(categories) });
   } catch (err) {
     log(`[CaptureLessons] error (non-blocking): ${err.message}`);
     return rawInput;
