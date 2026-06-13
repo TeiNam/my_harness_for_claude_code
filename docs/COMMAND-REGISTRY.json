@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalCommands": 50,
+  "totalCommands": 53,
   "commands": [
     {
       "command": "aside",
@@ -122,6 +122,28 @@
       "path": "commands/hookify.md"
     },
     {
+      "command": "humanize-redo",
+      "description": "2차 윤문 / 부분 재실행 — 가장 최근 윤문 결과를 strict Phase B로 다시 다듬는다 (카테고리·문단·강도 지정 가능)",
+      "type": "review",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [
+        "humanize-korean"
+      ],
+      "path": "commands/humanize-redo.md"
+    },
+    {
+      "command": "humanize",
+      "description": "한글 AI 티 제거 — humanize-korean 파이프라인 실행 (기본 Fast 모드, --strict 시 5인 파이프라인)",
+      "type": "general",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [
+        "humanize-korean"
+      ],
+      "path": "commands/humanize.md"
+    },
+    {
       "command": "instinct-export",
       "description": "Export instincts from project/global scope to a file",
       "type": "testing",
@@ -169,6 +191,17 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/learn.md"
+    },
+    {
+      "command": "lessons",
+      "description": "경량 lessons-learned 교훈 로그를 조회·추가하거나, 안정된 교훈을 steering 규칙으로 승격한다.",
+      "type": "review",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [
+        "lessons-learned"
+      ],
+      "path": "commands/lessons.md"
     },
     {
       "command": "loop-start",
@@ -503,10 +536,10 @@
   "statistics": {
     "byType": {
       "build": 1,
-      "general": 7,
+      "general": 8,
       "planning": 1,
       "refactoring": 1,
-      "review": 7,
+      "review": 9,
       "testing": 33
     },
     "topAgents": [
@@ -541,8 +574,16 @@
         "count": 3
       },
       {
+        "skill": "humanize-korean",
+        "count": 2
+      },
+      {
         "skill": "rust-testing",
         "count": 2
+      },
+      {
+        "skill": "lessons-learned",
+        "count": 1
       },
       {
         "skill": "postgres-guideline",
