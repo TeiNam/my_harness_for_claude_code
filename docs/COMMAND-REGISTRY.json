@@ -153,22 +153,24 @@
       "path": "commands/instinct-status.md"
     },
     {
-      "command": "learn-eval",
-      "description": "Extract reusable patterns from the session, self-evaluate quality before saving, and determine the right save location (Global vs Project).",
-      "type": "testing",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [],
-      "path": "commands/learn-eval.md"
-    },
-    {
       "command": "learn",
-      "description": "Extract reusable patterns from the current session and save them as candidate skills or guidance.",
+      "description": "Extract reusable patterns from the session, self-evaluate quality before saving, and determine the right save location (Global vs Project).",
       "type": "review",
       "primaryAgents": [],
       "allAgents": [],
       "skills": [],
       "path": "commands/learn.md"
+    },
+    {
+      "command": "lessons",
+      "description": "경량 lessons-learned 교훈 로그를 조회·추가하거나, 안정된 교훈을 steering 규칙으로 승격한다.",
+      "type": "review",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [
+        "lessons-learned"
+      ],
+      "path": "commands/lessons.md"
     },
     {
       "command": "loop-start",
@@ -506,8 +508,8 @@
       "general": 7,
       "planning": 1,
       "refactoring": 1,
-      "review": 7,
-      "testing": 33
+      "review": 8,
+      "testing": 32
     },
     "topAgents": [
       {
@@ -543,6 +545,10 @@
       {
         "skill": "rust-testing",
         "count": 2
+      },
+      {
+        "skill": "lessons-learned",
+        "count": 1
       },
       {
         "skill": "postgres-guideline",

@@ -74,12 +74,14 @@ are added later, list them here so they're easy to find and complete.
 - `--with-hooks` 로 hooks 를 머지하고 `CLAUDE_HOME` 이 `$HOME/.claude` 가 아닌 경우, 일부 환경 (CLAUDE_PROJECT_DIR 미주입 등) 을 위한 안전망으로 `$HOME/.claude/_harness` 보조 링크가 함께 생성된다. 끄려면 `--no-home-link` (`-NoHomeLink`).
 - 자산 추가: 파일을 두고 frontmatter 에 `workloads: [...]` 만 적으면 끝. 휴리스틱에 맡길 수도 있다. 일괄 재태깅은 `node scripts/install/tag-assets.js --apply --force`.
 - 저수준 모드: `--workload=python-backend,mysql` 를 직접 지정하면 메뉴를 무시하고 그 값만 사용한다.
+- **드리프트 점검**: `npm run check-drift [-- --workload=core]` (= `scripts/install/check-drift.js`). 선택 워크로드 기준으로 "레포가 깔아야 할 자산" vs "실제 `$CLAUDE_HOME` 심볼릭"을 대조해 missing / wrong-target / broken 을 보고하고 drift 가 있으면 exit 1 + `./install.sh --force` 안내. 읽기 전용 — 링크를 만들거나 지우지 않는다. "자산은 옛 상태로 stale 인데 훅만 풀 주입" 같은 어긋남을 한 방에 드러내려는 용도(과거 글로벌이 거의 비어 있었던 사고의 재발 방지).
 - 테스트: `tests/scripts/install/{workloads,menu,select-workloads,select-assets,tag-assets,merge-hooks}.test.js`.
 
 ## Hooks (status)
 
 - `hooks/hooks.json` — main hook stack. Install via `./install.sh --with-hooks` (or `install.ps1 -WithHooks`), which merges entries into `~/.claude/settings.json` keyed by `id`. Re-runs are idempotent; user-added entries are preserved. `--with-hooks --dry-run` previews the change; `--with-hooks --uninstall` removes only harness-owned ids.
-- `scripts/install/merge-hooks.js` — the underlying merger; can be called directly when you don't want the symlink step. Tests live at `tests/scripts/install/merge-hooks.test.js`.
+- **글로벌 기본은 `HARNESS_HOOK_PROFILE=minimal`** (`~/.claude/settings.json` 의 `env`). hooks.json 의 모든 그룹은 `run-with-flags.js <id> <script> <profilesCsv>` 로 게이팅되고, `scripts/lib/hook-flags.js` 가 profile 과 `HARNESS_DISABLED_HOOKS` CSV 를 읽어 실행 여부를 결정한다. minimal 에서는 `minimal,…` 태그가 붙은 라이프사이클·안전 훅(`block-no-verify`, `session:start/end`, `metrics-bridge` 등)만 살아남고 gateguard·observe·governance·format-typecheck 같은 `standard,strict` 전용 훅은 전부 꺼진다. 코드 프로젝트에서 더 엄격히 가려면 그 프로젝트 `.claude/settings.json` 에 `env.HARNESS_HOOK_PROFILE=standard` 를 둔다. 특정 훅만 끄려면 `HARNESS_DISABLED_HOOKS=stop:cost-tracker,…`.
+- `scripts/install/merge-hooks.js` — the underlying merger; can be called directly when you don't want the symlink step. id 가 없는 (사용자가 손으로 박은) 훅 그룹은 추적 못 하므로 재머지 시 중복될 수 있다 — 머지 전 settings.json 의 id-less 하네스 훅은 정리할 것. Tests live at `tests/scripts/install/merge-hooks.test.js`.
 - `hooks/prompt-pack.json` — two reference-only prompts (`ref:pre-write-guard`, `ref:review-on-stop`). Not runnable; see `hooks/README-prompt-pack.md` for what they overlap with and how to wire them up if needed.
 
 ## Self-evolution (학습 메커니즘)
@@ -87,7 +89,7 @@ are added later, list them here so they're easy to find and complete.
 세 층위로 무게가 다르다. 가벼운 것부터 무거운 것 순:
 
 - **lessons-learned** (경량, 한 줄 교훈 로그) — `skills/lessons-learned/SKILL.md` (manual inclusion) 에 반복 교정 교훈을 한 줄씩 누적. `scripts/hooks/capture-lessons.js` (Stop hook, id `stop:capture-lessons`) 가 transcript 에서 반복 교정 신호(사용자 정정 / 빌드·테스트 실패 / 리뷰 지적)를 휴리스틱 감지하면 `systemMessage` 로 "`/lessons add` 권장" 한 줄 알림을 띄운다 — 파일은 사용자 확인 후 `/lessons` 로만 기록(자동 편집 안 함). Stop 이벤트는 `additionalContext` 를 허용하지 않으므로 systemMessage 로만 알린다. kiro-with-harness 의 Kiro `askAgent` hook 을 재해석한 것. 테스트: `tests/hooks/capture-lessons.test.js`.
-- **`/learn`** (중간, 패턴→skill) — 비자명한 문제 해결을 재사용 skill 파일 1개로 추출.
+- **`/learn`** (중간, 패턴→skill) — 비자명한 문제 해결을 재사용 skill 파일 1개로 추출. 추출 후 품질 게이트(체크리스트 + Save/Improve/Absorb/Drop 판정)와 저장 위치(Global vs Project) 결정을 거친다. (구 `/learn-eval` 흡수됨 — 2026-06 통합.)
 - **continuous-learning-v2** (자동, instinct) — 상시 관찰(`observe-runner.js`) → instinct 누적 → `/promote`·`/evolve` 로 command/skill/agent 승격.
 
 안정적으로 반복되는 lesson 은 `/lessons promote` 로 `rules/` steering 규칙으로 올린다.

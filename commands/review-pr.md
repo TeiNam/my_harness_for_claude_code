@@ -23,7 +23,7 @@ If no PR is specified, review the current branch's PR. If no focus is specified,
    - `pr-test-analyzer`
    - `silent-failure-hunter`
    - `type-design-analyzer`
-   - `code-simplifier`
+   - `refactor-cleaner`
 4. Aggregate results:
    - dedupe overlapping findings
    - rank by severity

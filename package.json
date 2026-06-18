@@ -13,7 +13,8 @@
     "command-registry:write": "node scripts/ci/generate-command-registry.js --write",
     "command-registry:check": "node scripts/ci/generate-command-registry.js --check",
     "install:link": "bash ./install.sh",
-    "uninstall:link": "bash ./install.sh --uninstall"
+    "uninstall:link": "bash ./install.sh --uninstall",
+    "check-drift": "node scripts/install/check-drift.js"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
