@@ -52,9 +52,10 @@ async function main() {
     transcriptPath = process.env.CLAUDE_TRANSCRIPT_PATH;
   }
 
-  // Get script directory to find config
+  // Get script directory to find config (config lives next to the hook;
+  // formerly under the deprecated skills/continuous-learning v1 skill).
   const scriptDir = __dirname;
-  const configFile = path.join(scriptDir, '..', '..', 'skills', 'continuous-learning', 'config.json');
+  const configFile = path.join(scriptDir, 'evaluate-session.config.json');
 
   // Default configuration
   let minSessionLength = 10;
