@@ -201,7 +201,7 @@ J. 시각 장식 남용 — J-1~J-4
 - 처방: 일부 문단은 사례·장면·인용으로 시작하도록 순서를 흐트러뜨림.
 
 ### C-5. 이모지 남발 [S1]
-- 패턴: `✅ 🚀 💡 ⚠️ 📊` 같은 이모지가 리스트 머리·헤딩·강조에 박혀 있음.
+- 패턴: 체크표시·로켓·전구·경고·차트(U+2705 U+1F680 U+1F4A1 U+26A0 U+1F4CA) 같은 이모지가 리스트 머리·헤딩·강조에 박혀 있음.
 - 처방: 에세이/리포트 문맥이면 전량 제거. SNS·제품 카피가 아닌 이상 AI 티가 극단적으로 강함.
 
 ### C-6. 헤딩 아래 한 줄 요약 박스 [S2]
@@ -526,7 +526,7 @@ J. 시각 장식 남용 — J-1~J-4
 
 - **simplification 축**: `lexical_diversity_ttr` · `lexical_density` · `ending_diversity` (Baker 1993; Toral 2019).
 - **normalisation 축**: `normalisation_score`(평서형 -다/된다/이다 집중률) · `da_streak_rate`(-다 4문장 연속 streak 카운트) (Baker 1993).
-- **interference 축**: T1~T8 8개 검출 시그널 + `interference_index` 합성 (Toury 1995 law of interference) — `inanimate_subject_rate`(T1↔A-15·D-5) · `by_passive_count`/`double_passive_count`(T2↔A-8·A-9·A-12) · `pronoun_density`(T3↔A-16) · `deul_overuse_rate`(T4↔A-17 **hold, 검증용 측정 유지**) · `relative_clause_nesting`(T5↔A-18) · `have_make_literal_count`(T6↔A-7·F-4) · `double_particle_count`(T7↔A-19) · `progressive_aspect_rate`(T8↔E-2·E-7).
+- **interference 축**: T1~T8 8개 검출 시그널 + `interference_index` 합성 (Toury 1995 law of interference) — `inanimate_subject_rate`(T1<->A-15·D-5) · `by_passive_count`/`double_passive_count`(T2<->A-8·A-9·A-12) · `pronoun_density`(T3<->A-16) · `deul_overuse_rate`(T4<->A-17 **hold, 검증용 측정 유지**) · `relative_clause_nesting`(T5<->A-18) · `have_make_literal_count`(T6<->A-7·F-4) · `double_particle_count`(T7<->A-19) · `progressive_aspect_rate`(T8<->E-2·E-7).
 
 본진 패턴 → metric 연계는 양방향이다. 패턴 위반 카운트가 임계 초과면 detector·rewriter가 본진 ID로 처방하고, 동시에 metric 합성 점수가 baseline 대비 이상치면 reviewer가 추가 검증한다. 한국어 baseline은 metric-engineer가 비번역 한국어 corpus(Sejong 등) 기준 산출한다.
 

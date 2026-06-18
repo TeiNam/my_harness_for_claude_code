@@ -79,10 +79,10 @@ GitHub PR 초안. 형식:
 - v1.6 산출물(`_workspace/2026-05-07-{001~008}/`) 보존
 
 ## 4대 철칙 준수
-1. monolith·5인 정의 무수정 ✅
-2. 재윤문 없는 회귀 ✅
-3. 학술 인용 양면 보존 (SSOT 메타 + scholarship.md) ✅
-4. 카테고리 분리 자율 판정 (taxonomist 결정 기록) ✅
+1. monolith·5인 정의 무수정 [x]
+2. 재윤문 없는 회귀 [x]
+3. 학술 인용 양면 보존 (SSOT 메타 + scholarship.md) [x]
+4. 카테고리 분리 자율 판정 (taxonomist 결정 기록) [x]
 
 ## 미해결 이월
 - baseline 실측 교정 (계속)
