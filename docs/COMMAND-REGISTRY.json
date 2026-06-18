@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalCommands": 50,
+  "totalCommands": 52,
   "commands": [
     {
       "command": "aside",
@@ -120,6 +120,28 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/hookify.md"
+    },
+    {
+      "command": "humanize-redo",
+      "description": "2차 윤문 / 부분 재실행 — 가장 최근 윤문 결과를 strict Phase B로 다시 다듬는다 (카테고리·문단·강도 지정 가능)",
+      "type": "review",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [
+        "humanize-korean"
+      ],
+      "path": "commands/humanize-redo.md"
+    },
+    {
+      "command": "humanize",
+      "description": "한글 AI 티 제거 — humanize-korean 파이프라인 실행 (기본 Fast 모드, --strict 시 5인 파이프라인)",
+      "type": "general",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [
+        "humanize-korean"
+      ],
+      "path": "commands/humanize.md"
     },
     {
       "command": "instinct-export",
@@ -505,10 +527,10 @@
   "statistics": {
     "byType": {
       "build": 1,
-      "general": 7,
+      "general": 8,
       "planning": 1,
       "refactoring": 1,
-      "review": 8,
+      "review": 9,
       "testing": 32
     },
     "topAgents": [
@@ -541,6 +563,10 @@
       {
         "skill": "rust-patterns",
         "count": 3
+      },
+      {
+        "skill": "humanize-korean",
+        "count": 2
       },
       {
         "skill": "rust-testing",
