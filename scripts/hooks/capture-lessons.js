@@ -109,7 +109,7 @@ function candidateCategories(counts) {
  */
 function buildSuggestion(categories) {
   const cats = categories.join(', ');
-  return `📝 반복 교정 신호 감지(${cats}). 교훈을 남기려면 /lessons add 를 실행하세요.`;
+  return `[lessons] 반복 교정 신호 감지(${cats}). 교훈을 남기려면 /lessons add 를 실행하세요.`;
 }
 
 /**

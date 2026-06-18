@@ -73,9 +73,17 @@ for (const testFile of testFiles) {
 
   console.log(`\n━━━ Running ${displayPath} ━━━`);
 
+  // 훅 프로파일 env 가 부모 셸에서 새어 들어오면 hook-flags 테스트가
+  // 자기 fixture 가 아니라 그 값을 보고 깨진다. 각 테스트가 입력으로
+  // profile 을 직접 제어하므로 자식 env 에서는 비워서 격리한다.
+  const childEnv = { ...process.env };
+  delete childEnv.HARNESS_HOOK_PROFILE;
+  delete childEnv.HARNESS_DISABLED_HOOKS;
+
   const result = spawnSync('node', [testPath], {
     encoding: 'utf8',
-    stdio: ['pipe', 'pipe', 'pipe']
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env: childEnv
   });
 
   const stdout = result.stdout || '';
