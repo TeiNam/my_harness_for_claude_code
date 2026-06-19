@@ -1,0 +1,46 @@
+# Changelog
+
+All notable changes, grouped by commit date.
+
+## 2026-06-20
+
+- feat(git): 날짜별 CHANGELOG 자동 생성 post-commit 훅 추가 (3424c5e)
+
+## 2026-06-19
+
+- feat(skills): tech-writer 기술 문서 작성·윤문 스킬 통합 (2722f5e)
+- refactor(install): 메타/실험 스킬 31종을 메뉴 비노출 lab 그룹으로 격리 (73bbda0)
+
+## 2026-06-18
+
+- refactor(learning): continuous-learning v1 완전 제거 (9fa805b)
+- style(humanize): unicode-safety 게이트 위반 이모지 정리 (498a849)
+- Merge remote-tracking branch 'origin/main' (dd08618)
+- test(harness): npm test 완전 녹색화 + drawio 스킬 커밋 (26f1b36)
+- chore(harness): 글로벌 최소화 + 드리프트 감지 + 학습 명령 통합 (db37ee8)
+
+## 2026-06-13
+
+- docs: update command registry and README counts for humanize-korean (1075607)
+- feat(writing): integrate humanize-korean (한글 AI 티 제거) from im-not-ai (c6990b4)
+
+## 2026-06-04
+
+- fix(hooks): capture-lessons uses systemMessage, not additionalContext (756afbf)
+- docs: highlight AWS Bedrock optimization in README (afea97b)
+- feat(hooks): add lightweight lessons-learned self-evolution mechanism (422993a)
+- fix(hooks): retune context-monitor thresholds for 1M-context models (3a8a4ce)
+
+## 2026-05-23
+
+- fix(hooks): resolve harness root via CLAUDE_PROJECT_DIR for project-local installs (7454930)
+- feat(install): add workload-tagged install with 2-tier menu (14aab45)
+- feat(rules): add korean-language and readme-rule common rules (38d42f9)
+- docs: rewrite README with verified counts, install/test workflow, and badges (c140fb3)
+
+## 2026-05-22
+
+- test: drop unused catalog validator helpers and schema path constants (e900438)
+- chore: fix unicode safety violations and skill frontmatter format (6212e3c)
+- Initial commit: personal Claude Code harness (7dc94e1)
+
