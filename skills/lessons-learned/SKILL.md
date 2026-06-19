@@ -64,4 +64,4 @@ steering 을 수동으로(또는 `capture-lessons` hook 제안 흐름으로) 끌
 
 ### User corrections
 
-<!-- 여기에 사용자 정정 교훈을 한 줄씩 추가 -->
+- [2026-06-20] (User corrections) "git push / GitKraken 등 GUI 로 push 할 때 반응하는 훅" 요청 -> Claude 훅(PreToolUse/PostToolUse)은 Claude 자신의 도구 호출에만 발동한다. 사용자가 터미널·GUI 로 직접 git 조작하는 것까지 커버하려면 네이티브 git 훅(`core.hooksPath` + `post-commit`/`pre-push`)을 써야 한다.

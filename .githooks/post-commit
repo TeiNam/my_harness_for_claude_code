@@ -1,0 +1,30 @@
+#!/bin/sh
+# post-commit: CHANGELOG.md 를 커밋 날짜별로 묶어 재생성하고 스테이징한다.
+# 다음 커밋에 함께 실려 push 시 자동 전송된다 (amend 안 함 → rebase/merge/
+# cherry-pick 중에도 안전). 어떤 git 클라이언트(GitKraken 등)든 동일하게 동작.
+#
+# ponytail: stage-only, 한 커밋 지연(마지막 커밋 항목은 그다음 커밋 때 반영).
+#           지연 없이 같은 커밋에 넣으려면 끝부분 git add 를
+#           `CHANGELOG_SKIP=1 git commit --amend --no-edit --no-verify` 로 교체.
+
+# 진행 중인 rebase/merge/cherry-pick 에서는 churn 방지를 위해 건너뛴다.
+git_dir=$(git rev-parse --git-dir 2>/dev/null) || exit 0
+for state in rebase-merge rebase-apply MERGE_HEAD CHERRY_PICK_HEAD; do
+  [ -e "$git_dir/$state" ] && exit 0
+done
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+out="$root/CHANGELOG.md"
+
+{
+  printf '# Changelog\n\nAll notable changes, grouped by commit date.\n'
+  # %cd=커밋날짜(short), %s=제목, %h=축약 해시. 0x1f(US) 로 필드 구분.
+  git log --date=short --pretty=format:'%cd%x1f%s%x1f%h' | awk -F'\037' '
+    $1 != prev { printf "\n## %s\n\n", $1; prev = $1 }
+    { printf "- %s (%s)\n", $2, $3 }
+  '
+  printf '\n'
+} > "$out" || exit 0
+
+git add "$out" 2>/dev/null
+exit 0

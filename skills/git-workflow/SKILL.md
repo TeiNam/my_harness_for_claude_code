@@ -533,6 +533,13 @@ build/
 .DS_Store
 Thumbs.db
 
+# AI coding assistants (local config/state — exclude by default)
+.claude/
+.kiro/
+.codex/
+.cursor/
+.aider*
+
 # Logs
 *.log
 logs/
