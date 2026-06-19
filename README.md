@@ -18,14 +18,14 @@
 
 | 디렉터리 | 항목 수 | 설명 |
 |---|---:|---|
-| `agents/` | 48 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher 등) |
-| `commands/` | 53 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 125 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / 글쓰기 등) |
+| `agents/` | 52 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
+| `commands/` | 52 | 슬래시 커맨드 (frontmatter 기반 markdown) |
+| `skills/` | 126 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / 글쓰기 등) |
 | `rules/` | 36 | common 레이어 + 언어별(typescript / python / rust / web) |
 | `hooks/` | 29 | 이벤트 기반 훅 매처 (실행 스크립트 44종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
 | `scripts/` | — | 훅 핸들러 / 설치 / CI 검증 / 세션 관리 도구 |
-| `tests/` | — | 1527개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
+| `tests/` | — | 1526개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
 | `docs/` | — | 장문 가이드(글쓰기 / 보안)와 steering 규칙 |
 
 상세 인덱스는 `docs/COMMAND-REGISTRY.json`에 자동 생성되어 있습니다.
@@ -49,7 +49,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 - **백엔드**: `fastapi-backend-best-practices`(7개 하위 영역), `python-patterns`, `rust-patterns`
 - **프론트엔드**: `obsidian-plugin-develop`(TypeScript + i18n + Chromium + 릴리스 체크리스트), `vite-patterns`, `frontend-patterns`
 - **AI / 클라우드**: `claude-api`, `aws-bedrock`, `aws-cloud`, `realtime-stt-huggingface`, `cost-aware-llm-pipeline`, `ai-regression-testing`
-- **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`
+- **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`, `tech-writer`(한/영 기술 문서 작성·윤문 오케스트레이터, 5개 전용 에이전트)
 - **한글 AI 티 제거**: `humanize-korean` — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 패턴을 탐지·윤문(`/humanize`·`/humanize-redo`, Fast/strict 모드). epoko77-ai/im-not-ai 통합.
 
 ## AWS Bedrock 워크플로 (최적화 포인트)
