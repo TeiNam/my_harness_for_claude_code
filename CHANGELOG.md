@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-06-20
 
+- docs(changelog): post-commit 훅 산출 CHANGELOG.md 추가 (76c8c75)
 - feat(git): 날짜별 CHANGELOG 자동 생성 post-commit 훅 추가 (3424c5e)
 
 ## 2026-06-19
