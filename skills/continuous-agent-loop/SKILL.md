@@ -2,7 +2,7 @@
 name: continuous-agent-loop
 description: Patterns for continuous autonomous agent loops with quality gates, evals, and recovery controls.
 origin: harness
-workloads: [core]
+workloads: [lab]
 ---
 
 # Continuous Agent Loop

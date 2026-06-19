@@ -2,7 +2,7 @@
 name: scholar-evaluation
 description: Structured scholarly-work evaluation for papers, proposals, literature reviews, methods sections, evidence quality, citation support, and research-writing feedback.
 origin: community
-workloads: [core]
+workloads: [lab]
 ---
 
 # Scholar Evaluation

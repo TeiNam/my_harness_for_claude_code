@@ -40,6 +40,7 @@ function runTests() {
       'core',
       'dynamodb',
       'frontend',
+      'lab',
       'mongodb',
       'mysql',
       'nodejs',

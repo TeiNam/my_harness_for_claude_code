@@ -2,7 +2,7 @@
 name: agentic-engineering
 description: Operate as an agentic engineer using eval-first execution, decomposition, and cost-aware model routing.
 origin: harness
-workloads: [core]
+workloads: [lab]
 ---
 
 # Agentic Engineering

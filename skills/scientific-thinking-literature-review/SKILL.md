@@ -2,7 +2,7 @@
 name: literature-review
 description: Systematic literature-review workflow for academic, biomedical, technical, and scientific topics, including search planning, source screening, synthesis, citation checks, and evidence logging.
 origin: community
-workloads: [core]
+workloads: [lab]
 ---
 
 # Literature Review
