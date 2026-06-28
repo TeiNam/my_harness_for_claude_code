@@ -19,6 +19,10 @@
 #   -DataDesign  mysql, postgres, mongodb, dynamodb
 #
 # 그 외 옵션:
+#   -WithHooks   hooks 를 settings.json 에 병합. 대화형이면 워크로드 설치 후
+#                hooks·mcp 추가 설치를 물어보므로 생략 가능; 이 플래그를 주면
+#                hooks 는 묻지 않고 바로 병합한다.
+#   -NoExtras    워크로드 외(hooks·mcp) 추가 설치 프롬프트를 건너뛴다.
 #   -NoHomeLink  $env:CLAUDE_HOME 이 %USERPROFILE%\.claude 가 아닐 때도
 #                %USERPROFILE%\.claude\_harness 보조 링크를 만들지 않음
 #
@@ -30,6 +34,7 @@ param(
     [switch]$Uninstall,
     [switch]$Force,
     [switch]$WithHooks,
+    [switch]$NoExtras,
     [switch]$NoHomeLink,
     [switch]$All,
     [string[]]$Workload,
@@ -191,6 +196,25 @@ function Invoke-HookMerge {
     & node @argList
 }
 
+# 워크로드 외(hooks·mcp) 추가 설치 프롬프트. 대화형 콘솔일 때만 묻는다.
+function Confirm-Extra {
+    param([string]$Question)
+    if ($NoExtras -or -not [Environment]::UserInteractive -or [Console]::IsInputRedirected) {
+        return $false
+    }
+    $reply = Read-Host "$Question [y/N]"
+    return ($reply -match '^(y|yes)$')
+}
+
+function Show-McpInfo {
+    Write-Host ''
+    Write-Host '==> MCP servers'
+    Write-Host "  MCP 설정 샘플: $HarnessDir\.mcp.json (github·context7·exa·brave-search·sentry·time·playwright)"
+    Write-Host '  활성화: 필요한 서버를 ~/.claude.json 또는 프로젝트 .mcp.json 의 mcpServers 에 복사.'
+    Write-Host '  키는 환경변수로 주입 — $env:GITHUB_PAT, $env:BRAVE_API_KEY (.env.example 참고).'
+    Write-Host '  exa·sentry 는 remote(HTTP), time 은 uvx(uv 설치 필요).'
+}
+
 function Remove-EmptyHarnessDirs {
     foreach ($sub in 'agents','commands','skills','rules') {
         $container = Join-Path $ClaudeDir (Join-Path $sub '_harness')
@@ -263,8 +287,24 @@ foreach ($line in Get-Selection -WlCsv $ResolvedWorkloads) {
     }
 }
 
-if ($WithHooks -or $Uninstall) {
+# 워크로드 외 자산(hooks·mcp). uninstall: 함께 제거. install: -WithHooks 면 바로
+# 병합, 아니면 대화형 콘솔일 때 hooks·mcp 를 각각 물어본다(-NoExtras/리다이렉트 skip).
+$hooksDone = $false
+if ($Uninstall) {
     Invoke-HookMerge
+} elseif ($WithHooks) {
+    Invoke-HookMerge
+    $hooksDone = $true
+} elseif (-not $NoExtras -and [Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
+    Write-Host ''
+    Write-Host '──> 워크로드 외 추가 설치 (선택)'
+    if (Confirm-Extra 'hooks 를 settings.json 에 병합할까요? (포맷·품질·세션 훅)') {
+        Invoke-HookMerge
+        $hooksDone = $true
+    }
+    if (Confirm-Extra 'MCP 서버 설정 안내를 볼까요?') {
+        Show-McpInfo
+    }
 }
 
 if ($Uninstall -and -not $DryRun) {
@@ -273,10 +313,10 @@ if ($Uninstall -and -not $DryRun) {
 
 if (-not $Uninstall) {
     Write-Host ''
-    if ($WithHooks) {
+    if ($hooksDone) {
         Write-Host "Done. Symlinks installed and hooks merged into `$ClaudeDir\settings.json."
     } else {
-        Write-Host "Done. Hooks are NOT auto-installed - re-run with -WithHooks to merge them,"
-        Write-Host "or edit `$ClaudeDir\settings.json by hand."
+        Write-Host "Done. Symlinks installed. Hooks NOT merged - re-run with -WithHooks"
+        Write-Host "(or answer yes to the hooks prompt) to enable them."
     }
 }

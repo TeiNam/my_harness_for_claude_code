@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-06-28
 
+- docs(common): MCP 변경에 맞춰 공통 영역 문서·설정 동기화 (6f49c9c)
 - i18n(skills): 한글 작성 스킬 6종을 영어로 번역 (토큰 절감) (2155577)
 - feat(skills): mysql-guideline 에 개발 원칙·안티패턴·JDBC ref 2개 추가 (d374522)
 - feat(skills): RDBMS 공통 네이밍 규칙 rdbms-naming 신규 + guideline 정렬 (04d58df)

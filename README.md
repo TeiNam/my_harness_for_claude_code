@@ -107,10 +107,16 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 ./install.sh --dry-run                          # 변경 없이 미리 보기
 ./install.sh --uninstall                        # 모두 제거 (선택과 무관하게 전체 정리)
 ./install.sh --force                            # 기존 파일 덮어쓰기
-./install.sh --with-hooks                       # ~/.claude/settings.json 에 훅 병합
+./install.sh --with-hooks                       # 묻지 않고 ~/.claude/settings.json 에 훅 병합
 ./install.sh --with-hooks --dry-run             # 병합 결과 미리 보기
 ./install.sh --with-hooks --uninstall           # 하네스가 추가한 훅만 정리 (사용자 훅 보존)
+./install.sh --no-extras                        # 워크로드 외(hooks·mcp) 프롬프트 건너뛰기
 ```
+
+워크로드(agent·command·skill·rule)는 선택에 따라 설치되고, **워크로드 밖인
+hooks·mcp 는 설치 후 대화형(TTY)일 때 추가 설치할지 물어봅니다.** `--with-hooks`
+를 주면 hooks 를 묻지 않고 바로 병합하고, `--no-extras` 또는 비대화형(CI·파이프)
+이면 프롬프트 없이 워크로드만 설치합니다.
 
 저수준 워크로드 키를 직접 다루고 싶으면 `--workload=python-backend,mysql` / `--skip-workload=ai,nodejs` 도 그대로 사용할 수 있습니다 (메뉴 플래그보다 우선).
 

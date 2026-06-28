@@ -18,7 +18,11 @@
 #   --dry-run        실제 변경 없이 미리 보기
 #   --uninstall      모든 하네스 심볼릭 링크 제거 (선택과 무관하게 전체 정리)
 #   --force          기존 파일/링크 덮어쓰기
-#   --with-hooks     hooks/hooks.json 을 ~/.claude/settings.json 에 병합
+#   --with-hooks     hooks/hooks.json 을 ~/.claude/settings.json 에 병합.
+#                    TTY 면 워크로드 설치 후 hooks·mcp 추가 설치를 물어본다;
+#                    이 플래그를 주면 hooks 는 묻지 않고 바로 병합한다.
+#   --no-extras      워크로드 외(hooks·mcp) 추가 설치 프롬프트를 건너뛴다.
+#                    비대화형(CI)에서는 기본적으로 묻지 않으므로 불필요.
 #   --no-home-link   CLAUDE_HOME 이 ~/.claude 가 아닐 때도 ~/.claude/_harness
 #                    보조 링크를 만들지 않음 (자세한 내용은 main() 의 보조 링크
 #                    블록 주석을 참고)
@@ -32,6 +36,7 @@ DRY_RUN=0
 UNINSTALL=0
 FORCE=0
 WITH_HOOKS=0
+NO_EXTRAS=0
 NO_HOME_LINK=0
 WORKLOAD=""
 SKIP_WORKLOAD=""
@@ -45,6 +50,7 @@ for arg in "$@"; do
         --uninstall)            UNINSTALL=1 ;;
         --force)                FORCE=1 ;;
         --with-hooks)           WITH_HOOKS=1 ;;
+        --no-extras)            NO_EXTRAS=1 ;;
         --no-home-link)         NO_HOME_LINK=1 ;;
         --workload=*)           WORKLOAD="${arg#--workload=}" ;;
         --workloads=*)          WORKLOAD="${arg#--workloads=}" ;;
@@ -188,6 +194,35 @@ merge_hooks() {
     node "$HARNESS_DIR/scripts/install/merge-hooks.js" "${merge_args[@]}"
 }
 
+# 워크로드 외 자산(hooks·mcp)은 워크로드 분류 밖이다. 설치 후 TTY 면 물어본다.
+# 비대화형(파이프/CI)이면 묻지 않고 기존 플래그 동작만 따른다.
+#   $1 = 프롬프트 문구, 반환 0 = yes
+prompt_yes_no() {
+    local question="$1"
+    # TTY 아님(비대화형) 또는 --no-extras → no
+    if [ "$NO_EXTRAS" -eq 1 ] || [ ! -t 0 ]; then
+        return 1
+    fi
+    local reply
+    printf '%s [y/N] ' "$question" >&2
+    read -r reply || return 1
+    case "$reply" in
+        [yY]|[yY][eE][sS]) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+# mcp 는 settings 머지가 아니라 안내다 (.mcp.json 이 ${VAR} 참조라 키 주입은
+# 사용자 몫). 어떻게 활성화하는지만 보여준다.
+print_mcp_info() {
+    echo
+    echo "==> MCP servers"
+    echo "  MCP 설정 샘플: $HARNESS_DIR/.mcp.json (github·context7·exa·brave-search·sentry·time·playwright)"
+    echo "  활성화: 필요한 서버를 ~/.claude.json 또는 프로젝트 .mcp.json 의 mcpServers 에 복사."
+    echo "  키는 환경변수로 주입 — \$GITHUB_PAT, \$BRAVE_API_KEY (.env.example 참고)."
+    echo "  exa·sentry 는 remote(HTTP), time 은 uvx(uv 설치 필요)."
+}
+
 # 자산 선택 출력. uninstall 일 때는 *모든* 자산을 순회해서 이전(더 넓은) 설치
 # 흔적까지 정리한다.
 build_selection() {
@@ -255,8 +290,26 @@ main() {
         fi
     done < <(build_selection)
 
-    if [ "$WITH_HOOKS" -eq 1 ] || [ "$UNINSTALL" -eq 1 ]; then
+    # ── 워크로드 외 자산(hooks·mcp) ───────────────────────────────────────
+    # uninstall: hooks 도 함께 제거. install: --with-hooks 면 바로 병합,
+    # 아니면 TTY 일 때 hooks·mcp 를 각각 물어본다(--no-extras / 비대화형은 skip).
+    local hooks_done=0
+    if [ "$UNINSTALL" -eq 1 ]; then
         merge_hooks || true
+    elif [ "$WITH_HOOKS" -eq 1 ]; then
+        merge_hooks || true
+        hooks_done=1
+    elif [ "$NO_EXTRAS" -eq 0 ] && [ -t 0 ]; then
+        # TTY 일 때만 워크로드 외(hooks·mcp) 추가 설치를 물어본다.
+        echo
+        echo "──> 워크로드 외 추가 설치 (선택)"
+        if prompt_yes_no "hooks 를 settings.json 에 병합할까요? (포맷·품질·세션 훅)"; then
+            merge_hooks || true
+            hooks_done=1
+        fi
+        if prompt_yes_no "MCP 서버 설정 안내를 볼까요?"; then
+            print_mcp_info
+        fi
     fi
 
     if [ "$UNINSTALL" -eq 1 ]; then
@@ -271,11 +324,11 @@ main() {
 
     if [ "$UNINSTALL" -eq 0 ]; then
         echo
-        if [ "$WITH_HOOKS" -eq 1 ]; then
+        if [ "$hooks_done" -eq 1 ]; then
             echo "Done. Symlinks installed and hooks merged into \$CLAUDE_DIR/settings.json."
         else
-            echo "Done. Hooks are NOT auto-installed — re-run with --with-hooks to merge them,"
-            echo "or edit \$CLAUDE_DIR/settings.json by hand."
+            echo "Done. Symlinks installed. Hooks NOT merged — re-run with --with-hooks"
+            echo "(or answer yes to the hooks prompt) to enable them."
         fi
     fi
 }
