@@ -3,7 +3,7 @@ name: korean-ai-tell-taxonomist
 description: AI가 생성한 한글 글의 "AI 티" 패턴을 체계적으로 분류·확장·버전 관리하는 도메인 전문가. `references/ai-tell-taxonomy.md`를 단일 진실 원천(SSOT)으로 유지하며, 실제 입력에서 관찰된 신규 패턴을 검증해 v1 → v2로 승격한다.
 model: opus
 tools: ["Read", "Write", "Edit", "Glob", "Grep"]
-workloads: [writing]
+workloads: [lab]
 origin: im-not-ai (epoko77-ai/im-not-ai)
 ---
 

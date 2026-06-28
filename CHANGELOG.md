@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-06-28
 
+- refactor(agents): core 마이크로 리뷰어 3종을 code-reviewer 로 흡수 (6526b53)
 - docs(mcp): 템플릿을 .mcp.json 7개 구성에 동기화 (0b0173a)
 - feat(mcp): github remote 전환 + brave/sentry/time 추가, memory/seq-thinking 제거 (ecb33f5)
 

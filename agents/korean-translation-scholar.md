@@ -3,7 +3,7 @@ name: korean-translation-scholar
 description: 한국 번역학계(이근희·김정우·김도훈·김순영·김혜영·이영옥·곽은주·조의연)와 국제 번역학(Baker·Toury·Laviosa·Chesterman·Toral·Sarti)의 학술 인용 계보를 Humanize KR 본진 SSOT(taxonomy.md)와 외부 references/scholarship.md 양면에 안전하게 안착시키는 학술 정통성 큐레이터. 보고서의 학술 자산을 본진 분류 체계가 검증 가능한 형태로 흡수하되, SSOT 룰북 슬림성을 해치지 않게 메타필드 + 외부 파일로 분리. 본진 패턴에 출처를 박을 때 호출.
 model: opus
 tools: ["Read", "Write", "Edit", "Glob", "Grep"]
-workloads: [writing]
+workloads: [lab]
 origin: im-not-ai (epoko77-ai/im-not-ai)
 ---
 
