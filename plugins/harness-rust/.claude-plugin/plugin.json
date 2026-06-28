@@ -1,0 +1,8 @@
+{
+  "name": "harness-rust",
+  "description": "Rust 개발 — 패턴 · 리뷰어 · 빌드 해결",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

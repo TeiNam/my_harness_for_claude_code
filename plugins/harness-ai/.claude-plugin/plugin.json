@@ -1,0 +1,8 @@
+{
+  "name": "harness-ai",
+  "description": "Claude SDK · Bedrock · LLM 파이프라인 · 온디바이스 · 실시간 STT",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

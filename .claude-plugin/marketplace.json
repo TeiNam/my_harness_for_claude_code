@@ -1,0 +1,79 @@
+{
+  "name": "harness",
+  "description": "Personal Claude Code harness — workload별 플러그인 (필요한 것만 골라 설치)",
+  "owner": {
+    "name": "teinam"
+  },
+  "plugins": [
+    {
+      "name": "harness-ai",
+      "source": "./plugins/harness-ai",
+      "description": "Claude SDK · Bedrock · LLM 파이프라인 · 온디바이스 · 실시간 STT"
+    },
+    {
+      "name": "harness-cloud",
+      "source": "./plugins/harness-cloud",
+      "description": "AWS · Docker · Terraform · K8s — DevOps"
+    },
+    {
+      "name": "harness-core",
+      "source": "./plugins/harness-core",
+      "description": "항상 포함되는 코어 — planning · review · git · sessions · 학습 메커니즘"
+    },
+    {
+      "name": "harness-dynamodb",
+      "source": "./plugins/harness-dynamodb",
+      "description": "DynamoDB NoSQL 패턴 — single-table · GSI"
+    },
+    {
+      "name": "harness-frontend",
+      "source": "./plugins/harness-frontend",
+      "description": "React · Vite · TypeScript · Web UI · 접근성 · 모션"
+    },
+    {
+      "name": "harness-mongodb",
+      "source": "./plugins/harness-mongodb",
+      "description": "MongoDB 문서 설계 · 인덱스 · 샤딩"
+    },
+    {
+      "name": "harness-mysql",
+      "source": "./plugins/harness-mysql",
+      "description": "MySQL · Aurora MySQL — 스키마 · 인덱스 · 파티셔닝 · 최적화"
+    },
+    {
+      "name": "harness-nodejs",
+      "source": "./plugins/harness-nodejs",
+      "description": "Node.js 서버 · 툴링 (Bun · Prisma)"
+    },
+    {
+      "name": "harness-obsidian",
+      "source": "./plugins/harness-obsidian",
+      "description": "Obsidian 플러그인 개발 (TS · i18n · 릴리스 체크리스트)"
+    },
+    {
+      "name": "harness-postgres",
+      "source": "./plugins/harness-postgres",
+      "description": "PostgreSQL · Aurora Postgres — 스키마 · 인덱스 · 성능"
+    },
+    {
+      "name": "harness-python-backend",
+      "source": "./plugins/harness-python-backend",
+      "description": "FastAPI · Python 백엔드 (api-design · async · domain-modeling · security · testing)"
+    },
+    {
+      "name": "harness-python-data",
+      "source": "./plugins/harness-python-data",
+      "description": "DuckDB · pandas · polars · PyTorch · MLE · RecSys"
+    },
+    {
+      "name": "harness-rust",
+      "source": "./plugins/harness-rust",
+      "description": "Rust 개발 — 패턴 · 리뷰어 · 빌드 해결"
+    },
+    {
+      "name": "harness-writing",
+      "source": "./plugins/harness-writing",
+      "description": "아티클 · 콘텐츠 · 블로깅 · 카피 · 번역 · PPT · humanize"
+    }
+  ]
+}

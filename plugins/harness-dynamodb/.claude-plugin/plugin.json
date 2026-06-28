@@ -1,0 +1,8 @@
+{
+  "name": "harness-dynamodb",
+  "description": "DynamoDB NoSQL 패턴 — single-table · GSI",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

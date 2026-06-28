@@ -1,0 +1,8 @@
+{
+  "name": "harness-nodejs",
+  "description": "Node.js 서버 · 툴링 (Bun · Prisma)",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

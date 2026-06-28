@@ -1,0 +1,8 @@
+{
+  "name": "harness-postgres",
+  "description": "PostgreSQL · Aurora Postgres — 스키마 · 인덱스 · 성능",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

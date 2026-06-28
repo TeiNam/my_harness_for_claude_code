@@ -104,7 +104,7 @@ def _z_marker(z: float | None) -> str:
     if z is None:
         return ""
     if z >= 1.5:
-        return "  ★ S1 트리거"
+        return "  * S1 트리거"
     if z >= 1.0:
         return "  · S2 시그널"
     return ""
@@ -158,7 +158,7 @@ def _render_block(metrics_obj: dict) -> str:
     lines.append("[근거 사용 가이드]")
     lines.append("- 위 점수는 *근거 보조*다. 단독 판정 금지(보고서 명시).")
     lines.append("- z>1.0 지표는 quick-rules.md S1·S2 패턴과 교차 확인 후 윤문할 것.")
-    lines.append("- ending_comma_rate가 ★ S1 트리거인 경우 C-11(연결어미 뒤 쉼표) 우선 손질.")
+    lines.append("- ending_comma_rate가 * S1 트리거인 경우 C-11(연결어미 뒤 쉼표) 우선 손질.")
     lines.append("- conclusion_pivot 매치 토큰은 D-1·H-1 처방 적용 대상.")
     lines.append("")
     return "\n".join(lines)

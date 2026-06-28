@@ -1,0 +1,8 @@
+{
+  "name": "harness-python-backend",
+  "description": "FastAPI · Python 백엔드 (api-design · async · domain-modeling · security · testing)",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

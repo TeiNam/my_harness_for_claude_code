@@ -1,0 +1,8 @@
+{
+  "name": "harness-mongodb",
+  "description": "MongoDB 문서 설계 · 인덱스 · 샤딩",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}
