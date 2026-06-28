@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-06-28
 
+- docs(rules): paths frontmatter 자동로드 컨벤션을 README 에 문서화 (ae48977)
 - refactor(commands): /pr 와 중복인 /prp-pr 제거 (53→52) (2fdc994)
 - refactor(hooks): strict 프로파일 차별화 — 차단형 훅 2종을 strict 전용으로 (e8296f1)
 - refactor(agents): humanize 메타 유지보수 에이전트 7종을 lab 그룹으로 격리 (74a8906)

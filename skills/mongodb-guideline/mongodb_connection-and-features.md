@@ -1,12 +1,16 @@
 # Connection Management and MongoDB Features
 
-## motor Async Connection Pool (Python)
+## Async Connection Pool (Python)
+
+> 신규 코드는 **PyMongo Async (`AsyncMongoClient`)** 를 쓴다. motor 는
+> 2026-05 deprecated 예정이며 공식이 PyMongo Async 로 이전을 권고한다. 풀링
+> 의미는 동일하다(`maxPoolSize` 기본 100, `minPoolSize` 기본 0).
 
 ```python
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import AsyncMongoClient
 
 # 앱 시작 시 한 번만 생성 (싱글턴)
-client = AsyncIOMotorClient(
+client = AsyncMongoClient(
     "mongodb://app:password@localhost:27017/myapp",
     maxPoolSize=10,
     minPoolSize=4,
@@ -19,23 +23,27 @@ client = AsyncIOMotorClient(
 db = client["myapp"]
 ```
 
-> WARNING: `AsyncIOMotorClient`는 프로세스당 하나만 생성할 것.
+> WARNING: 클라이언트는 프로세스당 하나만 생성할 것 (요청마다 생성 금지 → 풀 고갈).
 > FastAPI의 경우 `lifespan` 이벤트에서 생성/종료 관리 권장.
 
 ```python
 # FastAPI lifespan 패턴
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from pymongo import AsyncMongoClient
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.mongo = AsyncIOMotorClient("mongodb://localhost:27017")
+    app.state.mongo = AsyncMongoClient("mongodb://localhost:27017")
     app.state.db = app.state.mongo["myapp"]
     yield
-    app.state.mongo.close()
+    await app.state.mongo.close()
 
 app = FastAPI(lifespan=lifespan)
 ```
+
+> 레거시 motor 코드(`from motor.motor_asyncio import AsyncIOMotorClient`)는
+> 아직 동작하지만 신규 작성·마이그레이션 시 PyMongo Async 로 전환한다.
 
 ## Node.js Native Driver (Async)
 

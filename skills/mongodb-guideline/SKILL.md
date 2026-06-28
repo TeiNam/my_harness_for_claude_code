@@ -63,4 +63,7 @@ workloads: [mongodb]
 - `document-design.md` — Embed vs Reference 전략, 컨텐츠 중심 설계, 글로벌 쿼리 회피
 - `index-strategy.md` — RDBMS와 다른 MongoDB 인덱스 전략, multikey/partial/TTL
 - `shard-key.md` — 샤드키 선정 원칙, 패턴별 가이드
-- `connection-and-features.md` — motor async, transactions, change streams
+- `connection-and-features.md` — 비동기 커넥션(PyMongo Async `AsyncMongoClient`; motor는 2026-05 deprecated), transactions, change streams
+
+## Related
+- `mongodb-patterns` — 런타임 쿼리/집계/인덱스/트랜잭션/커넥션 풀/진단 패턴 (이 가이드는 설계 규약, patterns 는 실행 패턴 담당).
