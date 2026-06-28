@@ -107,11 +107,26 @@ To add support for a new language (e.g., `rust/`):
    - `patterns.md` — language-specific design patterns
    - `hooks.md` — PostToolUse hooks for formatters, linters, type checkers
    - `security.md` — secret management, security scanning tools
-3. Each file should start with:
+3. Add a YAML frontmatter block so the rule auto-loads when matching files are
+   edited, plus a `workloads:` tag for install selection:
+   ```
+   ---
+   paths:
+     - "**/*.rs"
+   workloads: [rust]
+   ---
+   ```
+   - `paths:` is a list of globs. Claude Code loads the rule automatically when
+     an edited file matches. Use the language's file extensions.
+   - Omit `paths:` only when no file glob applies — e.g. `common/` (language-agnostic)
+     and `web/` (a frontend *domain*, not a single extension; loaded via its
+     `workloads: [frontend]` install rather than glob auto-load). If you want a
+     web rule to auto-load, add the relevant globs (`**/*.tsx`, `**/*.css`).
+4. After the frontmatter, each file should start with:
    ```
    > This file extends [common/xxx.md](../common/xxx.md) with <Language> specific content.
    ```
-4. Reference existing skills if available, or create new ones under `skills/`.
+5. Reference existing skills if available, or create new ones under `skills/`.
 
 For non-language domains like `web/`, follow the same layered pattern when there is enough reusable domain-specific guidance to justify a standalone ruleset.
 
