@@ -4,13 +4,14 @@ This is a personal harness, not a published product — there is no security dis
 
 ## Secrets Handling
 
-`mcp-configs/` and your local `~/.claude/settings.json` may carry MCP server credentials. Never commit real tokens; resolve them at spawn time from env-vars or the OS keychain.
+`mcp-configs/`, the committed `.mcp.json`, and your local `~/.claude/settings.json` may carry MCP server credentials. Never commit real tokens — the committed `.mcp.json` uses `${VAR}` env-var references only (`GITHUB_PAT`, `BRAVE_API_KEY`); resolve real values at spawn time from env-vars or the OS keychain.
 
-Quick audit:
+Quick audit (catches a literal secret that slipped past the `${VAR}` convention):
 
 ```bash
 # macOS / Linux
-grep -EnH '(TOKEN|SECRET|KEY|PASSWORD)\s*"\s*:\s*"[A-Za-z0-9_-]{16,}"' ~/.claude/settings.json
+grep -EnH '(TOKEN|SECRET|KEY|PASSWORD|PAT)\s*"\s*:\s*"[A-Za-z0-9_-]{16,}"' \
+  ~/.claude/settings.json .mcp.json mcp-configs/*.json
 ```
 
 If something matches, rotate the secret at the issuing provider, then move it to an env-var the MCP server already supports.

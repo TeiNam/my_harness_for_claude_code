@@ -153,7 +153,8 @@ python 3.12.8
 | 변수 | 용도 |
 |---|---|
 | `ANTHROPIC_API_KEY` | Anthropic API |
-| `GITHUB_TOKEN` | MCP github 서버, work-items 동기화 |
+| `GITHUB_PAT` | MCP github 서버 (remote) 인증 |
+| `BRAVE_API_KEY` | MCP brave-search 서버 |
 | `CLAUDE_HOME` | 기본값 `~/.claude` 재정의 |
 | `HARNESS_HOOK_PROFILE` | 훅 프로파일 (`minimal` / `standard` / `strict`) |
 | `HARNESS_DISABLED_HOOKS` | 비활성화할 훅 ID 목록(쉼표 구분) |
@@ -165,7 +166,7 @@ python 3.12.8
 
 ## MCP 서버
 
-샘플 설정은 `mcp-configs/mcp-servers.json`과 `.mcp.json`에 있습니다 — github, context7, exa, memory, playwright, sequential-thinking. 컨텍스트 윈도 보호를 위해 동시 활성 서버는 10개 이하로 유지합니다. 토큰 같은 비밀값은 환경 변수나 OS 키체인에서 spawn 시점에 주입하고 절대 커밋하지 않습니다.
+샘플 설정은 `mcp-configs/mcp-servers.json`과 `.mcp.json`에 있습니다 — github(remote), context7, exa(remote), brave-search, sentry(remote·OAuth), time, playwright. 컨텍스트 윈도 보호를 위해 동시 활성 서버는 10개 이하로 유지합니다. 토큰 같은 비밀값은 `${VAR}` 환경 변수 참조로만 두고(`GITHUB_PAT`, `BRAVE_API_KEY`) 실제 값은 절대 커밋하지 않습니다.
 
 ## 자주 쓰는 슬래시 커맨드
 
