@@ -2,9 +2,12 @@
 name: mysql-guideline
 description: >
   MySQL 8.0+ 스키마 설계, 테이블/인덱스 생성, 쿼리 최적화, 파티셔닝,
-  커넥션 관리에 적용. 트리거: CREATE TABLE, ALTER TABLE, slow query 분석,
-  index 설계, RANGE partition, MySQL migration, utf8mb4, InnoDB,
-  트랜잭션 관리, UPSERT, Covering Index, 복합 인덱스 관련 작업.
+  커넥션 관리, 개발 원칙·안티패턴, JDBC 드라이버 선택에 적용. 트리거:
+  CREATE TABLE, ALTER TABLE, slow query 분석, index 설계, RANGE partition,
+  MySQL migration, utf8mb4, InnoDB, 트랜잭션 관리, UPSERT, Covering Index,
+  복합 인덱스, 정규화, 데이터 타입 선택, INET_ATON, UUID_TO_BIN,
+  DATETIME TIMESTAMP, stored procedure, COUNT(*), 랜덤 PK, JSON 컬럼,
+  JDBC, Connector/J, AWS Advanced JDBC Wrapper, Aurora 페일오버 관련 작업.
 origin: custom
 workloads: [mysql]
 ---
@@ -63,3 +66,5 @@ workloads: [mysql]
 - `index-and-query.md` — Index strategy, query patterns
 - `partitioning.md` — Partitioning strategy, management
 - `connection-and-features.md` — Connection management, transactions
+- `dev-practices.md` — 개발 원칙·안티패턴: 정규화, 최소 타입, INET_ATON/UUID_TO_BIN, DATETIME vs TIMESTAMP, SP/Trigger 자제, 인덱스 안티패턴, COUNT(*)·랜덤PK·복합PK·물리FK·JSON 회피
+- `jdbc-driver.md` — Java 드라이버 선택: AWS Advanced JDBC Wrapper(권장, v4.1.0) vs Connector/J, 페일오버 튜닝
