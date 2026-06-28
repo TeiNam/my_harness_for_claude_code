@@ -19,6 +19,9 @@
 #   --uninstall      모든 하네스 심볼릭 링크 제거 (선택과 무관하게 전체 정리)
 #   --force          기존 파일/링크 덮어쓰기
 #   --with-hooks     hooks/hooks.json 을 ~/.claude/settings.json 에 병합
+#   --rules-only     rule 자산만 설치 (agent/command/skill 제외). /plugin 으로
+#                    이미 받은 사람이 hooks·rules 만 보충할 때 — 중복 등록 방지.
+#                    보통 --with-hooks 와 함께 쓴다.
 #   --no-home-link   CLAUDE_HOME 이 ~/.claude 가 아닐 때도 ~/.claude/_harness
 #                    보조 링크를 만들지 않음 (자세한 내용은 main() 의 보조 링크
 #                    블록 주석을 참고)
@@ -32,6 +35,7 @@ DRY_RUN=0
 UNINSTALL=0
 FORCE=0
 WITH_HOOKS=0
+RULES_ONLY=0
 NO_HOME_LINK=0
 WORKLOAD=""
 SKIP_WORKLOAD=""
@@ -45,6 +49,7 @@ for arg in "$@"; do
         --uninstall)            UNINSTALL=1 ;;
         --force)                FORCE=1 ;;
         --with-hooks)           WITH_HOOKS=1 ;;
+        --rules-only)           RULES_ONLY=1 ;;
         --no-home-link)         NO_HOME_LINK=1 ;;
         --workload=*)           WORKLOAD="${arg#--workload=}" ;;
         --workloads=*)          WORKLOAD="${arg#--workloads=}" ;;
@@ -248,6 +253,11 @@ main() {
 
     while IFS=$'\t' read -r kind src_rel dest_rel; do
         [ -z "$kind" ] && continue
+        # --rules-only: skip agent/command/skill (the /plugin path owns those);
+        # install just rules so plugin users don't double-register them.
+        if [ "$RULES_ONLY" -eq 1 ] && [ "$UNINSTALL" -eq 0 ] && [ "$kind" != "rule" ]; then
+            continue
+        fi
         if [ "$UNINSTALL" -eq 1 ]; then
             unlink_one "$src_rel" "$dest_rel"
         else

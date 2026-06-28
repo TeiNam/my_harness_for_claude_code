@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalCommands": 53,
+  "totalCommands": 54,
   "commands": [
     {
       "command": "aside",
@@ -93,6 +93,15 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/harness-audit.md"
+    },
+    {
+      "command": "harness-setup",
+      "description": "Finish a /plugin install — show how to add the hooks and rules that plugins can't ship.",
+      "type": "build",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [],
+      "path": "commands/harness-setup.md"
     },
     {
       "command": "hookify-configure",
@@ -535,7 +544,7 @@
   ],
   "statistics": {
     "byType": {
-      "build": 1,
+      "build": 2,
       "general": 8,
       "planning": 1,
       "refactoring": 1,

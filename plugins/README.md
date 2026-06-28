@@ -17,8 +17,18 @@ Plugins ship **agents · commands · skills** per workload, plus one standalone
 **`harness-mcp`** (the MCP servers as a `.mcp.json`; API keys are `${ENV}`
 refs, so set them in your environment). `rules/` and `hooks/` aren't shippable
 per-plugin — `rules/` isn't a plugin component type, and the hooks rely on
-`HARNESS_HOOK_PROFILE` env gating a plugin can't set — so those still install
-via `./install.sh` (the paths coexist).
+`HARNESS_HOOK_PROFILE` env gating a plugin can't set.
+
+To add those after a `/plugin` install, run the in-CLI `/harness-setup` for
+guidance, or directly:
+
+```bash
+# rules + hooks only — skips agent/command/skill the plugins already provide
+./install.sh --rules-only --with-hooks --all
+```
+
+Plain `./install.sh` (without `--rules-only`) would re-symlink
+agents/commands/skills too, making each appear twice. The paths coexist.
 
 ## Regenerate
 

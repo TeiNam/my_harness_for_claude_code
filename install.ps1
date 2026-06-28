@@ -19,6 +19,9 @@
 #   -DataDesign  mysql, postgres, mongodb, dynamodb
 #
 # 그 외 옵션:
+#   -RulesOnly   rule 자산만 설치 (agent/command/skill 제외). /plugin 으로
+#                이미 받은 사람이 rules·hooks 만 보충할 때 중복 등록 방지.
+#                보통 -WithHooks 와 함께 쓴다.
 #   -NoHomeLink  $env:CLAUDE_HOME 이 %USERPROFILE%\.claude 가 아닐 때도
 #                %USERPROFILE%\.claude\_harness 보조 링크를 만들지 않음
 #
@@ -30,6 +33,7 @@ param(
     [switch]$Uninstall,
     [switch]$Force,
     [switch]$WithHooks,
+    [switch]$RulesOnly,
     [switch]$NoHomeLink,
     [switch]$All,
     [string[]]$Workload,
@@ -254,8 +258,11 @@ foreach ($line in Get-Selection -WlCsv $ResolvedWorkloads) {
     if ([string]::IsNullOrWhiteSpace($line)) { continue }
     $parts = $line -split "`t"
     if ($parts.Count -lt 3) { continue }
+    $kind = $parts[0]
     $sourceRel = $parts[1]
     $targetRel = $parts[2]
+    # -RulesOnly: the /plugin path owns agent/command/skill; install just rules.
+    if ($RulesOnly -and -not $Uninstall -and $kind -ne 'rule') { continue }
     if ($Uninstall) {
         Remove-HarnessSymlink -SourceRel $sourceRel -TargetRel $targetRel
     } else {

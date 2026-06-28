@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-06-28
 
+- feat(install): MCP 서버를 harness-mcp 플러그인으로 배포 (d0862a1)
 - Merge pull request #1 from TeiNam/feat/plugin-marketplace (8ced418)
 - feat(install): /plugin 마켓플레이스 생성기 — workload별 14개 플러그인 (d5286ee)
 - fix(ci): unicode-safe 이모지 치환 + 누락된 command 레지스트리 등록 (66412ea)

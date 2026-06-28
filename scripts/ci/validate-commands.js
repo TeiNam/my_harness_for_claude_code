@@ -69,8 +69,14 @@ function validateCommands() {
   let hasErrors = false;
   let warnCount = 0;
 
-  // Build set of valid command names (without .md extension)
-  const validCommands = new Set(files.map(f => f.replace(/\.md$/, '')));
+  // Build set of valid command names (without .md extension).
+  // Include Claude Code built-in slash commands so docs can reference them
+  // without a harness .md file (e.g. /plugin, /agents, /mcp).
+  const BUILTIN_COMMANDS = ['plugin', 'agents', 'mcp', 'hooks', 'help', 'clear', 'compact'];
+  const validCommands = new Set([
+    ...files.map(f => f.replace(/\.md$/, '')),
+    ...BUILTIN_COMMANDS,
+  ]);
 
   // Build set of valid agent names (without .md extension)
   const validAgents = new Set();
