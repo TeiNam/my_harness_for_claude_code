@@ -1,13 +1,13 @@
 ---
 name: mysql-guideline
 description: >
-  MySQL 8.0+ 스키마 설계, 테이블/인덱스 생성, 쿼리 최적화, 파티셔닝,
-  커넥션 관리, 개발 원칙·안티패턴, JDBC 드라이버 선택에 적용. 트리거:
-  CREATE TABLE, ALTER TABLE, slow query 분석, index 설계, RANGE partition,
-  MySQL migration, utf8mb4, InnoDB, 트랜잭션 관리, UPSERT, Covering Index,
-  복합 인덱스, 정규화, 데이터 타입 선택, INET_ATON, UUID_TO_BIN,
-  DATETIME TIMESTAMP, stored procedure, COUNT(*), 랜덤 PK, JSON 컬럼,
-  JDBC, Connector/J, AWS Advanced JDBC Wrapper, Aurora 페일오버 관련 작업.
+  MySQL 8.0+ schema design, table/index creation, query optimization, partitioning,
+  connection management, development principles and anti-patterns, JDBC driver selection.
+  Triggers: CREATE TABLE, ALTER TABLE, slow query analysis, index design, RANGE partition,
+  MySQL migration, utf8mb4, InnoDB, transaction management, UPSERT, Covering Index,
+  composite index, normalization, data type selection, INET_ATON, UUID_TO_BIN,
+  DATETIME TIMESTAMP, stored procedure, COUNT(*), random PK, JSON column,
+  JDBC, Connector/J, AWS Advanced JDBC Wrapper, Aurora failover related tasks.
 origin: custom
 workloads: [mysql]
 ---
@@ -29,15 +29,15 @@ workloads: [mysql]
 
 ## Naming Rules
 
-공통 RDBMS 네이밍(snake_case, 단수형, 능동태+날짜컬럼 예외, prefix/postfix 규칙,
-약어 정의서, 컬럼 접두·접미 체계, 데이터 타입)은 **`rdbms-naming` 스킬을 단일
-소스로 따른다.** 요약:
+Common RDBMS naming conventions (snake_case, singular form, active voice with date column
+exceptions, prefix/postfix rules, abbreviation dictionary, column prefix/suffix system,
+data types) follow the **`rdbms-naming` skill as the single source of truth.** Summary:
 
-- Tables/Columns: snake_case, 테이블은 단수형 (e.g. `user`, `user_chat_setting`, `user_id`)
-- 능동태: `create_date` — 단, 날짜+시간 컬럼은 `created_at`/`updated_at` 예외
-- 인덱스: 테이블+컬럼을 조건 순서대로, **접미사 대문자**
-  - 일반 `<table>_<col>_IDX` · Unique `_UIDX` · Fulltext `_FTX`
-  - 예: `book_like_user_id_IDX`, `book_uuid_UIDX`, `book_name_FTX`
+- Tables/Columns: snake_case, tables in singular form (e.g. `user`, `user_chat_setting`, `user_id`)
+- Active voice: `create_date` — but date+time columns use `created_at`/`updated_at` as exceptions
+- Indexes: table+column in condition order, **uppercase suffix**
+  - Regular `<table>_<col>_IDX` · Unique `_UIDX` · Fulltext `_FTX`
+  - Examples: `book_like_user_id_IDX`, `book_uuid_UIDX`, `book_name_FTX`
 
 ## Data Type Guide
 
@@ -47,13 +47,13 @@ workloads: [mysql]
 | Small PK | `smallint unsigned` | 0~65535 |
 | Standard PK | `int unsigned` | 0~4.2 billion |
 | Large PK | `bigint unsigned` | Log tables |
-| Boolean | `char(1)` 'Y'/'N' (권장) or `tinyint(1)` 0/1 | 0→NULL/falsy 오인 회피용 CHAR 권장. MySQL native boolean 없음 → tinyint 도 가능. 한 스키마 내 통일 |
+| Boolean | `char(1)` 'Y'/'N' (recommended) or `tinyint(1)` 0/1 | CHAR recommended to avoid 0→NULL/falsy confusion. MySQL has no native boolean → tinyint also viable. Unify within one schema |
 | Variable string | `varchar(n)` | Specify max length |
 | Long text | `text` | No length limit |
 | Fixed string | `char(n)` | Fixed-length codes |
 | Timestamp | `datetime` | With DEFAULT CURRENT_TIMESTAMP |
 | JSON data | `json` | MySQL 8.0+ native JSON |
-| Money | `decimal(p,s)` | Never use float / `decimal(15,2)`: 원화, `decimal(10,2)`: USD, `decimal(5,4)`: 비율(0.1234=12.34%) |
+| Money | `decimal(p,s)` | Never use float / `decimal(15,2)`: KRW, `decimal(10,2)`: USD, `decimal(5,4)`: ratio (0.1234=12.34%) |
 
 ## Prohibited Items
 - Stored Procedures: prohibited
@@ -66,5 +66,5 @@ workloads: [mysql]
 - `index-and-query.md` — Index strategy, query patterns
 - `partitioning.md` — Partitioning strategy, management
 - `connection-and-features.md` — Connection management, transactions
-- `dev-practices.md` — 개발 원칙·안티패턴: 정규화, 최소 타입, INET_ATON/UUID_TO_BIN, DATETIME vs TIMESTAMP, SP/Trigger 자제, 인덱스 안티패턴, COUNT(*)·랜덤PK·복합PK·물리FK·JSON 회피
-- `jdbc-driver.md` — Java 드라이버 선택: AWS Advanced JDBC Wrapper(권장, v4.1.0) vs Connector/J, 페일오버 튜닝
+- `dev-practices.md` — Development principles and anti-patterns: normalization, minimal types, INET_ATON/UUID_TO_BIN, DATETIME vs TIMESTAMP, avoid SP/Trigger, index anti-patterns, avoid COUNT(*), random PK, composite PK, physical FK, JSON
+- `jdbc-driver.md` — Java driver selection: AWS Advanced JDBC Wrapper (recommended, v4.1.0) vs Connector/J, failover tuning

@@ -1,65 +1,60 @@
 ---
 name: rdbms-naming
 description: >
-  RDBMS 공통 네이밍·데이터 타입 컨벤션 (MySQL·PostgreSQL 공유 단일 소스).
-  테이블/컬럼 snake_case, 단수형, 능동태(날짜·시간 컬럼 예외), prefix/postfix,
-  약어 정의서, 컬럼 접두·접미 체계, 인덱스 명명(_IDX/_UIDX/_FTX), 데이터 타입
-  선택. 트리거: 테이블/컬럼/인덱스 설계, DDL 작성, 스키마 리뷰, 네이밍 컨벤션,
-  snake_case, 약어, PK/FK 명명, boolean 컬럼, DECIMAL, 정산 금액 컬럼.
+  Common RDBMS naming and data type conventions (single source for MySQL and PostgreSQL).
+  Table/column snake_case, singular, active voice (with date/time column exceptions), prefix/postfix,
+  abbreviation dictionary, column prefix/suffix system, index naming (_IDX/_UIDX/_FTX), data type
+  selection. Triggers: table/column/index design, DDL authoring, schema review, naming conventions,
+  snake_case, abbreviations, PK/FK naming, boolean columns, DECIMAL, settlement amount columns.
 origin: custom
 workloads: [mysql, postgres]
 ---
 
 # RDBMS Naming Conventions
 
-**네이밍 거버넌스**(snake_case·단수형·능동태·prefix/postfix·약어·인덱스 명명)는
-MySQL·PostgreSQL 공통이라 이 스킬이 **단일 소스**다. **데이터 타입**은 엔진마다
-다르므로 아래 "데이터 타입 (DB별)" 표에서 대상 DB 칼럼만 적용하고, 더 깊은 내용은
-`mysql-guideline` / `postgres-guideline` 을 본다.
+**Naming governance** (snake_case, singular, active voice, prefix/postfix, abbreviations, index naming) is
+common across MySQL and PostgreSQL, making this skill the **single source**. **Data types** differ by
+engine, so apply only the target DB column from the "Data Types (by DB)" table below; see
+`mysql-guideline` / `postgres-guideline` for deeper details.
 
 ## When to Activate
 
-테이블·컬럼·인덱스를 새로 만들거나, DDL 을 작성·리뷰하거나, 네이밍 컨벤션을
-판단할 때. RDBMS(MySQL/PostgreSQL) 대상.
+When creating tables, columns, or indexes; authoring or reviewing DDL; or deciding naming conventions.
+Target: RDBMS (MySQL/PostgreSQL).
 
-## 공통 규칙
+## Common Rules
 
-- **snake_case**: 모든 식별자는 소문자 + 언더스코어. `authUser` → `auth_user`.
-- **직관적 기술형**: 이름만 보고 무엇인지 명확하게. 막연한 `log` 대신
-  `delivery_log` / `order_log`. 되도록 쉬운 단어.
-- **능동태**: 동사는 능동태. `create_date` (not `created_date`). 동명사는 허용.
-  - **예외 — 날짜/시간 컬럼**: `created_at` · `updated_at` 같은 관용 표기는
-    그대로 둔다. ORM·프레임워크 관례가 강하므로 능동태 강제 대상에서 제외.
-- **예약어 금지**: DB 고유 예약어를 식별자로 쓰지 않는다.
+- **snake_case**: All identifiers are lowercase with underscores. `authUser` → `auth_user`.
+- **Descriptive and intuitive**: Names should be self-explanatory. Use `delivery_log` / `order_log` instead of vague `log`. Prefer simple words.
+- **Active voice**: Use active voice for verbs. `create_date` (not `created_date`). Gerunds are allowed.
+  - **Exception — date/time columns**: Idiomatic expressions like `created_at` / `updated_at` remain as-is. Strong ORM and framework conventions exempt these from the active voice rule.
+- **No reserved words**: Do not use DB-specific reserved words as identifiers.
   (MySQL: dev.mysql.com/doc/refman/8.0/en/keywords.html)
 
-## 테이블 / 컬럼
+## Table / Column
 
-- **단수형**: 테이블명은 단수. `users` → `user`.
-- **postfix 금지 / prefix 제한**: `tb_user`·`user_tbl` → `user`. prefix 는
-  마스터 테이블에 종속된 속성 테이블 구분에만. 예: `user_auth`(마스터 `user`의
-  하위), `book_like`(마스터 `book`의 하위).
-- **약어 제한**: 되도록 약어를 피한다. 써야 하면 소문자 + **약어 정의서**에
-  등록해 팀 전체에 전파. `create_dt` → `create_date`, `user_cd` → `user_code`.
+- **Singular form**: Table names are singular. `users` → `user`.
+- **No postfix / limited prefix**: `tb_user`, `user_tbl` → `user`. Use prefix only to distinguish attribute tables subordinate to a master table. Examples: `user_auth` (child of master `user`), `book_like` (child of master `book`).
+- **Limited abbreviations**: Avoid abbreviations when possible. If necessary, use lowercase and register in the **abbreviation dictionary** for team-wide distribution. `create_dt` → `create_date`, `user_cd` → `user_code`.
 
-### 컬럼 접두/접미 체계
+### Column Prefix/Suffix System
 
-| 용도 | 규칙 | 예시 |
-|------|------|------|
+| Purpose | Rule | Example |
+|---------|------|---------|
 | PK | `<table>_id` | `user_id` |
 | FK | `<parent_table>_id` | `user_id` |
-| 날짜 (DATE) | `<목적>_date` | `create_date` |
-| 날짜+시간 (DATETIME) | `<목적>_at` | `created_at` |
-| 코드 | `<목적>_code` | `user_code` |
-| 숫자 | `<목적>_no` | `order_no` |
-| Boolean | `<컬럼>_yn` | `use_yn` |
+| Date (DATE) | `<purpose>_date` | `create_date` |
+| Date+Time (DATETIME) | `<purpose>_at` | `created_at` |
+| Code | `<purpose>_code` | `user_code` |
+| Number | `<purpose>_no` | `order_no` |
+| Boolean | `<column>_yn` | `use_yn` |
 
-## 약어 정의서
+## Abbreviation Dictionary
 
-원칙: 너무 긴 단어 중 약어로 충분한 단어만 합의하에 사용. 규칙은 **최소한**.
+Principle: Use abbreviations only for overly long words where the abbreviation is sufficient and agreed upon. Keep rules **minimal**.
 
-| 대상 | 약어 |
-|------|------|
+| Full Term | Abbreviation |
+|-----------|--------------|
 | number | `no` |
 | address | `addr` |
 | episode | `ep` |
@@ -68,78 +63,76 @@ MySQL·PostgreSQL 공통이라 이 스킬이 **단일 소스**다. **데이터 �
 | authentication | `auth` |
 | introduce | `intro` |
 
-## 인덱스 네이밍
+## Index Naming
 
-구조: 인덱스를 만들 테이블과 포함 컬럼을 **조건 순서대로** 기술하고,
-**접미사는 대문자**로 붙인다.
+Structure: Describe the table and included columns **in condition order**, and append the **suffix in uppercase**.
 
 ```
 <table>_<col1>_<col2>_..._IDX
 ```
 
-| 유형 | 접미사 | 예시 |
-|------|--------|------|
-| 일반 | `_IDX` | `book_like_user_id_IDX` |
+| Type | Suffix | Example |
+|------|--------|---------|
+| General | `_IDX` | `book_like_user_id_IDX` |
 | Unique | `_UIDX` | `book_uuid_UIDX` |
 | Fulltext | `_FTX` | `book_name_FTX` |
 
-복합 인덱스 예: `actor(first_name, last_name, last_update)` →
+Composite index example: `actor(first_name, last_name, last_update)` →
 `actor_first_name_last_name_last_update_IDX`.
 
-## 데이터 타입 (DB별)
+## Data Types (by DB)
 
-타입 선택은 DB 엔진마다 다르다. **공통 원칙**(아래)을 따르되, 구체 타입은
-대상 DB 칼럼을 본다. 더 깊은 타입 표는 `mysql-guideline` / `postgres-guideline`.
+Type selection varies by DB engine. Follow the **common principles** (below), but refer to the target DB column for concrete types. See `mysql-guideline` / `postgres-guideline` for deeper type tables.
 
-### 공통 원칙 (DB 무관)
+### Common Principles (DB-agnostic)
 
-- **PK 는 정수 계열 (UUID 지양)**: 첫 컬럼 PK `id` 는 auto-increment 정수
-  (`int`/`bigint`)로 한다. 정렬·인덱스 지역성·스토리지가 UUID 보다 유리.
-  UUID 는 **여러 DB·샤드에서 분산 생성**해야 할 때만(중앙 시퀀스 불가) 쓴다.
-  단일 DB 면 정수 PK 가 기본.
-  - **MySQL**: `AUTO_INCREMENT` (예: `id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY`)
-  - **PostgreSQL**: `GENERATED ALWAYS AS IDENTITY` (예: `id int GENERATED ALWAYS AS IDENTITY PRIMARY KEY`)
-- **금액/정산**: 부동소수점(`float`/`double`/`real`) **절대 금지** → 고정소수점.
-  기본 스케일 `(10,2)`; 통화·정밀도에 따라 조정(원화 `(15,2)`, 비율 `(5,4)`).
-- **JOIN 키**: 정수 계열로 하고, 조인 양쪽 컬럼의 **타입을 동일하게** 맞춘다.
-- **문자열**: 고정 자릿수 `CHAR(n)`, 가변 `VARCHAR(n)`.
-- **NULL 지양**: 인덱스가 잡히는 컬럼은 NULL 지양 — 정규화 테이블로 분리 후
-  JOIN 권장. 사이즈가 작거나 사용처가 적으면 NULL 허용.
+- **PK is integer-based (avoid UUID)**: The first-column PK `id` should be an auto-increment integer
+  (`int`/`bigint`). Ordering, index locality, and storage favor integers over UUIDs.
+  Use UUID **only when distributed generation across multiple DBs or shards** is required (no central sequence).
+  For a single DB, integer PK is the default.
+  - **MySQL**: `AUTO_INCREMENT` (e.g., `id int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY`)
+  - **PostgreSQL**: `GENERATED ALWAYS AS IDENTITY` (e.g., `id int GENERATED ALWAYS AS IDENTITY PRIMARY KEY`)
+- **Amounts / settlement**: Floating-point (`float`/`double`/`real`) is **absolutely prohibited** → use fixed-point.
+  Default scale `(10,2)`; adjust for currency and precision (KRW `(15,2)`, ratios `(5,4)`).
+- **JOIN keys**: Use integer types and ensure **both sides of the join have identical types**.
+- **Strings**: Fixed-length `CHAR(n)`, variable `VARCHAR(n)`.
+- **Avoid NULL**: For indexed columns, avoid NULL — prefer normalization into separate tables and JOIN.
+  Allow NULL only when size is small or usage is minimal.
 
-### 타입 매핑
+### Type Mapping
 
-| 용도 | MySQL | PostgreSQL |
-|------|-------|------------|
-| Boolean | `CHAR(1)` 'Y'/'N' 권장 (0→NULL/falsy 오인 회피) 또는 `tinyint(1)` 0/1. native boolean 없음 | **native `boolean`** 사용. 'Y'/'N' 문자열 금지 |
-| PK (auto, 정수) | **`AUTO_INCREMENT`** — `int`/`bigint unsigned` (표준 방식) | **`GENERATED ALWAYS AS IDENTITY`** — `int`/`bigint` (표준 방식). `SERIAL` 은 쓰지 않는다 (proprietary; IDENTITY 가 SQL 표준·실수 방지·권한 단순) |
-| 금액 | `DECIMAL(p,s)` | `numeric(p,s)` |
-| 날짜+시간 | `datetime` (+`DEFAULT CURRENT_TIMESTAMP`) | `timestamptz` (타임존 필수) |
-| 날짜 | `date` | `date` |
-| 긴 텍스트 | `TINYTEXT`(256B)/`TEXT`(64KB)/`MEDIUMTEXT`(16MB)/`LONGTEXT`(4GB) 4단계 | 가변 `text` **단일** (길이 구분 없음) |
-| JSON | `json` (8.0+ native) | `jsonb` (인덱싱 지원, `json` 아님) |
-| 양수 전용 | `UNSIGNED` 옵션 | UNSIGNED 없음 → `CHECK (col >= 0)` |
-| 자릿수 표시 고정 | `INT(n) ZEROFILL` | 표시폭/ZEROFILL 개념 없음 → 앱·`LPAD` 처리 |
-| 외부 ID (PK 아님) | `char(36)`/`binary(16)` UUID | `uuid` (`gen_random_uuid()`) |
-| IP 주소 | `varchar(45)` | `inet` (native) |
-| 배열 | (없음 → 정규화 or JSON) | `type[]` (e.g. `text[]`) |
+| Purpose | MySQL | PostgreSQL |
+|---------|-------|------------|
+| Boolean | `CHAR(1)` 'Y'/'N' recommended (avoids 0→NULL/falsy confusion) or `tinyint(1)` 0/1. No native boolean | **native `boolean`**. 'Y'/'N' strings prohibited |
+| PK (auto, integer) | **`AUTO_INCREMENT`** — `int`/`bigint unsigned` (standard method) | **`GENERATED ALWAYS AS IDENTITY`** — `int`/`bigint` (standard method). Do not use `SERIAL` (proprietary; IDENTITY is SQL standard, safer, simpler permissions) |
+| Amount | `DECIMAL(p,s)` | `numeric(p,s)` |
+| Date+Time | `datetime` (+`DEFAULT CURRENT_TIMESTAMP`) | `timestamptz` (timezone required) |
+| Date | `date` | `date` |
+| Long text | `TINYTEXT`(256B)/`TEXT`(64KB)/`MEDIUMTEXT`(16MB)/`LONGTEXT`(4GB) 4 tiers | Variable `text` **single** (no length distinction) |
+| JSON | `json` (8.0+ native) | `jsonb` (indexing support, not `json`) |
+| Positive-only | `UNSIGNED` option | No UNSIGNED → `CHECK (col >= 0)` |
+| Fixed display width | `INT(n) ZEROFILL` | No display width/ZEROFILL concept → handle in app or `LPAD` |
+| External ID (not PK) | `char(36)`/`binary(16)` UUID | `uuid` (`gen_random_uuid()`) |
+| IP address | `varchar(45)` | `inet` (native) |
+| Array | (none → normalize or JSON) | `type[]` (e.g., `text[]`) |
 
-> MySQL 고유: `UNSIGNED`, `ZEROFILL`, TEXT 4단계, `AUTO_INCREMENT`.
-> PostgreSQL 고유: native `boolean`, `timestamptz`, `jsonb`, `inet`, 배열,
-> `IDENTITY`, `numeric`. 둘을 섞어 쓰지 말고 대상 DB 칼럼만 적용한다.
+> MySQL-specific: `UNSIGNED`, `ZEROFILL`, TEXT 4 tiers, `AUTO_INCREMENT`.
+> PostgreSQL-specific: native `boolean`, `timestamptz`, `jsonb`, `inet`, arrays,
+> `IDENTITY`, `numeric`. Do not mix; apply only the target DB column.
 
-## Bad / Good 요약
+## Bad / Good Summary
 
-| Bad | Good | 이유 |
-|-----|------|------|
+| Bad | Good | Reason |
+|-----|------|--------|
 | `authUser` | `auth_user` | snake_case |
-| `users` | `user` | 단수형 |
-| `tb_user` | `user` | 불필요한 prefix |
-| `created_date` | `create_date` | 능동태 (날짜 컬럼은 `created_at` 예외) |
-| `create_dt` | `create_date` | 약어 남용 |
-| `idx_book_user` | `book_user_id_IDX` | 접미사 대문자, 테이블+컬럼 순 |
+| `users` | `user` | singular |
+| `tb_user` | `user` | unnecessary prefix |
+| `created_date` | `create_date` | active voice (date columns like `created_at` are exceptions) |
+| `create_dt` | `create_date` | abbreviation overuse |
+| `idx_book_user` | `book_user_id_IDX` | uppercase suffix, table+column order |
 
 ## Related
 
-- `mysql-guideline` — MySQL 고유 기본값·타입·금지사항. 이 규칙을 기반으로 함.
-- `postgres-guideline` — PostgreSQL 고유 차이(text 단일 타입, IDENTITY, UNSIGNED 미지원 등).
-- `rdbms-data-modeler` agent — 정규화·테이블 설계 시 이 컨벤션을 적용.
+- `mysql-guideline` — MySQL-specific defaults, types, and prohibitions. Based on these rules.
+- `postgres-guideline` — PostgreSQL-specific differences (single text type, IDENTITY, no UNSIGNED, etc.).
+- `rdbms-data-modeler` agent — Applies these conventions for normalization and table design.

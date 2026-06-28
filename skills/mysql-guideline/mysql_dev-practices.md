@@ -1,126 +1,135 @@
 # MySQL Development Practices
 
-MySQL 프로젝트 개발 시 지켜야 할 원칙과 회피해야 할 안티패턴.
-순서: 정규화 → 최적 데이터 타입 → SP/Trigger 자제 → 인덱스 → 안티패턴.
+Principles to follow and anti-patterns to avoid in MySQL projects.
+Order: normalization → optimal data types → avoid SP/Trigger → indexes → anti-patterns.
 
-## 1. 데이터 정규화 필수
+## 1. Data Normalization Required
 
-관계형 DB 의 본질은 "쪼개고 저장하고 합쳐서 출력한다".
+The essence of relational DB is "split, store, join to output".
 
-- MySQL 은 RDBMS — 정규화가 성능·정합성·무결성의 기본 전략.
-- 한 Row 를 읽는 데 블록이 많으면 I/O 가 늘어난다.
-- **JSON·HTML 을 한 컬럼에 밀어 넣는 구조는 안티패턴** (5.5 참고).
-- 정규화 수준·반정규화 판단은 `rdbms-data-modeler` 에이전트로.
+- MySQL is an RDBMS — normalization is the fundamental strategy for performance, consistency, and integrity.
+- More blocks to read one row increases I/O.
+- **Stuffing JSON/HTML into one column is an anti-pattern** (see 5.5).
+- Use `rdbms-data-modeler` agent for normalization level and denormalization decisions.
 
-## 2. 데이터 타입 선택
+## 2. Data Type Selection
 
-### 2.1 가장 작은 타입을 써라
+### 2.1 Use the Smallest Type
 
-작은 타입은 4가지 이득: 저장 공간(`TINYINT` 1B vs `INT` 4B → 1억 행 100MB vs
-400MB), 인덱스 크기 축소(메모리 적재율↑ → 검색 빠름), 버퍼풀·캐시 효율,
-네트워크 대역폭. 표현 가능 범위를 넘지 않는 선에서 최소 타입을 고른다.
+Smaller types bring four benefits: storage space (`TINYINT` 1B vs `INT` 4B → 100 million
+rows = 100MB vs 400MB), reduced index size (higher memory load rate → faster searches),
+buffer pool and cache efficiency, network bandwidth. Choose the minimal type without
+exceeding representable range.
 
-### 2.2 문자열 타입
+### 2.2 String Types
 
 | | CHAR | VARCHAR | TEXT |
 |---|------|---------|------|
-| 길이 | 고정 (≤255) | 가변 (≤65,535) | 가변, 별도 저장 후 포인터 참조 |
-| 장점 | 성능 일정, 인덱싱 효율 | 공간 효율 | 매우 큰 문자열 |
-| 단점 | 짧은 값에 공간 낭비 | 삽입·수정 성능 불일정 | 인덱싱 제한, 검색 저하 |
+| Length | Fixed (≤255) | Variable (≤65,535) | Variable, stored separately with pointer reference |
+| Pros | Consistent performance, index efficiency | Space efficient | Very large strings |
+| Cons | Space wasted on short values | Inconsistent insert/update performance | Index limitations, search degradation |
 
-고정 길이 코드 → `CHAR`, 일반 가변 문자열 → `VARCHAR`, 검색 조건이 아닌
-대용량 → `TEXT`.
+Fixed-length codes → `CHAR`, general variable strings → `VARCHAR`, large content not
+used in search conditions → `TEXT`.
 
 ### 2.3 DATETIME vs TIMESTAMP
 
 | | DATETIME | TIMESTAMP |
 |---|----------|-----------|
-| 형식 | `YYYY-MM-DD HH:MM:SS` | 유닉스 타임스탬프 |
-| 범위 | 1000 ~ 9999 | 1970 ~ 2038-01-19 |
-| 시간대 | 무관 (저장값 그대로) | 서버 시간대 변환 |
-| 공간 | 8B | 4B |
-| 용도 | 넓은 범위·고정 시간대 | 글로벌 서비스, 2038 이전, 자동 시간 |
+| Format | `YYYY-MM-DD HH:MM:SS` | Unix timestamp |
+| Range | 1000 ~ 9999 | 1970 ~ 2038-01-19 |
+| Timezone | Agnostic (stores value as-is) | Server timezone conversion |
+| Space | 8B | 4B |
+| Use case | Wide range, fixed timezone | Global services, before 2038, automatic time |
 
-2038년 문제(TIMESTAMP) 때문에 장기 보존 데이터는 DATETIME 이 안전하다.
+Due to the 2038 problem (TIMESTAMP), DATETIME is safer for long-term data retention.
 
-### 2.4 함수로 공간·무결성 잡기
+### 2.4 Space and Integrity via Functions
 
-- **`INET_ATON` / `INET_NTOA`** — IP 를 `INT UNSIGNED`(4B)로 저장. 문자열 대비
-  공간 절약 + 잘못된 형식 IP 차단(무결성).
+- **`INET_ATON` / `INET_NTOA`** — Store IP as `INT UNSIGNED`(4B). Space savings vs string
+  + blocks malformed IP (integrity).
   ```sql
   INSERT INTO ip_log (ip) VALUES (INET_ATON('192.168.0.1'));  -- 3232235521
   SELECT INET_NTOA(ip) FROM ip_log;
   ```
-- **`UUID_TO_BIN` / `BIN_TO_UUID`** — UUID 를 `BINARY(16)`(36B→16B)로. 바이너리
-  비교가 빨라 성능↑. 단 JOIN 키로 쓰면 가독성↓ → PK 로는 정수 권장(5.2).
+- **`UUID_TO_BIN` / `BIN_TO_UUID`** — UUID as `BINARY(16)`(36B→16B). Binary comparison is
+  faster for performance. But readability drops if used as JOIN key → integers recommended
+  for PK (5.2).
 
-## 3. Stored Procedure · Trigger · Event Scheduler 자제
+## 3. Avoid Stored Procedure · Trigger · Event Scheduler
 
-MySQL 은 SP 를 메모리에 캐시하지 않아 **매 호출마다 재컴파일**된다 (다른 DBMS 와
-다른 고유 약점). SQL 파싱 오버헤드도 매 실행 반복(리터럴도 캐싱 안 함).
+MySQL does not cache SP in memory — **recompiled on every call** (unique weakness vs other
+DBMS). SQL parsing overhead also repeats per execution (literals not cached).
 
-문제 영역: 유지보수(로직 분산, IDE 디버깅 불가) · 이식성(DBMS 종속) · 성능(Redis
-등 캐싱 통합 어려움, Scale-Out 제한) · 생산성(버전관리·테스트·배포 자동화 부재) ·
-로직 중복(앱<->SP 일관성 저하) · 보안(권한 복잡). 비즈니스 로직은 앱 레이어로.
+Problem areas: maintenance (logic scattered, IDE debugging impossible), portability (DBMS
+vendor lock-in), performance (caching integration with Redis etc. difficult, scale-out
+limitations), productivity (version control, testing, deployment automation absent), logic
+duplication (app<->SP consistency degraded), security (complex permissions). Keep business
+logic in application layer.
 
-## 4. 인덱스
+## 4. Indexes
 
-### DML 을 느리게 하는 이유
+### Why They Slow DML
 
-INSERT/UPDATE 시 B-트리 노드 분할·병합·재배치 발생. 인덱스가 많을수록 각각
-개별 갱신되어 비용 누적. 복합 인덱스는 여러 컬럼을 고려해 단일보다 갱신 비싸다.
+INSERT/UPDATE triggers B-tree node split, merge, reorganization. More indexes = each
+updated individually, costs accumulate. Composite indexes consider multiple columns,
+making updates costlier than single-column.
 
-### 생성 가이드
+### Creation Guidelines
 
-- 필요한 인덱스만 만든다 (DML 비용 <-> 조회 이득 트레이드오프).
-- 쓰기 많은 LOG 테이블 → 카디널리티 높은 단일 컬럼 인덱스.
-- 읽기 속도 중요 → 복합 인덱스 (ESR/순서는 `index-and-query` 참고).
-- **조건절 함수 사용 → 인덱스 무효화** (`WHERE DATE(col)=...` → 인덱스 못 탐).
-  생성 컬럼·함수 인덱스로 우회.
-- **`LIKE '%word'` (선행 와일드카드) → Full Table Scan** → 부하·장애. 문자열
-  검색이 많으면 Fulltext 인덱스, 한계 시 Elasticsearch 이관.
+- Create only needed indexes (DML cost <-> query benefit tradeoff).
+- Write-heavy LOG tables → single-column index on high-cardinality columns.
+- Read speed critical → composite index (ESR/order see `index-and-query`).
+- **Function in WHERE clause → index invalidated** (`WHERE DATE(col)=...` → index not used).
+  Work around with generated column or functional index.
+- **`LIKE '%word'` (leading wildcard) → Full Table Scan** → load, failures. If text search
+  is frequent, use Fulltext index; if insufficient, migrate to Elasticsearch.
 
-## 5. 안티패턴 (하지 말 것)
+## 5. Anti-Patterns (What Not to Do)
 
-### 5.1 `COUNT(*)` 를 검증 로직에 사용
+### 5.1 Using `COUNT(*)` in Validation Logic
 
-MySQL(InnoDB)은 행 수를 별도 저장하지 않아 카운트가 전체 스캔에 가깝다.
-"존재 여부" 검증엔 `COUNT(*)` 대신 `EXISTS` / `LIMIT 1` 을 쓴다.
+MySQL (InnoDB) does not store row count separately — counting approaches full scan.
+For "existence check", use `EXISTS` / `LIMIT 1` instead of `COUNT(*)`.
 
-### 5.2 PK 에 랜덤 키 사용
+### 5.2 Random Keys as PK
 
-MySQL PK 는 **클러스터드 인덱스** — PK 순서로 물리 정렬된다. 랜덤 키(UUIDv4 등)는
-삽입마다 페이지 재배열·분할을 유발해 쓰기 성능을 깎는다. **PK 는 `INT` 계열 +
-`AUTO_INCREMENT`** 가 기본. 분산 생성이 꼭 필요하면 UUIDv1/v7 + `UUID_TO_BIN`
-(시간 정렬성 있음), 단 FK JOIN 가독성은 감수.
+MySQL PK is a **clustered index** — physically sorted by PK order. Random keys (UUIDv4 etc.)
+trigger page reorganization and splits on every insert, degrading write performance.
+**PK should be `INT` family + `AUTO_INCREMENT`** by default. If distributed generation is
+essential, use UUIDv1/v7 + `UUID_TO_BIN` (time-sortable), but accept reduced FK JOIN
+readability.
 
-### 5.3 복합키를 PK 로
+### 5.3 Composite Keys as PK
 
-복합 PK 는 인덱스 크기·검색 비용↑, 쿼리 복잡·가독성↓, FK 참조 복잡(여러 컬럼
-동반), 컬럼 순서 의존성으로 성능 함정. **단일 대리키(`AUTO_INCREMENT`)를 PK 로**
-두고, 복합 컬럼은 UNIQUE 제약/인덱스로 표현한다.
+Composite PK increases index size and search cost, reduces query simplicity and readability,
+complicates FK references (multiple columns required), and introduces performance traps via
+column order dependencies. **Use single surrogate key (`AUTO_INCREMENT`) as PK**, express
+composite uniqueness via UNIQUE constraint/index.
 
-### 5.4 물리적 FK 제약
+### 5.4 Physical FK Constraints
 
-물리 FK 는 쓰기마다 무결성 검사 오버헤드, 참조 테이블 잠금 경합(동시성↓),
-마이그레이션·분산 환경 제약, DBMS별 구현 차이(이식성↓). **참조 무결성은
-애플리케이션 레이어에서 관리**하고, FK 관계는 `COMMENT` 로 논리적으로 문서화한다
-(schema-design 의 Application-Level Referential Integrity 참고).
+Physical FK adds integrity check overhead on every write, lock contention on referenced
+tables (reduced concurrency), migration and distributed environment constraints, DBMS-specific
+implementation differences (reduced portability). **Manage referential integrity at application
+layer**, document FK relationships logically via `COMMENT` (see Application-Level Referential
+Integrity in schema-design).
 
-### 5.5 JSON 타입 컬럼 남용
+### 5.5 JSON Column Overuse
 
-JSON 컬럼은 파싱 오버헤드, 직접 인덱싱 불가(Generated Column 필요), 스키마 검증
-부재(무결성↓), 복잡 쿼리·JOIN 제한, 문자열 저장으로 공간 비효율. 구조가 고정적
-이면 정규화한다. **문서형 데이터가 본질이면 MongoDB 를 검토** (`mongodb-guideline`).
+JSON columns add parsing overhead, cannot be directly indexed (Generated Column required),
+lack schema validation (reduced integrity), limit complex queries and JOINs, store inefficiently
+as strings. Normalize if structure is fixed. **If data is inherently document-oriented,
+consider MongoDB** (`mongodb-guideline`).
 
 ## Dev Practices Checklist
 
-- [ ] 정규화 우선, JSON/HTML 통짜 컬럼 없음
-- [ ] 표현 범위 내 가장 작은 타입 선택
-- [ ] IP → `INET_ATON`, UUID 저장 시 `UUID_TO_BIN`
-- [ ] DATETIME/TIMESTAMP 를 범위·시간대 요건에 맞게 선택
-- [ ] SP/Trigger/Event 미사용, 로직은 앱 레이어
-- [ ] 함수 조건·`LIKE '%x'` 로 인덱스 무효화하지 않음
-- [ ] 존재 검증에 `COUNT(*)` 대신 `EXISTS`
-- [ ] PK 는 `INT`+`AUTO_INCREMENT` (랜덤·복합 PK 회피)
-- [ ] 물리 FK 미사용, 참조 무결성은 앱에서
+- [ ] Prioritize normalization, no monolithic JSON/HTML columns
+- [ ] Select smallest type within representable range
+- [ ] IP → `INET_ATON`, UUID storage → `UUID_TO_BIN`
+- [ ] Choose DATETIME/TIMESTAMP based on range and timezone requirements
+- [ ] No SP/Trigger/Event, logic in app layer
+- [ ] Don't invalidate indexes with function conditions or `LIKE '%x'`
+- [ ] Existence check with `EXISTS` instead of `COUNT(*)`
+- [ ] PK is `INT`+`AUTO_INCREMENT` (avoid random and composite PK)
+- [ ] No physical FK, referential integrity in app

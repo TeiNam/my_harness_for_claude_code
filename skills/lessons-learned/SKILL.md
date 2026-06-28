@@ -1,67 +1,65 @@
 ---
 name: lessons-learned
-description: 반복되는 교정에서 추출한 한 줄 교훈을 한 파일에 누적하는 경량 학습 로그. 같은 유형의 리뷰 지적·빌드 실패 패턴·사용자 정정이 반복될 때, 세션을 넘어 같은 실수를 되풀이하지 않도록 한다. /learn(패턴→skill 추출)보다 가볍고, continuous-learning-v2의 instinct(자동 관찰)보다 명시적이다.
+description: Lightweight learning log that accumulates one-line lessons extracted from repeated corrections in a single file. When the same review findings, build failure patterns, or user corrections repeat, this prevents making the same mistake twice across sessions. Lighter than /learn (pattern→skill extraction), more explicit than continuous-learning-v2's instinct (automatic observation).
 inclusion: manual
 workloads: [core]
 origin: harness
 ---
 
-# Lessons Learned (경량 교훈 로그)
+# Lessons Learned (Lightweight Lesson Log)
 
-자기진화 메커니즘의 한 단계다. 반복된 교정에서 짧고 재사용 가능한 교훈을
-한 줄씩 뽑아 누적한다 — 같은 실수를 두 번 하지 않기 위해서.
+One stage of the self-evolution mechanism. Extract short, reusable lessons one line at a time from repeated corrections — to avoid making the same mistake twice.
 
-과거 작업과 닮은 일을 시작할 때, 리뷰할 때, 반복되는 실패를 고칠 때 이
-steering 을 수동으로(또는 `capture-lessons` hook 제안 흐름으로) 끌어온다.
+Pull in this steering manually (or via the `capture-lessons` hook suggestion flow) when starting work similar to past tasks, during review, or when fixing repeated failures.
 
-## 우리 하네스의 다른 학습 장치와의 경계
+## Boundaries with Other Learning Mechanisms in this Harness
 
-| 장치 | 무게 | 산출물 | 언제 |
-|------|------|--------|------|
-| **lessons-learned** (이 skill) | 가벼움 | 한 줄 교훈 (한 파일 누적) | 반복 교정이 보일 때 |
-| `/learn` | 중간 | skill 파일 1개/패턴 | 비자명한 문제를 풀었을 때 |
-| `continuous-learning-v2` (instinct) | 자동 | instinct → `/promote`·`/evolve` | 상시 관찰 |
+| Mechanism | Weight | Output | When |
+|-----------|--------|--------|------|
+| **lessons-learned** (this skill) | Lightweight | One-line lessons (accumulated in one file) | When repeated corrections appear |
+| `/learn` | Medium | 1 skill file/pattern | When a non-obvious problem is solved |
+| `continuous-learning-v2` (instinct) | Automatic | instinct → `/promote`·`/evolve` | Continuous observation |
 
-교훈이 안정적으로 반복되면 **steering 규칙(rule)으로 승격**하라 — 그게 마지막 단계다.
+When lessons repeat stably, **promote to steering rules** — that's the final stage.
 
-## 항목이 추가되는 방식
+## How Items Are Added
 
-- `capture-lessons` hook(Stop 이벤트)은 한 줄 교훈을 **제안만** 한다. 이 파일을 자동으로 편집하지 않는다.
-- 항목은 **사용자 확인 후에만** 기록한다. 사용자 자산 변경을 추적 가능하게 유지하기 위해서다.
-- 각 교훈은 실행 가능한 한 줄로 유지한다.
-- `/lessons` 커맨드로 로그를 조회하거나, 수동으로 추가하거나, 규칙으로 승격한다.
+- The `capture-lessons` hook (Stop event) **only suggests** one-line lessons. It does not automatically edit this file.
+- Items are recorded **only after user confirmation**. This keeps user asset changes traceable.
+- Each lesson is kept as one actionable line.
+- Use the `/lessons` command to query the log, add manually, or promote to rules.
 
-## 교훈 카테고리
+## Lesson Categories
 
-- **Review findings** — 반복되는 코드리뷰 지적 (에러 처리 누락, 가변 변경 대신 불변 업데이트, 입력 검증 누락 등).
-- **Build failure patterns** — 반복되는 컴파일/린트/테스트 실패와 그 근본 수정.
-- **User corrections** — 사용자가 두 번 이상 명시적으로 줘야 했던 지시.
+- **Review findings** — Repeated code review findings (missing error handling, mutable changes instead of immutable updates, missing input validation, etc.).
+- **Build failure patterns** — Repeated compile/lint/test failures and their root fixes.
+- **User corrections** — Instructions the user had to give explicitly two or more times.
 
-## 항목 포맷
+## Item Format
 
-매칭되는 카테고리 아래에 한 줄씩 추가한다:
+Add one line under the matching category:
 
 ```
-- [YYYY-MM-DD] (category) <트리거 / 맥락> -> <규칙으로 진술한 교훈>
+- [YYYY-MM-DD] (category) <trigger / context> -> <lesson stated as a rule>
 ```
 
-예:
+Examples:
 
 ```
-- [2026-06-04] (build) bun test 가 watch 로 걸려 멈춤 -> 항상 `bun test`(단발) 로 실행한다.
-- [2026-06-04] (review) async 함수에서 에러 미처리 반복 -> 외부 호출은 try/catch 또는 Result 로 감싼다.
+- [2026-06-04] (build) bun test hung in watch mode -> Always run `bun test` (single-shot).
+- [2026-06-04] (review) Repeated unhandled errors in async functions -> Wrap external calls in try/catch or Result.
 ```
 
 ## Lessons
 
 ### Review findings
 
-<!-- 여기에 리뷰 교훈을 한 줄씩 추가 -->
+<!-- Add review lessons one line at a time here -->
 
 ### Build failure patterns
 
-<!-- 여기에 빌드 교훈을 한 줄씩 추가 -->
+<!-- Add build lessons one line at a time here -->
 
 ### User corrections
 
-- [2026-06-20] (User corrections) "git push / GitKraken 등 GUI 로 push 할 때 반응하는 훅" 요청 -> Claude 훅(PreToolUse/PostToolUse)은 Claude 자신의 도구 호출에만 발동한다. 사용자가 터미널·GUI 로 직접 git 조작하는 것까지 커버하려면 네이티브 git 훅(`core.hooksPath` + `post-commit`/`pre-push`)을 써야 한다.
+- [2026-06-20] (User corrections) Request for "hook that reacts when pushing via git push / GitKraken or other GUI" -> Claude hooks (PreToolUse/PostToolUse) only fire on Claude's own tool invocations. To cover user's direct git manipulation via terminal or GUI, use native git hooks (`core.hooksPath` + `post-commit`/`pre-push`).
