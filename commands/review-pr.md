@@ -17,13 +17,13 @@ If no PR is specified, review the current branch's PR. If no focus is specified,
    - use `gh pr view` to get PR details, changed files, and diff
 2. Find project guidance:
    - look for `CLAUDE.md`, lint config, TypeScript config, repo conventions
-3. Run specialized review agents:
-   - `code-reviewer`
-   - `comment-analyzer`
-   - `pr-test-analyzer`
-   - `silent-failure-hunter`
-   - `type-design-analyzer`
-   - `refactor-cleaner`
+3. Run review agents:
+   - `code-reviewer` — the primary reviewer. It now folds in the error-handling,
+     type-design, and comment lenses. Map `--focus` to its lenses:
+     - `--focus=errors` / `types` / `comments` / `code` → `code-reviewer` restricted to that lens (or full checklist for `code`)
+     - no focus → `code-reviewer` full review (all lenses)
+   - `pr-test-analyzer` — test coverage/quality (distinct from code-reviewer; keep separate). Runs unless `--focus` excludes it.
+   - `refactor-cleaner` — dead code / duplication (`--focus=simplify`).
 4. Aggregate results:
    - dedupe overlapping findings
    - rank by severity

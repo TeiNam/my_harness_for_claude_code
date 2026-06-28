@@ -41,7 +41,7 @@ MLE review should compose existing SWE review surfaces instead of replacing them
 - Use `performance-optimizer` for latency, memory, batching, GPU utilization, cold start, and cost per prediction.
 - Use `build-error-resolver` for CI, dependency, native extension, CUDA, and environment-specific failures outside PyTorch itself.
 - Use `pr-test-analyzer` when the change claims coverage but does not prove leakage, schema drift, serving fallback, or promotion-gate behavior.
-- Use `silent-failure-hunter` when pipelines can appear green while skipping data, labels, eval slices, alerts, or artifact publication.
+- Use `code-reviewer` (errors lens, `/review-pr --focus=errors`) when pipelines can appear green while skipping data, labels, eval slices, alerts, or artifact publication.
 - Use `e2e-runner` for product flows where predictions affect user-visible or business-critical behavior.
 - Use `a11y-architect` when prediction explanations, confidence states, or fallback UI need to be accessible.
 - Use `doc-updater` when new model contracts, promotion gates, dashboards, or rollback runbooks need durable project documentation.

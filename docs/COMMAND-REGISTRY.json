@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalCommands": 52,
+  "totalCommands": 53,
   "commands": [
     {
       "command": "aside",
@@ -19,6 +19,15 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/build-fix.md"
+    },
+    {
+      "command": "changelog-hook",
+      "description": "Install a native git pre-commit hook that regenerates CHANGELOG.md grouped by commit date",
+      "type": "testing",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [],
+      "path": "commands/changelog-hook.md"
     },
     {
       "command": "checkpoint",
@@ -531,7 +540,7 @@
       "planning": 1,
       "refactoring": 1,
       "review": 9,
-      "testing": 32
+      "testing": 33
     },
     "topAgents": [
       {
