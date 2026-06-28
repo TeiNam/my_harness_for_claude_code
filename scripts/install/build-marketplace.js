@@ -329,7 +329,8 @@ function main(argv) {
       console.error('\nRun: node scripts/install/build-marketplace.js');
       return 1;
     }
-    console.log(`[build-marketplace] up to date (${Object.keys(plan).length} plugins)`);
+    const n = Object.keys(plan).length + (mcpExists(root) ? 1 : 0);
+    console.log(`[build-marketplace] up to date (${n} plugins)`);
     return 0;
   }
 
