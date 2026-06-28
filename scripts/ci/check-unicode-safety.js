@@ -12,6 +12,7 @@ const writeMode = process.argv.includes('--write');
 const ignoredDirs = new Set([
   '.git',
   'node_modules',
+  'plugins', // generated /plugin marketplace output — copies/symlinks of validated sources
   '.dmux',
   '.next',
   '.venv',

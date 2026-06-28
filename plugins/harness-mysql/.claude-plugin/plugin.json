@@ -1,0 +1,8 @@
+{
+  "name": "harness-mysql",
+  "description": "MySQL · Aurora MySQL — 스키마 · 인덱스 · 파티셔닝 · 최적화",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

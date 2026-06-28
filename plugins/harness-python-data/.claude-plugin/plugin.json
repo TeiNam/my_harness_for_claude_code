@@ -1,0 +1,8 @@
+{
+  "name": "harness-python-data",
+  "description": "DuckDB · pandas · polars · PyTorch · MLE · RecSys",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "harness-frontend",
+  "description": "React · Vite · TypeScript · Web UI · 접근성 · 모션",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

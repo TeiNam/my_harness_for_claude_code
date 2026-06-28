@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-06-28
+
+- fix(ci): unicode-safe 이모지 치환 + 누락된 command 레지스트리 등록 (66412ea)
+
 ## 2026-06-20
 
 - refactor(git): changelog 훅을 post-commit → pre-commit 으로 전환 (c50e51b)

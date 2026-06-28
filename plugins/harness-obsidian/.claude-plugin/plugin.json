@@ -1,0 +1,8 @@
+{
+  "name": "harness-obsidian",
+  "description": "Obsidian 플러그인 개발 (TS · i18n · 릴리스 체크리스트)",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}

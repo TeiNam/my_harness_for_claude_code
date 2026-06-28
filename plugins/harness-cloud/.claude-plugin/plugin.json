@@ -1,0 +1,8 @@
+{
+  "name": "harness-cloud",
+  "description": "AWS · Docker · Terraform · K8s — DevOps",
+  "version": "0.1.0",
+  "author": {
+    "name": "teinam"
+  }
+}
