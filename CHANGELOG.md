@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-06-28
 
+- refactor(hooks): strict 프로파일 차별화 — 차단형 훅 2종을 strict 전용으로 (e8296f1)
 - refactor(agents): humanize 메타 유지보수 에이전트 7종을 lab 그룹으로 격리 (74a8906)
 - refactor(agents): core 마이크로 리뷰어 3종을 code-reviewer 로 흡수 (6526b53)
 - docs(mcp): 템플릿을 .mcp.json 7개 구성에 동기화 (0b0173a)
