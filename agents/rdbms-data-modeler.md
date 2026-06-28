@@ -75,8 +75,9 @@ Tag denormalized columns with `COMMENT 'denormalized from <source>'`.
    - Detect and resolve 2NF violations
    - Detect and resolve 3NF violations
    - At each step, write a one-line rationale for any split
-5. **Physical design** (per the selected guideline):
-   - Naming: `snake_case`, `idx_{table}_{col}`, `uidx_{table}_{col}`
+5. **Physical design** (per the selected guideline + `rdbms-naming` skill):
+   - Naming: `snake_case`, singular tables, index suffix uppercase
+     (`{table}_{col}_IDX` / `_UIDX` / `_FTX`) — see `rdbms-naming`
    - PK type chosen by expected row count
    - `created_at` on every table; `updated_at` on every mutable table (skip for append-only logs)
    - Logical FKs only (no physical FK constraints); document the reference target via `COMMENT`
@@ -116,7 +117,7 @@ Tag denormalized columns with `COMMENT 'denormalized from <source>'`.
 - [ ] No physical FK constraints; logical FKs documented via `COMMENT`
 - [ ] `created_at` on every table; `updated_at` on every mutable table
 - [ ] Soft-delete tables use `is_active` + appropriate index strategy
-- [ ] Naming follows `snake_case` and index prefix conventions
+- [ ] Naming follows `rdbms-naming`: `snake_case`, singular tables, uppercase index suffix (`_IDX`/`_UIDX`/`_FTX`)
 - [ ] DB-specific types respected (MySQL: datetime / json; PostgreSQL: timestamptz / jsonb / boolean)
 - [ ] Partitioning decision made for log / history tables
 - [ ] Composite index order: equality → range → sort

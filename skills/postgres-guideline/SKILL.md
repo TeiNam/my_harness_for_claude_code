@@ -38,11 +38,16 @@ CREATE SCHEMA ref;    -- reference/master tables
 ```
 
 ## Naming Rules
-- Tables: snake_case (e.g. `chat_history`, `user_chat_setting`)
-- Columns: snake_case (e.g. `user_id`, `created_at`)
-- Indexes: `idx_{table}_{column}` / `uidx_{table}_{column}`
-- Sequences: `{table}_{column}_seq` (auto with IDENTITY)
-- Constraints: `{table}_{type}_{column}` (e.g. `user_pk_user_id`)
+
+공통 RDBMS 네이밍(snake_case, 단수형, 능동태+날짜컬럼 예외, prefix/postfix,
+약어 정의서, 컬럼 접두·접미 체계)은 **`rdbms-naming` 스킬을 단일 소스로 따른다.**
+요약 + PostgreSQL 고유:
+
+- Tables/Columns: snake_case, 테이블은 단수형 (e.g. `user`, `user_id`)
+- 능동태: `create_date` — 날짜+시간 컬럼은 `created_at` 예외
+- 인덱스: 테이블+컬럼 조건 순, **접미사 대문자** — `<table>_<col>_IDX` / `_UIDX` / `_FTX`
+- Sequences (PG 고유): `{table}_{column}_seq` (IDENTITY 자동 생성)
+- Constraints (PG 고유): `{table}_{type}_{column}` (e.g. `user_pk_user_id`)
 
 ## Data Type Guide
 
@@ -68,7 +73,7 @@ CREATE SCHEMA ref;    -- reference/master tables
 - Events/Schedulers: use external (cron, Airflow)
 - Complex Views: discouraged, simple read-only only
 - RULE: prohibited (unpredictable behavior)
-- SERIAL type: use IDENTITY instead
+- SERIAL type: discouraged — use `GENERATED ALWAYS AS IDENTITY` (SQL standard, prevents accidental override; SERIAL still works but is proprietary). PostgreSQL wiki: "Don't use serial."
 
 ## Reference Files
 - `schema-design.md` — PK/FK policy, RLS, checklists

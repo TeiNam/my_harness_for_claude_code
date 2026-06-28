@@ -25,11 +25,16 @@ workloads: [mysql]
 - Engine: InnoDB
 
 ## Naming Rules
-- Tables: snake_case (e.g. `chat_history`, `user_chat_setting`)
-- Columns: snake_case (e.g. `user_id`, `created_at`, `updated_at`)
-- Indexes: `idx_{table}_{column}`
-- Unique: `uidx_{table}_{column}`
-- Fulltext: `ftx_{table}_{column}`
+
+공통 RDBMS 네이밍(snake_case, 단수형, 능동태+날짜컬럼 예외, prefix/postfix 규칙,
+약어 정의서, 컬럼 접두·접미 체계, 데이터 타입)은 **`rdbms-naming` 스킬을 단일
+소스로 따른다.** 요약:
+
+- Tables/Columns: snake_case, 테이블은 단수형 (e.g. `user`, `user_chat_setting`, `user_id`)
+- 능동태: `create_date` — 단, 날짜+시간 컬럼은 `created_at`/`updated_at` 예외
+- 인덱스: 테이블+컬럼을 조건 순서대로, **접미사 대문자**
+  - 일반 `<table>_<col>_IDX` · Unique `_UIDX` · Fulltext `_FTX`
+  - 예: `book_like_user_id_IDX`, `book_uuid_UIDX`, `book_name_FTX`
 
 ## Data Type Guide
 
@@ -39,7 +44,7 @@ workloads: [mysql]
 | Small PK | `smallint unsigned` | 0~65535 |
 | Standard PK | `int unsigned` | 0~4.2 billion |
 | Large PK | `bigint unsigned` | Log tables |
-| Boolean | `tinyint(1)` | 0/1 |
+| Boolean | `char(1)` 'Y'/'N' (권장) or `tinyint(1)` 0/1 | 0→NULL/falsy 오인 회피용 CHAR 권장. MySQL native boolean 없음 → tinyint 도 가능. 한 스키마 내 통일 |
 | Variable string | `varchar(n)` | Specify max length |
 | Long text | `text` | No length limit |
 | Fixed string | `char(n)` | Fixed-length codes |
