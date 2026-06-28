@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-06-28
+
+- feat(mcp): github remote 전환 + brave/sentry/time 추가, memory/seq-thinking 제거 (ecb33f5)
+
 ## 2026-06-20
 
 - refactor(git): changelog 훅을 post-commit → pre-commit 으로 전환 (c50e51b)

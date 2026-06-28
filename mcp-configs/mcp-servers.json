@@ -1,45 +1,50 @@
 {
   "mcpServers": {
     "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PAT_HERE"
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer YOUR_GITHUB_PAT_HERE"
       },
-      "description": "GitHub operations - PRs, issues, repos"
+      "description": "GitHub operations (PRs, issues, repos) via the official remote server. The old npx @modelcontextprotocol/server-github is unsupported as of 2025-04. PAT: github.com/settings/tokens"
     },
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
-      "description": "Live documentation lookup — use with /docs command and documentation-lookup skill (resolve-library-id, query-docs)."
+      "description": "Live documentation lookup — use with documentation-lookup skill (resolve-library-id, query-docs)."
     },
     "exa": {
-      "command": "npx",
-      "args": ["-y", "exa-mcp-server"],
-      "env": {
-        "EXA_API_KEY": "YOUR_EXA_API_KEY_HERE"
-      },
-      "description": "Web search and research via Exa API — prefer task-scoped use for broader research after GitHub search and primary docs"
+      "type": "http",
+      "url": "https://mcp.exa.ai/mcp",
+      "description": "Web search and research via Exa — broader research after GitHub search and primary docs."
     },
-    "memory": {
+    "brave-search": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "description": "Persistent memory across sessions"
+      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
+      "env": {
+        "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
+      },
+      "description": "Independent web/local search (complements exa). Free tier 2,000 queries/mo: api.search.brave.com/app/keys"
+    },
+    "sentry": {
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp",
+      "description": "Sentry errors/issues via remote OAuth (no plaintext key). Approve on first session; OAuth flow via /mcp."
+    },
+    "time": {
+      "command": "uvx",
+      "args": ["mcp-server-time"],
+      "description": "Current time + IANA timezone conversion. Requires uv (brew install uv)."
     },
     "playwright": {
       "command": "npx",
-      "args": ["-y", "@playwright/mcp", "--browser", "chrome"],
-      "description": "Browser automation and testing via Playwright"
-    },
-    "sequential-thinking": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "description": "Chain-of-thought reasoning"
+      "args": ["-y", "@playwright/mcp", "--headless"],
+      "description": "Headless browser automation and testing. Use --extension instead to drive a running browser."
     }
   },
   "_comments": {
-    "usage": "Copy the servers you need to your ~/.claude.json mcpServers section",
-    "env_vars": "Replace YOUR_*_HERE placeholders with actual values",
+    "usage": "Copy the servers you need into the project .mcp.json or ~/.claude.json mcpServers section",
+    "env_vars": "Replace YOUR_*_HERE placeholders. The committed .mcp.json uses ${VAR} env refs instead of literals — prefer that for shared files.",
     "context_warning": "Keep under 10 MCPs enabled to preserve context window"
   }
 }
