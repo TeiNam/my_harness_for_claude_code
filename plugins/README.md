@@ -13,9 +13,12 @@ claude plugin                                 # browse, install per-plugin
 claude plugin install harness-mysql@harness
 ```
 
-Plugins ship **agents · commands · skills** only. `rules/`, `hooks/`, and
-`mcp-configs/` aren't per-plugin component types in Claude Code — those still
-install via `./install.sh` (the two paths coexist).
+Plugins ship **agents · commands · skills** per workload, plus one standalone
+**`harness-mcp`** (the MCP servers as a `.mcp.json`; API keys are `${ENV}`
+refs, so set them in your environment). `rules/` and `hooks/` aren't shippable
+per-plugin — `rules/` isn't a plugin component type, and the hooks rely on
+`HARNESS_HOOK_PROFILE` env gating a plugin can't set — so those still install
+via `./install.sh` (the paths coexist).
 
 ## Regenerate
 
@@ -34,6 +37,9 @@ npm run marketplace:check      # CI guard: fails if committed output is stale
   compares copied content against source to catch drift.
 - `--copy` materialises skills as real dirs too (Windows / git without
   `core.symlinks`).
+- **`harness-mcp/.mcp.json`** is generated from `mcp-configs/mcp-servers.json`,
+  with `YOUR_*_HERE` key placeholders rewritten to `${ENV}` refs (no secret
+  literal is committed). `--check` flags it stale when the source changes.
 
 `source` is committed (symlinks + copies both survive `git clone`), so a
 GitHub-hosted marketplace serves directly.

@@ -31,6 +31,11 @@
       "description": "React · Vite · TypeScript · Web UI · 접근성 · 모션"
     },
     {
+      "name": "harness-mcp",
+      "source": "./plugins/harness-mcp",
+      "description": "MCP 서버 묶음 — github · context7 · exa · memory · playwright · sequential-thinking"
+    },
+    {
       "name": "harness-mongodb",
       "source": "./plugins/harness-mongodb",
       "description": "MongoDB 문서 설계 · 인덱스 · 샤딩"

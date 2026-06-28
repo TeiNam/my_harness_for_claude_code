@@ -15,6 +15,7 @@ const {
   marketplaceJson,
   pluginJson,
   pluginName,
+  mcpJson,
   generate,
   check,
 } = require('../../../scripts/install/build-marketplace');
@@ -55,6 +56,14 @@ function buildFixture() {
   // lab group must never become a plugin.
   writeFile(path.join(root, 'agents/lab-toy.md'),
     '---\nname: lab-toy\nworkloads: [lab]\n---\n');
+  // mcp source: one server with a YOUR_*_HERE placeholder, one keyless.
+  writeFile(path.join(root, 'mcp-configs/mcp-servers.json'), JSON.stringify({
+    mcpServers: {
+      github: { command: 'npx', args: ['-y', 'x'], env: { GITHUB_PERSONAL_ACCESS_TOKEN: 'YOUR_GITHUB_PAT_HERE' } },
+      memory: { command: 'npx', args: ['-y', 'y'] },
+    },
+    _comments: { usage: 'drop me' },
+  }, null, 2));
   return root;
 }
 
@@ -148,6 +157,46 @@ function runTests() {
     const problems = check(root, planAfter);
     assert.ok(problems.some(p => /stale/.test(p)), `expected a stale report, got: ${problems.join('; ')}`);
 
+    fs.rmSync(root, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('mcpJson rewrites YOUR_*_HERE to ${ENV} ref and drops _comments', () => {
+    const root = buildFixture();
+    const mcp = mcpJson(root);
+    assert.strictEqual(mcp.mcpServers.github.env.GITHUB_PERSONAL_ACCESS_TOKEN, '${GITHUB_PERSONAL_ACCESS_TOKEN}');
+    assert.ok(!('env' in mcp.mcpServers.memory), 'keyless server stays keyless');
+    assert.ok(!('_comments' in mcp), '_comments dropped');
+    fs.rmSync(root, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('marketplaceJson includes harness-mcp when root has mcp source', () => {
+    const root = buildFixture();
+    const plan = buildPlan(root);
+    const withMcp = marketplaceJson(plan, root).plugins.map(p => p.name);
+    assert.ok(withMcp.includes('harness-mcp'), 'harness-mcp listed when source present');
+    // No root → no harness-mcp (back-compat with callers that omit root).
+    const without = marketplaceJson(plan).plugins.map(p => p.name);
+    assert.ok(!without.includes('harness-mcp'), 'omitted without root');
+    fs.rmSync(root, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('generate writes harness-mcp/.mcp.json + plugin.json, check clean then drift', () => {
+    const root = buildFixture();
+    const plan = buildPlan(root);
+    generate(root, plan, false);
+    const mcpDir = path.join(root, 'plugins', pluginName('mcp'));
+    assert.ok(fs.existsSync(path.join(mcpDir, '.mcp.json')), '.mcp.json written');
+    assert.ok(fs.existsSync(path.join(mcpDir, '.claude-plugin/plugin.json')), 'plugin.json written');
+    // No secret literal survives into committed output.
+    assert.ok(!fs.readFileSync(path.join(mcpDir, '.mcp.json'), 'utf8').includes('YOUR_'));
+    assert.deepStrictEqual(check(root, plan), [], 'fresh output clean');
+
+    // Edit the mcp source without regenerating → drift on .mcp.json.
+    writeFile(path.join(root, 'mcp-configs/mcp-servers.json'), JSON.stringify({
+      mcpServers: { memory: { command: 'npx', args: ['-y', 'CHANGED'] } },
+    }, null, 2));
+    const problems = check(root, plan);
+    assert.ok(problems.some(p => /harness-mcp/.test(p)), `expected harness-mcp drift, got: ${problems.join('; ')}`);
     fs.rmSync(root, { recursive: true, force: true });
   })) passed++; else failed++;
 

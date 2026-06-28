@@ -19,9 +19,15 @@
  *     agents/<name>.md -> symlink (or copy)
  *     commands/<name>.md
  *
- * Plugins only auto-discover agents/, commands/, skills/ (+ hooks/hooks.json).
- * rules/, hooks/, and mcp-configs/ are NOT per-plugin component types, so they
- * keep shipping via install.sh — this generator deliberately ignores them.
+ * Components split across two install paths:
+ *   - agents/commands/skills  -> one harness-<workload> plugin each (below)
+ *   - mcp-configs/            -> a single harness-mcp plugin (.mcp.json)
+ *   - rules/ + hooks/         -> stay with install.sh. rules aren't a plugin
+ *                                component type at all; hooks rely on env-profile
+ *                                gating (HARNESS_HOOK_PROFILE, which a plugin
+ *                                can't set) + a bundled scripts/ tree, so
+ *                                plugin-izing them risks broken gating and
+ *                                double-execution alongside --with-hooks.
  *
  * Discovery quirk (verified with `claude plugin details`): plugin scanning
  * follows DIRECTORY symlinks (skills load fine) but NOT FILE symlinks (a
@@ -55,6 +61,11 @@ const PLUGIN_KINDS = new Set(['agent', 'command', 'skill']);
 // Meta/experimental group: never menu-exposed, never a plugin.
 const SKIP_GROUPS = new Set(['lab']);
 
+// MCP lives in one standalone plugin (harness-mcp), not a workload split.
+// `mcp` reuses pluginName()/pluginJson() so its name is harness-mcp.
+const MCP_GROUP = 'mcp';
+const MCP_SOURCE_REL = 'mcp-configs/mcp-servers.json';
+
 /** Short human descriptions; falls back to the group key when missing. */
 const DESCRIPTIONS = {
   'core': '항상 포함되는 코어 — planning · review · git · sessions · 학습 메커니즘',
@@ -73,7 +84,31 @@ const DESCRIPTIONS = {
   'mongodb': 'MongoDB 문서 설계 · 인덱스 · 샤딩',
   'dynamodb': 'DynamoDB NoSQL 패턴 — single-table · GSI',
   'writing': '아티클 · 콘텐츠 · 블로깅 · 카피 · 번역 · PPT · humanize',
+  'mcp': 'MCP 서버 묶음 — github · context7 · exa · memory · playwright · sequential-thinking',
 };
+
+/**
+ * Plugin-ready .mcp.json from the shared mcp-configs source. The committed
+ * source carries `YOUR_*_HERE` placeholders; rewrite them to `${ENV}` refs so
+ * the generated plugin reads real keys from the user's environment and the
+ * repo never commits a secret-shaped literal. Drops the `_comments` block.
+ */
+function mcpJson(root) {
+  const src = JSON.parse(fs.readFileSync(path.resolve(root, MCP_SOURCE_REL), 'utf8'));
+  const out = { mcpServers: {} };
+  for (const [name, def] of Object.entries(src.mcpServers || {})) {
+    const next = { ...def };
+    if (def.env) {
+      next.env = {};
+      for (const [key, value] of Object.entries(def.env)) {
+        // YOUR_X_HERE -> ${X}; anything else passes through verbatim.
+        next.env[key] = /^YOUR_.*_HERE$/.test(value) ? `\${${key}}` : value;
+      }
+    }
+    out.mcpServers[name] = next;
+  }
+  return out;
+}
 
 function parseArgs(argv) {
   const flags = { copy: false, check: false, root: null };
@@ -122,6 +157,11 @@ function pluginName(group) {
   return `harness-${group}`;
 }
 
+/** harness-mcp ships only when the shared mcp-configs source is present. */
+function mcpExists(root) {
+  return Boolean(root) && fs.existsSync(path.resolve(root, MCP_SOURCE_REL));
+}
+
 function pluginJson(group) {
   return {
     name: pluginName(group),
@@ -131,8 +171,10 @@ function pluginJson(group) {
   };
 }
 
-function marketplaceJson(plan) {
-  const plugins = Object.keys(plan).sort().map(group => ({
+function marketplaceJson(plan, root) {
+  const groups = Object.keys(plan);
+  if (mcpExists(root)) groups.push(MCP_GROUP);
+  const plugins = groups.sort().map(group => ({
     name: pluginName(group),
     source: `./${PLUGINS_DIR}/${pluginName(group)}`,
     description: DESCRIPTIONS[group] || `harness ${group} assets`,
@@ -177,11 +219,25 @@ function generate(root, plan, copy) {
     for (const asset of plan[group]) placeAsset(root, pluginDir, asset, copy);
   }
 
+  // harness-mcp: standalone plugin carrying .mcp.json (no workload split).
+  if (mcpExists(root)) {
+    const mcpDir = path.join(pluginsRoot, pluginName(MCP_GROUP));
+    fs.mkdirSync(path.join(mcpDir, '.claude-plugin'), { recursive: true });
+    fs.writeFileSync(
+      path.join(mcpDir, '.claude-plugin', 'plugin.json'),
+      JSON.stringify(pluginJson(MCP_GROUP), null, 2) + '\n'
+    );
+    fs.writeFileSync(
+      path.join(mcpDir, '.mcp.json'),
+      JSON.stringify(mcpJson(root), null, 2) + '\n'
+    );
+  }
+
   const mpDir = path.join(root, '.claude-plugin');
   fs.mkdirSync(mpDir, { recursive: true });
   fs.writeFileSync(
     path.join(mpDir, 'marketplace.json'),
-    JSON.stringify(marketplaceJson(plan), null, 2) + '\n'
+    JSON.stringify(marketplaceJson(plan, root), null, 2) + '\n'
   );
 }
 
@@ -197,18 +253,34 @@ function check(root, plan) {
 
   // marketplace.json matches.
   const mpPath = path.join(root, '.claude-plugin', 'marketplace.json');
-  const expectedMp = JSON.stringify(marketplaceJson(plan), null, 2) + '\n';
+  const expectedMp = JSON.stringify(marketplaceJson(plan, root), null, 2) + '\n';
   if (!fs.existsSync(mpPath) || fs.readFileSync(mpPath, 'utf8') !== expectedMp) {
     problems.push('.claude-plugin/marketplace.json is missing or stale');
   }
 
-  // Expected plugin set vs on-disk.
+  // Expected plugin set vs on-disk (harness-mcp included when its source exists).
   const expectedPlugins = new Set(Object.keys(plan).map(pluginName));
+  if (mcpExists(root)) expectedPlugins.add(pluginName(MCP_GROUP));
   const onDisk = fs.existsSync(pluginsRoot)
     ? fs.readdirSync(pluginsRoot).filter(n => fs.statSync(path.join(pluginsRoot, n)).isDirectory())
     : [];
   for (const extra of onDisk) {
     if (!expectedPlugins.has(extra)) problems.push(`stale plugin dir: ${PLUGINS_DIR}/${extra}`);
+  }
+
+  // harness-mcp plugin.json + .mcp.json content.
+  if (mcpExists(root)) {
+    const mcpDir = path.join(pluginsRoot, pluginName(MCP_GROUP));
+    const pjPath = path.join(mcpDir, '.claude-plugin', 'plugin.json');
+    const expectedPj = JSON.stringify(pluginJson(MCP_GROUP), null, 2) + '\n';
+    if (!fs.existsSync(pjPath) || fs.readFileSync(pjPath, 'utf8') !== expectedPj) {
+      problems.push(`${pluginName(MCP_GROUP)}: plugin.json missing or stale`);
+    }
+    const mcpPath = path.join(mcpDir, '.mcp.json');
+    const expectedMcp = JSON.stringify(mcpJson(root), null, 2) + '\n';
+    if (!fs.existsSync(mcpPath) || fs.readFileSync(mcpPath, 'utf8') !== expectedMcp) {
+      problems.push(`${pluginName(MCP_GROUP)}: .mcp.json missing or stale (source changed)`);
+    }
   }
 
   for (const group of Object.keys(plan)) {
@@ -264,9 +336,13 @@ function main(argv) {
   generate(root, plan, flags.copy);
   const total = Object.values(plan).reduce((n, a) => n + a.length, 0);
   const mode = flags.copy ? 'all copied' : 'skills symlinked, agents/commands copied';
-  console.log(`[build-marketplace] ${Object.keys(plan).length} plugins, ${total} assets (${mode})`);
+  const count = Object.keys(plan).length + (mcpExists(root) ? 1 : 0);
+  console.log(`[build-marketplace] ${count} plugins, ${total} assets (${mode})`);
   for (const g of Object.keys(plan).sort()) {
     console.log(`  ${pluginName(g)}  (${plan[g].length})`);
+  }
+  if (mcpExists(root)) {
+    console.log(`  ${pluginName(MCP_GROUP)}  (.mcp.json)`);
   }
   return 0;
 }
@@ -280,4 +356,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { buildPlan, marketplaceJson, pluginJson, pluginName, generate, check };
+module.exports = { buildPlan, marketplaceJson, pluginJson, pluginName, mcpJson, mcpExists, generate, check };

@@ -79,6 +79,16 @@ are added later, list them here so they're easy to find and complete.
 - **드리프트 점검**: `npm run check-drift [-- --workload=core]` (= `scripts/install/check-drift.js`). 선택 워크로드 기준으로 "레포가 깔아야 할 자산" vs "실제 `$CLAUDE_HOME` 심볼릭"을 대조해 missing / wrong-target / broken 을 보고하고 drift 가 있으면 exit 1 + `./install.sh --force` 안내. 읽기 전용 — 링크를 만들거나 지우지 않는다. "자산은 옛 상태로 stale 인데 훅만 풀 주입" 같은 어긋남을 한 방에 드러내려는 용도(과거 글로벌이 거의 비어 있었던 사고의 재발 방지).
 - 테스트: `tests/scripts/install/{workloads,menu,select-workloads,select-assets,tag-assets,merge-hooks}.test.js`.
 
+## `/plugin` Marketplace (병행 배포 경로)
+
+install.sh 와 별개로, 네이티브 `/plugin` 으로도 워크로드별 선택 설치가 된다 — `scripts/install/build-marketplace.js` 가 평평한 자산을 워크로드별 플러그인으로 빌드한다.
+
+- `.claude-plugin/marketplace.json` + `plugins/harness-<workload>/` 를 **커밋** 한다 (GitHub clone 이 바로 서빙). `claude plugin marketplace add TeiNam/my_harness_for_claude_code` → `claude plugin install harness-mysql@harness`.
+- 플러그인이 싣는 것: **agent · command · skill**(워크로드별 ~14개) + **`harness-mcp`** 1개(`mcp-configs/mcp-servers.json` → `.mcp.json`, `YOUR_*_HERE` 키를 `${ENV}` 참조로 치환해 비밀 비커밋). `--check` 가 source 변경 시 stale 보고.
+- 플러그인이 **안** 싣는 것: `rules/`(플러그인 컴포넌트 타입 아님), `hooks/`(`HARNESS_HOOK_PROFILE` env 게이팅을 플러그인이 못 정함 + scripts 동봉/이중실행 리스크) → 둘 다 install.sh 경로 유지.
+- 기술 디테일: 스킬은 디렉터리 심볼릭(0 중복), agent/command 는 실파일 복사(플러그인 discovery 가 *파일* 심볼릭은 무시). `npm run marketplace:build` 재생성, `marketplace:check` 는 `npm test` 체인에 포함.
+- 테스트: `tests/scripts/install/build-marketplace.test.js`.
+
 ## Hooks (status)
 
 - `hooks/hooks.json` — main hook stack. Install via `./install.sh --with-hooks` (or `install.ps1 -WithHooks`), which merges entries into `~/.claude/settings.json` keyed by `id`. Re-runs are idempotent; user-added entries are preserved. `--with-hooks --dry-run` previews the change; `--with-hooks --uninstall` removes only harness-owned ids.
