@@ -3,7 +3,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg)
 ![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3.svg)
-![Tests](https://img.shields.io/badge/tests-1517%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-1526%20passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/teinam)
@@ -18,7 +18,7 @@
 
 | 디렉터리 | 항목 수 | 설명 |
 |---|---:|---|
-| `agents/` | 52 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
+| `agents/` | 49 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
 | `commands/` | 52 | 슬래시 커맨드 (frontmatter 기반 markdown) |
 | `skills/` | 129 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 글쓰기 등) |
 | `rules/` | 36 | common 레이어 + 언어별(typescript / python / rust / web) |
@@ -135,7 +135,7 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 
 각 자산의 그룹은 frontmatter 의 `workloads:` 키로 결정됩니다 (`workloads: [python-backend]`, `workloads: [obsidian, frontend]` 등). 키가 없거나 frontmatter 자체가 없는 파일은 `scripts/install/workloads.js` 의 휴리스틱으로 폴백 분류됩니다 (rules/ 는 부모 폴더 기준). 일괄 재태깅은 `node scripts/install/tag-assets.js --dry-run` 으로 미리보고 `--apply` 로 적용합니다.
 
-전체 워크로드 키 목록: `core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing`.
+전체 워크로드 키 목록: `core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing` (그 외 메뉴 비노출·수동 전용 키 `lab`).
 
 훅 병합은 `id`(`pre:bash:dispatcher`, `stop:cost-tracker` 등) 기준으로 멱등하게 동작하며, 변경 전 `settings.json.bak.<ISO>` 백업을 남깁니다. 사용자가 수동으로 추가한 훅 항목은 그대로 보존됩니다.
 
@@ -189,7 +189,7 @@ python 3.12.8
 
 ```bash
 npm run lint                      # ESLint
-npm test                          # CI 검증 + 전체 테스트 슈트(1517개)
+npm test                          # CI 검증 + 전체 테스트 슈트(1526개)
 node tests/run-all.js             # 테스트만 따로 실행
 npm run command-registry:write    # 커맨드 레지스트리 갱신
 npm run command-registry:check    # 동기화 상태만 확인 (CI용)

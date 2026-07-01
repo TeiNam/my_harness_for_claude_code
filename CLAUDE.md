@@ -67,7 +67,7 @@ are added later, list them here so they're easy to find and complete.
 설치는 6개 톱레벨 카테고리(**backend / frontend / plugin / data-analysis / data-design / writing**) 와 sub-옵션으로 결정된다. sub-옵션이 곧 워크로드 키와 1:1 매칭되어, 예컨대 "데이터 설계 → MySQL" 만 골랐을 때 Postgres 가이드까지 끌려오지 않는다.
 
 - 톱레벨 카테고리와 sub-옵션 → 워크로드 매핑은 `scripts/install/menu.js` 한 곳에서 정의된다.
-- 워크로드 키 카탈로그는 `scripts/install/workloads.js` (`core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing`). `core` 는 항상 포함된다.
+- 워크로드 키 카탈로그는 `scripts/install/workloads.js` (`core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing`). `core` 는 항상 포함된다. `lab` 은 메뉴에 노출되지 않는 수동 전용 키로 (`--workload=...,lab`), humanize 메타 에이전트 격리에만 쓴다.
 - 진입점은 `scripts/install/select-workloads.js` 로, 다음 셋 중 하나를 자동으로 고른다:
   - 메뉴 CLI 플래그(`--category=`, `--backend=`, `--data-design=` …) 가 있으면 비대화형으로 그 값 사용
   - 인자가 없고 TTY 면 stdin 기반 체크박스 메뉴
@@ -87,7 +87,7 @@ are added later, list them here so they're easy to find and complete.
 - **글로벌 기본은 `HARNESS_HOOK_PROFILE=minimal`** (`~/.claude/settings.json` 의 `env`). hooks.json 의 모든 그룹은 `run-with-flags.js <id> <script> <profilesCsv>` 로 게이팅되고(Stop/SessionEnd 훅은 인라인 bootstrap 래퍼가 같은 CSV 를 spawnSync 인자로 넘긴다), `scripts/lib/hook-flags.js` 가 profile 과 `HARNESS_DISABLED_HOOKS` CSV 를 읽어 실행 여부를 결정한다. 3단계는 누적 포함 관계다:
   - **minimal (9훅)**: 라이프사이클·안전·메트릭만 — `session:start`·`session:end:marker`·`stop:session-end`·`stop:evaluate-session`·`stop:capture-lessons`·`stop:cost-tracker`·`post:harness-metrics-bridge`·`pre/post:bash:dispatcher`. (앞 3개는 게이트 없는 직접 실행이라 항상 ON.)
   - **standard (27훅)**: minimal + 품질·관찰·거버넌스 **경고** 훅 (observe·governance·quality-gate·console-warn·design-quality·context-monitor·mcp-health-check·format-typecheck 등). 코드 프로젝트 권장값.
-  - **strict (28훅)**: standard + **차단형(blocking)** 훅 2종 — `pre:config-protection`(linter/formatter config 수정 차단)·`pre:edit-write:gateguard-fact-force`(파일당 첫 Edit 차단+사실확인 강제). 이 둘만 `strict` 단독 CSV 라 strict 에서만 켜진다.
+  - **strict (29훅)**: standard + **차단형(blocking)** 훅 2종 — `pre:config-protection`(linter/formatter config 수정 차단)·`pre:edit-write:gateguard-fact-force`(파일당 첫 Edit 차단+사실확인 강제). 이 둘만 `strict` 단독 CSV 라 strict 에서만 켜진다.
   - 더 엄격히: 프로젝트 `.claude/settings.json` 에 `env.HARNESS_HOOK_PROFILE=standard`(또는 `strict`). 특정 훅만 끄려면 `HARNESS_DISABLED_HOOKS=stop:cost-tracker,…`.
 - `scripts/install/merge-hooks.js` — the underlying merger; can be called directly when you don't want the symlink step. id 가 없는 (사용자가 손으로 박은) 훅 그룹은 추적 못 하므로 재머지 시 중복될 수 있다 — 머지 전 settings.json 의 id-less 하네스 훅은 정리할 것. Tests live at `tests/scripts/install/merge-hooks.test.js`.
 - `hooks/prompt-pack.json` — two reference-only prompts (`ref:pre-write-guard`, `ref:review-on-stop`). Not runnable; see `hooks/README-prompt-pack.md` for what they overlap with and how to wire them up if needed.
