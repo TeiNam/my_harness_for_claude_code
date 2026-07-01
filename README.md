@@ -20,7 +20,7 @@
 |---|---:|---|
 | `agents/` | 52 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
 | `commands/` | 52 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 126 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / 글쓰기 등) |
+| `skills/` | 129 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 글쓰기 등) |
 | `rules/` | 36 | common 레이어 + 언어별(typescript / python / rust / web) |
 | `hooks/` | 29 | 이벤트 기반 훅 매처 (실행 스크립트 44종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
