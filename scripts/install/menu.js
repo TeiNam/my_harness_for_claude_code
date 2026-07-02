@@ -5,7 +5,7 @@
  * menu.js — 2-tier 메뉴 정의와 메뉴 → 워크로드 변환.
  *
  * UX 모델:
- *   1) 6개 톱레벨 카테고리 중 사용할 것을 다중 선택한다.
+ *   1) 7개 톱레벨 카테고리 중 사용할 것을 다중 선택한다.
  *   2) 각 카테고리마다 sub-옵션 (언어/엔진/플랫폼) 을 다중 선택한다.
  *   3) sub-옵션의 합집합 + `core` = 활성 워크로드 집합.
  *
@@ -15,8 +15,10 @@
  * 데이터 분석 카테고리에서 "Python" 만 선택했을 때 FastAPI 가이드가 끌려오지
  * 않도록, python-backend 와 python-data 는 별도 키로 분리되어 있다.
  *
- * 카테고리에 sub-옵션이 없으면 (예: 글쓰기) 카테고리 자체가 단일 워크로드로
- * 매핑된다.
+ * 카테고리에 sub-옵션이 없으면 (예: 글쓰기, Apple 플랫폼) 카테고리 자체가
+ * 단일 워크로드로 매핑된다. Apple 플랫폼은 iOS/macOS/watchOS/visionOS를
+ * 세분화하지 않고 하나의 `apple` 워크로드로 묶는다 — 원본 저장소도 동일
+ * 워크플로로 다룬다.
  */
 
 /**
@@ -85,7 +87,16 @@ const CATEGORIES = [
   {
     id: 'writing',
     label: '글쓰기 / 콘텐츠',
-    workloads: ['writing'],
+    subQuestion: '어떤 글쓰기 작업?',
+    subOptions: [
+      { id: 'tech',   label: '기술 문서 · 블로깅 · PPT',    workloads: ['writing'] },
+      { id: 'social', label: '소셜 콘텐츠 (LinkedIn 등)', workloads: ['social-content'] },
+    ],
+  },
+  {
+    id: 'apple',
+    label: 'Apple 플랫폼 개발',
+    workloads: ['apple'],
   },
 ];
 

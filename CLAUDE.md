@@ -19,6 +19,8 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - **Cloud / AI**: AWS, Amazon Bedrock, Hugging Face models for real-time speech transcription
 - **Node.js**: server + tooling
 - **Writing**: creative writing, tech blogging, presentation (PPT) authoring
+- **Social Content**: LinkedIn personal-branding content production (voice profile, posts, hooks, graphics, carousels) — separate `social-content` workload, not bundled into `writing`
+- **Apple Platforms**: iOS/macOS/watchOS/visionOS development, Swift, SwiftUI, App Store lifecycle — separate `apple` workload, opt-in only
 
 ## Layout
 
@@ -48,7 +50,9 @@ The longer reviewer/architect agents (`code-reviewer`, `python-reviewer`, `types
 Filled-in (real content, not placeholder):
 
 - **DB**: `skills/postgres-guideline/`, `skills/mysql-guideline/`, `skills/mongodb-guideline/`, `skills/dynamodb-guideline/` — schema / index / partitioning / sharding / connection
-- **Frontend**: `skills/obsidian-plugin-develop/` (TypeScript + i18n + Chromium + release checklist), `skills/vite-patterns/`, `skills/frontend-patterns/`
+- **Frontend**: `skills/obsidian-plugin-develop/` (TypeScript + i18n + Chromium + release checklist), `skills/vite-patterns/`, `skills/frontend-patterns/`, `skills/frontend-design/` (origin: anthropics/skills — aesthetic direction, typography, anti-template judgment)
+- **Supanova (한글 랜딩페이지 디자인 엔진)**: `skills/taste-skill/`, `skills/redesign-skill/`, `skills/soft-skill/`, `skills/output-skill/` — origin: supanova-design-skill-main (based on Leonxlnx/taste-skill). Standalone HTML + Tailwind CDN 랜딩페이지를 한글 우선(Pretendard, `word-break: keep-all`, 자연스러운 한국어 카피)으로 생성/리디자인. `taste-skill` 상단에 `DESIGN_VARIANCE`/`MOTION_INTENSITY`/`VISUAL_DENSITY`/`LANDING_PURPOSE` 4개 설정값. 새 랜딩페이지는 `taste-skill`+`output-skill`, 기존 페이지 개선은 `redesign-skill`, 최고 퀄리티는 세 개 다 + `soft-skill`. `frontend` 워크로드로 통합.
+- **SEO/GEO/AEO**: `skills/seo-geo-aeo/` (origin: SNLabat/SEO-GEO-AEO-Skill) — URL 하나로 SEO·GEO(생성형 검색엔진)·AEO(답변엔진) 3축 감사, Word/PDF 리포트 산출. 기존 `skills/seo/`(harness 자체 SEO 스킬)와 별개, 둘 다 `frontend` 워크로드.
 - **AI**: `skills/claude-api/` (Anthropic SDK), `skills/foundation-models-on-device/`, `skills/ai-regression-testing/`, `skills/cost-aware-llm-pipeline/`, `skills/aws-bedrock/`, `skills/realtime-stt-huggingface/`, `skills/ai-tui/`
 - **AI TUI (터미널 에이전트 초기화면·두뇌)**: `skills/ai-tui/` — Claude Code·stocker 스타일 터미널 AI 에이전트의 초기화면(배너·로고·입력창·힌트바 6요소)과 두뇌(프롬프트·스킬·MCP·사용룰)를 세팅하는 크로스 언어 레퍼런스. `references/` 4종 — 언어별 3종(`node-pi-tui`, `rust-ratatui`, `python-textual`)과 언어 중립 `agent-brain-setup`. 유지형(pi-tui/textual) vs 즉시형(ratatui) 렌더링 차이와 ANSI 폭 함정을 언어별로 대비. `${CLAUDE_SKILL_DIR}` 토큰 치환. `ai`·`nodejs`·`rust`·`python-backend` 워크로드로 통합.
 - **Cloud**: `skills/aws-cloud/` (IAM, S3, Lambda, ECS/Fargate, RDS, networking, cost guardrails)
@@ -56,6 +60,13 @@ Filled-in (real content, not placeholder):
 - **Writing**: `skills/markdown-writing/`, `skills/article-writing/`, `skills/brand-voice/`, `skills/crosspost/`, `skills/frontend-slides/`, `skills/tech-blogging/`, `skills/creative-writing/`, `skills/ppt-authoring/`, `skills/tech-writer/`
 - **Tech Writer (기술 문서 작성·윤문)**: `skills/tech-writer/` — 한/영 기술 문서를 새로 쓰거나(write) 기존 초안을 윤문(polish)하는 오케스트레이터. `references/` 3종(quick-rules, tech-doc-taxonomy, tech-writing-playbook)과 전용 에이전트 5종(`tech-doc-writer`, `doc-clarity-reviewer`, `doc-quality-detector`, `tech-fidelity-auditor`, `tech-writer-monolith`)을 둔다. `${CLAUDE_SKILL_DIR}` 토큰 치환으로 경로 독립. `writing` 워크로드로 통합.
 - **Humanize (한글 AI 티 제거)**: `skills/humanize-korean/` — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 패턴을 탐지·윤문. Fast 모드(monolith 1콜)와 strict 5인 파이프라인. 진입 커맨드 `/humanize`·`/humanize-redo`. **런타임 에이전트(`writing` 상시 로드)**: `humanize-monolith`, `ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`. **스킬 유지·확장용 메타 에이전트는 `lab` 그룹으로 격리**(상시 로드 제외, 분류체계 v2.0 승격·학술 인용·metric 엔지니어링·웹 확장 시에만 수동 호출): `korean-ai-tell-taxonomist`, `taxonomy-gap-analyzer`, `translationese-research-distiller`, `post-editese-metric-engineer`, `quick-rules-integrator`, `korean-translation-scholar`, `humanize-web-architect`. 원본 epoko77-ai/im-not-ai 를 `writing` 워크로드로 통합.
+- **Social Content (LinkedIn 개인 브랜딩 콘텐츠 제작)**: 별도 `social-content` 워크로드 — origin: charlie947/social-media-skills. 기술 문서/블로깅용 `writing` 워크로드와 분리했으므로 글쓰기 카테고리에서 "기술 문서"만 고르면 이 17종은 끌려오지 않는다. 파이프라인 순서: `voice-builder`(voice.md/about-me.md 생성) → `newsletter-voice`(뉴스레터 전용 보이스) → 콘텐츠 제작(`post-writer`, `post-formatter`, `hook-generator`, `content-matrix`, `niche-research`) → 시각 자산(`graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `pinned-comment`, `youtube-thumbnail`) → 배포 후 검증(`post-scorer`, `analytics-dashboard`) → 부가(`profile-optimizer`, `reels-scripting`). `reels-scripting`은 `APIFY_API_TOKEN`·`GOOGLE_AI_API_KEY` 환경변수 필요.
+- **Apple 플랫폼 개발**: `skills/apple-*` 23개 카테고리 — origin: rshankras/claude-code-apple-skills (MIT, upstream LICENSE 사본은 `skills/apple-shared/LICENSE-upstream.txt`). 별도 `apple` 워크로드, iOS/macOS/watchOS/visionOS를 세분화하지 않고 하나로 묶었다(원본 저장소도 동일 워크플로로 다룸). 각 카테고리는 `skills/apple-<name>/SKILL.md` 가 라우터이고, 하위 서브스킬(`skills/apple-<name>/<sub>/SKILL.md`)은 라우터가 참고 파일로 읽어들이는 2단 구조 — Claude Code의 스킬 탐색은 1단 중첩만 인식하므로 서브스킬 자체는 자동 발견되지 않는다.
+  - **핵심 개발**: `apple-ios`, `apple-macos`, `apple-swift`(동시성·Swift 6.2), `apple-swiftui`(AlarmKit/WebKit/텍스트편집/툴바/3D차트), `apple-design`(Liquid Glass), `apple-testing`(TDD/스냅샷/특성화 테스트), `apple-generators`(63개 코드 생성기 — 로깅/분석/인증/페이월/설정화면/영속성/온보딩 등), `apple-security`, `apple-performance`(Instruments/SwiftUI 리렌더 진단)
+  - **플랫폼 특화**: `apple-watchos`, `apple-visionos`, `apple-swiftdata`, `apple-mapkit`, `apple-foundation`, `apple-core-ml`, `apple-apple-intelligence`(Foundation Models/Visual Intelligence/App Intents)
+  - **제품·운영**: `apple-product`(아이디어→PRD→아키텍처→App Store 7종 스펙 문서 워크플로), `apple-app-store`(ASO/키워드/리젝 대응), `apple-growth`(분석·PR·커뮤니티), `apple-legal`(개인정보정책/이용약관), `apple-monetization`, `apple-release-review`(배포 전 감사 체크리스트)
+  - **메타**: `apple-shared`(`skill-creator`/`skill-auditor` — 새 Apple 스킬 작성·감사용)
+  - 카테고리 간 상호 참조 경로는 접두사 없는 원본 경로(`skills/ios/...`, `skills/generators/...` 등)를 전부 `skills/apple-<name>/...` 로 재작성했고, 원저작자 로컬 경로(`/Users/ravishankar/...`)는 제거했다(`scripts/ci/validate-no-personal-paths.js` 통과 확인).
 
 ## Still Placeholder Skills
 
@@ -64,10 +75,10 @@ are added later, list them here so they're easy to find and complete.
 
 ## Workload-based Install (2-tier 메뉴)
 
-설치는 6개 톱레벨 카테고리(**backend / frontend / plugin / data-analysis / data-design / writing**) 와 sub-옵션으로 결정된다. sub-옵션이 곧 워크로드 키와 1:1 매칭되어, 예컨대 "데이터 설계 → MySQL" 만 골랐을 때 Postgres 가이드까지 끌려오지 않는다.
+설치는 7개 톱레벨 카테고리(**backend / frontend / plugin / data-analysis / data-design / writing / apple**) 와 sub-옵션으로 결정된다. sub-옵션이 곧 워크로드 키와 1:1 매칭되어, 예컨대 "데이터 설계 → MySQL" 만 골랐을 때 Postgres 가이드까지 끌려오지 않는다. "글쓰기" 카테고리도 sub-옵션 2개(**기술 문서** → `writing` / **소셜 콘텐츠** → `social-content`)로 나뉘어, 기술 문서 작업자가 글쓰기를 골라도 LinkedIn 콘텐츠 스킬 17종이 끌려오지 않는다. "Apple 플랫폼 개발"은 (글쓰기와 달리) sub-옵션 없이 카테고리 자체가 단일 워크로드 `apple` 로 매핑된다 — owner의 기존 6개 워크로드와 무관한 opt-in 전용 카테고리.
 
 - 톱레벨 카테고리와 sub-옵션 → 워크로드 매핑은 `scripts/install/menu.js` 한 곳에서 정의된다.
-- 워크로드 키 카탈로그는 `scripts/install/workloads.js` (`core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing`). `core` 는 항상 포함된다. `lab` 은 메뉴에 노출되지 않는 수동 전용 키로 (`--workload=...,lab`), humanize 메타 에이전트 격리에만 쓴다.
+- 워크로드 키 카탈로그는 `scripts/install/workloads.js` (`core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing, social-content, apple`). `core` 는 항상 포함된다. `lab` 은 메뉴에 노출되지 않는 수동 전용 키로 (`--workload=...,lab`), humanize 메타 에이전트 격리에만 쓴다.
 - 진입점은 `scripts/install/select-workloads.js` 로, 다음 셋 중 하나를 자동으로 고른다:
   - 메뉴 CLI 플래그(`--category=`, `--backend=`, `--data-design=` …) 가 있으면 비대화형으로 그 값 사용
   - 인자가 없고 TTY 면 stdin 기반 체크박스 메뉴

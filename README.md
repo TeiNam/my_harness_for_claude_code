@@ -3,7 +3,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg)
 ![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3.svg)
-![Tests](https://img.shields.io/badge/tests-1526%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-1528%20passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/teinam)
@@ -20,19 +20,19 @@
 |---|---:|---|
 | `agents/` | 49 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
 | `commands/` | 52 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 129 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 글쓰기 등) |
+| `skills/` | 177 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 / Apple 플랫폼 등) |
 | `rules/` | 36 | common 레이어 + 언어별(typescript / python / rust / web) |
 | `hooks/` | 29 | 이벤트 기반 훅 매처 (실행 스크립트 44종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
 | `scripts/` | — | 훅 핸들러 / 설치 / CI 검증 / 세션 관리 도구 |
-| `tests/` | — | 1526개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
+| `tests/` | — | 1528개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
 | `docs/` | — | 장문 가이드(글쓰기 / 보안)와 steering 규칙 |
 
 상세 인덱스는 `docs/COMMAND-REGISTRY.json`에 자동 생성되어 있습니다.
 
 ## 대상 워크로드
 
-Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian 플러그인, RDBMS / MongoDB / DuckDB / DynamoDB, AWS + Bedrock, Hugging Face 기반 실시간 STT, Node.js, 창작·기술 블로깅·PPT 작성.
+Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian 플러그인, RDBMS / MongoDB / DuckDB / DynamoDB, AWS + Bedrock, Hugging Face 기반 실시간 STT, Node.js, 창작·기술 블로깅·PPT 작성. (opt-in) Apple 플랫폼(iOS/macOS/watchOS/visionOS, Swift) 개발.
 
 ## 핵심 에이전트
 
@@ -47,10 +47,14 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 - **DB**: `postgres-guideline`, `mysql-guideline`, `mongodb-guideline`, `dynamodb-guideline` — 스키마 / 인덱스 / 파티셔닝 / 샤딩 / 커넥션
 - **백엔드**: `fastapi-backend-best-practices`(7개 하위 영역), `python-patterns`, `rust-patterns`
-- **프론트엔드**: `obsidian-plugin-develop`(TypeScript + i18n + Chromium + 릴리스 체크리스트), `vite-patterns`, `frontend-patterns`
+- **프론트엔드**: `obsidian-plugin-develop`(TypeScript + i18n + Chromium + 릴리스 체크리스트), `vite-patterns`, `frontend-patterns`, `frontend-design`(anthropics/skills — 심미적 방향성·타이포그래피)
+- **랜딩페이지 디자인 (Supanova)**: `taste-skill`, `redesign-skill`, `soft-skill`, `output-skill` — 한글 우선 Standalone HTML + Tailwind CDN 랜딩페이지 생성/리디자인 엔진(origin: supanova-design-skill-main, based on Leonxlnx/taste-skill). `frontend` 워크로드.
+- **SEO/GEO/AEO**: `seo-geo-aeo`(origin: SNLabat/SEO-GEO-AEO-Skill) — SEO·생성형 검색엔진(GEO)·답변엔진(AEO) 3축 웹사이트 감사, Word/PDF 리포트. 기존 `seo` 스킬과 별개, `frontend` 워크로드.
 - **AI / 클라우드**: `claude-api`, `aws-bedrock`, `aws-cloud`, `realtime-stt-huggingface`, `cost-aware-llm-pipeline`, `ai-regression-testing`
 - **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`, `tech-writer`(한/영 기술 문서 작성·윤문 오케스트레이터, 5개 전용 에이전트)
+- **소셜 콘텐츠 (LinkedIn 개인 브랜딩)**: `voice-builder`, `newsletter-voice`, `post-writer`, `post-formatter`, `post-scorer`, `hook-generator`, `content-matrix`, `niche-research`, `graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `pinned-comment`, `profile-optimizer`, `analytics-dashboard`, `reels-scripting`, `youtube-thumbnail` — 17종, origin: charlie947/social-media-skills. `writing`과 분리된 별도 `social-content` 워크로드.
 - **한글 AI 티 제거**: `humanize-korean` — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 패턴을 탐지·윤문(`/humanize`·`/humanize-redo`, Fast/strict 모드). epoko77-ai/im-not-ai 통합.
+- **Apple 플랫폼 개발**: `apple-ios`, `apple-macos`, `apple-swift`, `apple-swiftui`, `apple-design`(Liquid Glass), `apple-testing`, `apple-generators`(63개 코드 생성기), `apple-security`, `apple-performance`, `apple-watchos`, `apple-visionos`, `apple-swiftdata`, `apple-mapkit`, `apple-foundation`, `apple-core-ml`, `apple-apple-intelligence`, `apple-product`(아이디어→App Store 스펙 워크플로), `apple-app-store`, `apple-growth`, `apple-legal`, `apple-monetization`, `apple-release-review`, `apple-shared` — 23개 카테고리, origin: rshankras/claude-code-apple-skills(MIT). 별도 `apple` 워크로드, 다른 워크로드와 독립적으로 opt-in.
 
 ## AWS Bedrock 워크플로 (최적화 포인트)
 
@@ -66,7 +70,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 ## 설치
 
-설치는 6개 톱레벨 카테고리(**백엔드 / 프론트엔드 / 플러그인 / 데이터 분석 / 데이터 설계 / 글쓰기**) 로 시작해서 카테고리별 sub-옵션(언어·엔진·플랫폼) 을 다중 선택하는 방식입니다. 선택된 sub-옵션이 워크로드 키로 변환되고, 그 키와 교집합인 자산만 `~/.claude/` 에 파일별 심볼릭 링크로 들어갑니다. 저장소에서 수정한 내용은 즉시 반영됩니다.
+설치는 7개 톱레벨 카테고리(**백엔드 / 프론트엔드 / 플러그인 / 데이터 분석 / 데이터 설계 / 글쓰기 / Apple 플랫폼**) 로 시작해서 카테고리별 sub-옵션(언어·엔진·플랫폼) 을 다중 선택하는 방식입니다. 선택된 sub-옵션이 워크로드 키로 변환되고, 그 키와 교집합인 자산만 `~/.claude/` 에 파일별 심볼릭 링크로 들어갑니다. 저장소에서 수정한 내용은 즉시 반영됩니다.
 
 ### 대화형 메뉴
 
@@ -87,7 +91,9 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 ./install.sh --category=data-analysis --data-analysis=duckdb,python  # DuckDB + 파이썬 분석
 ./install.sh --category=data-design --data-design=mysql         # MySQL 가이드라인만 (Postgres 제외)
 ./install.sh --category=plugin --plugin=obsidian                # Obsidian 플러그인 + 프론트
-./install.sh --category=writing                                 # 글쓰기 자산만
+./install.sh --category=writing --writing=tech                  # 글쓰기 — 기술 문서만 (LinkedIn 콘텐츠 제외)
+./install.sh --category=writing --writing=social                 # 글쓰기 — 소셜 콘텐츠(LinkedIn)만
+./install.sh --category=apple                                    # Apple 플랫폼 개발(iOS/macOS/watchOS/visionOS) 23개 카테고리
 ```
 
 | 카테고리 | sub-옵션 |
@@ -97,7 +103,8 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 | `plugin` | `obsidian`, `chrome` (예약), `claude` (예약) |
 | `data-analysis` | `duckdb`, `python` |
 | `data-design` | `mysql`, `postgres`, `mongodb`, `dynamodb` |
-| `writing` | (sub-옵션 없음) |
+| `writing` | `tech`(기술 문서·블로깅·PPT → `writing`), `social`(LinkedIn 콘텐츠 → `social-content`) |
+| `apple` | (sub-옵션 없음, 단일 워크로드 `apple`) |
 
 > sub-옵션 플래그(`--backend=...` 등)를 명시하면 해당 카테고리는 자동으로 활성화되므로 `--category=` 는 생략 가능합니다.
 
@@ -135,7 +142,7 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 
 각 자산의 그룹은 frontmatter 의 `workloads:` 키로 결정됩니다 (`workloads: [python-backend]`, `workloads: [obsidian, frontend]` 등). 키가 없거나 frontmatter 자체가 없는 파일은 `scripts/install/workloads.js` 의 휴리스틱으로 폴백 분류됩니다 (rules/ 는 부모 폴더 기준). 일괄 재태깅은 `node scripts/install/tag-assets.js --dry-run` 으로 미리보고 `--apply` 로 적용합니다.
 
-전체 워크로드 키 목록: `core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing` (그 외 메뉴 비노출·수동 전용 키 `lab`).
+전체 워크로드 키 목록: `core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing, social-content, apple` (그 외 메뉴 비노출·수동 전용 키 `lab`).
 
 훅 병합은 `id`(`pre:bash:dispatcher`, `stop:cost-tracker` 등) 기준으로 멱등하게 동작하며, 변경 전 `settings.json.bak.<ISO>` 백업을 남깁니다. 사용자가 수동으로 추가한 훅 항목은 그대로 보존됩니다.
 
@@ -172,7 +179,7 @@ python 3.12.8
 
 ## MCP 서버
 
-샘플 설정은 `mcp-configs/mcp-servers.json`과 `.mcp.json`에 있습니다 — github(remote), context7, exa(remote), brave-search, sentry(remote·OAuth), time, playwright. 컨텍스트 윈도 보호를 위해 동시 활성 서버는 10개 이하로 유지합니다. 토큰 같은 비밀값은 `${VAR}` 환경 변수 참조로만 두고(`GITHUB_PAT`, `BRAVE_API_KEY`) 실제 값은 절대 커밋하지 않습니다.
+실제 활성 설정은 `.mcp.json`에 있습니다 — github(remote), context7, exa(remote), brave-search, sentry(remote·OAuth), time, playwright (7개). `mcp-configs/mcp-servers.json`은 복사용 샘플 카탈로그로, 위 7개에 agent-browser(stdio, Vercel 공식 CLI), higgsfield(remote·OAuth, 이미지/영상 생성), zapier(remote·OAuth, 9,000+ 앱 연동)를 더해 10개를 보유합니다. 필요한 항목만 `.mcp.json`으로 복사해 쓰세요. 컨텍스트 윈도 보호를 위해 동시 활성 서버는 10개 이하로 유지합니다. 토큰 같은 비밀값은 `${VAR}` 환경 변수 참조로만 두고(`GITHUB_PAT`, `BRAVE_API_KEY`) 실제 값은 절대 커밋하지 않습니다.
 
 ## 자주 쓰는 슬래시 커맨드
 
@@ -189,7 +196,7 @@ python 3.12.8
 
 ```bash
 npm run lint                      # ESLint
-npm test                          # CI 검증 + 전체 테스트 슈트(1526개)
+npm test                          # CI 검증 + 전체 테스트 슈트(1528개)
 node tests/run-all.js             # 테스트만 따로 실행
 npm run command-registry:write    # 커맨드 레지스트리 갱신
 npm run command-registry:check    # 동기화 상태만 확인 (CI용)

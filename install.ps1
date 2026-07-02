@@ -17,6 +17,7 @@
 #   -Plugin      obsidian, chrome, claude
 #   -DataAnalysis duckdb, python
 #   -DataDesign  mysql, postgres, mongodb, dynamodb
+#   -Writing     tech, social
 #
 # 그 외 옵션:
 #   -WithHooks   hooks 를 settings.json 에 병합. 대화형이면 워크로드 설치 후

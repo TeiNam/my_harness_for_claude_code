@@ -36,6 +36,8 @@ const PLACEHOLDER_USERNAMES = new Set([
   'yourname',
   'yourusername',
   'your-username',
+  // Not a personal account — the real macOS/Windows system-wide shared directory.
+  'shared',
 ]);
 
 const POSIX_USER_RE = /\/Users\/([a-zA-Z][a-zA-Z0-9._-]*)/g;

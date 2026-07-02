@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-03
+
+- feat(mcp): 샘플 카탈로그에 agent-browser·higgsfield·zapier MCP 추가 (e0e5bc0)
+
 ## 2026-07-01
 
 - docs: 매니페스트 수치를 실제 코드와 동기화 (757c43d)

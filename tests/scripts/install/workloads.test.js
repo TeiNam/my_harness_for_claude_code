@@ -36,6 +36,7 @@ function runTests() {
     // 메뉴 sub-옵션과 1:1 매칭되는 정밀 키 + core 베이스라인.
     assert.deepStrictEqual(GROUPS.slice().sort(), [
       'ai',
+      'apple',
       'cloud',
       'core',
       'dynamodb',
@@ -51,6 +52,7 @@ function runTests() {
       'python-backend',
       'python-data',
       'rust',
+      'social-content',
       'writing',
     ]);
   })) passed++; else failed++;

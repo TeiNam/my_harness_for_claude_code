@@ -42,8 +42,12 @@ const GROUPS = [
   'mongodb',
   'dynamodb',
 
-  // 글쓰기 카테고리
-  'writing',
+  // 글쓰기 카테고리 sub-옵션
+  'writing',         // 기술 문서 / 블로깅 / PPT / 장문 콘텐츠
+  'social-content',  // LinkedIn 개인 브랜딩 · 소셜 콘텐츠 제작 (voice-builder 등)
+
+  // Apple 플랫폼 개발 카테고리 (iOS / macOS / watchOS / visionOS 통합, Swift 동시성 포함)
+  'apple',
 
   // 메뉴에 노출되지 않는 격리 그룹 — 하네스 메타/실험 자산용.
   // 어떤 카테고리에도 매핑되지 않으므로 --all 에도 끌려오지 않는다.
@@ -150,6 +154,25 @@ const RULES = [
   { pattern: /^ppt[-_]authoring$/i, groups: ['writing'] },
   { pattern: /^frontend[-_]slides$/i, groups: ['writing', 'frontend'] },
   { pattern: /^translator[-_]docs$/i, groups: ['writing'] },
+
+  // -- Social Content (LinkedIn 개인 브랜딩, charlie947/social-media-skills) --
+  { pattern: /^voice[-_]builder$/i, groups: ['social-content'] },
+  { pattern: /^post[-_](writer|formatter|scorer)$/i, groups: ['social-content'] },
+  { pattern: /^hook[-_]generator$/i, groups: ['social-content'] },
+  { pattern: /^content[-_]matrix$/i, groups: ['social-content'] },
+  { pattern: /^newsletter[-_]voice$/i, groups: ['social-content'] },
+  { pattern: /^niche[-_]research$/i, groups: ['social-content'] },
+  { pattern: /^profile[-_]optimizer$/i, groups: ['social-content'] },
+  { pattern: /^quote[-_]post$/i, groups: ['social-content'] },
+  { pattern: /^pinned[-_]comment$/i, groups: ['social-content'] },
+  { pattern: /^graphic[-_]designer$/i, groups: ['social-content'] },
+  { pattern: /^gemini[-_](carousel|infographic)$/i, groups: ['social-content'] },
+  { pattern: /^youtube[-_]thumbnail$/i, groups: ['social-content'] },
+  { pattern: /^reels[-_]scripting$/i, groups: ['social-content'] },
+  { pattern: /^analytics[-_]dashboard$/i, groups: ['social-content'] },
+
+  // -- Apple 플랫폼 개발 (rshankras/claude-code-apple-skills) -------------
+  { pattern: /^apple[-_]/i, groups: ['apple'] },
 
   // -- 기타 reviewer / kind 한정 룰 ------------------------------------
   { pattern: /^rust[-_]reviewer$/i, groups: ['rust'], kind: 'agent' },

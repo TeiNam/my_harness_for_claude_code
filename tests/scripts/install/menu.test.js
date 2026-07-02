@@ -30,10 +30,10 @@ function runTests() {
   let passed = 0;
   let failed = 0;
 
-  if (test('CATEGORIES exposes the 6 user-facing top levels', () => {
+  if (test('CATEGORIES exposes the 7 user-facing top levels', () => {
     assert.deepStrictEqual(CATEGORY_IDS, [
       'backend', 'frontend', 'plugin',
-      'data-analysis', 'data-design', 'writing',
+      'data-analysis', 'data-design', 'writing', 'apple',
     ]);
   })) passed++; else failed++;
 
@@ -94,9 +94,30 @@ function runTests() {
       ['core', 'dynamodb', 'mongodb', 'mysql', 'postgres']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: writing has no sub-options and resolves directly', () => {
+  if (test('resolveSelection: writing with no sub-selection means "all sub-options"', () => {
     const r = resolveSelection({ categories: ['writing'] });
+    assert.deepStrictEqual(r.workloads, ['core', 'social-content', 'writing']);
+  })) passed++; else failed++;
+
+  if (test('resolveSelection: writing.tech excludes social-content', () => {
+    const r = resolveSelection({
+      categories: ['writing'],
+      subSelections: { writing: ['tech'] },
+    });
     assert.deepStrictEqual(r.workloads, ['core', 'writing']);
+  })) passed++; else failed++;
+
+  if (test('resolveSelection: writing.social excludes writing', () => {
+    const r = resolveSelection({
+      categories: ['writing'],
+      subSelections: { writing: ['social'] },
+    });
+    assert.deepStrictEqual(r.workloads, ['core', 'social-content']);
+  })) passed++; else failed++;
+
+  if (test('resolveSelection: apple has no sub-options and resolves directly', () => {
+    const r = resolveSelection({ categories: ['apple'] });
+    assert.deepStrictEqual(r.workloads, ['apple', 'core']);
   })) passed++; else failed++;
 
   if (test('resolveSelection: plugin=obsidian also drags frontend', () => {
