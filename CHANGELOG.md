@@ -2,8 +2,14 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-01
+
+- docs: 매니페스트 수치를 실제 코드와 동기화 (757c43d)
+- feat(skills): ai-tui 스킬 추가 — 터미널 에이전트 초기화면·두뇌 크로스 언어 레퍼런스 (e9d6e5d)
+
 ## 2026-06-28
 
+- feat(install): 워크로드 설치 후 hooks·mcp 추가 설치 프롬프트 (c737b36)
 - docs(common): MCP 변경에 맞춰 공통 영역 문서·설정 동기화 (6f49c9c)
 - i18n(skills): 한글 작성 스킬 6종을 영어로 번역 (토큰 절감) (2155577)
 - feat(skills): mysql-guideline 에 개발 원칙·안티패턴·JDBC ref 2개 추가 (d374522)

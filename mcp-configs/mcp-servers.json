@@ -40,6 +40,21 @@
       "command": "npx",
       "args": ["-y", "@playwright/mcp", "--headless"],
       "description": "Headless browser automation and testing. Use --extension instead to drive a running browser."
+    },
+    "agent-browser": {
+      "command": "agent-browser",
+      "args": ["mcp"],
+      "description": "Vercel Agent Browser official MCP (stdio, core tools profile) — semantic selectors, AI-optimized, built on Playwright. Requires: npm install -g agent-browser && agent-browser install. Use --tools all for full CLI parity."
+    },
+    "higgsfield": {
+      "type": "http",
+      "url": "https://mcp.higgsfield.ai/mcp",
+      "description": "Higgsfield AI image/video generation (30+ models: Soul, Kling, Veo, Flux, Seedream). Remote OAuth — no API key in config; authenticate with your Higgsfield account on first use."
+    },
+    "zapier": {
+      "type": "http",
+      "url": "https://mcp.zapier.com/api/v1/connect",
+      "description": "Zapier MCP — 9,000+ app integrations, 40,000+ actions. Remote OAuth; sign in at mcp.zapier.com when prompted. Claude Code plugin alt: /plugin install zapier@claude-plugins-official."
     }
   },
   "_comments": {
