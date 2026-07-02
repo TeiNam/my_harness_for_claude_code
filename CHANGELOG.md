@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-03
 
+- feat(skills): 소셜 콘텐츠·랜딩페이지·Apple 플랫폼 스킬 세트 통합 (4e64898)
 - feat(mcp): 샘플 카탈로그에 agent-browser·higgsfield·zapier MCP 추가 (e0e5bc0)
 
 ## 2026-07-01
