@@ -45,6 +45,10 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 The longer reviewer/architect agents (`code-reviewer`, `python-reviewer`, `typescript-reviewer`, `rust-reviewer`, `architect`, etc.) are kept alongside shorter counterparts — they overlap but are more detailed.
 
+### Model Routing (per-agent model tiers)
+
+Agents declare `model:` as an **alias** (`opus` / `sonnet` / `haiku`), never a pinned version ID, so the fleet follows model upgrades without a mass re-tag. Current lineup: `opus`→**Opus 4.8**, `sonnet`→**Sonnet 5**, `haiku`→**Haiku 4.5**. The authoritative policy (task tables, agent-class map, orchestration, Codex handoff) is `rules/common/model-routing.md`; `commands/model-route.md` and `/model-route` defer to it. Classes: reasoning-heavy/high-stakes agents (`architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity/quality auditors) → `opus`; implementation/review specialists → `sonnet`; mechanical high-frequency (`doc-updater`, `docs-lookup`) → `haiku`. Pick by worst-case cost of a wrong answer, not the average. For a genuinely independent cross-family opinion, route to Codex via `skills/codex-cli` (not just a re-prompt of the same model).
+
 ## High-value Skills for Owner's Workloads
 
 Filled-in (real content, not placeholder):
@@ -55,6 +59,8 @@ Filled-in (real content, not placeholder):
 - **SEO/GEO/AEO**: `skills/seo-geo-aeo/` (origin: SNLabat/SEO-GEO-AEO-Skill) — URL 하나로 SEO·GEO(생성형 검색엔진)·AEO(답변엔진) 3축 감사, Word/PDF 리포트 산출. 기존 `skills/seo/`(harness 자체 SEO 스킬)와 별개, 둘 다 `frontend` 워크로드.
 - **AI**: `skills/claude-api/` (Anthropic SDK), `skills/foundation-models-on-device/`, `skills/ai-regression-testing/`, `skills/cost-aware-llm-pipeline/`, `skills/aws-bedrock/`, `skills/realtime-stt-huggingface/`, `skills/ai-tui/`
 - **AI TUI (터미널 에이전트 초기화면·두뇌)**: `skills/ai-tui/` — Claude Code·stocker 스타일 터미널 AI 에이전트의 초기화면(배너·로고·입력창·힌트바 6요소)과 두뇌(프롬프트·스킬·MCP·사용룰)를 세팅하는 크로스 언어 레퍼런스. `references/` 4종 — 언어별 3종(`node-pi-tui`, `rust-ratatui`, `python-textual`)과 언어 중립 `agent-brain-setup`. 유지형(pi-tui/textual) vs 즉시형(ratatui) 렌더링 차이와 ANSI 폭 함정을 언어별로 대비. `${CLAUDE_SKILL_DIR}` 토큰 치환. `ai`·`nodejs`·`rust`·`python-backend` 워크로드로 통합.
+- **Codex (교차 모델 세컨드 오피니언)**: `skills/codex-cli/` — OpenAI Codex CLI(`codex exec` / `resume`)를 Claude Code 안에서 호출. 다른 모델 패밀리의 독립적 리뷰(Claude 작성 코드의 adversarial 검토), 어려운 결정의 tie-break, 대규모 기계적 편집 오프로드용. `</dev/null` stdin 리다이렉트(비-TTY 무한 대기 방지)·`2>/dev/null`(thinking 억제)·`--skip-git-repo-check` 3종은 필수. 샌드박스는 최소 권한(`read-only` 기본), `--full-auto`/`danger-full-access`는 사전 승인. Codex 출력은 검증 대상인 제안이지 정답 아님. `core` 워크로드.
+- **문서 생성 (PDF / DOCX / XLSX)**: `skills/pdf/`(pypdf 읽기·병합·폼필·분할, reportlab/weasyprint 생성, CJK 폰트 등록), `skills/docx/`(python-docx + docxtpl 템플릿 채우기, 스타일·표·한글 eastAsia 폰트), `skills/xlsx/`(openpyxl 스타일 리포트·수식·차트, pandas 핸드오프, `data_only` 함정) — 프로그래밍 방식 오피스 문서 산출. 슬라이드는 `ppt-authoring`+`frontend-slides`, 사람처럼 쓴 한글 산문은 `humanize-korean`가 담당하므로 별도 스킬 미신설. `core` 워크로드.
 - **Cloud**: `skills/aws-cloud/` (IAM, S3, Lambda, ECS/Fargate, RDS, networking, cost guardrails)
 - **Backend**: `skills/fastapi-backend-best-practices/` (api-design, async-patterns, deployment, domain-modeling, project-structure, security, testing), `skills/python-patterns/`, `skills/rust-patterns/`
 - **Writing**: `skills/markdown-writing/`, `skills/article-writing/`, `skills/brand-voice/`, `skills/crosspost/`, `skills/frontend-slides/`, `skills/tech-blogging/`, `skills/creative-writing/`, `skills/ppt-authoring/`, `skills/tech-writer/`

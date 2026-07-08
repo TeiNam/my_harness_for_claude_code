@@ -113,18 +113,18 @@ Optimize the tools you use and subagent architecture designed to delegate the ch
 ![Model Selection Table](./assets/images/longform/04-model-selection.png)
 *Hypothetical setup of subagents on various common tasks and reasoning behind the choices*
 
-| Task Type                 | Model  | Why                                        |
-| ------------------------- | ------ | ------------------------------------------ |
-| Exploration/search        | Haiku  | Fast, cheap, good enough for finding files |
-| Simple edits              | Haiku  | Single-file changes, clear instructions    |
-| Multi-file implementation | Sonnet | Best balance for coding                    |
-| Complex architecture      | Opus   | Deep reasoning needed                      |
-| PR reviews                | Sonnet | Understands context, catches nuance        |
-| Security analysis         | Opus   | Can't afford to miss vulnerabilities       |
-| Writing docs              | Haiku  | Structure is simple                        |
-| Debugging complex bugs    | Opus   | Needs to hold entire system in mind        |
+| Task Type                 | Model         | Why                                        |
+| ------------------------- | ------------- | ------------------------------------------ |
+| Exploration/search        | Haiku 4.5     | Fast, cheap, good enough for finding files |
+| Simple edits              | Haiku 4.5     | Single-file changes, clear instructions    |
+| Multi-file implementation | Sonnet 5      | Best balance for coding                    |
+| Complex architecture      | Opus 4.8      | Deep reasoning needed                      |
+| PR reviews                | Sonnet 5      | Understands context, catches nuance        |
+| Security analysis         | Opus 4.8      | Can't afford to miss vulnerabilities       |
+| Writing docs              | Haiku 4.5     | Structure is simple                        |
+| Debugging complex bugs    | Opus 4.8      | Needs to hold entire system in mind        |
 
-Default to Sonnet for 90% of coding tasks. Upgrade to Opus when first attempt failed, task spans 5+ files, architectural decisions, or security-critical code.
+Default to Sonnet 5 for 90% of coding tasks. Upgrade to Opus 4.8 when first attempt failed, task spans 5+ files, architectural decisions, or security-critical code. Full policy: `rules/common/model-routing.md`.
 
 **Pricing Reference:**
 

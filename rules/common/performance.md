@@ -2,20 +2,24 @@
 
 ## Model Selection Strategy
 
-**Haiku 4.5** (90% of Sonnet capability, 3x cost savings):
+> Full policy — task tables, agent-class map, orchestration, Codex — lives in
+> [model-routing.md](./model-routing.md). Summary below.
+
+**Haiku 4.5** (~90% of Sonnet capability, ~3x cost savings):
 - Lightweight agents with frequent invocation
-- Pair programming and code generation
+- Mechanical edits, search, doc scaffolding
 - Worker agents in multi-agent systems
 
-**Sonnet 4.6** (Best coding model):
+**Sonnet 5** (Best coding model — default for ~90% of coding):
 - Main development work
 - Orchestrating multi-agent workflows
-- Complex coding tasks
+- Multi-file implementation and refactors
 
-**Opus 4.5** (Deepest reasoning):
+**Opus 4.8** (Deepest reasoning):
 - Complex architectural decisions
-- Maximum reasoning requirements
-- Research and analysis tasks
+- Security analysis and adversarial review
+- Ambiguous requirements, system-wide debugging
+- Fast mode (`/fast`) keeps Opus reasoning with faster output
 
 ## Context Window Management
 

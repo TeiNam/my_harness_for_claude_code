@@ -20,8 +20,8 @@
 |---|---:|---|
 | `agents/` | 49 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
 | `commands/` | 52 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 177 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 / Apple 플랫폼 등) |
-| `rules/` | 36 | common 레이어 + 언어별(typescript / python / rust / web) |
+| `skills/` | 180 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / Codex / 문서 생성(PDF·DOCX·XLSX) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 / Apple 플랫폼 등) |
+| `rules/` | 37 | common 레이어(모델 라우팅 정책 포함) + 언어별(typescript / python / rust / web) |
 | `hooks/` | 29 | 이벤트 기반 훅 매처 (실행 스크립트 44종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
 | `scripts/` | — | 훅 핸들러 / 설치 / CI 검증 / 세션 관리 도구 |
@@ -51,6 +51,8 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 - **랜딩페이지 디자인 (Supanova)**: `taste-skill`, `redesign-skill`, `soft-skill`, `output-skill` — 한글 우선 Standalone HTML + Tailwind CDN 랜딩페이지 생성/리디자인 엔진(origin: supanova-design-skill-main, based on Leonxlnx/taste-skill). `frontend` 워크로드.
 - **SEO/GEO/AEO**: `seo-geo-aeo`(origin: SNLabat/SEO-GEO-AEO-Skill) — SEO·생성형 검색엔진(GEO)·답변엔진(AEO) 3축 웹사이트 감사, Word/PDF 리포트. 기존 `seo` 스킬과 별개, `frontend` 워크로드.
 - **AI / 클라우드**: `claude-api`, `aws-bedrock`, `aws-cloud`, `realtime-stt-huggingface`, `cost-aware-llm-pipeline`, `ai-regression-testing`
+- **Codex (교차 모델)**: `codex-cli` — OpenAI Codex CLI를 Claude Code 안에서 호출해 다른 모델 패밀리의 독립 리뷰·tie-break·대규모 기계적 편집 오프로드. `core` 워크로드.
+- **문서 생성**: `pdf`(pypdf·reportlab·weasyprint), `docx`(python-docx·docxtpl), `xlsx`(openpyxl·pandas) — 프로그래밍 방식 PDF/Word/Excel 산출. 슬라이드는 `ppt-authoring`·`frontend-slides`. `core` 워크로드.
 - **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`, `tech-writer`(한/영 기술 문서 작성·윤문 오케스트레이터, 5개 전용 에이전트)
 - **소셜 콘텐츠 (LinkedIn 개인 브랜딩)**: `voice-builder`, `newsletter-voice`, `post-writer`, `post-formatter`, `post-scorer`, `hook-generator`, `content-matrix`, `niche-research`, `graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `pinned-comment`, `profile-optimizer`, `analytics-dashboard`, `reels-scripting`, `youtube-thumbnail` — 17종, origin: charlie947/social-media-skills. `writing`과 분리된 별도 `social-content` 워크로드.
 - **한글 AI 티 제거**: `humanize-korean` — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 패턴을 탐지·윤문(`/humanize`·`/humanize-redo`, Fast/strict 모드). epoko77-ai/im-not-ai 통합.

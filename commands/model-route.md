@@ -13,9 +13,16 @@ Recommend the best model tier for the current task by complexity and budget.
 
 ## Routing Heuristic
 
-- `haiku`: deterministic, low-risk mechanical changes
-- `sonnet`: default for implementation and refactors
-- `opus`: architecture, deep review, ambiguous requirements
+- `haiku` (Haiku 4.5): deterministic, low-risk mechanical changes, search
+- `sonnet` (Sonnet 5): default for implementation and refactors — ~90% of coding
+- `opus` (Opus 4.8): architecture, security, deep review, ambiguous requirements
+
+Default to Sonnet 5; escalate to Opus 4.8 on failed first attempt, 5+ files,
+architectural, or security-critical work. Fast mode keeps Opus reasoning at
+lower latency — prefer it over downgrading when you need Opus-level judgment
+fast. For a cross-family second opinion, route to Codex (`skills/codex-cli`).
+
+Full policy: `rules/common/model-routing.md`.
 
 ## Required Output
 
