@@ -3,7 +3,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg)
 ![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3.svg)
-![Tests](https://img.shields.io/badge/tests-1528%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-1529%20passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/teinam)
@@ -25,7 +25,7 @@
 | `hooks/` | 29 | 이벤트 기반 훅 매처 (실행 스크립트 44종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
 | `scripts/` | — | 훅 핸들러 / 설치 / CI 검증 / 세션 관리 도구 |
-| `tests/` | — | 1528개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
+| `tests/` | — | 1529개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
 | `docs/` | — | 장문 가이드(글쓰기 / 보안)와 steering 규칙 |
 
 상세 인덱스는 `docs/COMMAND-REGISTRY.json`에 자동 생성되어 있습니다.
@@ -33,6 +33,20 @@
 ## 대상 워크로드
 
 Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian 플러그인, RDBMS / MongoDB / DuckDB / DynamoDB, AWS + Bedrock, Hugging Face 기반 실시간 STT, Node.js, 창작·기술 블로깅·PPT 작성. (opt-in) Apple 플랫폼(iOS/macOS/watchOS/visionOS, Swift) 개발.
+
+## 모델 라우팅
+
+에이전트마다 작업 성격에 맞는 모델 티어를 `model:` frontmatter에 **별칭**(`opus` / `sonnet` / `haiku`)으로 선언합니다. 버전 ID를 직접 박지 않으므로, 모델이 업그레이드돼도 대규모 재태깅 없이 최신 라인업을 따라갑니다.
+
+| 별칭 | 현재 매핑 | 성격 | 대표 에이전트 |
+|---|---|---|---|
+| `opus` | **Opus 4.8** | 가장 깊은 추론 — 아키텍처·모호성·적대적 리뷰·시스템 전반 디버깅 | `architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity/quality 감사관 |
+| `sonnet` | **Sonnet 5** | 최고의 코딩 모델 — 구현·리팩터·PR 리뷰(코딩의 ~90%) | 언어별 리뷰어, `code-*`, `devops`, `tdd-guide`, `refactor-cleaner`, 작성가 |
+| `haiku` | **Haiku 4.5** | Sonnet의 ~90% 성능을 ~3× 저렴하게 — 기계적 편집·검색·문서 스캐폴딩 | `doc-updater`, `docs-lookup`, 고빈도 워커 |
+
+기본은 Sonnet 5. 첫 시도가 실패했거나 · 5개 이상 파일에 걸치거나 · 아키텍처 결정이거나 · 보안이 걸린 작업이면 Opus 4.8로 올리고, 결정적이고 위험이 낮은 작업은 Haiku 4.5로 내립니다. 에이전트 클래스는 평균이 아니라 **틀렸을 때의 최악 비용**으로 고릅니다 (머지를 게이팅하는 리뷰어는 대부분 쉬워도 `opus`).
+
+권위 있는 정책(작업 표·에이전트 클래스 맵·오케스트레이션·Codex 핸드오프)은 `rules/common/model-routing.md`에 있고, `/model-route` 커맨드와 `performance.md`가 이를 참조합니다. 다른 모델 패밀리의 독립적 세컨드 오피니언이 필요하면 `skills/codex-cli`로 OpenAI Codex CLI를 호출합니다.
 
 ## 핵심 에이전트
 
@@ -198,7 +212,7 @@ python 3.12.8
 
 ```bash
 npm run lint                      # ESLint
-npm test                          # CI 검증 + 전체 테스트 슈트(1528개)
+npm test                          # CI 검증 + 전체 테스트 슈트(1529개)
 node tests/run-all.js             # 테스트만 따로 실행
 npm run command-registry:write    # 커맨드 레지스트리 갱신
 npm run command-registry:check    # 동기화 상태만 확인 (CI용)

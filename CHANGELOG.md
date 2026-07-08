@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-09
+
+- feat(models): 모델별 라우팅 정책 + Codex·문서생성 스킬 추가 (bb28acc)
+
 ## 2026-07-03
 
 - chore(skills): 유니코드 세이프티 자동 정리 및 android 스킬 추가 (ba5298c)
