@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-09
 
+- docs: README 모델 라우팅 섹션 추가 + 테스트 수·CHANGELOG 동기화 (bffdc58)
 - feat(models): 모델별 라우팅 정책 + Codex·문서생성 스킬 추가 (bb28acc)
 
 ## 2026-07-03
