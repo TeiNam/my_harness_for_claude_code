@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-11
 
+- feat(install): 글로벌 상태 검사·매니페스트 기록 플로우 (install.sh/ps1) (e55e314)
 - feat(install): 방향키 체크박스 3-tier 대화형 메뉴 (b10474b)
 - feat(install): apple/social 3분할 + manifest·check-global + menu 상세 tier (ef7157f)
 - docs: 설치 설계 리뷰 반영 — detailOptions leaf 부착·교차소속·별칭 확정 (30a472a)
