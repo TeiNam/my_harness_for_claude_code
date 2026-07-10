@@ -10,14 +10,18 @@
 #   2) 메뉴 CLI 플래그(-Category 등)가 있으면 비대화형으로 select-workloads.js 실행
 #   3) 인자가 없고 콘솔이면 select-workloads.js 가 대화형 메뉴를 띄움
 #
-# 메뉴 카테고리: backend / frontend / plugin / data-analysis / data-design / writing
+# 메뉴 카테고리: backend / frontend / plugin / data-analysis / data-design / writing / apple
 # Sub-옵션 플래그:
-#   -Backend     python, rust, nodejs, cloud, ai
-#   -Frontend    react-vite-ts
-#   -Plugin      obsidian, chrome, claude
-#   -DataAnalysis duckdb, python
-#   -DataDesign  mysql, postgres, mongodb, dynamodb
-#   -Writing     tech, social
+#   -Backend       python, rust, nodejs, cloud, ai
+#   -Frontend      react-vite-ts
+#   -Plugin        obsidian, chrome, claude
+#   -DataAnalysis  duckdb, python
+#   -DataDesign    mysql, postgres, mongodb, dynamodb
+#   -Writing       tech, social
+# 상세(3단계) 플래그:
+#   -Apple         core, platform, product     (apple 카테고리 상세)
+#   -WritingSocial voice, content, visual       (writing.social 상세)
+#   -Category=apple 는 3개 상세 전체 별칭
 #
 # 그 외 옵션:
 #   -WithHooks   hooks 를 settings.json 에 병합. 대화형이면 워크로드 설치 후
@@ -46,7 +50,9 @@ param(
     [string[]]$Plugin,
     [string[]]$DataAnalysis,
     [string[]]$DataDesign,
-    [string[]]$Writing
+    [string[]]$Writing,
+    [string[]]$Apple,          # 상세: core, platform, product (apple 은 sub 없음)
+    [string[]]$WritingSocial   # 상세: voice, content, visual (writing.social)
 )
 
 Set-StrictMode -Version Latest
@@ -87,6 +93,8 @@ function Build-MenuArgs {
         'data-analysis'  = (Join-CommaList $DataAnalysis)
         'data-design'    = (Join-CommaList $DataDesign)
         writing          = (Join-CommaList $Writing)
+        apple            = (Join-CommaList $Apple)            # 카테고리 레벨 상세
+        'writing-social' = (Join-CommaList $WritingSocial)    # sub 레벨 상세
     }
     foreach ($k in $pairs.Keys) {
         if ($pairs[$k]) { $args += "--$k=$($pairs[$k])" }
@@ -277,8 +285,46 @@ if (-not (Test-Path -LiteralPath $ClaudeDir)) {
     exit 1
 }
 
+$CheckGlobalScript = Join-Path $HarnessDir 'scripts/install/check-global.js'
+$ManifestScript    = Join-Path $HarnessDir 'scripts/install/manifest.js'
+
+# 1단계: 글로벌 baseline 설치 상태를 보고 (absent / outdated / current).
+function Show-GlobalState {
+    $json = & node $CheckGlobalScript "--claude-home=$ClaudeDir" "--root=$HarnessDir" 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $json) { return }
+    try { $obj = ($json | Out-String | ConvertFrom-Json) } catch { return }
+    # StrictMode 대비: 없는 속성 접근은 예외를 던지므로 PSObject.Properties 로 방어.
+    $prop = { param($o, $n) if ($o.PSObject.Properties[$n]) { $o.$n } else { $null } }
+    $state     = & $prop $obj 'state'
+    $installedV = & $prop $obj 'installedVersion'
+    $repoV     = & $prop $obj 'repoVersion'
+    $installed = if ($installedV) { $installedV } else { 'none' }
+    $repo = if ($repoV) { $repoV } else { '?' }
+    $stateLabel = if ($state) { $state } else { 'unknown' }
+    Write-Host "==> Global baseline: $stateLabel (installed: $installed, repo: $repo)"
+    switch ($state) {
+        'absent'   { Write-Host '    글로벌 하네스 없음 - 신규 설치합니다.' }
+        'outdated' { Write-Host '    설치된 버전이 오래됨 - 갱신합니다 (필요 시 -Force).' }
+        'current'  { Write-Host '    최신 상태 - 선택한 워크로드만 반영합니다.' }
+    }
+}
+
+# 설치 종료 후 매니페스트 기록 (다음 실행의 상태 판정 근거).
+function Write-HarnessManifest {
+    param([string]$WlCsv)
+    if ($DryRun) { Write-Host "[dry-run] write manifest ($ClaudeDir)"; return }
+    $repo = (Get-Content -LiteralPath (Join-Path $HarnessDir 'VERSION') -Raw).Trim()
+    & node $ManifestScript write "--claude-home=$ClaudeDir" "--version=$repo" "--workloads=$WlCsv" 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        $wl = if ($WlCsv) { $WlCsv } else { '<all>' }
+        Write-Host "manifest: $ClaudeDir\_harness-manifest.json (v$repo, workloads: $wl)"
+    }
+}
+
 $ResolvedWorkloads = $null
 if (-not $Uninstall) {
+    Show-GlobalState
+    Write-Host ''
     $ResolvedWorkloads = Resolve-Workloads
     Test-Workloads -WlCsv $ResolvedWorkloads
     $label = if ($ResolvedWorkloads) { $ResolvedWorkloads } else { '<all>' }
@@ -351,9 +397,11 @@ if ($Uninstall) {
 
 if ($Uninstall -and -not $DryRun) {
     Remove-EmptyHarnessDirs
+    Remove-Item -LiteralPath (Join-Path $ClaudeDir '_harness-manifest.json') -Force -ErrorAction SilentlyContinue
 }
 
 if (-not $Uninstall) {
+    Write-HarnessManifest -WlCsv $ResolvedWorkloads
     Write-Host ''
     if ($hooksDone) {
         Write-Host "Done. Symlinks installed and hooks merged into `$ClaudeDir\settings.json."

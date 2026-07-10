@@ -7,9 +7,12 @@
 #
 # 워크로드 결정은 두 가지 방식 모두 지원한다:
 #   A) 대화형 메뉴      — 인자가 없고 TTY 가 있을 때.
-#   B) 메뉴 CLI 플래그  — 6개 톱레벨 카테고리와 sub-옵션 플래그.
+#   B) 메뉴 CLI 플래그  — 7개 톱레벨 카테고리와 sub-옵션·상세 플래그.
 #                          예: --category=backend,writing --backend=python,cloud
 #                              --data-design=mysql
+#                          상세(3단계): --apple=core,platform (apple 상세),
+#                              --writing-social=voice,content (writing.social 상세).
+#                              --category=apple 은 3개 상세 전체 별칭.
 #   C) 저수준 플래그    — 워크로드 키를 직접 넣고 싶을 때 (--workload=...).
 #
 # 저수준 플래그가 들어오면 메뉴는 무시한다.
@@ -57,7 +60,7 @@ for arg in "$@"; do
         --skip-workload=*)      SKIP_WORKLOAD="${arg#--skip-workload=}" ;;
         --skip-workloads=*)     SKIP_WORKLOAD="${arg#--skip-workloads=}" ;;
         --all)                  MENU_ARGS+=("--all") ;;
-        --category=*|--backend=*|--frontend=*|--plugin=*|--data-analysis=*|--data-design=*|--writing=*)
+        --category=*|--backend=*|--frontend=*|--plugin=*|--data-analysis=*|--data-design=*|--writing=*|--apple=*|--writing-social=*)
                                 MENU_ARGS+=("$arg") ;;
         -h|--help)
             grep '^#' "$0" | sed 's/^# \{0,1\}//'
@@ -285,6 +288,38 @@ build_selection() {
     fi
 }
 
+# 1단계: 글로벌 baseline 설치 상태를 보고한다 (check-global.js).
+#   absent   — 매니페스트/루트링크 없음 → 신규 설치 진행
+#   outdated — 설치된 버전 < repo VERSION → 갱신 진행
+#   current  — 최신 → 그대로(멱등 재링크)
+# 심볼릭 설치는 멱등이라 세 경우 모두 아래 링크 루프를 그대로 태운다.
+# 여기서는 사용자에게 상태만 알린다.
+report_global_state() {
+    local json state installed repo
+    json="$(node "$HARNESS_DIR/scripts/install/check-global.js" --claude-home="$CLAUDE_DIR" --root="$HARNESS_DIR" 2>/dev/null)" || return 0
+    state="$(printf '%s' "$json" | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{try{console.log(JSON.parse(d).state)}catch{console.log("")}})' 2>/dev/null)"
+    installed="$(printf '%s' "$json" | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{try{console.log(JSON.parse(d).installedVersion||"")}catch{console.log("")}})' 2>/dev/null)"
+    repo="$(printf '%s' "$json" | node -e 'let d="";process.stdin.on("data",c=>d+=c);process.stdin.on("end",()=>{try{console.log(JSON.parse(d).repoVersion||"")}catch{console.log("")}})' 2>/dev/null)"
+    echo "==> Global baseline: ${state:-unknown} (installed: ${installed:-none}, repo: ${repo:-?})"
+    case "$state" in
+        absent)   echo "    글로벌 하네스 없음 — 신규 설치합니다." ;;
+        outdated) echo "    설치된 버전이 오래됨 — 갱신합니다 (필요 시 --force)." ;;
+        current)  echo "    최신 상태 — 선택한 워크로드만 반영합니다." ;;
+    esac
+}
+
+# 설치 종료 후 매니페스트를 기록한다 (다음 실행의 버전/상태 판정 근거).
+write_manifest() {
+    [ "$DRY_RUN" -eq 1 ] && { echo "[dry-run] write manifest ($CLAUDE_DIR)"; return 0; }
+    local repo
+    repo="$(cat "$HARNESS_DIR/VERSION" 2>/dev/null | tr -d '[:space:]')"
+    node "$HARNESS_DIR/scripts/install/manifest.js" write \
+        --claude-home="$CLAUDE_DIR" \
+        --version="$repo" \
+        --workloads="$WORKLOAD" 2>/dev/null \
+        && echo "manifest: $CLAUDE_DIR/_harness-manifest.json (v${repo}, workloads: ${WORKLOAD:-<all>})"
+}
+
 main() {
     if [ ! -d "$CLAUDE_DIR" ]; then
         echo "Claude config dir not found: $CLAUDE_DIR" >&2
@@ -293,6 +328,8 @@ main() {
     fi
 
     if [ "$UNINSTALL" -eq 0 ]; then
+        report_global_state
+        echo
         resolve_workloads
         validate_workloads
         echo "workloads: ${WORKLOAD:-<all>}${SKIP_WORKLOAD:+ (skip: $SKIP_WORKLOAD)}"
@@ -367,9 +404,14 @@ main() {
                 find "$container" -type d -empty -delete 2>/dev/null || true
             fi
         done
+        # 매니페스트 제거 (설치 흔적 정리).
+        if [ "$DRY_RUN" -eq 0 ]; then
+            rm -f "$CLAUDE_DIR/_harness-manifest.json" 2>/dev/null || true
+        fi
     fi
 
     if [ "$UNINSTALL" -eq 0 ]; then
+        write_manifest
         echo
         if [ "$hooks_done" -eq 1 ]; then
             echo "Done. Symlinks installed and hooks merged into \$CLAUDE_DIR/settings.json."

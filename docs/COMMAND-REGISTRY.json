@@ -227,7 +227,9 @@
       "type": "review",
       "primaryAgents": [],
       "allAgents": [],
-      "skills": [],
+      "skills": [
+        "codex-cli"
+      ],
       "path": "commands/model-route.md"
     },
     {
@@ -571,6 +573,10 @@
       {
         "skill": "rust-testing",
         "count": 2
+      },
+      {
+        "skill": "codex-cli",
+        "count": 1
       },
       {
         "skill": "lessons-learned",

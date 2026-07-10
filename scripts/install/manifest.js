@@ -92,6 +92,51 @@ function compareVersion(a, b) {
   return 0;
 }
 
+/**
+ * CLI: install 스크립트가 매니페스트를 기록할 때 호출한다 (bash/pwsh 가 node -e
+ * 를 인라인하지 않도록). installedAt 은 여기서 new Date() 로 스탬프한다 —
+ * CLI 진입점은 순수성 대상이 아니다 (모듈 함수는 여전히 순수).
+ *
+ *   node manifest.js write --claude-home=PATH --version=X --workloads=a,b
+ *   node manifest.js read  --claude-home=PATH        # JSON 또는 빈 출력
+ */
+function main(argv) {
+  const cmd = argv[2];
+  const flags = {};
+  for (const a of argv.slice(3)) {
+    const eq = a.indexOf('=');
+    if (eq !== -1) flags[a.slice(2, eq)] = a.slice(eq + 1);
+  }
+  const claudeHome = flags['claude-home'] || process.env.CLAUDE_HOME;
+  if (!claudeHome) { process.stderr.write('[manifest] --claude-home required\n'); return 2; }
+
+  if (cmd === 'write') {
+    const workloads = (flags.workloads || '').split(',').map(s => s.trim()).filter(Boolean);
+    writeManifest(claudeHome, {
+      version: flags.version || null,
+      workloads,
+      installedAt: new Date().toISOString(),
+    });
+    return 0;
+  }
+  if (cmd === 'read') {
+    const m = readManifest(claudeHome);
+    if (m) process.stdout.write(JSON.stringify(m) + '\n');
+    return 0;
+  }
+  process.stderr.write('[manifest] usage: manifest.js write|read --claude-home=PATH ...\n');
+  return 2;
+}
+
+if (require.main === module) {
+  try {
+    process.exit(main(process.argv));
+  } catch (e) {
+    process.stderr.write(`[manifest] ${e.message}\n`);
+    process.exit(2);
+  }
+}
+
 module.exports = {
   MANIFEST_NAME,
   manifestPath,
