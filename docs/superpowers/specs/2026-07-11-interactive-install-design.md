@@ -115,31 +115,65 @@ install 실행
 
 ### 4.4 3-tier 메뉴 — `menu.js` 확장
 
-sub-option에 **선택적** `detailQuestion` + `detailOptions` 필드 추가:
+> **구조 수정 (검토 발견)**: 초기 스펙은 detailOptions를 sub-option에만 두는 것으로 그렸으나, 실제 `menu.js`에서 **apple 카테고리는 subOptions가 없다** (카테고리 레벨에서 직접 `workloads: ['apple']`, sub 없는 유일한 카테고리). 따라서 detailOptions는 **"leaf 노드"(sub-option, 또는 sub 없는 카테고리) 어디에도 부착 가능**하도록 일반화한다.
+
+**데이터 모델**: `detailQuestion` + `detailOptions`를 **leaf가 될 수 있는 노드**(subOption, 또는 subOptions 없는 category)에 선택적으로 부착한다.
+
+- **apple** (subOptions 없음 → 카테고리 레벨에 detailOptions):
 
 ```js
 {
   id: 'apple', label: 'Apple 플랫폼 개발',
-  // (기존엔 카테고리 레벨 workloads: ['apple'])
-  subQuestion: '...',
-  subOptions: [
-    { id: 'apple', label: 'Apple 플랫폼', detailQuestion: '어느 영역?', detailOptions: [
-        { id: 'core',     label: '핵심 개발 (Swift/SwiftUI/테스트/생성기)', workloads: ['apple-core'] },
-        { id: 'platform', label: '플랫폼 특화 (watchOS/visionOS/ML/Maps)',  workloads: ['apple-platform'] },
-        { id: 'product',  label: '제품·운영 (App Store/성장/법무)',          workloads: ['apple-product'] },
-    ]},
+  detailQuestion: '어느 영역? (여러 개 선택 가능)',
+  detailOptions: [
+    { id: 'core',     label: '핵심 개발 (Swift/SwiftUI/테스트/생성기)', workloads: ['apple-core'] },
+    { id: 'platform', label: '플랫폼 특화 (watchOS/visionOS/ML/Maps)',  workloads: ['apple-platform'] },
+    { id: 'product',  label: '제품·운영 (App Store/성장/법무)',          workloads: ['apple-product'] },
   ],
 }
 ```
 
-**규칙**:
+- **social** (writing 카테고리의 sub-option → sub-option 레벨에 detailOptions):
 
-- `detailOptions`가 **없는** 중분류(mysql, rust, postgres, react-vite-ts…)는 지금처럼 leaf → 그 중분류의 `workloads` 전체 설치. 3단계로 내려가지 않는다.
-- `detailOptions`가 **있는** 중분류만 상세 tier로 드릴다운. 상세 미선택(빈 값)이면 전체 상세 = 전체 워크로드(하위호환 편의 기본값, 기존 "빈 배열 = 전체" 규칙과 일치).
+```js
+{ id: 'social', label: '소셜 콘텐츠 (LinkedIn 등)',
+  detailQuestion: '어느 단계? (여러 개 선택 가능)',
+  detailOptions: [
+    { id: 'voice',   label: '보이스·프로필 (voice-builder 등)',        workloads: ['social-voice'] },
+    { id: 'content', label: '콘텐츠 제작 (post-writer/hook 등)',       workloads: ['social-content'] },
+    { id: 'visual',  label: '시각 자산 (carousel/infographic 등)',     workloads: ['social-visual'] },
+  ],
+}
+```
 
-`resolveSelection()` 확장: `detailSelections: { [categoryId.subId]: detailId[] }`를 추가로 받아 상세 워크로드를 합집합에 더한다. detail이 없는 sub는 기존과 동일.
+**해석 규칙 (일관된 3단계)**:
 
-`parseCliFlags()` 확장: `--apple=core,platform` 같은 상세 플래그를 파싱 (sub-option이 카테고리와 동명일 때는 카테고리 플래그가 곧 상세 플래그).
+1. **카테고리** 선택 → 그 카테고리가
+   - `subOptions`를 가지면 → 중분류로 내려감
+   - `detailOptions`를 가지면 (sub 없음, apple) → 곧장 상세로 내려감
+   - 둘 다 없으면 (없음, 현재는 해당 없음) → 카테고리 `workloads` 그대로
+2. **중분류(sub-option)** 선택 → 그 sub이
+   - `detailOptions`를 가지면 (social) → 상세로 내려감
+   - 없으면 (mysql, rust…) → sub의 `workloads` 그대로 (leaf, 3단계로 안 내려감)
+3. **상세(detail)** 선택 → 고른 detail들의 `workloads` 합집합.
+   - **미선택(빈 값) = 전체 상세** (기존 "빈 배열 = 전체" 관례와 일치).
+
+`resolveSelection()` 확장: `detailSelections: { [nodeKey]: detailId[] }`를 추가로 받는다. `nodeKey`는 카테고리 레벨 detail이면 `categoryId`(예: `apple`), sub 레벨 detail이면 `categoryId.subId`(예: `writing.social`). 고른 detail들의 workloads를 합집합에 더한다. detailOptions 없는 노드는 기존과 완전히 동일하게 동작 → **비-detail 경로 회귀 없음.**
+
+`parseCliFlags()` 확장: 상세 플래그를 파싱.
+- 카테고리 레벨 detail: `--apple=core,platform`
+- sub 레벨 detail: `--writing-social=voice,content` (또는 하위호환으로 `--writing=social`만 주면 social 전체)
+
+### 4.4.1 교차소속(cross-membership) 원칙 — 확정
+
+> 목표에서 지적한 "프로그래밍에도 Python, 데이터 분석에도 Python" 케이스. **이미 핵심 메커니즘으로 지원되고 있다** (검토로 확인).
+
+- 한 자산은 `workloads:` 배열로 **여러 그룹에 동시 소속**한다. 예: `python-patterns [python-backend, python-data]`, `ai-tui [ai, rust, nodejs, python-backend]`, `aws-bedrock [ai, cloud]`.
+- 메뉴에서도 같은 소분류가 **여러 중분류에 등장**할 수 있다. 예: "Python"이 backend sub(`python-backend`)와 data-analysis sub(`python-data`) 양쪽에 존재.
+- 활성 그룹과 자산 그룹이 **한 개라도 교집합이면 설치**된다 (합집합·OR 시맨틱). 사용자가 backend·data 둘 다 고르면 `python-patterns`는 한 번만 링크된다 (자산 단위 dedup은 select-assets가 이미 처리).
+- **상세 그룹에도 동일 원칙 적용**: detail workload도 다중소속 배열 가능. 예: `apple-shared`(메타 도구)는 `apple-core` 하나에만 두어, 앱 개발자가 core를 고를 때만 따라온다.
+
+이 스펙은 **새 교차소속을 만들지 않고**, 기존 메커니즘을 detail 레벨까지 그대로 확장한다.
 
 ### 4.5 워크로드 카탈로그 — `workloads.js` 재분할
 
@@ -150,20 +184,26 @@ apple          → apple-core, apple-platform, apple-product   (3분할)
 social-content → social-voice, social-content, social-visual (3분할, social-content 는 재사용/축소)
 ```
 
-> 하위호환: `apple`·`social-content` 키를 **별칭(alias)** 으로 유지할지 여부는 §7 미해결. 기본안 = 옛 키를 카탈로그에 남겨두되 메뉴에서만 세분화(옛 `--workload=apple` 은 3개 전체로 확장 매핑).
+**별칭(alias) — 확정**: 옛 키 `apple`·`social-content`은 **확장 별칭으로 유지**한다.
+- `apple` → `{apple-core, apple-platform, apple-product}` 전체
+- `social-content`는 **분할 후에도 "콘텐츠 제작" 그룹의 실제 키로 재사용**(아래 참조)하므로 별칭 불필요. 대신 옛 의미(17종 전체)를 원하면 `--workload=social-voice,social-content,social-visual`.
+- 별칭 확장은 `select-assets.js`의 `selectGroups()` 진입 직후 1곳에서 처리 (`expandAliases(groups)` 헬퍼). 이렇게 해야 `--workload=apple`을 쓰는 기존 문서·CI·사용자 스크립트가 안 깨진다.
 
 **자산 재태깅**: apple 23개 스킬, social 17개 스킬의 frontmatter `workloads:`를 새 하위 키로 갱신.
 
-- apple 그룹핑 (CLAUDE.md 기준):
-  - `apple-core`: ios, macos, swift, swiftui, design, testing, generators, security, performance, shared
-  - `apple-platform`: watchos, visionos, swiftdata, mapkit, foundation, core-ml, apple-intelligence
-  - `apple-product`: product, app-store, growth, legal, monetization, release-review
-- social 그룹핑 (파이프라인 단계 기준):
-  - `social-voice`: voice-builder, newsletter-voice, profile-optimizer
-  - `social-content`: post-writer, post-formatter, hook-generator, content-matrix, niche-research, post-scorer, analytics-dashboard, pinned-comment, reels-scripting
-  - `social-visual`: graphic-designer, gemini-carousel, gemini-infographic, quote-post, youtube-thumbnail
+- apple 그룹핑 (CLAUDE.md "핵심/플랫폼/제품·운영/메타" 기준):
+  - `apple-core` (10): ios, macos, swift, swiftui, design, testing, generators, security, performance, **shared**
+    - `apple-shared`는 메타 도구(skill-creator/auditor + upstream LICENSE 위치)이나, 별도 그룹을 만들면 UX만 복잡해지므로 core에 귀속. 앱 개발 시작 = core 선택이므로 자연스럽다.
+  - `apple-platform` (7): watchos, visionos, swiftdata, mapkit, foundation, core-ml, apple-intelligence
+  - `apple-product` (6): product, app-store, growth, legal, monetization, release-review
+  - 합계 23 = 10+7+6 ✓
+- social 그룹핑 (CLAUDE.md 파이프라인 단계 기준):
+  - `social-voice` (3): voice-builder, newsletter-voice, profile-optimizer
+  - `social-content` (9): post-writer, post-formatter, hook-generator, content-matrix, niche-research, post-scorer, analytics-dashboard, pinned-comment, reels-scripting
+  - `social-visual` (5): graphic-designer, gemini-carousel, gemini-infographic, quote-post, youtube-thumbnail
+  - 합계 17 = 3+9+5 ✓
 
-재태깅은 수동 Edit 또는 `scripts/install/tag-assets.js` 활용.
+재태깅은 frontmatter 직접 Edit(정확) 또는 `workloads.js` RULES 갱신 후 `tag-assets.js`. RULES 기반 휴리스틱도 함께 갱신해 frontmatter 없는 자산 폴백을 새 키에 맞춘다.
 
 ### 4.6 방향키 체크박스 TUI — 신규 `scripts/install/checkbox-prompt.js`
 
@@ -190,32 +230,41 @@ checkboxPrompt({ title, options: [{id,label}], preselected? }) -> Promise<string
 | `scripts/install/manifest.js` | **신규** — read/write/repoVersion/compareVersion |
 | `scripts/install/check-global.js` | **신규** — absent/outdated/current 판정 CLI |
 | `scripts/install/checkbox-prompt.js` | **신규** — 방향키 체크박스 TUI (의존성 0) |
-| `scripts/install/menu.js` | detailOptions 지원, resolveSelection/parseCliFlags 확장 |
-| `scripts/install/workloads.js` | apple/social-content 3분할, RULES 재태깅 반영 |
+| `scripts/install/menu.js` | detailOptions(leaf 부착) 지원, resolveSelection/parseCliFlags 확장 |
+| `scripts/install/workloads.js` | apple/social 3분할, RULES 재태깅 반영, `expandAliases()` |
+| `scripts/install/select-assets.js` | `selectGroups()`에서 별칭 확장 적용 |
 | `scripts/install/select-workloads.js` | runInteractive 를 3-tier + 체크박스로 교체 |
 | `install.sh` | 플로우: check-global → baseline → check-drift → 워크로드 → manifest write |
 | `install.ps1` | 동일 플로우 (Node CLI 위임이라 로직 최소) |
 | skills/apple-*, skills/(social) | frontmatter `workloads:` 재태깅 |
-| `tests/scripts/install/*` | manifest·check-global·menu(detail)·checkbox 테스트 |
+| `README.md` | L71(social 목록), L112(`--category=apple`), L122(writing 표), L161(카탈로그) 갱신 |
+| `CLAUDE.md` | 워크로드 카탈로그·apple/social 설명 갱신 |
+| `tests/scripts/install/*` | manifest·check-global·menu(detail)·checkbox·alias 테스트 |
 
 ## 6. 테스트
 
-TDD. 각 신규 모듈은 순수 함수 위주로 테스트 가능하게 설계.
+TDD. 각 신규 모듈은 순수 함수 위주로 테스트 가능하게 설계. 순수-로직(manifest/menu/workloads/alias)은 프로세스 없이 require 테스트, CLI·TUI는 자식 프로세스/스트림 모킹.
 
-- `manifest.test.js`: compareVersion (0.1.0 vs 0.2.0 vs 0.1.0), read(없음)→null, write→read 왕복
-- `check-global.test.js`: absent(매니페스트 없음), outdated(낮은 버전), current — 임시 CLAUDE_HOME 픽스처
-- `menu.test.js` (확장): detailOptions 있는 sub의 resolveSelection, detail 빈 값→전체, parseCliFlags `--apple=core`
-- `workloads.test.js` (확장): 새 키 존재, apple-* 별칭 확장(선택 시)
-- `checkbox-prompt.test.js`: 키 입력 시퀀스 → 선택 배열 (stdin 모킹). raw-mode는 주입 가능한 스트림으로 테스트.
-- `select-assets.test.js`: 재태깅된 apple/social 자산이 새 키로 분류되는지
+**신규/확장 단위 테스트**
+- `manifest.test.js`: compareVersion (0.1.0<0.2.0, 0.1.0==0.1.0, 0.10.0>0.9.0 — 숫자비교), read(없음)→null, write→read 왕복, 손상된 JSON→null(throw 안 함)
+- `check-global.test.js`: absent(매니페스트 없음), absent(_harness 링크 없음), outdated(낮은 버전), current — 임시 CLAUDE_HOME 픽스처
+- `menu.test.js` (확장): (a) 카테고리 레벨 detail(apple)의 resolveSelection, (b) sub 레벨 detail(writing.social), (c) detail 빈 값→전체 상세, (d) parseCliFlags `--apple=core,platform` 및 `--writing-social=voice`, (e) **비-detail 노드 회귀**: mysql/rust 등이 기존과 동일 결과
+- `workloads.test.js` (확장): 새 키(apple-core/platform/product, social-voice/content/visual) 카탈로그 존재, `expandAliases(['apple'])`→3키, `expandAliases(['mysql'])`→그대로, 새 RULES가 각 스킬을 올바른 그룹에 매핑
+- `checkbox-prompt.test.js`: 키 입력 시퀀스(↓ space ↓ space enter)→선택 배열, `a`→전체 토글, ctrl-c→reject. raw-mode는 주입 가능한 fake stdin(EventEmitter)으로 테스트.
+- `select-assets.test.js` (확장): 재태깅된 apple/social 자산이 새 키로 분류, `--workload=apple` 별칭이 23개 apple 스킬 전부 선택, 다중소속(python-patterns)이 backend·data 어느 쪽 선택으로도 선택됨
 
-비-TTY/CI 경로(–all 폴백)가 깨지지 않는지 회귀 확인.
+**회귀·통합**
+- 비-TTY/CI 경로(`--all` 폴백, `--non-interactive --category=…`)가 동일 출력 유지
+- `npm test`의 `validate-skills.js`·`validate-agents.js`가 재태깅된 frontmatter를 통과 (workloads 값이 스키마 허용 범위인지)
+- `check-drift.js`가 새 키(apple-core 등)로도 정상 동작
+- **드리프트 골든 체크**: 재태깅 전/후 `select-assets --workload=<옛 전체>` 자산 집합이 동일해야 함 (그룹만 쪼갰지 자산이 누락/추가되면 안 됨) — apple 23·social 17 카운트 불변 단언
 
-## 7. 미해결 / 하위호환
+## 7. 미해결 / 하위호환 (해소됨)
 
-1. **옛 워크로드 키 별칭**: `--workload=apple` (기존 문서·스크립트에서 쓰던 것)을 `apple-core,apple-platform,apple-product`로 확장 매핑할지. 기본안 = 확장 매핑(별칭 유지). CLAUDE.md·README의 워크로드 카탈로그 문구도 갱신 필요.
-2. **manifest 부재 시 기존 사용자**: 이번 변경 전 설치한 사용자는 manifest가 없어 `absent`로 판정 → baseline 재설치(멱등, --force 아니면 기존 링크 skip). 안전하지만 최초 1회 재설치 유발. 허용 가능으로 본다.
-3. **상세 tier 확장**: writing 등 나머지 카테고리는 지금 leaf 유지. 나중에 `detailOptions`만 붙이면 자동 확장 (모델은 이미 지원).
+1. ~~옛 워크로드 키 별칭~~ → **해소**: `apple`은 3키 확장 별칭 유지, `social-content`는 실제 키로 재사용. §4.5 참조. `expandAliases()` 1곳 처리.
+2. **manifest 부재 시 기존 사용자**: 변경 전 설치자는 manifest 없음→`absent`→baseline 재설치(멱등, --force 없으면 기존 링크는 "ok"로 skip). 안전, 최초 1회 baseline 재확인만. 허용.
+3. **상세 tier 확장**: writing(tech), backend 등은 leaf 유지. 나중에 `detailOptions`만 붙이면 자동 확장(모델이 이미 leaf-부착 지원).
+4. **apple-shared 귀속**: 메타 도구지만 `apple-core`에 포함(별도 그룹 안 만듦). §4.5 참조.
 
 ## 8. 스킵한 것 (YAGNI)
 

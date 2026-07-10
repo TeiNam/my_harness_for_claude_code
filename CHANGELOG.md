@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-11
+
+- docs: 대화형 세분화 설치 설계 문서 추가 (4eb5ee1)
+
 ## 2026-07-09
 
 - docs: README 모델 라우팅 섹션 추가 + 테스트 수·CHANGELOG 동기화 (bffdc58)
