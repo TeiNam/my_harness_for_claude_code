@@ -3,7 +3,7 @@ name: core-ml
 description: Core ML, Create ML, Vision framework, Natural Language framework, on-device ML integration. Use when user wants image classification, text analysis, object detection, sound classification, model optimization, or custom model integration. Covers Core ML vs Foundation Models decision.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-platform]
 ---
 
 # Core ML Skills

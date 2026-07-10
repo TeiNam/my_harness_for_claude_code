@@ -182,8 +182,8 @@ python 3.12.8
 | 변수 | 용도 |
 |---|---|
 | `ANTHROPIC_API_KEY` | Anthropic API |
-| `GITHUB_PAT` | MCP github 서버 (remote) 인증 |
-| `BRAVE_API_KEY` | MCP brave-search 서버 |
+| `GITHUB_PAT` | MCP github 서버 인증 (프록시 `mcp-configs/proxy/.env`) |
+| `BRAVE_API_KEY` | MCP brave-search 서버 (프록시 `mcp-configs/proxy/.env`) |
 | `CLAUDE_HOME` | 기본값 `~/.claude` 재정의 |
 | `HARNESS_HOOK_PROFILE` | 훅 프로파일 (`minimal` / `standard` / `strict`) |
 | `HARNESS_DISABLED_HOOKS` | 비활성화할 훅 ID 목록(쉼표 구분) |
@@ -193,9 +193,40 @@ python 3.12.8
 
 훅 동작은 환경 변수만으로 조정합니다. 자세한 키 목록은 `hooks/README.md`를 참고하세요.
 
-## MCP 서버
+## MCP 서버 (proxy-first)
 
-실제 활성 설정은 `.mcp.json`에 있습니다 — github(remote), context7, exa(remote), brave-search, sentry(remote·OAuth), time, playwright (7개). `mcp-configs/mcp-servers.json`은 복사용 샘플 카탈로그로, 위 7개에 agent-browser(stdio, Vercel 공식 CLI), higgsfield(remote·OAuth, 이미지/영상 생성), zapier(remote·OAuth, 9,000+ 앱 연동)를 더해 10개를 보유합니다. 필요한 항목만 `.mcp.json`으로 복사해 쓰세요. 컨텍스트 윈도 보호를 위해 동시 활성 서버는 10개 이하로 유지합니다. 토큰 같은 비밀값은 `${VAR}` 환경 변수 참조로만 두고(`GITHUB_PAT`, `BRAVE_API_KEY`) 실제 값은 절대 커밋하지 않습니다.
+프록시 가능한 서버는 [tbxark/mcp-proxy](https://github.com/tbxark/mcp-proxy) 컨테이너에서 중앙 구동하고, 클라이언트는 `http://localhost:9090/<서버>/mcp` 하나만 바라봅니다. 여러 클라이언트가 같은 MCP 서버 프로세스를 중복으로 띄우지 않고, 시크릿도 프록시 한 곳에만 둡니다.
+
+**분류 기준**: 리눅스 컨테이너에서 무인증(또는 정적 env 시크릿)으로 헤드리스 구동되면 → 프록시. 호스트 브라우저·GUI·호스트 바이너리·경로·런타임 OAuth 리다이렉트가 필요하면 → 로컬.
+
+| 서버 | 위치 | 이유 |
+|---|---|---|
+| github, exa, context7, brave-search, time | **proxy** | 헤드리스·정적 시크릿(또는 무인증) — 컨테이너 구동 |
+| sentry | **local** | 런타임 OAuth 리다이렉트 — 프록시 경유 불가 |
+| playwright, agent-browser | **local** | 호스트 브라우저·바이너리 필요 |
+| higgsfield, zapier | **local** | 런타임 OAuth (샘플 카탈로그에만 포함) |
+
+- 프록시 에셋: `mcp-configs/proxy/` (`docker-compose.yaml` · `config.json` · `.env.example`). `install.sh` 가 설치 중 물어보고 `docker compose up -d` 로 기동합니다(compose v2 없으면 `brew install docker-compose` 시도).
+- 활성 클라이언트 설정: `.mcp.json` — 프록시 서버는 `localhost:9090` URL, 로컬 서버(sentry·playwright)는 직접 명령.
+- 복사용 카탈로그: `mcp-configs/mcp-servers.json` — 각 서버에 `route: proxy|local` 표시.
+- 시크릿(`GITHUB_PAT`·`BRAVE_API_KEY`)은 프록시 한 곳에만 — `.mcp.json` 에는 URL만 남아 키가 흩어지지 않습니다. 컨텍스트 윈도 보호를 위해 동시 활성 서버는 10개 이하로 유지합니다.
+
+### API 키 넣기
+
+`github` · `brave-search` 만 키가 필요합니다(`exa`·`context7`·`time` 은 불필요). 두 가지 중 하나:
+
+**1) 셸 rc (권장)** — 여러 프로젝트에서 재사용, 파일에 안 남음. `~/.zshrc` 또는 `~/.bashrc` 에:
+
+```bash
+export GITHUB_PAT="ghp_..."      # github.com/settings/tokens
+export BRAVE_API_KEY="BSA_..."   # api.search.brave.com/app/keys
+```
+
+`source ~/.zshrc` 후 `install.sh`(또는 `docker compose ... up -d`)를 실행하면 프록시가 셸 env 를 읽습니다. compose 는 셸 값을 빈 `.env` 보다 우선합니다.
+
+**2) 프록시 `.env`** — `cp mcp-configs/proxy/.env.example mcp-configs/proxy/.env` 후 값을 채웁니다. `.env` 는 커밋되지 않습니다.
+
+키를 안 넣으면 `github`·`brave-search` 만 인증 실패하고 나머지 프록시 서버는 정상 동작합니다.
 
 ## 자주 쓰는 슬래시 커맨드
 

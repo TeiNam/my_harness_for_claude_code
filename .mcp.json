@@ -2,33 +2,27 @@
   "mcpServers": {
     "github": {
       "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer ${GITHUB_PAT}"
-      }
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@2.1.4"]
+      "url": "http://localhost:9090/github/mcp"
     },
     "exa": {
       "type": "http",
-      "url": "https://mcp.exa.ai/mcp"
+      "url": "http://localhost:9090/exa/mcp"
+    },
+    "context7": {
+      "type": "http",
+      "url": "http://localhost:9090/context7/mcp"
     },
     "brave-search": {
-      "command": "npx",
-      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
-      "env": {
-        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
-      }
+      "type": "http",
+      "url": "http://localhost:9090/brave-search/mcp"
+    },
+    "time": {
+      "type": "http",
+      "url": "http://localhost:9090/time/mcp"
     },
     "sentry": {
       "type": "http",
       "url": "https://mcp.sentry.dev/mcp"
-    },
-    "time": {
-      "command": "uvx",
-      "args": ["mcp-server-time"]
     },
     "playwright": {
       "command": "npx",

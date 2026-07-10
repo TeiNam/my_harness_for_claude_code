@@ -3,7 +3,7 @@ name: release-review
 description: Senior developer-level release review for macOS/iOS apps. Identifies security, privacy, UX, and distribution issues with actionable fixes. Use when preparing an app for release, want a critical review, or before App Store submission.
 allowed-tools: [Read, Glob, Grep]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-product]
 ---
 
 # Release Review for Apple Platforms

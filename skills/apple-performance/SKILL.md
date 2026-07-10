@@ -3,7 +3,7 @@ name: apple-performance
 description: Performance diagnosis for Apple platform apps — Instruments profiling (hangs, memory, slow launches, energy drain) and SwiftUI-specific re-render/view-identity debugging. Use when reviewing app performance or diagnosing why SwiftUI views are slow or re-rendering too often.
 allowed-tools: [Read, Glob, Grep, WebFetch]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-core]
 ---
 
 # Performance Diagnosis

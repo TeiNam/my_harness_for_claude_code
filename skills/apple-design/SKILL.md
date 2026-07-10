@@ -3,7 +3,7 @@ name: design
 description: Design system skills for modern Apple platform UI including Liquid Glass, animations, and visual design patterns. Use when implementing new design language features.
 allowed-tools: [Read, Write, Edit, Glob, Grep, AskUserQuestion]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-core]
 ---
 
 # Design Skills

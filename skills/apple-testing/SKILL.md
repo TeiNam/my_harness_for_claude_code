@@ -3,7 +3,7 @@ name: testing
 description: TDD and testing skills for iOS/macOS apps. Covers characterization tests, TDD workflows, test contracts, snapshot tests, and test infrastructure. Use for test-driven development, adding tests to existing code, or building test infrastructure.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-core]
 ---
 
 # Testing & TDD Skills

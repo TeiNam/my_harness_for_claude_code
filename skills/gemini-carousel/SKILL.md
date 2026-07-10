@@ -3,7 +3,7 @@ name: gemini-carousel
 description: >
   Generate a branded slide-by-slide LinkedIn carousel using Gemini. Takes source content, builds a design brief, waits for approval, then outputs per-slide image generation prompts. 1080x1350 vertical format. Use this skill whenever the user says "carousel", "build a carousel", "turn this into a carousel", "gemini carousel", or wants multi-slide LinkedIn content. Always includes an approval gate between brief and image generation.
 origin: charlie947/social-media-skills
-workloads: [social-content]
+workloads: [social-visual]
 ---
 
 # Gemini Carousel

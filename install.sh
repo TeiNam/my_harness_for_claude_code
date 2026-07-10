@@ -212,15 +212,62 @@ prompt_yes_no() {
     esac
 }
 
-# mcp 는 settings 머지가 아니라 안내다 (.mcp.json 이 ${VAR} 참조라 키 주입은
-# 사용자 몫). 어떻게 활성화하는지만 보여준다.
-print_mcp_info() {
+# mcp 는 proxy-first: 프록시 가능한 서버(github·exa·context7·brave-search·time)는
+# mcp-proxy 컨테이너에서 중앙 구동하고, 클라이언트는 localhost:9090 만 바라본다.
+# OAuth·브라우저 의존 서버(sentry·playwright 등)는 클라이언트에 로컬로 남긴다.
+PROXY_DIR="$HARNESS_DIR/mcp-configs/proxy"
+
+# compose v2 확인 (없으면 brew 로 설치 시도). 반환 0 = 사용 가능.
+ensure_compose() {
+    if docker compose version >/dev/null 2>&1; then
+        return 0
+    fi
+    echo "  docker compose(v2) 없음."
+    if command -v brew >/dev/null 2>&1; then
+        echo "  brew install docker-compose 로 설치…"
+        run brew install docker-compose
+        docker compose version >/dev/null 2>&1 && return 0
+    fi
+    echo "  compose v2 설치 실패 — https://docs.docker.com/compose/install/ 수동 설치 후 재실행." >&2
+    return 1
+}
+
+# 프록시를 실제로 기동한다. --dry-run 이면 명령만 출력.
+setup_mcp_proxy() {
     echo
-    echo "==> MCP servers"
-    echo "  MCP 설정 샘플: $HARNESS_DIR/.mcp.json (github·context7·exa·brave-search·sentry·time·playwright)"
-    echo "  활성화: 필요한 서버를 ~/.claude.json 또는 프로젝트 .mcp.json 의 mcpServers 에 복사."
-    echo "  키는 환경변수로 주입 — \$GITHUB_PAT, \$BRAVE_API_KEY (.env.example 참고)."
-    echo "  exa·sentry 는 remote(HTTP), time 은 uvx(uv 설치 필요)."
+    echo "==> MCP proxy (mcp-configs/proxy/)"
+
+    if ! command -v docker >/dev/null 2>&1; then
+        echo "  docker 없음 — Colima(brew install colima) 또는 Docker Desktop 설치 후 재실행." >&2
+        echo "  프록시 없이 쓰려면 .mcp.json 의 localhost:9090 항목을 직접 연결로 바꿔야 함." >&2
+        return 1
+    fi
+    if [ "$DRY_RUN" -eq 0 ] && ! docker info >/dev/null 2>&1; then
+        echo "  docker 데몬 미동작 — 'colima start' 또는 Docker Desktop 실행 후 재실행." >&2
+        return 1
+    fi
+    ensure_compose || return 1
+
+    # 시크릿: 셸 rc export 가 우선(빈 .env 를 덮음). rc 에 없으면 proxy/.env 에서 읽음.
+    if [ -z "${GITHUB_PAT:-}" ] || [ -z "${BRAVE_API_KEY:-}" ]; then
+        echo "  API 키 넣는 법 (하나 택):"
+        echo "    1) 셸 rc (권장) — ~/.zshrc 또는 ~/.bashrc 에:"
+        echo "         export GITHUB_PAT=\"ghp_...\"      # github.com/settings/tokens"
+        echo "         export BRAVE_API_KEY=\"BSA_...\"    # api.search.brave.com/app/keys"
+        echo "       그다음 'source ~/.zshrc' 후 이 설치를 다시 실행."
+        echo "    2) $PROXY_DIR/.env 에 직접 값 채우기 (.env.example 참고)."
+    fi
+    if [ ! -f "$PROXY_DIR/.env" ]; then
+        run cp "\"$PROXY_DIR/.env.example\"" "\"$PROXY_DIR/.env\""
+    fi
+
+    echo "  docker compose up -d …"
+    run docker compose -f "\"$PROXY_DIR/docker-compose.yaml\"" --project-directory "\"$PROXY_DIR\"" up -d
+
+    echo "  프록시 서버: github·exa·context7·brave-search·time → http://localhost:9090/<서버>/mcp"
+    echo "  로컬 유지: sentry(OAuth)·playwright(브라우저) — .mcp.json 에 직접."
+    echo "  시크릿(GITHUB_PAT·BRAVE_API_KEY)은 $PROXY_DIR/.env 한 곳에만."
+    echo "  확인: curl -i http://localhost:9090/time/mcp  (405 계열이면 정상 기동)"
 }
 
 # 자산 선택 출력. uninstall 일 때는 *모든* 자산을 순회해서 이전(더 넓은) 설치
@@ -307,8 +354,8 @@ main() {
             merge_hooks || true
             hooks_done=1
         fi
-        if prompt_yes_no "MCP 서버 설정 안내를 볼까요?"; then
-            print_mcp_info
+        if prompt_yes_no "MCP proxy 를 지금 설치·기동할까요? (docker compose up -d)"; then
+            setup_mcp_proxy || true
         fi
     fi
 

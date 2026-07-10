@@ -3,7 +3,7 @@ name: shared
 description: Platform-agnostic skills including skill creation templates and best practices. Use when creating new skills or improving existing ones.
 allowed-tools: [Read, Write, Glob, Grep, Bash]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-core]
 ---
 
 # Shared Skills

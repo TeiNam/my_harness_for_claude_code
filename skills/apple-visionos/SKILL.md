@@ -3,7 +3,7 @@ name: apple-visionos
 description: visionOS widget patterns including mounting styles, glass/paper textures, proximity-aware layouts, and spatial widget families. Use when creating or adapting widgets for visionOS.
 allowed-tools: [Read, Glob, Grep, WebFetch]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-platform]
 ---
 
 # visionOS Patterns

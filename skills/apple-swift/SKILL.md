@@ -3,7 +3,7 @@ name: swift-development
 description: Swift language patterns and best practices including concurrency, performance, and modern idioms. Use for Swift language-level code review or architecture guidance.
 allowed-tools: [Read, Glob, Grep]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-core]
 ---
 
 # Swift Development

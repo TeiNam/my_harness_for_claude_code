@@ -3,7 +3,7 @@ name: gemini-infographic
 description: >
   Generate the hand-drawn whiteboard infographic prompt that pulled 480k impressions across 3 posts. Takes source content (a post, newsletter, blog, research note) and returns a complete Gemini image generation prompt with a structured brief. Use this skill whenever the user says "whiteboard infographic", "gemini infographic", "hand-drawn graphic", "turn this into a whiteboard", or wants an AI-generated infographic for a post.
 origin: charlie947/social-media-skills
-workloads: [social-content]
+workloads: [social-visual]
 ---
 
 # Gemini Infographic

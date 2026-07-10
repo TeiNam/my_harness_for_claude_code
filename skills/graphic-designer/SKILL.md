@@ -3,7 +3,7 @@ name: graphic-designer
 description: >
   Create LinkedIn post graphics. Decides between an HTML/CSS structured graphic or an AI-generated infographic based on the post content. Use this skill whenever the user says "design a graphic", "create a visual", "make an image", "graphic for my post", "LinkedIn image", or wants any visual content to pair with a LinkedIn post. Also trigger when the user finishes writing a post and wants a matching graphic.
 origin: charlie947/social-media-skills
-workloads: [social-content]
+workloads: [social-visual]
 ---
 
 # Graphic Designer

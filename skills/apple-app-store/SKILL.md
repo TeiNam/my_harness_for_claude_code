@@ -3,7 +3,7 @@ name: app-store
 description: App Store optimization and marketing skills for descriptions, screenshots, keywords, review responses, and comprehensive promotional strategy. Use when user needs help with App Store presence, ASO, marketing, or customer communication.
 allowed-tools: [Read, Write, Edit, Glob, Grep, AskUserQuestion, WebSearch]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-product]
 ---
 
 # App Store Optimization & Marketing Skills

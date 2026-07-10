@@ -3,7 +3,7 @@ name: growth
 description: Growth skills for indie Apple developers — user acquisition, analytics interpretation, press/media outreach, community building, and indie business operations. Use when user asks about growing their app, understanding metrics, getting press coverage, or running an indie dev business.
 allowed-tools: [Read, Glob, Grep, AskUserQuestion, WebSearch]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-product]
 ---
 
 # Growth Skills

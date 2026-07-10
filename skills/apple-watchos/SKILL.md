@@ -3,7 +3,7 @@ name: watchOS
 description: watchOS development guidance including SwiftUI for Watch, Watch Connectivity, complications, and watch-specific UI patterns. Use for watchOS code review, best practices, or Watch app development.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-platform]
 ---
 
 # watchOS Development

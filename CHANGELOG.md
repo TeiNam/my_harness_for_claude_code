@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-11
 
+- docs: 설치 설계 리뷰 반영 — detailOptions leaf 부착·교차소속·별칭 확정 (30a472a)
 - docs: 대화형 세분화 설치 설계 문서 추가 (4eb5ee1)
 
 ## 2026-07-09

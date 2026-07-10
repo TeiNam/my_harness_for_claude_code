@@ -207,13 +207,54 @@ function Confirm-Extra {
     return ($reply -match '^(y|yes)$')
 }
 
-function Show-McpInfo {
+# mcp 는 proxy-first: 프록시 가능한 서버(github·exa·context7·brave-search·time)는
+# mcp-proxy 컨테이너에서 중앙 구동하고, 클라이언트는 localhost:9090 만 바라본다.
+# OAuth·브라우저 의존 서버(sentry·playwright 등)는 클라이언트에 로컬로 남긴다.
+function Set-McpProxy {
+    $proxyDir = Join-Path $HarnessDir 'mcp-configs\proxy'
     Write-Host ''
-    Write-Host '==> MCP servers'
-    Write-Host "  MCP 설정 샘플: $HarnessDir\.mcp.json (github·context7·exa·brave-search·sentry·time·playwright)"
-    Write-Host '  활성화: 필요한 서버를 ~/.claude.json 또는 프로젝트 .mcp.json 의 mcpServers 에 복사.'
-    Write-Host '  키는 환경변수로 주입 — $env:GITHUB_PAT, $env:BRAVE_API_KEY (.env.example 참고).'
-    Write-Host '  exa·sentry 는 remote(HTTP), time 은 uvx(uv 설치 필요).'
+    Write-Host '==> MCP proxy (mcp-configs/proxy/)'
+
+    if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+        Write-Host '  docker 없음 — Docker Desktop 설치 후 재실행.' -ForegroundColor Yellow
+        Write-Host '  프록시 없이 쓰려면 .mcp.json 의 localhost:9090 항목을 직접 연결로 바꿔야 함.' -ForegroundColor Yellow
+        return
+    }
+    if (-not $DryRun) {
+        docker info *> $null
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host '  docker 데몬 미동작 — Docker Desktop 실행 후 재실행.' -ForegroundColor Yellow
+            return
+        }
+    }
+    docker compose version *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host '  docker compose(v2) 없음 — https://docs.docker.com/compose/install/ 설치 후 재실행.' -ForegroundColor Yellow
+        return
+    }
+
+    # 시크릿: 셸/프로세스 env 가 우선(빈 .env 를 덮음). 없으면 proxy/.env 에서 읽음.
+    $envFile = Join-Path $proxyDir '.env'
+    if (-not $env:GITHUB_PAT -or -not $env:BRAVE_API_KEY) {
+        Write-Host '  API 키 넣는 법 (하나 택):'
+        Write-Host '    1) PowerShell 프로필 (권장) — notepad $PROFILE 에:'
+        Write-Host '         $env:GITHUB_PAT = "ghp_..."      # github.com/settings/tokens'
+        Write-Host '         $env:BRAVE_API_KEY = "BSA_..."    # api.search.brave.com/app/keys'
+        Write-Host '       그다음 . $PROFILE 후 이 설치를 다시 실행.'
+        Write-Host "    2) $envFile 에 직접 값 채우기 (.env.example 참고)."
+    }
+    if (-not (Test-Path -LiteralPath $envFile)) {
+        Invoke-Step -Action { Copy-Item (Join-Path $proxyDir '.env.example') $envFile } -Description "copy .env"
+    }
+
+    $compose = Join-Path $proxyDir 'docker-compose.yaml'
+    Write-Host '  docker compose up -d …'
+    Invoke-Step -Action { docker compose -f $compose --project-directory $proxyDir up -d } -Description 'docker compose up -d'
+
+    Write-Host '  프록시 서버: github·exa·context7·brave-search·time → http://localhost:9090/<서버>/mcp'
+    Write-Host '  로컬 유지: sentry(OAuth)·playwright(브라우저) — .mcp.json 에 직접.'
+    Write-Host "  시크릿(GITHUB_PAT·BRAVE_API_KEY)은 $envFile 한 곳에만."
+    Write-Host '  확인: curl -i http://localhost:9090/time/mcp  (405 계열이면 정상 기동)'
 }
 
 function Remove-EmptyHarnessDirs {
@@ -303,8 +344,8 @@ if ($Uninstall) {
         Invoke-HookMerge
         $hooksDone = $true
     }
-    if (Confirm-Extra 'MCP 서버 설정 안내를 볼까요?') {
-        Show-McpInfo
+    if (Confirm-Extra 'MCP proxy 를 지금 설치·기동할까요? (docker compose up -d)') {
+        Set-McpProxy
     }
 }
 

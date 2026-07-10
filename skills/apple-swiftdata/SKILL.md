@@ -3,7 +3,7 @@ name: apple-swiftdata
 description: SwiftData class inheritance patterns for hierarchical models with type-based querying, polymorphic relationships, and when to choose inheritance vs enums. Use when designing SwiftData model hierarchies.
 allowed-tools: [Read, Glob, Grep, WebFetch]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-platform]
 ---
 
 # SwiftData Patterns

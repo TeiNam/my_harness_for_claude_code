@@ -22,14 +22,26 @@
  */
 
 /**
- * @typedef {{ id: string, label: string, workloads: string[] }} SubOption
+ * @typedef {{ id: string, label: string, workloads: string[] }} DetailOption
+ * @typedef {{
+ *   id: string,
+ *   label: string,
+ *   workloads?: string[],
+ *   detailQuestion?: string,
+ *   detailOptions?: DetailOption[],
+ * }} SubOption
  * @typedef {{
  *   id: string,
  *   label: string,
  *   workloads?: string[],
  *   subQuestion?: string,
  *   subOptions?: SubOption[],
+ *   detailQuestion?: string,
+ *   detailOptions?: DetailOption[],
  * }} Category
+ *
+ * detailOptions 는 "leaf 가 될 수 있는 노드"(subOptions 없는 category, 또는
+ * subOption)에 부착한다. 부착된 노드는 3번째 tier(상세)로 드릴다운한다.
  */
 
 /** @type {Category[]} */
@@ -90,13 +102,28 @@ const CATEGORIES = [
     subQuestion: '어떤 글쓰기 작업?',
     subOptions: [
       { id: 'tech',   label: '기술 문서 · 블로깅 · PPT',    workloads: ['writing'] },
-      { id: 'social', label: '소셜 콘텐츠 (LinkedIn 등)', workloads: ['social-content'] },
+      {
+        id: 'social', label: '소셜 콘텐츠 (LinkedIn 등)',
+        // 상세 tier: 파이프라인 단계별 3분할. 미선택 시 전체 설치.
+        detailQuestion: '어느 단계? (여러 개 선택 가능)',
+        detailOptions: [
+          { id: 'voice',   label: '보이스 · 프로필 (voice-builder 등)',      workloads: ['social-voice'] },
+          { id: 'content', label: '콘텐츠 제작 (post-writer / hook 등)',     workloads: ['social-content'] },
+          { id: 'visual',  label: '시각 자산 (carousel / infographic 등)',   workloads: ['social-visual'] },
+        ],
+      },
     ],
   },
   {
     id: 'apple',
     label: 'Apple 플랫폼 개발',
-    workloads: ['apple'],
+    // sub-옵션 없이 카테고리 레벨에 상세 tier 를 둔다 (영역별 3분할).
+    detailQuestion: '어느 영역? (여러 개 선택 가능)',
+    detailOptions: [
+      { id: 'core',     label: '핵심 개발 (Swift/SwiftUI/테스트/생성기)', workloads: ['apple-core'] },
+      { id: 'platform', label: '플랫폼 특화 (watchOS/visionOS/ML/Maps)',  workloads: ['apple-platform'] },
+      { id: 'product',  label: '제품 · 운영 (App Store/성장/법무)',        workloads: ['apple-product'] },
+    ],
   },
 ];
 
@@ -107,29 +134,65 @@ function findCategory(id) {
 }
 
 /**
+ * detailOptions 를 가진 노드(카테고리 또는 sub-옵션)의 워크로드를 산출한다.
+ * 고른 상세 id 들의 workloads 합집합을 wlSet 에 더한다.
+ *
+ * @param {DetailOption[]} detailOptions
+ * @param {string[]|undefined} requested  고른 상세 id 배열 (빈/미지정 → 전체)
+ * @param {Set<string>} wlSet
+ * @param {string} nodeKey                미지 상세 id 리포팅용 (예: 'apple', 'writing.social')
+ * @param {string[]} unknownDetails
+ */
+function addDetailWorkloads(detailOptions, requested, wlSet, nodeKey, unknownDetails) {
+  const details = (Array.isArray(requested) && requested.length)
+    ? requested
+    : detailOptions.map(d => d.id); // 빈 배열 → 전체 상세
+  for (const detId of details) {
+    const det = detailOptions.find(d => d.id === detId);
+    if (!det) { unknownDetails.push(`${nodeKey}.${detId}`); continue; }
+    for (const w of det.workloads) wlSet.add(w);
+  }
+}
+
+/**
  * 메뉴 선택 입력을 받아 활성 워크로드 집합을 산출한다.
  *
- * @param {{ categories: string[], subSelections?: Record<string, string[]> }} input
- *        categories: 톱레벨 카테고리 id 배열
- *        subSelections: { [categoryId]: subOptionId[] } — sub-옵션을 가진
- *                       카테고리에서 사용자가 고른 항목들. 빈 배열은 그 카테고리의
- *                       모든 sub-옵션을 의미한다 (편의 기본값).
- * @returns {{ workloads: string[], unknownCategories: string[], unknownSubs: string[] }}
+ * @param {{
+ *   categories: string[],
+ *   subSelections?: Record<string, string[]>,
+ *   detailSelections?: Record<string, string[]>,
+ * }} input
+ *   categories: 톱레벨 카테고리 id 배열
+ *   subSelections: { [categoryId]: subOptionId[] } — sub-옵션을 가진 카테고리의
+ *                  선택. 빈 배열 = 전체 sub.
+ *   detailSelections: { [nodeKey]: detailId[] } — 상세 tier 선택. nodeKey 는
+ *                  카테고리 레벨 상세면 `categoryId`(예: 'apple'), sub 레벨
+ *                  상세면 `categoryId.subId`(예: 'writing.social'). 빈 배열 = 전체 상세.
+ * @returns {{ workloads: string[], unknownCategories: string[], unknownSubs: string[], unknownDetails: string[] }}
  */
-function resolveSelection({ categories = [], subSelections = {} } = {}) {
+function resolveSelection({ categories = [], subSelections = {}, detailSelections = {} } = {}) {
   const wlSet = new Set(['core']); // core 는 항상 포함
   const unknownCategories = [];
   const unknownSubs = [];
+  const unknownDetails = [];
 
   for (const catId of categories) {
     const cat = findCategory(catId);
     if (!cat) { unknownCategories.push(catId); continue; }
 
+    // (1) 카테고리 레벨 상세 tier (apple: subOptions 없음)
+    if (cat.detailOptions && cat.detailOptions.length) {
+      addDetailWorkloads(cat.detailOptions, detailSelections[catId], wlSet, catId, unknownDetails);
+      continue;
+    }
+
+    // (2) sub-옵션 없는 단순 카테고리
     if (!cat.subOptions || cat.subOptions.length === 0) {
       for (const w of (cat.workloads || [])) wlSet.add(w);
       continue;
     }
 
+    // (3) sub-옵션이 있는 카테고리
     const requestedSubs = subSelections[catId];
     const subs = (Array.isArray(requestedSubs) && requestedSubs.length)
       ? requestedSubs
@@ -138,7 +201,13 @@ function resolveSelection({ categories = [], subSelections = {} } = {}) {
     for (const subId of subs) {
       const sub = cat.subOptions.find(s => s.id === subId);
       if (!sub) { unknownSubs.push(`${catId}.${subId}`); continue; }
-      for (const w of sub.workloads) wlSet.add(w);
+      // sub 레벨 상세 tier (writing.social)
+      if (sub.detailOptions && sub.detailOptions.length) {
+        const nodeKey = `${catId}.${subId}`;
+        addDetailWorkloads(sub.detailOptions, detailSelections[nodeKey], wlSet, nodeKey, unknownDetails);
+      } else {
+        for (const w of (sub.workloads || [])) wlSet.add(w);
+      }
     }
   }
 
@@ -146,20 +215,19 @@ function resolveSelection({ categories = [], subSelections = {} } = {}) {
     workloads: [...wlSet].sort(),
     unknownCategories,
     unknownSubs,
+    unknownDetails,
   };
 }
 
 /**
  * CLI 플래그를 메뉴 입력 형태로 정규화.
  *
- *   --category=backend,writing
- *   --backend=python,cloud
- *   --frontend=react-vite-ts
- *   --plugin=obsidian
- *   --data-analysis=duckdb,python
- *   --data-design=mysql,mongodb
- *
- * (글쓰기처럼 sub-옵션이 없는 카테고리는 그냥 --category=writing 으로 충분)
+ *   --category=backend,writing        톱레벨 카테고리
+ *   --backend=python,cloud            sub-옵션
+ *   --data-design=mysql,mongodb       sub-옵션
+ *   --apple=core,platform             카테고리 레벨 상세 (apple 은 sub 없음)
+ *   --writing=tech,social             sub-옵션
+ *   --writing-social=voice,content    sub 레벨 상세 (writing.social)
  *
  * @param {Record<string,string|string[]>} flags
  */
@@ -169,16 +237,41 @@ function parseCliFlags(flags) {
 
   const categories = split(flags.category);
   const subSelections = {};
+  const detailSelections = {};
+  const ensureCategory = id => { if (!categories.includes(id)) categories.push(id); };
 
   for (const cat of CATEGORIES) {
-    const flag = flags[cat.id];
-    if (flag === undefined) continue;
-    subSelections[cat.id] = split(flag);
-    // sub-옵션 플래그를 명시했지만 --category 에 카테고리를 안 넣었다면 자동 포함.
-    if (!categories.includes(cat.id)) categories.push(cat.id);
+    // 카테고리 레벨 상세 (apple): `--apple=core,platform` → detailSelections['apple']
+    if (cat.detailOptions && cat.detailOptions.length) {
+      const flag = flags[cat.id];
+      if (flag !== undefined) {
+        detailSelections[cat.id] = split(flag);
+        ensureCategory(cat.id);
+      }
+      continue;
+    }
+
+    // sub-옵션 플래그: `--backend=python,cloud`
+    const subFlag = flags[cat.id];
+    if (subFlag !== undefined) {
+      subSelections[cat.id] = split(subFlag);
+      ensureCategory(cat.id);
+    }
+
+    // sub 레벨 상세 플래그: `--<catId>-<subId>=...` (예: --writing-social=voice)
+    for (const sub of (cat.subOptions || [])) {
+      if (!sub.detailOptions || !sub.detailOptions.length) continue;
+      const detailFlag = flags[`${cat.id}-${sub.id}`];
+      if (detailFlag === undefined) continue;
+      detailSelections[`${cat.id}.${sub.id}`] = split(detailFlag);
+      ensureCategory(cat.id);
+      // 상세만 줬고 sub 를 --writing= 로 안 골랐다면, 그 sub 를 자동 선택.
+      if (!subSelections[cat.id]) subSelections[cat.id] = [sub.id];
+      else if (!subSelections[cat.id].includes(sub.id)) subSelections[cat.id].push(sub.id);
+    }
   }
 
-  return { categories, subSelections };
+  return { categories, subSelections, detailSelections };
 }
 
 module.exports = {

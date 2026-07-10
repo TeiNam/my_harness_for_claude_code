@@ -44,6 +44,7 @@ const {
   classifyRulePath,
   identifierOf,
   validateGroups,
+  expandAliases,
 } = require('./workloads');
 
 function parseList(value) {
@@ -142,16 +143,21 @@ function readWorkloads(filePath, fallback) {
 }
 
 function selectGroups({ workload, skipWorkload }) {
+  // 옛 통짜 키(예: apple)를 하위 키로 먼저 확장한 뒤 검증한다 — 분할 후
+  // `apple` 은 GROUPS 에 없으므로 확장 전에 validateGroups 를 돌리면 실패한다.
+  const wl = workload && workload.length ? expandAliases(workload) : workload;
+  const skip = skipWorkload && skipWorkload.length ? expandAliases(skipWorkload) : skipWorkload;
+
   let active;
-  if (workload && workload.length) {
-    validateGroups(workload, '--workload');
-    active = GROUPS.filter(g => workload.includes(g));
+  if (wl && wl.length) {
+    validateGroups(wl, '--workload');
+    active = GROUPS.filter(g => wl.includes(g));
   } else {
     active = GROUPS.slice();
   }
-  if (skipWorkload && skipWorkload.length) {
-    validateGroups(skipWorkload, '--skip-workload');
-    active = active.filter(g => !skipWorkload.includes(g));
+  if (skip && skip.length) {
+    validateGroups(skip, '--skip-workload');
+    active = active.filter(g => !skip.includes(g));
   }
   return active;
 }

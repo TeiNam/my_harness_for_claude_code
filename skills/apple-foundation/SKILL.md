@@ -3,7 +3,7 @@ name: apple-foundation
 description: AttributedString patterns for rich text formatting, alignment, selection, and SwiftUI integration. Use when working with styled text, text editing, or AttributedString APIs.
 allowed-tools: [Read, Glob, Grep, WebFetch]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-platform]
 ---
 
 # Foundation Patterns

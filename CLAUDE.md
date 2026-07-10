@@ -29,7 +29,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `commands/` — slash commands (markdown with `description:` frontmatter)
 - `hooks/` — trigger-based hook configs (JSON + handler scripts)
 - `rules/` — always-follow guidelines (common + per-language)
-- `mcp-configs/` — MCP server configurations
+- `mcp-configs/` — MCP server configs (proxy-first: `proxy/` holds the mcp-proxy compose stack; `mcp-servers.json` catalog marks each server `route: proxy|local`)
 - `scripts/` — Node.js utilities for hooks, install/uninstall, audits
 - `tests/` — test suite for `scripts/`
 - `docs/` — long-form reference (writing guides, security guide, steering rules)

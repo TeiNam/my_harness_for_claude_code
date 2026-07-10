@@ -1,65 +1,80 @@
 {
+  "_routing": {
+    "_comment": "이 하네스는 mcp-proxy(mcp-configs/proxy/)로 프록시 가능한 서버를 중앙 컨테이너에서 돌린다. 아래 각 서버의 route 필드가 proxy/local 을 표시한다.",
+    "test": "리눅스 컨테이너에서 무인증(또는 정적 env 시크릿)으로 헤드리스 구동되면 proxy. 호스트 브라우저·GUI·호스트 바이너리·경로·런타임 OAuth 리다이렉트가 필요하면 local.",
+    "proxy_url": "프록시 경유 서버는 클라이언트에서 http://localhost:9090/<서버키>/mcp 로 붙는다."
+  },
   "mcpServers": {
     "github": {
+      "route": "proxy",
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
         "Authorization": "Bearer YOUR_GITHUB_PAT_HERE"
       },
-      "description": "GitHub operations (PRs, issues, repos) via the official remote server. The old npx @modelcontextprotocol/server-github is unsupported as of 2025-04. PAT: github.com/settings/tokens"
-    },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"],
-      "description": "Live documentation lookup — use with documentation-lookup skill (resolve-library-id, query-docs)."
+      "description": "GitHub operations (PRs, issues, repos) via the official remote server. 프록시 config.json 에 정적 PAT 헤더로 넣는다. PAT: github.com/settings/tokens"
     },
     "exa": {
+      "route": "proxy",
       "type": "http",
       "url": "https://mcp.exa.ai/mcp",
-      "description": "Web search and research via Exa — broader research after GitHub search and primary docs."
+      "description": "Web search and research via Exa (remote, 무인증) — 프록시가 그대로 전달."
+    },
+    "context7": {
+      "route": "proxy",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Live documentation lookup — 프록시 컨테이너 안 npx 로 구동. documentation-lookup skill 과 함께 사용."
     },
     "brave-search": {
+      "route": "proxy",
       "command": "npx",
       "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
       "env": {
         "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
       },
-      "description": "Independent web/local search (complements exa). Free tier 2,000 queries/mo: api.search.brave.com/app/keys"
-    },
-    "sentry": {
-      "type": "http",
-      "url": "https://mcp.sentry.dev/mcp",
-      "description": "Sentry errors/issues via remote OAuth (no plaintext key). Approve on first session; OAuth flow via /mcp."
+      "description": "Independent web/local search — 프록시 컨테이너 안 npx. 시크릿은 프록시 .env 에 한 번만. api.search.brave.com/app/keys"
     },
     "time": {
+      "route": "proxy",
       "command": "uvx",
       "args": ["mcp-server-time"],
-      "description": "Current time + IANA timezone conversion. Requires uv (brew install uv)."
+      "description": "Current time + IANA timezone conversion — 프록시 컨테이너 안 uvx."
+    },
+    "sentry": {
+      "route": "local",
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp",
+      "description": "Sentry errors/issues — 런타임 OAuth 리다이렉트라 프록시 경유 불가. 클라이언트에 직접. Approve on first session via /mcp."
     },
     "playwright": {
+      "route": "local",
       "command": "npx",
       "args": ["-y", "@playwright/mcp", "--headless"],
-      "description": "Headless browser automation and testing. Use --extension instead to drive a running browser."
+      "description": "Headless browser automation — 호스트 브라우저 필요, 로컬 stdio 유지. --extension 으로 실행 중 브라우저 제어."
     },
     "agent-browser": {
+      "route": "local",
       "command": "agent-browser",
       "args": ["mcp"],
-      "description": "Vercel Agent Browser official MCP (stdio, core tools profile) — semantic selectors, AI-optimized, built on Playwright. Requires: npm install -g agent-browser && agent-browser install. Use --tools all for full CLI parity."
+      "description": "Vercel Agent Browser official MCP — 호스트 바이너리·브라우저 필요, 로컬 유지. Requires: npm install -g agent-browser && agent-browser install."
     },
     "higgsfield": {
+      "route": "local",
       "type": "http",
       "url": "https://mcp.higgsfield.ai/mcp",
-      "description": "Higgsfield AI image/video generation (30+ models: Soul, Kling, Veo, Flux, Seedream). Remote OAuth — no API key in config; authenticate with your Higgsfield account on first use."
+      "description": "Higgsfield AI image/video generation — 런타임 OAuth 라 로컬 직접. authenticate on first use."
     },
     "zapier": {
+      "route": "local",
       "type": "http",
       "url": "https://mcp.zapier.com/api/v1/connect",
-      "description": "Zapier MCP — 9,000+ app integrations, 40,000+ actions. Remote OAuth; sign in at mcp.zapier.com when prompted. Claude Code plugin alt: /plugin install zapier@claude-plugins-official."
+      "description": "Zapier MCP (9,000+ 앱) — 런타임 OAuth 라 로컬 직접. sign in at mcp.zapier.com when prompted."
     }
   },
   "_comments": {
-    "usage": "Copy the servers you need into the project .mcp.json or ~/.claude.json mcpServers section",
-    "env_vars": "Replace YOUR_*_HERE placeholders. The committed .mcp.json uses ${VAR} env refs instead of literals — prefer that for shared files.",
+    "usage": "route=proxy 서버는 mcp-configs/proxy/config.json 에 넣고 컨테이너로 구동, 클라이언트는 http://localhost:9090/<키>/mcp 로 연결. route=local 서버는 클라이언트 .mcp.json 에 직접 복사.",
+    "env_vars": "proxy 서버 시크릿(GITHUB_PAT·BRAVE_API_KEY)은 mcp-configs/proxy/.env 에 한 번만 둔다. 클라이언트에는 URL 만 남아 시크릿이 흩어지지 않는다.",
     "context_warning": "Keep under 10 MCPs enabled to preserve context window"
   }
 }

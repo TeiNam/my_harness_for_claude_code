@@ -1,0 +1,17 @@
+services:
+  mcp-proxy:
+    image: ghcr.io/tbxark/mcp-proxy:latest
+    container_name: harness-mcp-proxy
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      # config.json은 읽기 전용 마운트. 값은 컨테이너 안에서 ${VAR}로 치환됨.
+      - ./config.json:/config/config.json:ro
+    environment:
+      # 같은 폴더의 .env 또는 compose를 실행하는 셸에서 주입.
+      BRAVE_API_KEY: ${BRAVE_API_KEY:-}
+      GITHUB_PAT: ${GITHUB_PAT:-}
+    extra_hosts:
+      # Colima/Docker Desktop에서 컨테이너→호스트(로컬 REST API 등) 도달용.
+      - "host.docker.internal:host-gateway"

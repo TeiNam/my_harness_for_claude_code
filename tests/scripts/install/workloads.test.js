@@ -14,6 +14,7 @@ const {
   identifierOf,
   isKnownGroup,
   validateGroups,
+  expandAliases,
 } = require('../../../scripts/install/workloads');
 
 function test(name, fn) {
@@ -32,11 +33,13 @@ function runTests() {
   let passed = 0;
   let failed = 0;
 
-  if (test('GROUPS catalog reflects the 2-tier menu', () => {
-    // 메뉴 sub-옵션과 1:1 매칭되는 정밀 키 + core 베이스라인.
+  if (test('GROUPS catalog reflects the 3-tier menu (apple/social 3분할)', () => {
+    // 메뉴 sub-옵션·상세와 매칭되는 정밀 키 + core 베이스라인.
     assert.deepStrictEqual(GROUPS.slice().sort(), [
       'ai',
-      'apple',
+      'apple-core',
+      'apple-platform',
+      'apple-product',
       'cloud',
       'core',
       'dynamodb',
@@ -53,6 +56,8 @@ function runTests() {
       'python-data',
       'rust',
       'social-content',
+      'social-visual',
+      'social-voice',
       'writing',
     ]);
   })) passed++; else failed++;
@@ -147,6 +152,45 @@ function runTests() {
     // 옛 'python' 키도 이제 unknown
     assert.throws(() => validateGroups(['python']),
       /Unknown groups: python/);
+  })) passed++; else failed++;
+
+  // -- apple/social 3분할 분류 -------------------------------------------
+  if (test('apple skills classify into core/platform/product groups', () => {
+    assert.deepStrictEqual(classifyIdentifier('apple-ios', 'skill'), ['apple-core']);
+    assert.deepStrictEqual(classifyIdentifier('apple-shared', 'skill'), ['apple-core']);
+    assert.deepStrictEqual(classifyIdentifier('apple-watchos', 'skill'), ['apple-platform']);
+    assert.deepStrictEqual(classifyIdentifier('apple-core-ml', 'skill'), ['apple-platform']);
+    assert.deepStrictEqual(classifyIdentifier('apple-app-store', 'skill'), ['apple-product']);
+    assert.deepStrictEqual(classifyIdentifier('apple-release-review', 'skill'), ['apple-product']);
+  })) passed++; else failed++;
+
+  if (test('apple classification never double-tags (subdivision holds)', () => {
+    // 넓은 폴백을 제거했으므로 각 apple 스킬은 정확히 1개 그룹.
+    for (const id of ['apple-ios', 'apple-watchos', 'apple-monetization', 'apple-apple-intelligence']) {
+      assert.strictEqual(classifyIdentifier(id, 'skill').length, 1, `${id} should map to exactly one group`);
+    }
+  })) passed++; else failed++;
+
+  if (test('social skills classify into voice/content/visual groups', () => {
+    assert.deepStrictEqual(classifyIdentifier('voice-builder', 'skill'), ['social-voice']);
+    assert.deepStrictEqual(classifyIdentifier('newsletter-voice', 'skill'), ['social-voice']);
+    assert.deepStrictEqual(classifyIdentifier('post-writer', 'skill'), ['social-content']);
+    assert.deepStrictEqual(classifyIdentifier('graphic-designer', 'skill'), ['social-visual']);
+    assert.deepStrictEqual(classifyIdentifier('gemini-carousel', 'skill'), ['social-visual']);
+  })) passed++; else failed++;
+
+  // -- 별칭 확장 ----------------------------------------------------------
+  if (test('expandAliases expands apple to its three sub-keys', () => {
+    assert.deepStrictEqual(expandAliases(['apple']).sort(),
+      ['apple-core', 'apple-platform', 'apple-product']);
+  })) passed++; else failed++;
+
+  if (test('expandAliases passes non-alias keys through untouched', () => {
+    assert.deepStrictEqual(expandAliases(['mysql', 'rust']), ['mysql', 'rust']);
+    // 별칭 + 일반 키 혼합, 중복 제거
+    assert.deepStrictEqual(expandAliases(['apple', 'apple-core']).sort(),
+      ['apple-core', 'apple-platform', 'apple-product']);
+    assert.deepStrictEqual(expandAliases([]), []);
   })) passed++; else failed++;
 
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);

@@ -3,7 +3,7 @@ name: apple-intelligence
 description: Apple Intelligence skills for on-device AI features including Foundation Models, Visual Intelligence, App Intents, and intelligent assistants. Use when implementing AI-powered features.
 allowed-tools: [Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-platform]
 ---
 
 # Apple Intelligence Skills

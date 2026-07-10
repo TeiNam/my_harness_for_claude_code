@@ -3,7 +3,7 @@ name: profile-optimizer
 description: >
   Rebuild a LinkedIn profile for maximum conversions. Produces new headline options, about section, experience section, featured section strategy, and 4 image generation prompts (banner, profile picture, 2 featured tiles). Use this skill whenever the user says "optimize my profile", "fix my LinkedIn", "rewrite my headline", "profile review", "LinkedIn audit", "rebuild my profile", or wants help with any part of their LinkedIn profile. Also trigger when the user uploads a LinkedIn profile PDF or screenshot for review.
 origin: charlie947/social-media-skills
-workloads: [social-content]
+workloads: [social-voice]
 ---
 
 # Profile Optimizer

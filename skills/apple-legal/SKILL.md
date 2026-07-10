@@ -3,7 +3,7 @@ name: legal
 description: Legal document generation and compliance guidance for indie Apple developers. Covers privacy policies, terms of service, EULAs, GDPR/CCPA/DPDP compliance, and Apple App Store legal requirements. Use when user needs legal documents or compliance guidance.
 allowed-tools: [Read, Glob, Grep, AskUserQuestion]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-product]
 ---
 
 # Legal Document Generation & Compliance

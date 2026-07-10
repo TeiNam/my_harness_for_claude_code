@@ -3,7 +3,7 @@ name: youtube-thumbnail
 description: >
   Generate a branded YouTube thumbnail from a video title. Uses a reference photo of the creator, high-CTR thumbnail principles, and brand colours to produce a ready-to-generate image prompt for Gemini. Use this skill whenever the user says "thumbnail", "youtube thumbnail", "build me a thumbnail", or wants a video cover image before writing the script. The thumbnail-first workflow mirrors the graphic-first approach for LinkedIn: sells the video before anyone hears a word of the script.
 origin: charlie947/social-media-skills
-workloads: [social-content]
+workloads: [social-visual]
 ---
 
 # YouTube Thumbnail

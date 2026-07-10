@@ -1,0 +1,32 @@
+{
+  "mcpProxy": {
+    "baseURL": "http://localhost:9090",
+    "addr": ":9090",
+    "name": "Harness MCP Proxy",
+    "type": "streamable-http"
+  },
+  "mcpServers": {
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "transportType": "streamable-http",
+      "headers": { "Authorization": "Bearer ${GITHUB_PAT}" }
+    },
+    "exa": {
+      "url": "https://mcp.exa.ai/mcp",
+      "transportType": "streamable-http"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
+      "env": { "BRAVE_API_KEY": "${BRAVE_API_KEY}" }
+    },
+    "time": {
+      "command": "uvx",
+      "args": ["mcp-server-time"]
+    }
+  }
+}

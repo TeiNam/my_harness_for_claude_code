@@ -3,7 +3,7 @@ name: security
 description: Security review and guidance for iOS, macOS, and watchOS apps. Covers secure storage, biometric authentication, network security, and platform-specific patterns. Use when implementing security features or reviewing code for vulnerabilities.
 allowed-tools: [Read, Glob, Grep]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-core]
 ---
 
 # Security Review for Apple Platforms

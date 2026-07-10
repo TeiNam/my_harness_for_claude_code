@@ -3,7 +3,7 @@ name: newsletter-voice
 description: >
   Build newsletter writing instructions inside a Cowork project. Runs after voice-builder. Produces newsletter-voice.md, a single file Claude references when drafting newsletters in the user's voice. Works with or without existing newsletter samples: if the user has past issues, the skill analyses them; if not, the skill offers 6 archetypes tuned to the user's voice. Trigger whenever the user says "build my newsletter voice", "learn my newsletter style", "set up my newsletter system", "train on my newsletters", "newsletter onboarding", or drops newsletter samples into chat asking for an analysis. Requires voice-builder to have run first: the skill needs voice.md and about-me.md in the project to work.
 origin: charlie947/social-media-skills
-workloads: [social-content]
+workloads: [social-voice]
 ---
 
 # Newsletter Voice

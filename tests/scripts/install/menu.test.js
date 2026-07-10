@@ -37,12 +37,26 @@ function runTests() {
     ]);
   })) passed++; else failed++;
 
-  if (test('every sub-option references at least one workload', () => {
+  if (test('every leaf node references workloads OR has detailOptions', () => {
+    const hasWorkloads = n => Array.isArray(n.workloads) && n.workloads.length > 0;
+    const hasDetails = n => Array.isArray(n.detailOptions) && n.detailOptions.length > 0;
     for (const cat of CATEGORIES) {
-      if (!cat.subOptions) continue;
-      for (const sub of cat.subOptions) {
-        assert.ok(Array.isArray(sub.workloads) && sub.workloads.length > 0,
-          `sub-option ${cat.id}.${sub.id} has no workloads`);
+      if (cat.subOptions) {
+        for (const sub of cat.subOptions) {
+          assert.ok(hasWorkloads(sub) || hasDetails(sub),
+            `sub-option ${cat.id}.${sub.id} has neither workloads nor detailOptions`);
+          // 상세를 가진 노드는 각 상세가 workloads 를 가져야 한다.
+          for (const det of (sub.detailOptions || [])) {
+            assert.ok(hasWorkloads(det), `detail ${cat.id}.${sub.id}.${det.id} has no workloads`);
+          }
+        }
+      } else {
+        // sub 없는 카테고리: 카테고리 자체가 workloads 또는 detailOptions 를 가져야.
+        assert.ok(hasWorkloads(cat) || hasDetails(cat),
+          `category ${cat.id} has neither workloads nor detailOptions`);
+        for (const det of (cat.detailOptions || [])) {
+          assert.ok(hasWorkloads(det), `detail ${cat.id}.${det.id} has no workloads`);
+        }
       }
     }
   })) passed++; else failed++;
@@ -94,12 +108,14 @@ function runTests() {
       ['core', 'dynamodb', 'mongodb', 'mysql', 'postgres']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: writing with no sub-selection means "all sub-options"', () => {
+  if (test('resolveSelection: writing with no sub-selection means "all" (social 상세 전체 포함)', () => {
     const r = resolveSelection({ categories: ['writing'] });
-    assert.deepStrictEqual(r.workloads, ['core', 'social-content', 'writing']);
+    // writing(tech) + social 상세 전체 3키.
+    assert.deepStrictEqual(r.workloads,
+      ['core', 'social-content', 'social-visual', 'social-voice', 'writing']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: writing.tech excludes social-content', () => {
+  if (test('resolveSelection: writing.tech excludes all social keys', () => {
     const r = resolveSelection({
       categories: ['writing'],
       subSelections: { writing: ['tech'] },
@@ -107,17 +123,53 @@ function runTests() {
     assert.deepStrictEqual(r.workloads, ['core', 'writing']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: writing.social excludes writing', () => {
+  if (test('resolveSelection: writing.social with no detail = all 3 social keys', () => {
     const r = resolveSelection({
       categories: ['writing'],
       subSelections: { writing: ['social'] },
     });
-    assert.deepStrictEqual(r.workloads, ['core', 'social-content']);
+    assert.deepStrictEqual(r.workloads,
+      ['core', 'social-content', 'social-visual', 'social-voice']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: apple has no sub-options and resolves directly', () => {
+  if (test('resolveSelection: writing.social detail picks a single social group', () => {
+    const r = resolveSelection({
+      categories: ['writing'],
+      subSelections: { writing: ['social'] },
+      detailSelections: { 'writing.social': ['voice'] },
+    });
+    assert.deepStrictEqual(r.workloads, ['core', 'social-voice']);
+  })) passed++; else failed++;
+
+  if (test('resolveSelection: apple (category-level detail) with no detail = all 3 apple keys', () => {
     const r = resolveSelection({ categories: ['apple'] });
-    assert.deepStrictEqual(r.workloads, ['apple', 'core']);
+    assert.deepStrictEqual(r.workloads,
+      ['apple-core', 'apple-platform', 'apple-product', 'core']);
+  })) passed++; else failed++;
+
+  if (test('resolveSelection: apple detail picks specific areas', () => {
+    const r = resolveSelection({
+      categories: ['apple'],
+      detailSelections: { apple: ['core', 'product'] },
+    });
+    assert.deepStrictEqual(r.workloads, ['apple-core', 'apple-product', 'core']);
+  })) passed++; else failed++;
+
+  if (test('resolveSelection: unknown detail reported separately', () => {
+    const r = resolveSelection({
+      categories: ['apple'],
+      detailSelections: { apple: ['core', 'bogus'] },
+    });
+    assert.deepStrictEqual(r.unknownDetails, ['apple.bogus']);
+    assert.ok(r.workloads.includes('apple-core'));
+  })) passed++; else failed++;
+
+  if (test('resolveSelection: non-detail leaves (mysql/rust) unchanged — 회귀', () => {
+    const r = resolveSelection({
+      categories: ['data-design', 'backend'],
+      subSelections: { 'data-design': ['mysql'], backend: ['rust'] },
+    });
+    assert.deepStrictEqual(r.workloads, ['core', 'mysql', 'rust']);
   })) passed++; else failed++;
 
   if (test('resolveSelection: plugin=obsidian also drags frontend', () => {
@@ -150,6 +202,27 @@ function runTests() {
     const a = parseCliFlags({ category: 'backend,writing', backend: 'python' });
     const b = parseCliFlags({ category: ['backend', 'writing'], backend: ['python'] });
     assert.deepStrictEqual(a, b);
+  })) passed++; else failed++;
+
+  if (test('parseCliFlags: --apple=core,platform routes to category-level detail', () => {
+    const { categories, detailSelections } = parseCliFlags({ apple: 'core,platform' });
+    assert.deepStrictEqual(categories, ['apple']);
+    assert.deepStrictEqual(detailSelections, { apple: ['core', 'platform'] });
+  })) passed++; else failed++;
+
+  if (test('parseCliFlags: --apple=core resolves to apple-core only', () => {
+    const { categories, subSelections, detailSelections } = parseCliFlags({ apple: 'core' });
+    const r = resolveSelection({ categories, subSelections, detailSelections });
+    assert.deepStrictEqual(r.workloads, ['apple-core', 'core']);
+  })) passed++; else failed++;
+
+  if (test('parseCliFlags: --writing-social=voice routes to sub-level detail + auto sub', () => {
+    const { categories, subSelections, detailSelections } = parseCliFlags({ 'writing-social': 'voice' });
+    assert.deepStrictEqual(categories, ['writing']);
+    assert.deepStrictEqual(subSelections, { writing: ['social'] });
+    assert.deepStrictEqual(detailSelections, { 'writing.social': ['voice'] });
+    const r = resolveSelection({ categories, subSelections, detailSelections });
+    assert.deepStrictEqual(r.workloads, ['core', 'social-voice']);
   })) passed++; else failed++;
 
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);

@@ -65,6 +65,14 @@ function buildFixture() {
   writeFile(path.join(root, 'rules/common/git-workflow.md'),
     'no frontmatter at all\n');  // no fm → folder-based fallback (core)
 
+  // apple 3분할 자산 — 별칭(--workload=apple) 확장 검증용.
+  writeFile(path.join(root, 'skills/apple-ios/SKILL.md'),
+    '---\nname: iOS\nworkloads: [apple-core]\n---\n');
+  writeFile(path.join(root, 'skills/apple-watchos/SKILL.md'),
+    '---\nname: watchOS\nworkloads: [apple-platform]\n---\n');
+  writeFile(path.join(root, 'skills/apple-app-store/SKILL.md'),
+    '---\nname: App Store\nworkloads: [apple-product]\n---\n');
+
   return root;
 }
 
@@ -172,6 +180,24 @@ function runTests() {
     assert.ok(ids.includes('rules/common/git-workflow.md'));
 
     fs.rmSync(root, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('selectAssets: --workload=apple 별칭이 3분할 자산 전부 선택', () => {
+    const root = buildFixture();
+    const aliased = selectAssets({ root, workload: ['apple'] });
+    const ids = aliased.selected.map(a => a.sourceRel).sort();
+    assert.deepStrictEqual(ids, ['skills/apple-app-store', 'skills/apple-ios', 'skills/apple-watchos']);
+    // 하위 키 하나만 골랐을 땐 그 그룹만.
+    const coreOnly = selectAssets({ root, workload: ['apple-core'] });
+    assert.deepStrictEqual(coreOnly.selected.map(a => a.sourceRel), ['skills/apple-ios']);
+    fs.rmSync(root, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('selectGroups: apple 별칭이 3키로 확장', () => {
+    assert.deepStrictEqual(
+      selectGroups({ workload: ['apple'] }).sort(),
+      ['apple-core', 'apple-platform', 'apple-product']
+    );
   })) passed++; else failed++;
 
   if (test('selectAssets target paths land under <kind>/_harness/', () => {

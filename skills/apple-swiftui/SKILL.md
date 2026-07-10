@@ -3,7 +3,7 @@ name: apple-swiftui
 description: SwiftUI feature patterns — AlarmKit, WebKit embedding, rich text editing, customizable toolbars, and 3D charts. Use when implementing alarms/timers, embedding web content, rich text, toolbars, or 3D data visualization in SwiftUI.
 allowed-tools: [Read, Glob, Grep, WebFetch]
 origin: rshankras/claude-code-apple-skills
-workloads: [apple]
+workloads: [apple-core]
 ---
 
 # SwiftUI Feature Patterns
