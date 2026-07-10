@@ -78,6 +78,37 @@ function runTests() {
     assert.ok(groups.includes('python-backend'));
   })) passed++; else failed++;
 
+  if (test('--apple=core resolves to category-level detail (apple-core)', () => {
+    const out = run(['--non-interactive', '--apple=core']);
+    assert.strictEqual(out, 'apple-core,core');
+  })) passed++; else failed++;
+
+  if (test('--category=apple (alias) expands to all three apple keys', () => {
+    const out = run(['--non-interactive', '--category=apple']);
+    assert.strictEqual(out, 'apple-core,apple-platform,apple-product,core');
+  })) passed++; else failed++;
+
+  if (test('--writing-social=voice resolves sub-level detail', () => {
+    const out = run(['--non-interactive', '--writing-social=voice']);
+    assert.strictEqual(out, 'core,social-voice');
+  })) passed++; else failed++;
+
+  if (test('--writing=tech excludes all social keys', () => {
+    const out = run(['--non-interactive', '--writing=tech']);
+    assert.strictEqual(out, 'core,writing');
+  })) passed++; else failed++;
+
+  if (test('unknown detail option fails with non-zero exit code', () => {
+    let threw = false;
+    try {
+      run(['--non-interactive', '--apple=bogus']);
+    } catch (e) {
+      threw = true;
+      assert.ok(/Unknown detail options: apple\.bogus/.test(e.stderr || e.message));
+    }
+    assert.ok(threw, 'expected failure for unknown detail');
+  })) passed++; else failed++;
+
   if (test('unknown category fails with non-zero exit code', () => {
     let threw = false;
     try {

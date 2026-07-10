@@ -18,12 +18,12 @@
  * 진단 로그는 stderr 로 보낸다 — stdout 은 기계가 읽는다.
  */
 
-const readline = require('readline');
 const {
   CATEGORIES,
   parseCliFlags,
   resolveSelection,
 } = require('./menu');
+const { checkboxPrompt } = require('./checkbox-prompt');
 
 function parseArgv(argv) {
   const flags = {};
@@ -49,24 +49,34 @@ function parseArgv(argv) {
 }
 
 function helpText() {
-  const cats = CATEGORIES.map(c => {
-    const subs = c.subOptions
-      ? c.subOptions.map(s => s.id).join(',')
-      : '(no sub-options)';
-    return `  --${c.id.padEnd(14)}=${subs}`;
-  }).join('\n');
+  const lines = [];
+  for (const c of CATEGORIES) {
+    if (c.detailOptions) {
+      // 카테고리 레벨 상세 (apple)
+      lines.push(`  --${c.id.padEnd(16)}=${c.detailOptions.map(d => d.id).join(',')}   (상세)`);
+    } else if (c.subOptions) {
+      lines.push(`  --${c.id.padEnd(16)}=${c.subOptions.map(s => s.id).join(',')}`);
+      for (const s of c.subOptions) {
+        if (!s.detailOptions) continue;
+        lines.push(`  --${`${c.id}-${s.id}`.padEnd(16)}=${s.detailOptions.map(d => d.id).join(',')}   (상세)`);
+      }
+    } else {
+      lines.push(`  --${c.id.padEnd(16)}   (no sub-options)`);
+    }
+  }
   return [
     'select-workloads.js — 워크로드 선택 진입점',
     '',
     '사용:',
-    '  node select-workloads.js                 대화형 메뉴 (TTY) 또는 전체',
+    '  node select-workloads.js                 대화형 3단계 체크박스 (TTY) 또는 전체',
     '  node select-workloads.js --all           플래그/메뉴 없이 전체 설치',
     '  node select-workloads.js --non-interactive --category=...  CLI 모드',
     '',
     'CLI 플래그:',
     '  --category=backend,writing         사용할 톱레벨 카테고리 (콤마 구분)',
-    '  --<category>=<sub1>,<sub2>         각 카테고리의 sub-옵션',
-    cats,
+    '  --<category>=<sub1>,<sub2>         각 카테고리의 sub-옵션 / 상세',
+    '  --<category>-<sub>=<detail1>,...  sub 레벨 상세 (예: --writing-social=voice)',
+    ...lines,
     '',
     '출력:',
     '  stdout: 콤마 구분 워크로드 키 (예: core,python-backend,frontend)',
@@ -76,7 +86,13 @@ function helpText() {
 
 function hasAnyFlagSelection(flags) {
   if ('category' in flags) return true;
-  for (const c of CATEGORIES) if (c.id in flags) return true;
+  for (const c of CATEGORIES) {
+    if (c.id in flags) return true;
+    // sub 레벨 상세 플래그: --<catId>-<subId> (예: --writing-social)
+    for (const s of (c.subOptions || [])) {
+      if (`${c.id}-${s.id}` in flags) return true;
+    }
+  }
   return false;
 }
 
@@ -90,57 +106,59 @@ function selectAll() {
 }
 
 /**
- * stdin 기반 대화형 메뉴. enquirer 등 외부 패키지에 의존하지 않도록
- * "1,3" / "all" / "skip" 같은 텍스트 입력을 받는다.
+ * stdin 기반 3단계 대화형 메뉴 (방향키 체크박스).
+ *   1) 대분류(카테고리)  →  2) 중분류(sub-옵션)  →  3) 상세(detail, 있을 때만)
+ * 각 단계는 checkbox-prompt.js 를 재사용한다. 아무것도 안 고르면 그 단계는
+ * "전체"로 해석된다 (resolveSelection 의 빈 배열 = 전체 규칙과 일치).
  */
 async function runInteractive() {
-  const rl = readline.createInterface({ input: process.stdin, output: process.stderr });
-  const ask = q => new Promise(resolve => rl.question(q, resolve));
-
   process.stderr.write('\n=== 설치할 워크로드를 선택하세요 ===\n');
-  process.stderr.write('카테고리 번호를 콤마로 입력하세요. "all" = 전부, "skip" 후 Enter = 글쓰기만.\n\n');
 
-  CATEGORIES.forEach((c, i) => {
-    process.stderr.write(`  ${i + 1}) ${c.label}\n`);
+  // 1단계: 대분류
+  const chosenCatIds = await checkboxPrompt({
+    title: '대분류 (space 토글 · a 전체 · enter 확정):',
+    options: CATEGORIES.map(c => ({ id: c.id, label: c.label })),
   });
-  process.stderr.write('\n');
+  const categories = chosenCatIds.length ? chosenCatIds : [];
 
-  const catAnswer = (await ask('카테고리 [기본 all]: ')).trim();
-  let chosenCategoryIdx;
-  if (!catAnswer || catAnswer === 'all') {
-    chosenCategoryIdx = CATEGORIES.map((_, i) => i);
-  } else if (catAnswer === 'skip') {
-    chosenCategoryIdx = [];
-  } else {
-    chosenCategoryIdx = catAnswer.split(',')
-      .map(s => parseInt(s.trim(), 10) - 1)
-      .filter(n => Number.isInteger(n) && n >= 0 && n < CATEGORIES.length);
-  }
-
-  const categories = chosenCategoryIdx.map(i => CATEGORIES[i].id);
   const subSelections = {};
+  const detailSelections = {};
 
-  for (const idx of chosenCategoryIdx) {
-    const cat = CATEGORIES[idx];
+  for (const catId of categories) {
+    const cat = CATEGORIES.find(c => c.id === catId);
+    if (!cat) continue;
+
+    // 카테고리 레벨 상세 tier (예: apple — sub 없음)
+    if (cat.detailOptions && cat.detailOptions.length) {
+      detailSelections[catId] = await checkboxPrompt({
+        title: `\n[${cat.label}] ${cat.detailQuestion || '항목을 고르세요'} (미선택 = 전체):`,
+        options: cat.detailOptions.map(d => ({ id: d.id, label: d.label })),
+      });
+      continue;
+    }
+
     if (!cat.subOptions || cat.subOptions.length === 0) continue;
 
-    process.stderr.write(`\n[${cat.label}] ${cat.subQuestion || '항목을 고르세요'}\n`);
-    cat.subOptions.forEach((s, i) => {
-      process.stderr.write(`    ${i + 1}) ${s.label}\n`);
+    // 2단계: 중분류
+    const subIds = await checkboxPrompt({
+      title: `\n[${cat.label}] ${cat.subQuestion || '항목을 고르세요'} (미선택 = 전체):`,
+      options: cat.subOptions.map(s => ({ id: s.id, label: s.label })),
     });
-    const ans = (await ask(`  선택 [기본 all]: `)).trim();
-    if (!ans || ans === 'all') {
-      subSelections[cat.id] = cat.subOptions.map(s => s.id);
-    } else {
-      subSelections[cat.id] = ans.split(',')
-        .map(s => parseInt(s.trim(), 10) - 1)
-        .filter(n => Number.isInteger(n) && n >= 0 && n < cat.subOptions.length)
-        .map(n => cat.subOptions[n].id);
+    subSelections[catId] = subIds; // 빈 배열이면 resolveSelection 이 전체로 해석
+
+    // 3단계: 상세 (선택된 sub 중 detailOptions 를 가진 것만)
+    const effectiveSubs = subIds.length ? subIds : cat.subOptions.map(s => s.id);
+    for (const subId of effectiveSubs) {
+      const sub = cat.subOptions.find(s => s.id === subId);
+      if (!sub || !sub.detailOptions || !sub.detailOptions.length) continue;
+      detailSelections[`${catId}.${subId}`] = await checkboxPrompt({
+        title: `\n[${cat.label} › ${sub.label}] ${sub.detailQuestion || '항목을 고르세요'} (미선택 = 전체):`,
+        options: sub.detailOptions.map(d => ({ id: d.id, label: d.label })),
+      });
     }
   }
 
-  rl.close();
-  return resolveSelection({ categories, subSelections });
+  return resolveSelection({ categories, subSelections, detailSelections });
 }
 
 async function main() {
@@ -155,8 +173,8 @@ async function main() {
   if (flags._all) {
     result = selectAll();
   } else if (hasAnyFlagSelection(flags)) {
-    const { categories, subSelections } = parseCliFlags(flags);
-    result = resolveSelection({ categories, subSelections });
+    const { categories, subSelections, detailSelections } = parseCliFlags(flags);
+    result = resolveSelection({ categories, subSelections, detailSelections });
   } else if (flags._nonInteractive || !process.stdin.isTTY) {
     // TTY 가 없고 플래그도 없을 때는 전체 설치가 가장 안전한 기본.
     process.stderr.write('[select-workloads] no flags and not a TTY — defaulting to --all\n');
@@ -171,6 +189,10 @@ async function main() {
   }
   if (result.unknownSubs.length) {
     process.stderr.write(`Unknown sub-options: ${result.unknownSubs.join(', ')}\n`);
+    return 2;
+  }
+  if (result.unknownDetails && result.unknownDetails.length) {
+    process.stderr.write(`Unknown detail options: ${result.unknownDetails.join(', ')}\n`);
     return 2;
   }
 
