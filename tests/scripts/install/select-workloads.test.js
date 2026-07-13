@@ -33,108 +33,196 @@ function runTests() {
   let passed = 0;
   let failed = 0;
 
-  if (test('--all enables every workload (sorted)', () => {
-    const out = run(['--all']);
-    const groups = out.split(',');
-    assert.ok(groups.includes('core'));
-    assert.ok(groups.includes('python-backend'));
-    assert.ok(groups.includes('mysql'));
-    assert.ok(groups.includes('writing'));
-    // sorted output
-    assert.deepStrictEqual(groups.slice().sort(), groups);
-  })) passed++; else failed++;
+  if (
+    test('--all enables every workload (sorted)', () => {
+      const out = run(['--all']);
+      const groups = out.split(',');
+      assert.ok(groups.includes('core'));
+      assert.ok(groups.includes('python-backend'));
+      assert.ok(groups.includes('mysql'));
+      assert.ok(groups.includes('writing'));
+      // sorted output
+      assert.deepStrictEqual(groups.slice().sort(), groups);
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--non-interactive --dev=python yields core,python-backend', () => {
-    const out = run(['--non-interactive', '--dev=python']);
-    assert.strictEqual(out, 'core,python-backend');
-  })) passed++; else failed++;
+  if (
+    test('--non-interactive --dev=python yields core,python-backend', () => {
+      const out = run(['--non-interactive', '--dev=python']);
+      assert.strictEqual(out, 'core,python-backend');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--non-interactive --data=python-data avoids python-backend', () => {
-    const out = run(['--non-interactive', '--data=python-data']);
-    const groups = out.split(',');
-    assert.ok(groups.includes('python-data'));
-    assert.ok(groups.includes('ai'));
-    assert.ok(!groups.includes('python-backend'));
-  })) passed++; else failed++;
+  if (
+    test('--non-interactive --data=python-data avoids python-backend', () => {
+      const out = run(['--non-interactive', '--data=python-data']);
+      const groups = out.split(',');
+      assert.ok(groups.includes('python-data'));
+      assert.ok(groups.includes('ai'));
+      assert.ok(!groups.includes('python-backend'));
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--non-interactive --data=mysql excludes other DB engines', () => {
-    const out = run(['--non-interactive', '--data=mysql']);
-    assert.strictEqual(out, 'core,mysql');
-  })) passed++; else failed++;
+  if (
+    test('--non-interactive --data=mysql excludes other DB engines', () => {
+      const out = run(['--non-interactive', '--data=mysql']);
+      assert.strictEqual(out, 'core,mysql');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('multiple categories combine workloads', () => {
-    const out = run(['--non-interactive', '--category=dev,writing', '--dev=python']);
-    const groups = out.split(',');
-    assert.ok(groups.includes('python-backend'));
-    assert.ok(groups.includes('writing'));
-    assert.ok(groups.includes('core'));
-  })) passed++; else failed++;
+  if (
+    test('multiple categories combine workloads', () => {
+      const out = run(['--non-interactive', '--category=dev,writing', '--dev=python']);
+      const groups = out.split(',');
+      assert.ok(groups.includes('python-backend'));
+      assert.ok(groups.includes('writing'));
+      assert.ok(groups.includes('core'));
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--non-interactive without flags falls back to --all', () => {
-    const out = run(['--non-interactive']);
-    const groups = out.split(',');
-    assert.ok(groups.includes('mysql'));
-    assert.ok(groups.includes('writing'));
-    assert.ok(groups.includes('python-backend'));
-  })) passed++; else failed++;
+  if (
+    test('--non-interactive without flags falls back to --all', () => {
+      const out = run(['--non-interactive']);
+      const groups = out.split(',');
+      assert.ok(groups.includes('mysql'));
+      assert.ok(groups.includes('writing'));
+      assert.ok(groups.includes('python-backend'));
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--dev-apple=core resolves to sub-level detail (apple-core)', () => {
-    const out = run(['--non-interactive', '--dev-apple=core']);
-    assert.strictEqual(out, 'apple-core,core');
-  })) passed++; else failed++;
+  if (
+    test('--dev-apple=core resolves to sub-level detail (apple-core)', () => {
+      const out = run(['--non-interactive', '--dev-apple=core']);
+      assert.strictEqual(out, 'apple-core,core');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--dev-apple with no value expands to all three apple keys', () => {
-    const out = run(['--non-interactive', '--dev-apple=core,platform,product']);
-    assert.strictEqual(out, 'apple-core,apple-platform,apple-product,core');
-  })) passed++; else failed++;
+  if (
+    test('--dev-apple with no value expands to all three apple keys', () => {
+      const out = run(['--non-interactive', '--dev-apple=core,platform,product']);
+      assert.strictEqual(out, 'apple-core,apple-platform,apple-product,core');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--writing-social=voice resolves sub-level detail', () => {
-    const out = run(['--non-interactive', '--writing-social=voice']);
-    assert.strictEqual(out, 'core,social-voice');
-  })) passed++; else failed++;
+  if (
+    test('--writing-social=voice resolves sub-level detail', () => {
+      const out = run(['--non-interactive', '--writing-social=voice']);
+      assert.strictEqual(out, 'core,social-voice');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--writing=general excludes all social keys', () => {
-    const out = run(['--non-interactive', '--writing=general']);
-    assert.strictEqual(out, 'core,writing');
-  })) passed++; else failed++;
+  if (
+    test('--writing=general excludes all social keys', () => {
+      const out = run(['--non-interactive', '--writing=general']);
+      assert.strictEqual(out, 'core,writing');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('--research=report yields core,report (tech-writer)', () => {
-    const out = run(['--non-interactive', '--research=report']);
-    assert.strictEqual(out, 'core,report');
-  })) passed++; else failed++;
+  if (
+    test('--research=report yields core,report (tech-writer)', () => {
+      const out = run(['--non-interactive', '--research=report']);
+      assert.strictEqual(out, 'core,report');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('unknown detail option fails with non-zero exit code', () => {
-    let threw = false;
-    try {
-      run(['--non-interactive', '--dev-apple=bogus']);
-    } catch (e) {
-      threw = true;
-      assert.ok(/Unknown detail options: dev\.apple\.bogus/.test(e.stderr || e.message));
-    }
-    assert.ok(threw, 'expected failure for unknown detail');
-  })) passed++; else failed++;
+  if (
+    test('unknown detail option fails with non-zero exit code', () => {
+      let threw = false;
+      try {
+        run(['--non-interactive', '--dev-apple=bogus']);
+      } catch (e) {
+        threw = true;
+        assert.ok(/Unknown detail options: dev\.apple\.bogus/.test(e.stderr || e.message));
+      }
+      assert.ok(threw, 'expected failure for unknown detail');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('unknown category fails with non-zero exit code', () => {
-    let threw = false;
-    try {
-      run(['--non-interactive', '--category=imaginary']);
-    } catch (e) {
-      threw = true;
-      assert.ok(/Unknown categories: imaginary/.test(e.stderr || e.message));
-    }
-    assert.ok(threw, 'expected failure for unknown category');
-  })) passed++; else failed++;
+  if (
+    test('옛/미지 플래그(--backend=)는 전체설치로 폴백하지 않고 실패한다', () => {
+      let threw = false;
+      try {
+        run(['--non-interactive', '--backend=python']);
+      } catch (e) {
+        threw = true;
+        assert.ok(/Unknown flags: --backend/.test(e.stderr || e.message));
+      }
+      assert.ok(threw, 'expected failure for old flag, not --all fallback');
+    })
+  )
+    passed++;
+  else failed++;
 
-  if (test('unknown sub-option fails with non-zero exit code', () => {
-    let threw = false;
-    try {
-      run(['--non-interactive', '--dev=imaginary']);
-    } catch (e) {
-      threw = true;
-      assert.ok(/Unknown sub-options: dev\.imaginary/.test(e.stderr || e.message));
-    }
-    assert.ok(threw, 'expected failure for unknown sub');
-  })) passed++; else failed++;
+  if (
+    test('--category=dev + --dev-apple=core 는 dev 전체 + apple 은 core 만 (좁혀지지 않음)', () => {
+      const out = run(['--non-interactive', '--category=dev', '--dev-apple=core']);
+      const groups = out.split(',');
+      // dev 전체가 살아있어야: frontend·python-backend·rust 포함
+      assert.ok(groups.includes('frontend'), 'dev 전체 유지 (frontend)');
+      assert.ok(groups.includes('python-backend'), 'dev 전체 유지 (python-backend)');
+      assert.ok(groups.includes('rust'), 'dev 전체 유지 (rust)');
+      // apple 은 core 만: platform·product 는 없어야
+      assert.ok(groups.includes('apple-core'), 'apple-core 포함');
+      assert.ok(!groups.includes('apple-platform'), 'apple-platform 제외');
+      assert.ok(!groups.includes('apple-product'), 'apple-product 제외');
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
+    test('unknown category fails with non-zero exit code', () => {
+      let threw = false;
+      try {
+        run(['--non-interactive', '--category=imaginary']);
+      } catch (e) {
+        threw = true;
+        assert.ok(/Unknown categories: imaginary/.test(e.stderr || e.message));
+      }
+      assert.ok(threw, 'expected failure for unknown category');
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
+    test('unknown sub-option fails with non-zero exit code', () => {
+      let threw = false;
+      try {
+        run(['--non-interactive', '--dev=imaginary']);
+      } catch (e) {
+        threw = true;
+        assert.ok(/Unknown sub-options: dev\.imaginary/.test(e.stderr || e.message));
+      }
+      assert.ok(threw, 'expected failure for unknown sub');
+    })
+  )
+    passed++;
+  else failed++;
 
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
   process.exit(failed > 0 ? 1 : 0);

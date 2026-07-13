@@ -18,11 +18,7 @@
  * 진단 로그는 stderr 로 보낸다 — stdout 은 기계가 읽는다.
  */
 
-const {
-  CATEGORIES,
-  parseCliFlags,
-  resolveSelection,
-} = require('./menu');
+const { CATEGORIES, parseCliFlags, resolveSelection } = require('./menu');
 const { checkboxPrompt } = require('./checkbox-prompt');
 
 function parseArgv(argv) {
@@ -30,10 +26,22 @@ function parseArgv(argv) {
   const positional = [];
   for (let i = 2; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--non-interactive') { flags._nonInteractive = true; continue; }
-    if (a === '--all')              { flags._all = true; continue; }
-    if (a === '--print-categories') { flags._printCategories = true; continue; }
-    if (a === '-h' || a === '--help') { flags._help = true; continue; }
+    if (a === '--non-interactive') {
+      flags._nonInteractive = true;
+      continue;
+    }
+    if (a === '--all') {
+      flags._all = true;
+      continue;
+    }
+    if (a === '--print-categories') {
+      flags._printCategories = true;
+      continue;
+    }
+    if (a === '-h' || a === '--help') {
+      flags._help = true;
+      continue;
+    }
     if (a.startsWith('--')) {
       const eq = a.indexOf('=');
       if (eq !== -1) {
@@ -80,8 +88,30 @@ function helpText() {
     '',
     '출력:',
     '  stdout: 콤마 구분 워크로드 키 (예: core,python-backend,frontend)',
-    '  stderr: 진단 로그',
+    '  stderr: 진단 로그'
   ].join('\n');
+}
+
+/** 인식되는 메뉴 플래그 이름 전체 집합 (category + 각 sub 레벨 상세). */
+function knownFlagNames() {
+  const names = new Set(['category']);
+  for (const c of CATEGORIES) {
+    names.add(c.id);
+    for (const s of c.subOptions || []) {
+      if (s.detailOptions && s.detailOptions.length) names.add(`${c.id}-${s.id}`);
+    }
+  }
+  return names;
+}
+
+/**
+ * 사용자가 준 `--xxx=` 플래그 중 인식되지 않는 것(옛 플래그·오타)을 찾는다.
+ * parseArgv 는 `_` 접두 내부 플래그(_all/_nonInteractive 등)와 실제 플래그를
+ * 한 객체에 담으므로 내부 플래그는 제외한다.
+ */
+function unknownFlagNames(flags) {
+  const known = knownFlagNames();
+  return Object.keys(flags).filter(k => !k.startsWith('_') && !known.has(k));
 }
 
 function hasAnyFlagSelection(flags) {
@@ -89,7 +119,7 @@ function hasAnyFlagSelection(flags) {
   for (const c of CATEGORIES) {
     if (c.id in flags) return true;
     // sub 레벨 상세 플래그: --<catId>-<subId> (예: --writing-social)
-    for (const s of (c.subOptions || [])) {
+    for (const s of c.subOptions || []) {
       if (`${c.id}-${s.id}` in flags) return true;
     }
   }
@@ -117,7 +147,7 @@ async function runInteractive() {
   // 1단계: 대분류
   const chosenCatIds = await checkboxPrompt({
     title: '대분류 (space 토글 · a 전체 · enter 확정):',
-    options: CATEGORIES.map(c => ({ id: c.id, label: c.label })),
+    options: CATEGORIES.map(c => ({ id: c.id, label: c.label }))
   });
   const categories = chosenCatIds.length ? chosenCatIds : [];
 
@@ -132,7 +162,7 @@ async function runInteractive() {
     if (cat.detailOptions && cat.detailOptions.length) {
       detailSelections[catId] = await checkboxPrompt({
         title: `\n[${cat.label}] ${cat.detailQuestion || '항목을 고르세요'} (미선택 = 전체):`,
-        options: cat.detailOptions.map(d => ({ id: d.id, label: d.label })),
+        options: cat.detailOptions.map(d => ({ id: d.id, label: d.label }))
       });
       continue;
     }
@@ -142,7 +172,7 @@ async function runInteractive() {
     // 2단계: 중분류
     const subIds = await checkboxPrompt({
       title: `\n[${cat.label}] ${cat.subQuestion || '항목을 고르세요'} (미선택 = 전체):`,
-      options: cat.subOptions.map(s => ({ id: s.id, label: s.label })),
+      options: cat.subOptions.map(s => ({ id: s.id, label: s.label }))
     });
     subSelections[catId] = subIds; // 빈 배열이면 resolveSelection 이 전체로 해석
 
@@ -153,7 +183,7 @@ async function runInteractive() {
       if (!sub || !sub.detailOptions || !sub.detailOptions.length) continue;
       detailSelections[`${catId}.${subId}`] = await checkboxPrompt({
         title: `\n[${cat.label} › ${sub.label}] ${sub.detailQuestion || '항목을 고르세요'} (미선택 = 전체):`,
-        options: sub.detailOptions.map(d => ({ id: d.id, label: d.label })),
+        options: sub.detailOptions.map(d => ({ id: d.id, label: d.label }))
       });
     }
   }
@@ -163,10 +193,24 @@ async function runInteractive() {
 
 async function main() {
   const { flags } = parseArgv(process.argv);
-  if (flags._help) { process.stdout.write(helpText() + '\n'); return 0; }
+  if (flags._help) {
+    process.stdout.write(helpText() + '\n');
+    return 0;
+  }
   if (flags._printCategories) {
     process.stdout.write(JSON.stringify(CATEGORIES, null, 2) + '\n');
     return 0;
+  }
+
+  // 옛/오타 플래그(예: --backend=)를 조용히 무시하고 전체 설치로 폴백하지 않도록,
+  // 인식되지 않는 --xxx= 플래그가 있으면 즉시 실패한다. (--all 은 명시적이라 예외)
+  const unknown = unknownFlagNames(flags);
+  if (unknown.length && !flags._all) {
+    process.stderr.write(
+      `Unknown flags: ${unknown.map(f => `--${f}`).join(', ')}\n` +
+      `유효한 카테고리 플래그: --category, ${[...knownFlagNames()].filter(n => n !== 'category').map(n => `--${n}`).join(', ')}\n`
+    );
+    return 2;
   }
 
   let result;
@@ -201,14 +245,16 @@ async function main() {
 }
 
 if (require.main === module) {
-  main().then(code => process.exit(code || 0)).catch(err => {
-    process.stderr.write(`[select-workloads] ${err.message}\n`);
-    process.exit(1);
-  });
+  main()
+    .then(code => process.exit(code || 0))
+    .catch(err => {
+      process.stderr.write(`[select-workloads] ${err.message}\n`);
+      process.exit(1);
+    });
 }
 
 module.exports = {
   parseArgv,
   selectAll,
-  runInteractive,
+  runInteractive
 };

@@ -247,6 +247,9 @@ function parseCliFlags(flags) {
   const split = v => (Array.isArray(v) ? v : String(v || '').split(',')).map(s => s.trim()).filter(Boolean);
 
   const categories = split(flags.category);
+  // `--category=X` 로 명시된 카테고리 집합. 이 카테고리는 "전체 sub" 의도이므로
+  // 아래 상세 플래그의 auto-sub 가 subSelections 를 특정 sub 로 좁히면 안 된다.
+  const explicitCategories = new Set(categories);
   const subSelections = {};
   const detailSelections = {};
   const ensureCategory = id => {
@@ -278,7 +281,10 @@ function parseCliFlags(flags) {
       if (detailFlag === undefined) continue;
       detailSelections[`${cat.id}.${sub.id}`] = split(detailFlag);
       ensureCategory(cat.id);
-      // 상세만 줬고 sub 를 --writing= 로 안 골랐다면, 그 sub 를 자동 선택.
+      // 상세만 줬고 sub 를 --dev= 로도, --category=dev 로도 안 골랐다면 그 sub 를
+      // 자동 선택(상세 플래그 하나로 카테고리를 켜는 편의). 단 `--category=dev` 로
+      // 카테고리를 명시했으면 "전체 sub" 의도이므로 좁히지 않는다(상세는 그 브랜치에만 적용).
+      if (explicitCategories.has(cat.id)) continue;
       if (!subSelections[cat.id]) subSelections[cat.id] = [sub.id];
       else if (!subSelections[cat.id].includes(sub.id)) subSelections[cat.id].push(sub.id);
     }
