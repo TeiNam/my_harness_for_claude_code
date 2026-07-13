@@ -28,6 +28,9 @@
 #                hooks·mcp 추가 설치를 물어보므로 생략 가능; 이 플래그를 주면
 #                hooks 는 묻지 않고 바로 병합한다.
 #   -NoExtras    워크로드 외(hooks·mcp) 추가 설치 프롬프트를 건너뛴다.
+#   -NoCore      baseline core 워크로드를 제외 (= -SkipWorkload core). core 는
+#                글로벌에만 두고 프로젝트 로컬 설치엔 워크로드만 담고 싶을 때.
+#                예: $env:CLAUDE_HOME="$PWD\.claude"; ./install.ps1 -NoCore -Category frontend
 #   -NoHomeLink  $env:CLAUDE_HOME 이 %USERPROFILE%\.claude 가 아닐 때도
 #                %USERPROFILE%\.claude\_harness 보조 링크를 만들지 않음
 #
@@ -40,6 +43,7 @@ param(
     [switch]$Force,
     [switch]$WithHooks,
     [switch]$NoExtras,
+    [switch]$NoCore,
     [switch]$NoHomeLink,
     [switch]$All,
     [string[]]$Workload,
@@ -73,7 +77,8 @@ function Join-CommaList {
 }
 
 $WorkloadCsv     = Join-CommaList $Workload
-$SkipWorkloadCsv = Join-CommaList $SkipWorkload
+# -NoCore 는 -SkipWorkload core 의 별칭. 둘 다 주면 core 를 합쳐 제외.
+$SkipWorkloadCsv = Join-CommaList (@($SkipWorkload) + $(if ($NoCore) { 'core' }))
 
 $SelectAssetsScript    = Join-Path $HarnessDir 'scripts/install/select-assets.js'
 $SelectWorkloadsScript = Join-Path $HarnessDir 'scripts/install/select-workloads.js'

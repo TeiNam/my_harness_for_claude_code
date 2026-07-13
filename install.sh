@@ -26,6 +26,10 @@
 #                    이 플래그를 주면 hooks 는 묻지 않고 바로 병합한다.
 #   --no-extras      워크로드 외(hooks·mcp) 추가 설치 프롬프트를 건너뛴다.
 #                    비대화형(CI)에서는 기본적으로 묻지 않으므로 불필요.
+#   --no-core        baseline core 워크로드를 제외 (= --skip-workload=core).
+#                    core 는 글로벌(~/.claude)에만 두고 프로젝트 로컬 설치엔
+#                    워크로드만 담고 싶을 때. 예:
+#                    CLAUDE_HOME=$PWD/.claude ./install.sh --no-core --category=frontend
 #   --no-home-link   CLAUDE_HOME 이 ~/.claude 가 아닐 때도 ~/.claude/_harness
 #                    보조 링크를 만들지 않음 (자세한 내용은 main() 의 보조 링크
 #                    블록 주석을 참고)
@@ -59,6 +63,9 @@ for arg in "$@"; do
         --workloads=*)          WORKLOAD="${arg#--workloads=}" ;;
         --skip-workload=*)      SKIP_WORKLOAD="${arg#--skip-workload=}" ;;
         --skip-workloads=*)     SKIP_WORKLOAD="${arg#--skip-workloads=}" ;;
+        # 프로젝트 로컬 설치용: baseline core 를 글로벌에만 두고 여기선 뺀다.
+        # --skip-workload=core 의 읽기 쉬운 별칭. 둘 다 주면 core 를 합쳐 제외.
+        --no-core)              SKIP_WORKLOAD="${SKIP_WORKLOAD:+$SKIP_WORKLOAD,}core" ;;
         --all)                  MENU_ARGS+=("--all") ;;
         --category=*|--backend=*|--frontend=*|--plugin=*|--data-analysis=*|--data-design=*|--writing=*|--apple=*|--writing-social=*)
                                 MENU_ARGS+=("$arg") ;;
