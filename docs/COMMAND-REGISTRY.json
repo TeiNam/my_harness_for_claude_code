@@ -58,7 +58,7 @@
     },
     {
       "command": "cross-review",
-      "description": "교차 모델 코드리뷰 — 현재 diff(또는 PR)를 codex·kiro-cli 두 외부 모델에 보내 독립 리뷰를 받고 대조·종합",
+      "description": "교차 모델 코드리뷰 — 현재 diff(또는 PR)를 Claude 자체 리뷰 + OpenAI Codex 독립 리뷰로 2-way 대조·종합",
       "type": "review",
       "primaryAgents": [],
       "allAgents": [],

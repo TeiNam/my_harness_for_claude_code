@@ -1,14 +1,19 @@
 ---
-description: 교차 모델 코드리뷰 — 현재 diff(또는 PR)를 codex·kiro-cli 두 외부 모델에 보내 독립 리뷰를 받고 대조·종합
+description: 교차 모델 코드리뷰 — 현재 diff(또는 PR)를 Claude 자체 리뷰 + OpenAI Codex 독립 리뷰로 2-way 대조·종합
 argument-hint: [pr-number | pr-url | blank for local diff]
 workloads: [core]
 ---
 
-# Cross-Model Code Review
+# Cross-Model Code Review (2-way)
 
-같은 diff를 **서로 다른 모델 패밀리** 두 곳(OpenAI Codex, Amazon Kiro)에 독립적으로
-리뷰시키고, 각자의 지적을 대조해 종합한다. Claude 자기 자신이 놓치는 사각을 다른
-모델의 시선으로 메우는 게 목적. 두 모델 출력은 **검증 대상인 제안**이지 정답이 아니다.
+같은 diff를 **두 모델 패밀리**가 독립적으로 리뷰한다 — 이 세션의 **Claude**(직접
+정독)와 **OpenAI Codex**(다른 모델 패밀리, CLI 호출). Claude 혼자 놓치는 사각을
+Codex의 시선으로 메우고, 두 관점이 겹치는 지적은 신뢰도가 높다. Codex 출력은
+**검증 대상인 제안**이지 정답이 아니다.
+
+> Amazon Kiro(kiro-cli)는 한때 3번째 리뷰어였으나, `--no-interactive` 모드가 도구
+> 호출 후 최종 리뷰 텍스트를 안정적으로 내놓지 못해 제외했다. 필요하면 대화형으로
+> 직접 붙여 쓰는 편이 낫다.
 
 **Input**: $ARGUMENTS
 
@@ -21,48 +26,42 @@ workloads: [core]
   둘 다 비면 최근 커밋 `git show HEAD`를 대상으로 삼는다.
 - `$ARGUMENTS`가 PR 번호/URL이면: `gh pr diff <n>` 로 diff 확보.
 
-diff가 비어 있으면 "리뷰할 변경 없음"으로 보고하고 중단.
+diff가 비어 있으면 "리뷰할 변경 없음"으로 보고하고 중단. diff가 크면(수백 줄+)
+데이터·생성물 덩어리는 빼고 **로직 파일만** 추려 리뷰 신호를 높인다.
 
-## 2. 두 리뷰어에 병렬 전송
+## 2. 두 관점으로 리뷰
 
-diff를 임시 파일에 저장한 뒤(프롬프트 인자로 직접 넘기면 길이·이스케이프 문제) 두 CLI를
-한 메시지에서 **동시에** 호출한다. 프리플라이트: `codex --version`, `kiro-cli --version`이
-non-zero면 그 리뷰어는 건너뛰고 사용자에게 알린다.
-
-공통 리뷰 프롬프트(파일 경로를 프롬프트에 박아 각 CLI가 직접 읽게 한다):
-
-> `<diff-file>`의 변경을 리뷰해라. 다음만 보고: 1) correctness 버그 2) 보안 이슈
-> (injection, secret, auth) 3) 에러 처리 누락 4) 놓친 엣지 케이스. severity(CRITICAL/HIGH/
-> MEDIUM/LOW)와 파일:라인을 붙여라. 스타일 지적은 생략. 문제 없으면 "No issues"만.
+**(A) Codex — 독립 축.** diff를 임시 파일에 저장한 뒤(프롬프트 인자로 직접 넘기면
+길이·이스케이프 문제) 호출한다. 프리플라이트: `codex --version`이 non-zero면 Codex는
+건너뛰고 Claude 단독 리뷰임을 사용자에게 알린다.
 
 ```bash
-# codex — read-only, stdin 반드시 /dev/null, thinking 억제
+# read-only, stdin 반드시 /dev/null, thinking 억제(2>/dev/null), git 체크 skip
 codex exec --skip-git-repo-check --sandbox read-only \
   "Review the diff in <diff-file>. Report only: correctness bugs, security \
-issues, missing error handling, missed edge cases. Tag severity + file:line. \
-Skip style. Say 'No issues' if clean." </dev/null 2>/dev/null
-
-# kiro-cli — 비대화형, 도구 신뢰 안 함(읽기 리뷰만)
-kiro-cli chat --no-interactive --trust-tools= \
-  "Review the diff in <diff-file>. Report only: correctness bugs, security \
-issues, missing error handling, missed edge cases. Tag severity + file:line. \
-Skip style. Say 'No issues' if clean." 2>/dev/null
+issues (injection/secret/auth), missing error handling, missed edge cases. \
+Tag severity CRITICAL/HIGH/MEDIUM/LOW with file:line. Skip style. \
+Say 'No issues' if clean." </dev/null 2>/dev/null
 ```
 
-codex는 완료 시점에만 출력하니 **동기 실행**(백그라운드 금지). 둘 다 최대 ~600s.
+Codex는 완료 시점에만 출력하니 **동기 실행**(백그라운드 금지). 최대 ~600s.
 
-## 3. 대조·종합
+**(B) Claude — 자체 축.** Codex를 기다리는 동안(또는 이후) 같은 diff를 직접 정독한다.
+Codex가 약한 곳을 특히 본다: 파일 간 정합(예: 두 스크립트의 플래그·상수 대조), 프로젝트
+관례 위반, 카탈로그-코드 키 일치, 사용 맥락상 자연스러운 엣지 케이스.
 
-- 두 리뷰어가 **공통 지적**한 항목 → 신뢰도 높음, 최상단.
-- 한쪽만 지적한 항목 → 각 소스 명시(`[codex]` / `[kiro]`)하고 나열.
-- **직접 검증**: 두 모델 다 자기 knowledge cutoff가 있고 틀릴 수 있다. 지적을 그대로
-  받아쓰지 말고, 실제 코드/diff를 열어 확인한 것만 CONFIRMED로 표시. 확인 못 한 건
-  PLAUSIBLE로 구분.
+## 3. 대조·종합·검증
+
+- 두 축이 **공통 지적**한 항목 → 신뢰도 높음, 최상단.
+- 한쪽만 지적한 항목 → 소스 명시(`[codex]` / `[claude]`)하고 나열.
+- **직접 검증이 핵심**: Codex는 knowledge cutoff·코드 오독이 있을 수 있다. 지적을 그대로
+  받아쓰지 말고 실제 코드/diff를 열거나 명령을 재현해 확인한 것만 **CONFIRMED**로,
+  확인 못 한 건 **PLAUSIBLE**로 구분한다.
 - 최종 출력: severity 내림차순 표 1개 + 한 줄 요약. 사용자가 fix 여부 결정.
 
 ## 참고
 
 - codex 호출 3종 세트(`</dev/null`·`2>/dev/null`·`--skip-git-repo-check`)는 필수 —
   자세한 규약은 `skills/codex-cli/SKILL.md`.
-- 쓰기 권한(codex `--sandbox workspace-write`, kiro `--trust-all-tools`)은 리뷰엔 불필요.
-  fix를 외부 모델에 시키려면 사용자 승인 후에만.
+- 쓰기 권한(codex `--sandbox workspace-write`)은 리뷰엔 불필요. fix를 Codex에 시키려면
+  사용자 승인 후에만.
