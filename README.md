@@ -219,7 +219,7 @@ python 3.12.8
 | playwright, agent-browser | **local** | 호스트 브라우저·바이너리 필요 |
 | higgsfield, zapier | **local** | 런타임 OAuth (샘플 카탈로그에만 포함) |
 
-- 프록시 에셋: `mcp-configs/proxy/` (`docker-compose.yaml` · `config.json` · `.env.example`). `install.sh` 가 설치 중 물어보고 `docker compose up -d` 로 기동합니다(compose v2 없으면 `brew install docker-compose` 시도).
+- 프록시 에셋: `mcp-configs/proxy/` (`docker-compose.yaml` · `config.json` · `.env.example`). `install.sh` 가 설치 중 물어보고(또는 `--with-mcp` 로 바로) `docker compose up -d` 로 기동합니다. **docker 가 없으면** 설치 명령(brew 있으면 `brew install colima docker docker-compose && colima start`, 없으면 Colima/Docker Desktop 링크)과 재실행 커맨드(`./install.sh --with-mcp`)를 안내하고 넘어갑니다. 데몬 미동작·compose v2 부재도 각각 켜는 법을 안내합니다.
 - 활성 클라이언트 설정: `.mcp.json` — 프록시 서버(github·exa·context7·brave-search·time·obsidian·drawio 등)는 `localhost:9090` URL, 로컬 서버(sentry·playwright)는 직접 명령.
 - 복사용 카탈로그: `mcp-configs/mcp-servers.json` — 각 서버에 `route: proxy|local` 표시.
 - 시크릿(`GITHUB_PAT`·`BRAVE_API_KEY`)은 프록시 한 곳에만 — `.mcp.json` 에는 URL만 남아 키가 흩어지지 않습니다. 컨텍스트 윈도 보호를 위해 동시 활성 서버는 10개 이하로 유지합니다.
