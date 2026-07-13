@@ -3,7 +3,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg)
 ![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3.svg)
-![Tests](https://img.shields.io/badge/tests-1529%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-1571%20passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/teinam)
@@ -19,13 +19,13 @@
 | 디렉터리 | 항목 수 | 설명 |
 |---|---:|---|
 | `agents/` | 49 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
-| `commands/` | 52 | 슬래시 커맨드 (frontmatter 기반 markdown) |
+| `commands/` | 53 | 슬래시 커맨드 (frontmatter 기반 markdown) |
 | `skills/` | 180 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / Codex / 문서 생성(PDF·DOCX·XLSX) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 / Apple 플랫폼 등) |
 | `rules/` | 37 | common 레이어(모델 라우팅 정책 포함) + 언어별(typescript / python / rust / web) |
-| `hooks/` | 29 | 이벤트 기반 훅 매처 (실행 스크립트 44종) |
+| `hooks/` | 30 | 이벤트 기반 훅 매처 (실행 스크립트 47종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
 | `scripts/` | — | 훅 핸들러 / 설치 / CI 검증 / 세션 관리 도구 |
-| `tests/` | — | 1529개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
+| `tests/` | — | 1571개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
 | `docs/` | — | 장문 가이드(글쓰기 / 보안)와 steering 규칙 |
 
 상세 인덱스는 `docs/COMMAND-REGISTRY.json`에 자동 생성되어 있습니다.
@@ -194,6 +194,7 @@ python 3.12.8
 | `CLAUDE_HOME` | 기본값 `~/.claude` 재정의 |
 | `HARNESS_HOOK_PROFILE` | 훅 프로파일 (`minimal` / `standard` / `strict`) |
 | `HARNESS_DISABLED_HOOKS` | 비활성화할 훅 ID 목록(쉼표 구분) |
+| `HARNESS_STOP_TESTS` | `stop:run-tests` 자동 테스트 실행 끄기 (`off`/`0`/`false`) |
 | `HARNESS_OBSERVER_DIR` | 옵저버 출력 디렉터리 |
 | `HARNESS_GH_SHIM` | 테스트용 gh shim 활성화 |
 | `HARNESS_SESSION_RECORDING_DIR` | 세션 녹화 출력 경로 |
@@ -238,7 +239,7 @@ export BRAVE_API_KEY="BSA_..."   # api.search.brave.com/app/keys
 ## 자주 쓰는 슬래시 커맨드
 
 - 시작: `/plan`, `/feature-dev`, `/tdd-workflow`
-- 리뷰: `/code-review`, `/python-review`, `/rust-review`, `/fastapi-review`
+- 리뷰: `/code-review`, `/cross-review`(codex·kiro-cli 교차 모델), `/python-review`, `/rust-review`, `/fastapi-review`
 - 빌드 / 테스트: `/build-fix`, `/rust-build`, `/test-coverage`
 - 정리 / 게이트: `/refactor-clean`, `/security-scan`, `/quality-gate`
 - 학습 / 스킬: `/skill-create`, `/skill-health`, `/learn`
@@ -250,7 +251,7 @@ export BRAVE_API_KEY="BSA_..."   # api.search.brave.com/app/keys
 
 ```bash
 npm run lint                      # ESLint
-npm test                          # CI 검증 + 전체 테스트 슈트(1529개)
+npm test                          # CI 검증 + 전체 테스트 슈트(1571개)
 node tests/run-all.js             # 테스트만 따로 실행
 npm run command-registry:write    # 커맨드 레지스트리 갱신
 npm run command-registry:check    # 동기화 상태만 확인 (CI용)

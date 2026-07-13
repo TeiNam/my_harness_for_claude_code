@@ -34,7 +34,9 @@ const SOURCE_EXT = /\.(ts|tsx|js|jsx|mjs|cjs|py|rs|go)$/;
 const DISABLE_VALUES = new Set(['0', 'false', 'off', 'disabled']);
 
 function isDisabled() {
-  const raw = String(process.env.HARNESS_STOP_TESTS || '').trim().toLowerCase();
+  const raw = String(process.env.HARNESS_STOP_TESTS || '')
+    .trim()
+    .toLowerCase();
   return DISABLE_VALUES.has(raw);
 }
 
@@ -49,7 +51,7 @@ function changedSourceFiles(cwd) {
   const r = spawnSync('git', ['status', '--porcelain', '--untracked-files=all'], {
     cwd,
     encoding: 'utf8',
-    timeout: 10_000,
+    timeout: 10_000
   });
   if (r.status !== 0 || !r.stdout) return [];
 
@@ -100,14 +102,12 @@ function detectRunner(root) {
         const pm = detectPackageManager(root);
         return { cmd: pm, args: ['test'], label: `${pm} test` };
       }
-    } catch { /* 매니페스트 파싱 실패 → 아래 다른 러너 시도 */ }
+    } catch {
+      /* 매니페스트 파싱 실패 → 아래 다른 러너 시도 */
+    }
   }
 
-  if (
-    fs.existsSync(path.join(root, 'pyproject.toml')) ||
-    fs.existsSync(path.join(root, 'pytest.ini')) ||
-    fs.existsSync(path.join(root, 'tests'))
-  ) {
+  if (fs.existsSync(path.join(root, 'pyproject.toml')) || fs.existsSync(path.join(root, 'pytest.ini')) || fs.existsSync(path.join(root, 'tests'))) {
     return { cmd: 'pytest', args: ['-q'], label: 'pytest -q' };
   }
 
@@ -156,7 +156,7 @@ function main() {
       cwd: root,
       encoding: 'utf8',
       timeout: perRootMs,
-      shell: process.platform === 'win32',
+      shell: process.platform === 'win32'
     });
 
     // 러너 바이너리 자체가 없으면(ENOENT) 조용히 넘어간다.
@@ -169,7 +169,7 @@ function main() {
     if (result.status !== 0) {
       const tail = (result.stdout || '') + (result.stderr || '');
       const lines = tail.split('\n').filter(Boolean).slice(-15);
-      process.stderr.write(`[Stop] ❌ 테스트 실패 (${path.basename(root)} — ${runner.label}):\n`);
+      process.stderr.write(`[Stop] 테스트 실패 (${path.basename(root)} — ${runner.label}):\n`);
       lines.forEach(l => process.stderr.write(`  ${l}\n`));
       process.stderr.write('[Stop] 위 실패를 확인하세요. (끄기: HARNESS_STOP_TESTS=off)\n');
     }
@@ -194,8 +194,12 @@ function run(rawInput) {
 if (require.main === module) {
   let stdinData = '';
   process.stdin.setEncoding('utf8');
-  process.stdin.on('data', c => { stdinData += c; });
-  process.stdin.on('end', () => { process.stdout.write(run(stdinData)); });
+  process.stdin.on('data', c => {
+    stdinData += c;
+  });
+  process.stdin.on('end', () => {
+    process.stdout.write(run(stdinData));
+  });
 } else {
   module.exports = { run, detectRunner, detectPackageManager, findProjectRoot, changedSourceFiles };
 }

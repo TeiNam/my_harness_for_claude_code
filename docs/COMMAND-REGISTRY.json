@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalCommands": 52,
+  "totalCommands": 53,
   "commands": [
     {
       "command": "aside",
@@ -55,6 +55,17 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/cost-report.md"
+    },
+    {
+      "command": "cross-review",
+      "description": "교차 모델 코드리뷰 — 현재 diff(또는 PR)를 codex·kiro-cli 두 외부 모델에 보내 독립 리뷰를 받고 대조·종합",
+      "type": "review",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [
+        "codex-cli"
+      ],
+      "path": "commands/cross-review.md"
     },
     {
       "command": "evolve",
@@ -532,7 +543,7 @@
       "general": 8,
       "planning": 1,
       "refactoring": 1,
-      "review": 9,
+      "review": 10,
       "testing": 32
     },
     "topAgents": [
@@ -567,16 +578,16 @@
         "count": 3
       },
       {
+        "skill": "codex-cli",
+        "count": 2
+      },
+      {
         "skill": "humanize-korean",
         "count": 2
       },
       {
         "skill": "rust-testing",
         "count": 2
-      },
-      {
-        "skill": "codex-cli",
-        "count": 1
       },
       {
         "skill": "lessons-learned",
