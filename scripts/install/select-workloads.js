@@ -208,7 +208,10 @@ async function main() {
   if (unknown.length && !flags._all) {
     process.stderr.write(
       `Unknown flags: ${unknown.map(f => `--${f}`).join(', ')}\n` +
-      `유효한 카테고리 플래그: --category, ${[...knownFlagNames()].filter(n => n !== 'category').map(n => `--${n}`).join(', ')}\n`
+        `유효한 카테고리 플래그: --category, ${[...knownFlagNames()]
+          .filter(n => n !== 'category')
+          .map(n => `--${n}`)
+          .join(', ')}\n`
     );
     return 2;
   }
