@@ -83,6 +83,7 @@ If you want to run hooks without `install.sh`, set `CLAUDE_PLUGIN_ROOT=<path to 
 | **Session start** | `SessionStart` | Loads previous context and detects package manager |
 | **Pre-compact** | `PreCompact` | Saves state before context compaction |
 | **Run tests** | `Stop` | Runs project tests (npm/pnpm/yarn/bun test · pytest · cargo test) when source changed this session — non-blocking, warns on failure (strict; `HARNESS_STOP_TESTS=off` to disable) |
+| **Command registry** | `Stop` | Regenerates `COMMAND-REGISTRY.json` when `commands/*.md` changed (harness repo only) — non-blocking (standard+) |
 | **Console.log audit** | `Stop` | Checks all modified files for `console.log` after each response |
 | **Session summary** | `Stop` | Persists session state when transcript path is available |
 | **Pattern extraction** | `Stop` | Evaluates session for extractable patterns (continuous learning) |
