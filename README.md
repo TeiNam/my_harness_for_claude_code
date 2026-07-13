@@ -64,7 +64,8 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 - **프론트엔드**: `obsidian-plugin-develop`(TypeScript + i18n + Chromium + 릴리스 체크리스트), `vite-patterns`, `frontend-patterns`, `frontend-design`(anthropics/skills — 심미적 방향성·타이포그래피)
 - **랜딩페이지 디자인 (Supanova)**: `taste-skill`, `redesign-skill`, `soft-skill`, `output-skill` — 한글 우선 Standalone HTML + Tailwind CDN 랜딩페이지 생성/리디자인 엔진(origin: supanova-design-skill-main, based on Leonxlnx/taste-skill). `frontend` 워크로드.
 - **SEO/GEO/AEO**: `seo-geo-aeo`(origin: SNLabat/SEO-GEO-AEO-Skill) — SEO·생성형 검색엔진(GEO)·답변엔진(AEO) 3축 웹사이트 감사, Word/PDF 리포트. 기존 `seo` 스킬과 별개, `frontend` 워크로드.
-- **AI / 클라우드**: `claude-api`, `aws-bedrock`, `aws-cloud`, `realtime-stt-huggingface`, `cost-aware-llm-pipeline`, `ai-regression-testing`
+- **AI / 클라우드**: `claude-api`, `aws-bedrock`, `aws-cloud`, `aws-finops`(FinOps Foundation Framework + AWS 비용관리), `realtime-stt-huggingface`, `cost-aware-llm-pipeline`, `ai-regression-testing`
+- **데이터 분석**: `analysis-methodology`(분석 방법론·판단층 — 프레이밍→기법선택→검증→결정), `python-data-analysis`(pandas/polars/duckdb 도구), `duckdb-patterns`
 - **Codex (교차 모델)**: `codex-cli` — OpenAI Codex CLI를 Claude Code 안에서 호출해 다른 모델 패밀리의 독립 리뷰·tie-break·대규모 기계적 편집 오프로드. `core` 워크로드.
 - **문서 생성**: `pdf`(pypdf·reportlab·weasyprint), `docx`(python-docx·docxtpl), `xlsx`(openpyxl·pandas) — 프로그래밍 방식 PDF/Word/Excel 산출. 슬라이드는 `ppt-authoring`·`frontend-slides`. `core` 워크로드.
 - **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`, `tech-writer`(한/영 기술 문서 작성·윤문 오케스트레이터, 5개 전용 에이전트)
@@ -78,6 +79,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 - **`aws-bedrock` 스킬** — Converse API, `bedrock-runtime` 모델 호출(Claude / Nova / Llama / Mistral / Cohere / Titan), Bedrock Agents·Knowledge Bases(관리형 RAG), Guardrails(PII·금칙어·문맥 필터), Titan/Cohere 임베딩, prompt caching, provisioned throughput, 크로스 리전 inference profile. Bedrock vs 직접 provider SDK 선택 기준표 포함.
 - **`aws-cloud` 스킬** — IAM 최소 권한, VPC 엔드포인트·PrivateLink, 리전 레지던시, CloudWatch / CloudTrail 관측, 비용 가드레일.
+- **`aws-finops` 스킬** — FinOps Foundation Framework(Inform/Optimize/Operate) 기반 비용관리. Cost Explorer·CUR·Budgets·Anomaly Detection, 태깅·Cost Categories, Savings Plans vs RI, Compute Optimizer, 단위경제학, showback/chargeback. `finops` 워크로드.
 - **`cost-aware-llm-pipeline` 스킬** — 토큰·비용 추적과 모델 라우팅으로 Bedrock 호출 비용을 통제.
 - **`claude-api` 스킬** — Bedrock과 Anthropic 직접 SDK를 함께 쓸 때의 스트리밍·tool use·캐싱 패턴.
 - **연계 에이전트** — `devops`(plan·dry-run 우선의 AWS 변경), `security-reviewer`(IAM·자격증명·SDK 호출 경로 점검), `architect`(추론 파이프라인·리트라이/백오프 설계).
