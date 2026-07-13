@@ -15,29 +15,34 @@
 
 /** 사용자가 고를 수 있는 모든 워크로드 키. */
 const GROUPS = [
-  // baseline — 항상 포함
+  // baseline — 항상 포함 (github·context7·time·fetch 만)
   'core',
 
+  // 리서치 도구 (웹 검색) — core 에서 분리, 필요할 때만
+  'research', // exa · brave-search
+
   // 백엔드 카테고리 sub-옵션
-  'python-backend',  // FastAPI / 일반 백엔드 파이썬
+  'python-backend', // FastAPI / 일반 백엔드 파이썬
   'rust',
   'nodejs',
-  'cloud',           // AWS / Docker / Terraform / K8s (범용 AWS·계정·네트워크·IAM·통합)
-  'devops',          // AWS IaC·컨테이너(EKS/ECS)·서버리스·Lambda·관측성(CloudWatch/Prometheus)
-  'finops',          // AWS 비용·요금 (Billing and Cost Management / Pricing)
-  'data-analysis',   // AWS 분석 엔진 (Glue/Athena/EMR/Redshift) — 로컬 pandas/duckdb 는 python-data
-  'ai',              // Claude SDK / Bedrock / LLM 파이프라인 / HF STT
+  'cloud', // AWS / Docker / Terraform / K8s (범용 AWS·계정·네트워크·IAM·통합)
+  'devops', // AWS IaC·컨테이너(EKS/ECS)·서버리스·Lambda·관측성(CloudWatch/Prometheus)
+  'finops', // AWS 비용·요금 (Billing and Cost Management / Pricing)
+  'integration', // AWS 통합·메시징 (SNS·SQS/MQ/OpenAPI/Step Functions/AppSync)
+  'aws-rds', // AWS 관리형 DB MCP (Aurora PG/MySQL·DSQL·RDS Oracle/SQL Server·Keyspaces·Timestream) — 로컬 DB 설계(mysql/postgres/mongodb)와 별개
+  'data-analysis', // AWS 분석 엔진 (Glue/Athena/EMR/Redshift/Neptune) — 로컬 pandas/duckdb 는 python-data
+  'ai', // Claude SDK / Bedrock / LLM 파이프라인 / HF STT
 
   // 프론트엔드 카테고리 sub-옵션
-  'frontend',        // React / Vite / TypeScript / Next / Web UI
+  'frontend', // React / Vite / TypeScript / Next / Web UI
 
   // 플러그인 카테고리 sub-옵션
   'obsidian',
-  'plugin-chrome',   // 예약 — 자산이 추가될 때 채워질 키
-  'plugin-claude',   // 예약 — Claude Code 플러그인 자체 개발용
+  'plugin-chrome', // 예약 — 자산이 추가될 때 채워질 키
+  'plugin-claude', // 예약 — Claude Code 플러그인 자체 개발용
 
   // 데이터 분석 카테고리 sub-옵션
-  'python-data',     // duckdb / pandas / polars / pytorch / mle / recsys
+  'python-data', // duckdb / pandas / polars / pytorch / mle / recsys
 
   // 데이터 설계 카테고리 sub-옵션
   'mysql',
@@ -46,21 +51,21 @@ const GROUPS = [
   'dynamodb',
 
   // 글쓰기 카테고리 sub-옵션
-  'writing',         // 기술 문서 / 블로깅 / PPT / 장문 콘텐츠
+  'writing', // 기술 문서 / 블로깅 / PPT / 장문 콘텐츠
   // 소셜 콘텐츠 3분할 (LinkedIn 개인 브랜딩) — writing.social 상세 tier
-  'social-voice',    // 보이스·프로필 (voice-builder / newsletter-voice / profile-optimizer)
-  'social-content',  // 콘텐츠 제작 (post-writer / hook-generator / content-matrix 등)
-  'social-visual',   // 시각 자산 (graphic-designer / gemini-* / quote-post / youtube-thumbnail)
+  'social-voice', // 보이스·프로필 (voice-builder / newsletter-voice / profile-optimizer)
+  'social-content', // 콘텐츠 제작 (post-writer / hook-generator / content-matrix 등)
+  'social-visual', // 시각 자산 (graphic-designer / gemini-* / quote-post / youtube-thumbnail)
 
   // Apple 플랫폼 개발 3분할 — apple 카테고리 상세 tier
-  'apple-core',      // 핵심 개발 (Swift/SwiftUI/테스트/생성기/보안/성능/디자인/메타)
-  'apple-platform',  // 플랫폼 특화 (watchOS/visionOS/SwiftData/MapKit/Foundation/ML)
-  'apple-product',   // 제품·운영 (App Store/성장/법무/수익화/릴리스 리뷰)
+  'apple-core', // 핵심 개발 (Swift/SwiftUI/테스트/생성기/보안/성능/디자인/메타)
+  'apple-platform', // 플랫폼 특화 (watchOS/visionOS/SwiftData/MapKit/Foundation/ML)
+  'apple-product', // 제품·운영 (App Store/성장/법무/수익화/릴리스 리뷰)
 
   // 메뉴에 노출되지 않는 격리 그룹 — 하네스 메타/실험 자산용.
   // 어떤 카테고리에도 매핑되지 않으므로 --all 에도 끌려오지 않는다.
   // 필요하면 --workload=...,lab 으로 명시 설치한다.
-  'lab',
+  'lab'
 ];
 
 /**
@@ -195,7 +200,7 @@ const RULES = [
 
   // -- 기타 reviewer / kind 한정 룰 ------------------------------------
   { pattern: /^rust[-_]reviewer$/i, groups: ['rust'], kind: 'agent' },
-  { pattern: /^typescript[-_]reviewer$/i, groups: ['frontend'], kind: 'agent' },
+  { pattern: /^typescript[-_]reviewer$/i, groups: ['frontend'], kind: 'agent' }
 
   // rules/ 폴더 폴백은 classifyRulePath 에서 처리한다.
 ];
@@ -239,14 +244,18 @@ function classifyRulePath(relativePath) {
   const folder = (parts[1] || '').toLowerCase();
   const baseName = (parts[parts.length - 1] || '').replace(/\.md$/i, '').toLowerCase();
   switch (folder) {
-    case 'common':    return ['core'];
+    case 'common':
+      return ['core'];
     case 'python':
       if (baseName === 'fastapi') return ['python-backend'];
       return ['python-backend', 'python-data'];
-    case 'rust':      return ['rust'];
+    case 'rust':
+      return ['rust'];
     case 'typescript':
-    case 'web':       return ['frontend'];
-    default:          return [DEFAULT_GROUP];
+    case 'web':
+      return ['frontend'];
+    default:
+      return [DEFAULT_GROUP];
   }
 }
 
@@ -274,7 +283,7 @@ function classify(asset) {
  * 별칭에 넣지 않는다 (옛 의미인 17종 전체를 원하면 세 키를 명시).
  */
 const ALIASES = {
-  apple: ['apple-core', 'apple-platform', 'apple-product'],
+  apple: ['apple-core', 'apple-platform', 'apple-product']
 };
 
 /**
@@ -298,9 +307,7 @@ function isKnownGroup(id) {
 function validateGroups(ids, label = 'groups') {
   const bad = ids.filter(g => !isKnownGroup(g));
   if (bad.length) {
-    throw new Error(
-      `Unknown ${label}: ${bad.join(', ')}. Valid: ${GROUPS.join(', ')}`
-    );
+    throw new Error(`Unknown ${label}: ${bad.join(', ')}. Valid: ${GROUPS.join(', ')}`);
   }
 }
 
@@ -315,5 +322,5 @@ module.exports = {
   classifyRulePath,
   identifierOf,
   isKnownGroup,
-  validateGroups,
+  validateGroups
 };

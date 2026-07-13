@@ -32,6 +32,10 @@ const OUTPUT = path.join(ROOT, 'mcp-configs', 'proxy', 'config.json');
 // core 는 항상 포함되는 baseline 워크로드.
 const ALWAYS = 'core';
 
+// 컨텍스트 윈도 보호 권장 상한. 이 수를 넘으면 경고한다(차단은 안 함).
+// CLAUDE.md 의 "동시 활성 MCP 10개 이하" 를 프록시 기준 8개로 더 보수적으로 잡음.
+const RECOMMENDED_MAX = 8;
+
 // 카탈로그의 시크릿 플레이스홀더 → 실행 config 의 ${ENV} 참조.
 const SECRET_PLACEHOLDERS = {
   YOUR_GITHUB_PAT_HERE: '${GITHUB_PAT}',
@@ -40,10 +44,17 @@ const SECRET_PLACEHOLDERS = {
 };
 
 function parseArgs(argv) {
-  const out = { workloads: [], dryRun: false, list: false };
+  const out = { workloads: [], servers: null, dryRun: false, list: false };
   for (const a of argv) {
     if (a.startsWith('--workload=') || a.startsWith('--workloads=')) {
       out.workloads = a
+        .split('=')[1]
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+    } else if (a.startsWith('--servers=')) {
+      // 서버 단위 명시 선택(대화형 체크박스가 넘겨주는 값). 워크로드 매칭을 건너뛴다.
+      out.servers = a
         .split('=')[1]
         .split(',')
         .map(s => s.trim())
@@ -93,26 +104,35 @@ function toRuntimeEntry(entry) {
 }
 
 /**
- * 선택된 워크로드 집합에 매칭되는 proxy 서버만 추린다.
+ * proxy 서버를 추린다. `serverAllowlist` 가 주어지면 그 이름들만(서버 단위 선택,
+ * 대화형 체크박스용), 아니면 선택된 워크로드에 매칭되는 서버를 고른다.
+ * @param {object} catalog
+ * @param {string[]} selected - 워크로드 키
+ * @param {string[]|null} serverAllowlist - 서버 이름 목록(있으면 워크로드 무시)
  * @returns {{ servers: object, keys: string[], needsTerraform: boolean }}
  */
-function selectServers(catalog, selected) {
+function selectServers(catalog, selected, serverAllowlist = null) {
   const active = new Set([ALWAYS, ...expandAliases(selected)]);
+  const allow = serverAllowlist ? new Set(serverAllowlist) : null;
   const servers = {};
   const keys = [];
   for (const [name, entry] of Object.entries(catalog.mcpServers || {})) {
     if (entry.route !== 'proxy') continue; // local 은 프록시 대상 아님
-    const wl = entry.workloads || [ALWAYS];
-    if (!wl.some(w => active.has(w))) continue;
+    if (allow) {
+      if (!allow.has(name)) continue; // 서버 단위 명시 선택
+    } else {
+      const wl = entry.workloads || [ALWAYS];
+      if (!wl.some(w => active.has(w))) continue;
+    }
     servers[name] = toRuntimeEntry(entry);
     keys.push(name);
   }
   return { servers, keys, needsTerraform: keys.includes('terraform') };
 }
 
-function build(selected) {
+function build(selected, serverAllowlist = null) {
   const catalog = JSON.parse(fs.readFileSync(CATALOG, 'utf8'));
-  const { servers, keys, needsTerraform } = selectServers(catalog, selected);
+  const { servers, keys, needsTerraform } = selectServers(catalog, selected, serverAllowlist);
   const config = {
     mcpProxy: {
       baseURL: 'http://localhost:9090',
@@ -127,7 +147,7 @@ function build(selected) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
-  const { config, keys, needsTerraform } = build(args.workloads);
+  const { config, keys, needsTerraform } = build(args.workloads, args.servers);
 
   if (args.list) {
     process.stdout.write(keys.join('\n') + (keys.length ? '\n' : ''));
@@ -144,6 +164,16 @@ function main() {
     process.stderr.write(`[build-mcp-config] ${keys.length} proxy 서버 → ${path.relative(ROOT, OUTPUT)}\n`);
   }
   process.stderr.write(`  ${keys.join(', ')}\n`);
+
+  // 컨텍스트 윈도 보호: 권장 상한 초과 시 경고(차단 안 함). 서버 단위 재선택 유도.
+  if (keys.length > RECOMMENDED_MAX) {
+    process.stderr.write(
+      `[build-mcp-config] [!] ${keys.length}개 — 권장 상한 ${RECOMMENDED_MAX}개 초과. ` +
+      `동시 활성 MCP 가 많으면 컨텍스트 윈도를 잠식합니다.\n` +
+      `  필요한 것만 골라 재빌드: node scripts/install/build-mcp-config.js --servers=github,exa,...\n` +
+      `  (전체 목록: --list)\n`
+    );
+  }
 
   // terraform 은 별도 compose 서비스(terraform-mcp)가 필요하다. 호출부가 알 수 있게 알림.
   if (needsTerraform) {

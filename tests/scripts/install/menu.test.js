@@ -105,7 +105,7 @@ function runTests() {
       subSelections: { 'data-design': [] },
     });
     assert.deepStrictEqual(r.workloads.sort(),
-      ['core', 'dynamodb', 'mongodb', 'mysql', 'postgres']);
+      ['aws-rds', 'core', 'dynamodb', 'mongodb', 'mysql', 'postgres']);
   })) passed++; else failed++;
 
   if (test('resolveSelection: writing with no sub-selection means "all" (social 상세 전체 포함)', () => {

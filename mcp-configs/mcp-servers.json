@@ -9,7 +9,9 @@
   "mcpServers": {
     "github": {
       "route": "proxy",
-      "workloads": ["core"],
+      "workloads": [
+        "core"
+      ],
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
@@ -19,23 +21,37 @@
     },
     "exa": {
       "route": "proxy",
-      "workloads": ["core"],
+      "workloads": [
+        "research"
+      ],
       "type": "http",
       "url": "https://mcp.exa.ai/mcp",
       "description": "Web search and research via Exa (remote, 무인증) — 프록시가 그대로 전달."
     },
     "context7": {
       "route": "proxy",
-      "workloads": ["core"],
+      "workloads": [
+        "core"
+      ],
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
       "description": "Live documentation lookup — 프록시 컨테이너 안 npx 로 구동. documentation-lookup skill 과 함께 사용."
     },
     "brave-search": {
       "route": "proxy",
-      "workloads": ["core"],
+      "workloads": [
+        "research"
+      ],
       "command": "npx",
-      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
+      "args": [
+        "-y",
+        "@brave/brave-search-mcp-server",
+        "--transport",
+        "stdio"
+      ],
       "env": {
         "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_HERE"
       },
@@ -43,154 +59,271 @@
     },
     "time": {
       "route": "proxy",
-      "workloads": ["core"],
+      "workloads": [
+        "core"
+      ],
       "command": "uvx",
-      "args": ["mcp-server-time"],
+      "args": [
+        "mcp-server-time"
+      ],
       "description": "Current time + IANA timezone conversion — 프록시 컨테이너 안 uvx."
     },
     "fetch": {
       "route": "proxy",
-      "workloads": ["core"],
+      "workloads": [
+        "core"
+      ],
       "command": "uvx",
-      "args": ["mcp-server-fetch"],
+      "args": [
+        "mcp-server-fetch"
+      ],
       "description": "URL fetch + HTML→markdown 변환 — 프록시 컨테이너 안 uvx, 무인증."
     },
     "drawio": {
       "route": "proxy",
-      "workloads": ["frontend"],
+      "workloads": [
+        "frontend"
+      ],
       "command": "npx",
-      "args": ["-y", "@next-ai-drawio/mcp-server@latest"],
+      "args": [
+        "-y",
+        "@next-ai-drawio/mcp-server@latest"
+      ],
       "description": "draw.io(diagrams.net) 다이어그램 생성·편집 — 프록시 컨테이너 안 npx. drawio-diagram skill 과 함께 사용."
     },
     "token-optimizer": {
       "route": "proxy",
-      "workloads": ["core"],
+      "workloads": [
+        "writing"
+      ],
       "command": "npx",
-      "args": ["-y", "token-optimizer-mcp"],
+      "args": [
+        "-y",
+        "token-optimizer-mcp"
+      ],
       "description": "토큰 사용 최적화 유틸 — 프록시 컨테이너 안 npx, 무인증."
     },
     "aws-documentation": {
       "route": "proxy",
-      "workloads": ["cloud", "ai"],
+      "workloads": [
+        "cloud",
+        "ai"
+      ],
       "command": "uvx",
-      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ],
       "description": "AWS 공식 문서 검색·조회 — 프록시 컨테이너 안 uvx, 무인증. aws-cloud·aws-bedrock skill 과 함께 사용."
     },
     "aws-iam": {
       "route": "proxy",
-      "workloads": ["cloud"],
+      "workloads": [
+        "cloud"
+      ],
       "command": "uvx",
-      "args": ["awslabs.iam-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.iam-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "AWS IAM 사용자·역할·정책 조회·관리 — uvx. AWS 자격증명 필요(AWS_PROFILE·AWS_REGION). 프로덕션 IAM 은 read-only 권장."
     },
     "aws-iac": {
       "route": "proxy",
-      "workloads": ["devops"],
+      "workloads": [
+        "devops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.aws-iac-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.aws-iac-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "Infrastructure as Code 툴킷 (CloudFormation + CDK 문서·검증) — 구 ccapi·CDK 통합. uvx. AWS 자격증명 필요."
     },
     "aws-eks": {
       "route": "proxy",
-      "workloads": ["devops"],
+      "workloads": [
+        "devops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.eks-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.eks-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "Amazon EKS 클러스터·워크로드 관리 — uvx. AWS 자격증명 필요."
     },
     "aws-ecs": {
       "route": "proxy",
-      "workloads": ["devops"],
+      "workloads": [
+        "devops"
+      ],
       "command": "uvx",
-      "args": ["--from", "awslabs-ecs-mcp-server", "ecs-mcp-server"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "--from",
+        "awslabs-ecs-mcp-server",
+        "ecs-mcp-server"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "Amazon ECS 서비스·태스크 관리 — uvx(--from awslabs-ecs-mcp-server). AWS 자격증명 필요."
     },
     "aws-serverless": {
       "route": "proxy",
-      "workloads": ["devops"],
+      "workloads": [
+        "devops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.aws-serverless-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.aws-serverless-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "AWS Serverless(SAM 등) 애플리케이션 관리 — uvx. AWS 자격증명 필요."
     },
     "aws-lambda-tool": {
       "route": "proxy",
-      "workloads": ["devops"],
+      "workloads": [
+        "devops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.lambda-tool-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.lambda-tool-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "Lambda 함수를 MCP 도구로 노출 — uvx. AWS 자격증명 필요."
     },
     "aws-cloudwatch": {
       "route": "proxy",
-      "workloads": ["devops"],
+      "workloads": [
+        "devops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.cloudwatch-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.cloudwatch-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "CloudWatch 메트릭·로그·알람 조회 — uvx. AWS 자격증명 필요. 관측성 트러블슈팅용."
     },
     "aws-prometheus": {
       "route": "proxy",
-      "workloads": ["devops"],
+      "workloads": [
+        "devops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.prometheus-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.prometheus-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "Amazon Managed Prometheus 쿼리 — uvx. AWS 자격증명 필요."
     },
     "aws-support": {
       "route": "proxy",
-      "workloads": ["devops"],
+      "workloads": [
+        "devops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.aws-support-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.aws-support-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "AWS Support 케이스 조회·생성 — uvx. AWS 자격증명 필요."
     },
     "aws-billing-cost": {
       "route": "proxy",
-      "workloads": ["finops"],
+      "workloads": [
+        "finops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.billing-cost-management-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.billing-cost-management-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "AWS 비용·사용량 분석 (Billing and Cost Management) — uvx. AWS 자격증명 필요. read-only 권장."
     },
     "aws-pricing": {
       "route": "proxy",
-      "workloads": ["finops"],
+      "workloads": [
+        "finops"
+      ],
       "command": "uvx",
-      "args": ["awslabs.aws-pricing-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.aws-pricing-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "AWS 서비스 요금 조회·견적 — uvx. AWS 자격증명 필요."
     },
     "aws-redshift": {
       "route": "proxy",
-      "workloads": ["data-analysis"],
+      "workloads": [
+        "data-analysis"
+      ],
       "command": "uvx",
-      "args": ["awslabs.redshift-mcp-server@latest"],
-      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "args": [
+        "awslabs.redshift-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
       "description": "Amazon Redshift 클러스터·쿼리 — uvx. AWS 자격증명 필요."
     },
     "aws-knowledge": {
       "route": "proxy",
-      "workloads": ["cloud"],
+      "workloads": [
+        "cloud"
+      ],
       "url": "https://knowledge-mcp.global.api.aws",
       "transportType": "streamable-http",
       "description": "AWS Knowledge MCP (AWS 관리형 원격, 무인증) — 최신 AWS 문서·API·베스트프랙티스. 프록시가 그대로 전달."
     },
     "terraform": {
       "route": "proxy",
-      "workloads": ["cloud"],
+      "workloads": [
+        "cloud"
+      ],
       "url": "http://terraform-mcp:8080/mcp",
       "transportType": "streamable-http",
       "description": "Terraform provider·모듈·정책 조회 — Go 바이너리라 프록시 안에서 못 돌려 별도 컨테이너(hashicorp/terraform-mcp-server)로 실행, 프록시가 내부 네트워크로 전달. compose 의 terraform-mcp 서비스 참고. 이 서버가 선택되면 build-mcp-config 가 terraform-mcp compose 서비스도 함께 활성화한다."
     },
     "obsidian": {
       "route": "proxy",
-      "workloads": ["obsidian"],
+      "workloads": [
+        "obsidian"
+      ],
       "command": "uvx",
-      "args": ["mcp-obsidian"],
+      "args": [
+        "mcp-obsidian"
+      ],
       "env": {
         "OBSIDIAN_API_KEY": "YOUR_OBSIDIAN_API_KEY_HERE",
         "OBSIDIAN_HOST": "host.docker.internal",
@@ -200,38 +333,669 @@
     },
     "sentry": {
       "route": "local",
-      "workloads": ["core"],
+      "workloads": [
+        "core"
+      ],
       "type": "http",
       "url": "https://mcp.sentry.dev/mcp",
       "description": "Sentry errors/issues — 런타임 OAuth 리다이렉트라 프록시 경유 불가. 클라이언트에 직접. Approve on first session via /mcp."
     },
     "playwright": {
       "route": "local",
-      "workloads": ["frontend"],
+      "workloads": [
+        "frontend"
+      ],
       "command": "npx",
-      "args": ["-y", "@playwright/mcp", "--headless"],
+      "args": [
+        "-y",
+        "@playwright/mcp",
+        "--headless"
+      ],
       "description": "Headless browser automation — 호스트 브라우저 필요, 로컬 stdio 유지. --extension 으로 실행 중 브라우저 제어."
     },
     "agent-browser": {
       "route": "local",
-      "workloads": ["frontend"],
+      "workloads": [
+        "frontend"
+      ],
       "command": "agent-browser",
-      "args": ["mcp"],
+      "args": [
+        "mcp"
+      ],
       "description": "Vercel Agent Browser official MCP — 호스트 바이너리·브라우저 필요, 로컬 유지. Requires: npm install -g agent-browser && agent-browser install."
     },
     "higgsfield": {
       "route": "local",
-      "workloads": ["social-visual"],
+      "workloads": [
+        "social-visual"
+      ],
       "type": "http",
       "url": "https://mcp.higgsfield.ai/mcp",
       "description": "Higgsfield AI image/video generation — 런타임 OAuth 라 로컬 직접. authenticate on first use."
     },
     "zapier": {
       "route": "local",
-      "workloads": ["core"],
+      "workloads": [
+        "core"
+      ],
       "type": "http",
       "url": "https://mcp.zapier.com/api/v1/connect",
       "description": "Zapier MCP (9,000+ 앱) — 런타임 OAuth 라 로컬 직접. sign in at mcp.zapier.com when prompted."
+    },
+    "aws-bedrock-kb": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.bedrock-kb-retrieval-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Bedrock Knowledge Bases 검색(관리형 RAG) 조회 — uvx(awslabs.bedrock-kb-retrieval-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-bedrock-custom-model": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-bedrock-custom-model-import-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Bedrock Custom Model Import 관리 — uvx(awslabs.aws-bedrock-custom-model-import-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-bedrock-agentcore": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-bedrock-agentcore-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Bedrock AgentCore 에이전트 런타임 관리 — uvx(awslabs.amazon-bedrock-agentcore-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-kendra": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-kendra-index-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Amazon Kendra 엔터프라이즈 검색 인덱스 조회 — uvx(awslabs.amazon-kendra-index-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-qbusiness": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-qbusiness-anonymous-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Amazon Q Business(anonymous) 조회 — uvx(awslabs.amazon-qbusiness-anonymous-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-qindex": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-qindex-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Amazon Q index 조회 — uvx(awslabs.amazon-qindex-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-sagemaker": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.sagemaker-ai-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "SageMaker AI 모델·엔드포인트 관리 — uvx(awslabs.sagemaker-ai-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-document-loader": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.document-loader-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "문서 로더 — RAG 파이프라인용 문서 적재 — uvx(awslabs.document-loader-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-translate": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-translate-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Amazon Translate 기계 번역 — uvx(awslabs.amazon-translate-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-roda": {
+      "route": "proxy",
+      "workloads": [
+        "ai"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.roda-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Registry of Open Data on AWS(RODA) 조회 — uvx(awslabs.roda-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-dataprocessing": {
+      "route": "proxy",
+      "workloads": [
+        "data-analysis"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-dataprocessing-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Glue·EMR·Athena 데이터 처리 — uvx(awslabs.aws-dataprocessing-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-spark-troubleshooting": {
+      "route": "proxy",
+      "workloads": [
+        "data-analysis"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.sagemaker-unified-studio-spark-troubleshooting-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "SageMaker Unified Studio Spark 트러블슈팅 — uvx(awslabs.sagemaker-unified-studio-spark-troubleshooting-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-spark-upgrade": {
+      "route": "proxy",
+      "workloads": [
+        "data-analysis"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.sagemaker-unified-studio-spark-upgrade-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "SageMaker Unified Studio Spark 업그레이드 — uvx(awslabs.sagemaker-unified-studio-spark-upgrade-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-postgres": {
+      "route": "proxy",
+      "workloads": [
+        "aws-rds"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.postgres-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Aurora PostgreSQL / RDS Postgres 쿼리·스키마 — uvx(awslabs.postgres-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-aurora-dsql": {
+      "route": "proxy",
+      "workloads": [
+        "aws-rds"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aurora-dsql-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Aurora DSQL 조회 — uvx(awslabs.aurora-dsql-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-rds-oracle": {
+      "route": "proxy",
+      "workloads": [
+        "aws-rds"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.oracle-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "RDS Oracle 쿼리 — uvx(awslabs.oracle-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-rds-mssql": {
+      "route": "proxy",
+      "workloads": [
+        "aws-rds"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.mssql-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "RDS SQL Server 쿼리 — uvx(awslabs.mssql-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-mysql": {
+      "route": "proxy",
+      "workloads": [
+        "aws-rds"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.mysql-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Aurora MySQL / RDS MySQL 쿼리·스키마 — uvx(awslabs.mysql-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-keyspaces": {
+      "route": "proxy",
+      "workloads": [
+        "aws-rds"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-keyspaces-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Amazon Keyspaces(Cassandra 호환) 조회 — uvx(awslabs.amazon-keyspaces-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-timestream-influxdb": {
+      "route": "proxy",
+      "workloads": [
+        "aws-rds"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.timestream-for-influxdb-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Timestream for InfluxDB 시계열 조회 — uvx(awslabs.timestream-for-influxdb-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-neptune": {
+      "route": "proxy",
+      "workloads": [
+        "data-analysis"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-neptune-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Amazon Neptune 그래프 DB 조회 — uvx(awslabs.amazon-neptune-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-api": {
+      "route": "proxy",
+      "workloads": [
+        "cloud"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-api-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "AWS API 범용 액세스 + 최신 문서(프리뷰) — uvx(awslabs.aws-api-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-network": {
+      "route": "proxy",
+      "workloads": [
+        "cloud"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-network-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "AWS 네트워크(VPC 등) 조회·진단 — uvx(awslabs.aws-network-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-sns-sqs": {
+      "route": "proxy",
+      "workloads": [
+        "integration"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-sns-sqs-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "SNS·SQS 메시징 관리 — uvx(awslabs.amazon-sns-sqs-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-mq": {
+      "route": "proxy",
+      "workloads": [
+        "integration"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.amazon-mq-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Amazon MQ 브로커 관리 — uvx(awslabs.amazon-mq-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-openapi": {
+      "route": "proxy",
+      "workloads": [
+        "integration"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.openapi-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "OpenAPI 스펙 기반 API 호출 — uvx(awslabs.openapi-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-stepfunctions": {
+      "route": "proxy",
+      "workloads": [
+        "integration"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.stepfunctions-tool-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Step Functions 상태머신을 MCP 도구로 노출 — uvx(awslabs.stepfunctions-tool-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-location": {
+      "route": "proxy",
+      "workloads": [
+        "cloud"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-location-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Location Service 지오코딩·경로 — uvx(awslabs.aws-location-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-elasticache": {
+      "route": "proxy",
+      "workloads": [
+        "cloud"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.elasticache-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "ElastiCache 관리 — uvx(awslabs.elasticache-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-valkey": {
+      "route": "proxy",
+      "workloads": [
+        "cloud"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.valkey-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Valkey(MemoryDB) 조회 — uvx(awslabs.valkey-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-memcached": {
+      "route": "proxy",
+      "workloads": [
+        "cloud"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.memcached-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Memcached 조회 — uvx(awslabs.memcached-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-s3-tables": {
+      "route": "proxy",
+      "workloads": [
+        "cloud"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.s3-tables-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "S3 Tables(Iceberg) 관리 — uvx(awslabs.s3-tables-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-appsync": {
+      "route": "proxy",
+      "workloads": [
+        "integration"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-appsync-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "AppSync GraphQL API 관리 — uvx(awslabs.aws-appsync-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-iot-sitewise": {
+      "route": "proxy",
+      "workloads": [
+        "cloud"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-iot-sitewise-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "IoT SiteWise 산업 데이터 조회 — uvx(awslabs.aws-iot-sitewise-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-transform": {
+      "route": "proxy",
+      "workloads": [
+        "devops"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-transform-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "AWS Transform 마이그레이션·현대화 — uvx(awslabs.aws-transform-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-sap": {
+      "route": "proxy",
+      "workloads": [
+        "devops"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-for-sap-management-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Systems Manager for SAP 관리 — uvx(awslabs.aws-for-sap-management-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-security-agent": {
+      "route": "proxy",
+      "workloads": [
+        "devops"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.security-agent-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "AWS Security Agent 보안 점검 — uvx(awslabs.security-agent-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-cloudtrail": {
+      "route": "proxy",
+      "workloads": [
+        "devops"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.cloudtrail-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "CloudTrail 이벤트·감사 로그 조회 — uvx(awslabs.cloudtrail-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-cloudwatch-appsignals": {
+      "route": "proxy",
+      "workloads": [
+        "devops"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.cloudwatch-applicationsignals-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "CloudWatch Application Signals APM 조회 — uvx(awslabs.cloudwatch-applicationsignals-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-well-architected-security": {
+      "route": "proxy",
+      "workloads": [
+        "devops"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.well-architected-security-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Well-Architected 보안 평가 — uvx(awslabs.well-architected-security-mcp-server). AWS SSO 자격증명 필요."
+    },
+    "aws-finch": {
+      "route": "proxy",
+      "workloads": [
+        "devops"
+      ],
+      "command": "uvx",
+      "args": [
+        "awslabs.finch-mcp-server@latest"
+      ],
+      "env": {
+        "AWS_PROFILE": "${AWS_PROFILE}",
+        "AWS_REGION": "${AWS_REGION}"
+      },
+      "description": "Finch 컨테이너 런타임 관리 — uvx(awslabs.finch-mcp-server). AWS SSO 자격증명 필요."
     }
   },
   "_comments": {

@@ -51,71 +51,73 @@ const CATEGORIES = [
     label: '백엔드 개발',
     subQuestion: '어떤 백엔드를 다루세요?',
     subOptions: [
-      { id: 'python',  label: 'Python (FastAPI 등)', workloads: ['python-backend'] },
-      { id: 'rust',    label: 'Rust',                workloads: ['rust'] },
-      { id: 'nodejs',  label: 'Node.js',             workloads: ['nodejs'] },
-      { id: 'cloud',   label: 'AWS · Docker · K8s',  workloads: ['cloud'] },
-      { id: 'devops',  label: 'DevOps (IaC·컨테이너·서버리스·관측성)', workloads: ['devops', 'cloud'] },
-      { id: 'finops',  label: 'FinOps (AWS 비용·요금)', workloads: ['finops'] },
-      { id: 'ai',      label: 'AI · LLM 파이프라인', workloads: ['ai'] },
-    ],
+      { id: 'python', label: 'Python (FastAPI 등)', workloads: ['python-backend'] },
+      { id: 'rust', label: 'Rust', workloads: ['rust'] },
+      { id: 'nodejs', label: 'Node.js', workloads: ['nodejs'] },
+      { id: 'cloud', label: 'AWS · Docker · K8s', workloads: ['cloud'] },
+      { id: 'devops', label: 'DevOps (IaC·컨테이너·서버리스·관측성)', workloads: ['devops', 'cloud'] },
+      { id: 'finops', label: 'FinOps (AWS 비용·요금)', workloads: ['finops'] },
+      { id: 'integration', label: 'Integration (SNS·SQS·MQ·Step Functions)', workloads: ['integration'] },
+      { id: 'ai', label: 'AI · LLM 파이프라인', workloads: ['ai'] },
+      { id: 'research', label: 'Research (웹 검색 — exa·brave)', workloads: ['research'] }
+    ]
   },
   {
     id: 'frontend',
     label: '프론트엔드 개발',
     subQuestion: '어떤 프론트엔드 스택?',
-    subOptions: [
-      { id: 'react-vite-ts', label: 'React / Vite / TypeScript', workloads: ['frontend'] },
-    ],
+    subOptions: [{ id: 'react-vite-ts', label: 'React / Vite / TypeScript', workloads: ['frontend'] }]
   },
   {
     id: 'plugin',
     label: '플러그인 개발',
     subQuestion: '어떤 플러그인 플랫폼?',
     subOptions: [
-      { id: 'obsidian', label: 'Obsidian 플러그인',     workloads: ['obsidian', 'frontend'] },
-      { id: 'chrome',   label: 'Chrome 확장 (예약)',    workloads: ['plugin-chrome', 'frontend'] },
-      { id: 'claude',   label: 'Claude Code 플러그인 (예약)', workloads: ['plugin-claude'] },
-    ],
+      { id: 'obsidian', label: 'Obsidian 플러그인', workloads: ['obsidian', 'frontend'] },
+      { id: 'chrome', label: 'Chrome 확장 (예약)', workloads: ['plugin-chrome', 'frontend'] },
+      { id: 'claude', label: 'Claude Code 플러그인 (예약)', workloads: ['plugin-claude'] }
+    ]
   },
   {
     id: 'data-analysis',
     label: '데이터 분석',
     subQuestion: '어떤 분석 도구?',
     subOptions: [
-      { id: 'duckdb', label: 'DuckDB 세팅 / 쿼리',    workloads: ['python-data'] },
+      { id: 'duckdb', label: 'DuckDB 세팅 / 쿼리', workloads: ['python-data'] },
       { id: 'python', label: 'Python (pandas/polars/pytorch/MLE)', workloads: ['python-data', 'ai'] },
-      { id: 'aws',    label: 'AWS 분석 (Glue·Athena·EMR·Redshift)', workloads: ['data-analysis'] },
-    ],
+      { id: 'aws', label: 'AWS 분석 (Glue·Athena·EMR·Redshift)', workloads: ['data-analysis'] }
+    ]
   },
   {
     id: 'data-design',
     label: '데이터 설계',
     subQuestion: '어떤 DB 엔진?',
     subOptions: [
-      { id: 'mysql',    label: 'MySQL / Aurora MySQL',         workloads: ['mysql'] },
+      { id: 'mysql', label: 'MySQL / Aurora MySQL', workloads: ['mysql'] },
       { id: 'postgres', label: 'PostgreSQL / Aurora Postgres', workloads: ['postgres'] },
-      { id: 'mongodb',  label: 'MongoDB',                      workloads: ['mongodb'] },
-      { id: 'dynamodb', label: 'DynamoDB',                     workloads: ['dynamodb'] },
-    ],
+      { id: 'mongodb', label: 'MongoDB', workloads: ['mongodb'] },
+      { id: 'dynamodb', label: 'DynamoDB', workloads: ['dynamodb'] },
+      { id: 'aws-rds', label: 'AWS 관리형 DB (Aurora·RDS·DSQL·Keyspaces)', workloads: ['aws-rds'] }
+    ]
   },
   {
     id: 'writing',
     label: '글쓰기 / 콘텐츠',
     subQuestion: '어떤 글쓰기 작업?',
     subOptions: [
-      { id: 'tech',   label: '기술 문서 · 블로깅 · PPT',    workloads: ['writing'] },
+      { id: 'tech', label: '기술 문서 · 블로깅 · PPT', workloads: ['writing'] },
       {
-        id: 'social', label: '소셜 콘텐츠 (LinkedIn 등)',
+        id: 'social',
+        label: '소셜 콘텐츠 (LinkedIn 등)',
         // 상세 tier: 파이프라인 단계별 3분할. 미선택 시 전체 설치.
         detailQuestion: '어느 단계? (여러 개 선택 가능)',
         detailOptions: [
-          { id: 'voice',   label: '보이스 · 프로필 (voice-builder 등)',      workloads: ['social-voice'] },
-          { id: 'content', label: '콘텐츠 제작 (post-writer / hook 등)',     workloads: ['social-content'] },
-          { id: 'visual',  label: '시각 자산 (carousel / infographic 등)',   workloads: ['social-visual'] },
-        ],
-      },
-    ],
+          { id: 'voice', label: '보이스 · 프로필 (voice-builder 등)', workloads: ['social-voice'] },
+          { id: 'content', label: '콘텐츠 제작 (post-writer / hook 등)', workloads: ['social-content'] },
+          { id: 'visual', label: '시각 자산 (carousel / infographic 등)', workloads: ['social-visual'] }
+        ]
+      }
+    ]
   },
   {
     id: 'apple',
@@ -123,11 +125,11 @@ const CATEGORIES = [
     // sub-옵션 없이 카테고리 레벨에 상세 tier 를 둔다 (영역별 3분할).
     detailQuestion: '어느 영역? (여러 개 선택 가능)',
     detailOptions: [
-      { id: 'core',     label: '핵심 개발 (Swift/SwiftUI/테스트/생성기)', workloads: ['apple-core'] },
-      { id: 'platform', label: '플랫폼 특화 (watchOS/visionOS/ML/Maps)',  workloads: ['apple-platform'] },
-      { id: 'product',  label: '제품 · 운영 (App Store/성장/법무)',        workloads: ['apple-product'] },
-    ],
-  },
+      { id: 'core', label: '핵심 개발 (Swift/SwiftUI/테스트/생성기)', workloads: ['apple-core'] },
+      { id: 'platform', label: '플랫폼 특화 (watchOS/visionOS/ML/Maps)', workloads: ['apple-platform'] },
+      { id: 'product', label: '제품 · 운영 (App Store/성장/법무)', workloads: ['apple-product'] }
+    ]
+  }
 ];
 
 const CATEGORY_IDS = CATEGORIES.map(c => c.id);
@@ -147,12 +149,13 @@ function findCategory(id) {
  * @param {string[]} unknownDetails
  */
 function addDetailWorkloads(detailOptions, requested, wlSet, nodeKey, unknownDetails) {
-  const details = (Array.isArray(requested) && requested.length)
-    ? requested
-    : detailOptions.map(d => d.id); // 빈 배열 → 전체 상세
+  const details = Array.isArray(requested) && requested.length ? requested : detailOptions.map(d => d.id); // 빈 배열 → 전체 상세
   for (const detId of details) {
     const det = detailOptions.find(d => d.id === detId);
-    if (!det) { unknownDetails.push(`${nodeKey}.${detId}`); continue; }
+    if (!det) {
+      unknownDetails.push(`${nodeKey}.${detId}`);
+      continue;
+    }
     for (const w of det.workloads) wlSet.add(w);
   }
 }
@@ -181,7 +184,10 @@ function resolveSelection({ categories = [], subSelections = {}, detailSelection
 
   for (const catId of categories) {
     const cat = findCategory(catId);
-    if (!cat) { unknownCategories.push(catId); continue; }
+    if (!cat) {
+      unknownCategories.push(catId);
+      continue;
+    }
 
     // (1) 카테고리 레벨 상세 tier (apple: subOptions 없음)
     if (cat.detailOptions && cat.detailOptions.length) {
@@ -191,25 +197,26 @@ function resolveSelection({ categories = [], subSelections = {}, detailSelection
 
     // (2) sub-옵션 없는 단순 카테고리
     if (!cat.subOptions || cat.subOptions.length === 0) {
-      for (const w of (cat.workloads || [])) wlSet.add(w);
+      for (const w of cat.workloads || []) wlSet.add(w);
       continue;
     }
 
     // (3) sub-옵션이 있는 카테고리
     const requestedSubs = subSelections[catId];
-    const subs = (Array.isArray(requestedSubs) && requestedSubs.length)
-      ? requestedSubs
-      : cat.subOptions.map(s => s.id); // 빈 배열 → 전체
+    const subs = Array.isArray(requestedSubs) && requestedSubs.length ? requestedSubs : cat.subOptions.map(s => s.id); // 빈 배열 → 전체
 
     for (const subId of subs) {
       const sub = cat.subOptions.find(s => s.id === subId);
-      if (!sub) { unknownSubs.push(`${catId}.${subId}`); continue; }
+      if (!sub) {
+        unknownSubs.push(`${catId}.${subId}`);
+        continue;
+      }
       // sub 레벨 상세 tier (writing.social)
       if (sub.detailOptions && sub.detailOptions.length) {
         const nodeKey = `${catId}.${subId}`;
         addDetailWorkloads(sub.detailOptions, detailSelections[nodeKey], wlSet, nodeKey, unknownDetails);
       } else {
-        for (const w of (sub.workloads || [])) wlSet.add(w);
+        for (const w of sub.workloads || []) wlSet.add(w);
       }
     }
   }
@@ -218,7 +225,7 @@ function resolveSelection({ categories = [], subSelections = {}, detailSelection
     workloads: [...wlSet].sort(),
     unknownCategories,
     unknownSubs,
-    unknownDetails,
+    unknownDetails
   };
 }
 
@@ -235,13 +242,14 @@ function resolveSelection({ categories = [], subSelections = {}, detailSelection
  * @param {Record<string,string|string[]>} flags
  */
 function parseCliFlags(flags) {
-  const split = v => (Array.isArray(v) ? v : String(v || '').split(','))
-    .map(s => s.trim()).filter(Boolean);
+  const split = v => (Array.isArray(v) ? v : String(v || '').split(',')).map(s => s.trim()).filter(Boolean);
 
   const categories = split(flags.category);
   const subSelections = {};
   const detailSelections = {};
-  const ensureCategory = id => { if (!categories.includes(id)) categories.push(id); };
+  const ensureCategory = id => {
+    if (!categories.includes(id)) categories.push(id);
+  };
 
   for (const cat of CATEGORIES) {
     // 카테고리 레벨 상세 (apple): `--apple=core,platform` → detailSelections['apple']
@@ -262,7 +270,7 @@ function parseCliFlags(flags) {
     }
 
     // sub 레벨 상세 플래그: `--<catId>-<subId>=...` (예: --writing-social=voice)
-    for (const sub of (cat.subOptions || [])) {
+    for (const sub of cat.subOptions || []) {
       if (!sub.detailOptions || !sub.detailOptions.length) continue;
       const detailFlag = flags[`${cat.id}-${sub.id}`];
       if (detailFlag === undefined) continue;
@@ -282,5 +290,5 @@ module.exports = {
   CATEGORY_IDS,
   findCategory,
   resolveSelection,
-  parseCliFlags,
+  parseCliFlags
 };
