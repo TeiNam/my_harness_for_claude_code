@@ -169,9 +169,9 @@ function main() {
   if (keys.length > RECOMMENDED_MAX) {
     process.stderr.write(
       `[build-mcp-config] [!] ${keys.length}개 — 권장 상한 ${RECOMMENDED_MAX}개 초과. ` +
-      `동시 활성 MCP 가 많으면 컨텍스트 윈도를 잠식합니다.\n` +
-      `  필요한 것만 골라 재빌드: node scripts/install/build-mcp-config.js --servers=github,exa,...\n` +
-      `  (전체 목록: --list)\n`
+        `동시 활성 MCP 가 많으면 컨텍스트 윈도를 잠식합니다.\n` +
+        `  필요한 것만 골라 재빌드: node scripts/install/build-mcp-config.js --servers=github,exa,...\n` +
+        `  (전체 목록: --list)\n`
     );
   }
 
