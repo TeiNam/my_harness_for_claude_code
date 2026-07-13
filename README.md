@@ -191,6 +191,7 @@ python 3.12.8
 | `ANTHROPIC_API_KEY` | Anthropic API |
 | `GITHUB_PAT` | MCP github 서버 인증 (프록시 `mcp-configs/proxy/.env`) |
 | `BRAVE_API_KEY` | MCP brave-search 서버 (프록시 `mcp-configs/proxy/.env`) |
+| `OBSIDIAN_API_KEY` | MCP obsidian 서버 (프록시 `mcp-configs/proxy/.env`) |
 | `CLAUDE_HOME` | 기본값 `~/.claude` 재정의 |
 | `HARNESS_HOOK_PROFILE` | 훅 프로파일 (`minimal` / `standard` / `strict`) |
 | `HARNESS_DISABLED_HOOKS` | 비활성화할 훅 ID 목록(쉼표 구분) |
@@ -209,13 +210,14 @@ python 3.12.8
 
 | 서버 | 위치 | 이유 |
 |---|---|---|
-| github, exa, context7, brave-search, time | **proxy** | 헤드리스·정적 시크릿(또는 무인증) — 컨테이너 구동 |
+| github, exa, context7, brave-search, time, fetch, drawio, token-optimizer, aws-documentation, obsidian | **proxy** | 헤드리스·정적 시크릿(또는 무인증) — 컨테이너 구동 |
+| terraform | **proxy** | Go 바이너리라 프록시 안에서 못 돌려 별도 컨테이너(`terraform-mcp:8080`), 프록시가 내부 네트워크로 전달 |
 | sentry | **local** | 런타임 OAuth 리다이렉트 — 프록시 경유 불가 |
 | playwright, agent-browser | **local** | 호스트 브라우저·바이너리 필요 |
 | higgsfield, zapier | **local** | 런타임 OAuth (샘플 카탈로그에만 포함) |
 
 - 프록시 에셋: `mcp-configs/proxy/` (`docker-compose.yaml` · `config.json` · `.env.example`). `install.sh` 가 설치 중 물어보고 `docker compose up -d` 로 기동합니다(compose v2 없으면 `brew install docker-compose` 시도).
-- 활성 클라이언트 설정: `.mcp.json` — 프록시 서버는 `localhost:9090` URL, 로컬 서버(sentry·playwright)는 직접 명령.
+- 활성 클라이언트 설정: `.mcp.json` — 프록시 서버(github·exa·context7·brave-search·time·obsidian·drawio 등)는 `localhost:9090` URL, 로컬 서버(sentry·playwright)는 직접 명령.
 - 복사용 카탈로그: `mcp-configs/mcp-servers.json` — 각 서버에 `route: proxy|local` 표시.
 - 시크릿(`GITHUB_PAT`·`BRAVE_API_KEY`)은 프록시 한 곳에만 — `.mcp.json` 에는 URL만 남아 키가 흩어지지 않습니다. 컨텍스트 윈도 보호를 위해 동시 활성 서버는 10개 이하로 유지합니다.
 

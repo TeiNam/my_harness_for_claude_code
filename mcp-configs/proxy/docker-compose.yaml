@@ -12,6 +12,24 @@ services:
       # 같은 폴더의 .env 또는 compose를 실행하는 셸에서 주입.
       BRAVE_API_KEY: ${BRAVE_API_KEY:-}
       GITHUB_PAT: ${GITHUB_PAT:-}
+      OBSIDIAN_API_KEY: ${OBSIDIAN_API_KEY:-}
     extra_hosts:
-      # Colima/Docker Desktop에서 컨테이너→호스트(로컬 REST API 등) 도달용.
+      # Colima/Docker Desktop에서 컨테이너→호스트(Obsidian REST API 등) 도달용.
       - "host.docker.internal:host-gateway"
+    depends_on:
+      - terraform-mcp
+
+  # Terraform MCP (Go 바이너리라 프록시 컨테이너 안에서 못 돌리므로 별도 서비스로 streamable-http 실행).
+  # 프록시는 내부 네트워크에서 http://terraform-mcp:8080/mcp 로 접근 (호스트에 포트 미발행).
+  terraform-mcp:
+    image: hashicorp/terraform-mcp-server:1.0.0
+    container_name: harness-terraform-mcp
+    restart: unless-stopped
+    environment:
+      TRANSPORT_MODE: streamable-http
+      TRANSPORT_HOST: 0.0.0.0      # 같은 네트워크의 프록시에서 접근 허용.
+      TRANSPORT_PORT: "8080"
+      MCP_CORS_MODE: disabled      # 내부 네트워크 전용(호스트/브라우저 미노출)이라 CORS 비활성화.
+      # HCP/TFE 워크스페이스 관리가 필요하면 아래 주석 해제:
+      # TFE_ADDRESS: https://app.terraform.io
+      # TFE_TOKEN: ${TFE_TOKEN:-}

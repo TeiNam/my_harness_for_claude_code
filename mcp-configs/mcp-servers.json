@@ -41,6 +41,47 @@
       "args": ["mcp-server-time"],
       "description": "Current time + IANA timezone conversion — 프록시 컨테이너 안 uvx."
     },
+    "fetch": {
+      "route": "proxy",
+      "command": "uvx",
+      "args": ["mcp-server-fetch"],
+      "description": "URL fetch + HTML→markdown 변환 — 프록시 컨테이너 안 uvx, 무인증."
+    },
+    "drawio": {
+      "route": "proxy",
+      "command": "npx",
+      "args": ["-y", "@next-ai-drawio/mcp-server@latest"],
+      "description": "draw.io(diagrams.net) 다이어그램 생성·편집 — 프록시 컨테이너 안 npx. drawio-diagram skill 과 함께 사용."
+    },
+    "token-optimizer": {
+      "route": "proxy",
+      "command": "npx",
+      "args": ["-y", "token-optimizer-mcp"],
+      "description": "토큰 사용 최적화 유틸 — 프록시 컨테이너 안 npx, 무인증."
+    },
+    "aws-documentation": {
+      "route": "proxy",
+      "command": "uvx",
+      "args": ["awslabs.aws-documentation-mcp-server@latest"],
+      "description": "AWS 공식 문서 검색·조회 — 프록시 컨테이너 안 uvx, 무인증. aws-cloud·aws-bedrock skill 과 함께 사용."
+    },
+    "terraform": {
+      "route": "proxy",
+      "url": "http://terraform-mcp:8080/mcp",
+      "transportType": "streamable-http",
+      "description": "Terraform provider·모듈·정책 조회 — Go 바이너리라 프록시 안에서 못 돌려 별도 컨테이너(hashicorp/terraform-mcp-server)로 실행, 프록시가 내부 네트워크로 전달. compose 의 terraform-mcp 서비스 참고."
+    },
+    "obsidian": {
+      "route": "proxy",
+      "command": "uvx",
+      "args": ["mcp-obsidian"],
+      "env": {
+        "OBSIDIAN_API_KEY": "YOUR_OBSIDIAN_API_KEY_HERE",
+        "OBSIDIAN_HOST": "host.docker.internal",
+        "OBSIDIAN_PORT": "27124"
+      },
+      "description": "Obsidian vault 읽기·검색·편집 (Local REST API 플러그인) — 프록시 컨테이너 안 uvx, host.docker.internal 로 호스트 Obsidian 접근. 시크릿은 프록시 .env 의 OBSIDIAN_API_KEY."
+    },
     "sentry": {
       "route": "local",
       "type": "http",

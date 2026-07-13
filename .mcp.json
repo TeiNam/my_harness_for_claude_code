@@ -20,6 +20,14 @@
       "type": "http",
       "url": "http://localhost:9090/time/mcp"
     },
+    "obsidian": {
+      "type": "http",
+      "url": "http://localhost:9090/obsidian/mcp"
+    },
+    "drawio": {
+      "type": "http",
+      "url": "http://localhost:9090/drawio/mcp"
+    },
     "sentry": {
       "type": "http",
       "url": "https://mcp.sentry.dev/mcp"
