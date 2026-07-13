@@ -1,5 +1,5 @@
 ---
-name: data-analysis
+name: analysis-methodology
 description: >
   Data analysis methodology — how to frame a question, pick the right technique,
   avoid statistical traps, and connect results to decisions. NOT a tool tutorial
