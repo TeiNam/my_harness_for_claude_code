@@ -2,7 +2,7 @@
 name: docker-patterns
 description: Docker and Docker Compose patterns for local development, container security, networking, volume strategies, and multi-service orchestration.
 origin: harness
-workloads: [cloud]
+workloads: [cloud, devops]
 ---
 
 # Docker Patterns
