@@ -16,14 +16,15 @@ services:
     extra_hosts:
       # Colima/Docker Desktop에서 컨테이너→호스트(Obsidian REST API 등) 도달용.
       - "host.docker.internal:host-gateway"
-    depends_on:
-      - terraform-mcp
 
   # Terraform MCP (Go 바이너리라 프록시 컨테이너 안에서 못 돌리므로 별도 서비스로 streamable-http 실행).
   # 프록시는 내부 네트워크에서 http://terraform-mcp:8080/mcp 로 접근 (호스트에 포트 미발행).
+  # cloud 워크로드(terraform 서버 선택) 일 때만 뜬다 — `--profile terraform` 없으면 제외.
+  # build-mcp-config.js 가 terraform 을 고르면 install 스크립트가 이 profile 을 켠다.
   terraform-mcp:
     image: hashicorp/terraform-mcp-server:1.0.0
     container_name: harness-terraform-mcp
+    profiles: ["terraform"]
     restart: unless-stopped
     environment:
       TRANSPORT_MODE: streamable-http

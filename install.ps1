@@ -267,13 +267,23 @@ function Set-McpProxy {
         Invoke-Step -Action { Copy-Item (Join-Path $proxyDir '.env.example') $envFile } -Description "copy .env"
     }
 
+    # 선택된 워크로드에 맞는 proxy 서버만 골라 config.json 을 빌드한다.
+    # (통짜로 전부 띄우지 않고 필요한 것만 — CLAUDE.md 의 "동시 MCP 10개 이하" 원칙.)
+    $builder = Join-Path $HarnessDir 'scripts\install\build-mcp-config.js'
+    $builderArgs = @("--workload=$ResolvedWorkloads")
+    if ($DryRun) { $builderArgs += '--dry-run' }
+    $buildOut = & node $builder @builderArgs 2>&1
+    $buildOut | ForEach-Object { Write-Host "  $_" }
+    $composeProfiles = @()
+    if ($buildOut -match 'terraform 선택됨') { $composeProfiles = @('--profile', 'terraform') }
+
     $compose = Join-Path $proxyDir 'docker-compose.yaml'
     Write-Host '  docker compose up -d …'
-    Invoke-Step -Action { docker compose -f $compose --project-directory $proxyDir up -d } -Description 'docker compose up -d'
+    Invoke-Step -Action { docker compose @composeProfiles -f $compose --project-directory $proxyDir up -d } -Description 'docker compose up -d'
 
-    Write-Host '  프록시 서버: github·exa·context7·brave-search·time → http://localhost:9090/<서버>/mcp'
+    Write-Host '  프록시 서버 → http://localhost:9090/<서버>/mcp (선택된 워크로드 기준, 위 목록 참고).'
     Write-Host '  로컬 유지: sentry(OAuth)·playwright(브라우저) — .mcp.json 에 직접.'
-    Write-Host "  시크릿(GITHUB_PAT·BRAVE_API_KEY)은 $envFile 한 곳에만."
+    Write-Host "  시크릿(GITHUB_PAT·BRAVE_API_KEY·OBSIDIAN_API_KEY)은 $envFile 한 곳에만."
     Write-Host '  확인: curl -i http://localhost:9090/time/mcp  (405 계열이면 정상 기동)'
 }
 

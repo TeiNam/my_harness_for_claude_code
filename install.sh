@@ -285,12 +285,23 @@ setup_mcp_proxy() {
         run cp "\"$PROXY_DIR/.env.example\"" "\"$PROXY_DIR/.env\""
     fi
 
-    echo "  docker compose up -d …"
-    run docker compose -f "\"$PROXY_DIR/docker-compose.yaml\"" --project-directory "\"$PROXY_DIR\"" up -d
+    # 선택된 워크로드에 맞는 proxy 서버만 골라 config.json 을 빌드한다.
+    # (통짜로 전부 띄우지 않고 필요한 것만 — CLAUDE.md 의 "동시 MCP 10개 이하" 원칙.)
+    local build_out compose_profiles="" build_dry=""
+    [ "$DRY_RUN" -eq 1 ] && build_dry="--dry-run"
+    build_out="$(node "$HARNESS_DIR/scripts/install/build-mcp-config.js" --workload="$WORKLOAD" $build_dry 2>&1)" || true
+    echo "$build_out" | sed 's/^/  /'
+    # terraform 서버가 선택되면 compose 의 terraform-mcp profile 도 켠다.
+    if printf '%s' "$build_out" | grep -q "terraform 선택됨"; then
+        compose_profiles="--profile terraform"
+    fi
 
-    echo "  프록시 서버: github·exa·context7·brave-search·time → http://localhost:9090/<서버>/mcp"
+    echo "  docker compose up -d …"
+    run docker compose $compose_profiles -f "\"$PROXY_DIR/docker-compose.yaml\"" --project-directory "\"$PROXY_DIR\"" up -d
+
+    echo "  프록시 서버 → http://localhost:9090/<서버>/mcp (선택된 워크로드 기준, 위 목록 참고)."
     echo "  로컬 유지: sentry(OAuth)·playwright(브라우저) — .mcp.json 에 직접."
-    echo "  시크릿(GITHUB_PAT·BRAVE_API_KEY)은 $PROXY_DIR/.env 한 곳에만."
+    echo "  시크릿(GITHUB_PAT·BRAVE_API_KEY·OBSIDIAN_API_KEY)은 $PROXY_DIR/.env 한 곳에만."
     echo "  확인: curl -i http://localhost:9090/time/mcp  (405 계열이면 정상 기동)"
 }
 

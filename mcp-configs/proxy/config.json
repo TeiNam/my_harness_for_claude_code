@@ -8,8 +8,10 @@
   "mcpServers": {
     "github": {
       "url": "https://api.githubcopilot.com/mcp/",
-      "transportType": "streamable-http",
-      "headers": { "Authorization": "Bearer ${GITHUB_PAT}" }
+      "headers": {
+        "Authorization": "Bearer ${GITHUB_PAT}"
+      },
+      "transportType": "streamable-http"
     },
     "exa": {
       "url": "https://mcp.exa.ai/mcp",
@@ -17,45 +19,41 @@
     },
     "context7": {
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@2.1.4"]
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ]
     },
     "brave-search": {
       "command": "npx",
-      "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
-      "env": { "BRAVE_API_KEY": "${BRAVE_API_KEY}" }
+      "args": [
+        "-y",
+        "@brave/brave-search-mcp-server",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
     },
     "time": {
       "command": "uvx",
-      "args": ["mcp-server-time"]
+      "args": [
+        "mcp-server-time"
+      ]
     },
     "fetch": {
       "command": "uvx",
-      "args": ["mcp-server-fetch"]
-    },
-    "drawio": {
-      "command": "npx",
-      "args": ["-y", "@next-ai-drawio/mcp-server@latest"]
+      "args": [
+        "mcp-server-fetch"
+      ]
     },
     "token-optimizer": {
       "command": "npx",
-      "args": ["-y", "token-optimizer-mcp"]
-    },
-    "aws-documentation": {
-      "command": "uvx",
-      "args": ["awslabs.aws-documentation-mcp-server@latest"]
-    },
-    "terraform": {
-      "url": "http://terraform-mcp:8080/mcp",
-      "transportType": "streamable-http"
-    },
-    "obsidian": {
-      "command": "uvx",
-      "args": ["mcp-obsidian"],
-      "env": {
-        "OBSIDIAN_API_KEY": "${OBSIDIAN_API_KEY}",
-        "OBSIDIAN_HOST": "host.docker.internal",
-        "OBSIDIAN_PORT": "27124"
-      }
+      "args": [
+        "-y",
+        "token-optimizer-mcp"
+      ]
     }
   }
 }

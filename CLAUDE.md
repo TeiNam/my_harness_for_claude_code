@@ -29,7 +29,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `commands/` — slash commands (markdown with `description:` frontmatter)
 - `hooks/` — trigger-based hook configs (JSON + handler scripts)
 - `rules/` — always-follow guidelines (common + per-language)
-- `mcp-configs/` — MCP server configs (proxy-first: `proxy/` holds the mcp-proxy compose stack; `mcp-servers.json` catalog marks each server `route: proxy|local`)
+- `mcp-configs/` — MCP server configs (proxy-first: `proxy/` holds the mcp-proxy compose stack; `mcp-servers.json` catalog is the SSOT, marking each server `route: proxy|local` + `workloads: [...]`). 설치 시 `scripts/install/build-mcp-config.js` 가 선택 워크로드와 매칭되는 `route=proxy` 서버만 골라 `proxy/config.json` 을 빌드한다(통짜 X). `terraform` 선택 시 compose 의 `terraform-mcp` profile 동반 기동.
 - `scripts/` — Node.js utilities for hooks, install/uninstall, audits
 - `tests/` — test suite for `scripts/`
 - `docs/` — long-form reference (writing guides, security guide, steering rules)

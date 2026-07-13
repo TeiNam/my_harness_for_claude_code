@@ -1,12 +1,14 @@
 {
   "_routing": {
-    "_comment": "이 하네스는 mcp-proxy(mcp-configs/proxy/)로 프록시 가능한 서버를 중앙 컨테이너에서 돌린다. 아래 각 서버의 route 필드가 proxy/local 을 표시한다.",
-    "test": "리눅스 컨테이너에서 무인증(또는 정적 env 시크릿)으로 헤드리스 구동되면 proxy. 호스트 브라우저·GUI·호스트 바이너리·경로·런타임 OAuth 리다이렉트가 필요하면 local.",
+    "_comment": "이 파일이 MCP 서버 전체 목록의 SSOT. 각 서버의 route(proxy/local)·workloads 필드가 분류를 표시한다. 실행용 proxy/config.json 은 scripts/install/build-mcp-config.js 가 선택된 워크로드에 맞는 route=proxy 서버만 골라 빌드하는 산출물이다(통짜 설치 금지 — CLAUDE.md 의 동시 MCP 10개 이하 원칙).",
+    "route_test": "리눅스 컨테이너에서 무인증(또는 정적 env 시크릿)으로 헤드리스 구동되면 proxy. 호스트 브라우저·GUI·호스트 바이너리·경로·런타임 OAuth 리다이렉트가 필요하면 local.",
+    "workloads": "설치 시 선택된 워크로드와 교집합되는 서버만 config.json 에 들어간다. core 는 항상 포함. 범용(검색·문서·시각화·시간·fetch)은 core, 나머지는 성격별(cloud·obsidian·frontend 등). terraform 이 선택되면 compose 의 terraform-mcp profile 도 함께 켜진다.",
     "proxy_url": "프록시 경유 서버는 클라이언트에서 http://localhost:9090/<서버키>/mcp 로 붙는다."
   },
   "mcpServers": {
     "github": {
       "route": "proxy",
+      "workloads": ["core"],
       "type": "http",
       "url": "https://api.githubcopilot.com/mcp/",
       "headers": {
@@ -16,18 +18,21 @@
     },
     "exa": {
       "route": "proxy",
+      "workloads": ["core"],
       "type": "http",
       "url": "https://mcp.exa.ai/mcp",
       "description": "Web search and research via Exa (remote, 무인증) — 프록시가 그대로 전달."
     },
     "context7": {
       "route": "proxy",
+      "workloads": ["core"],
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "description": "Live documentation lookup — 프록시 컨테이너 안 npx 로 구동. documentation-lookup skill 과 함께 사용."
     },
     "brave-search": {
       "route": "proxy",
+      "workloads": ["core"],
       "command": "npx",
       "args": ["-y", "@brave/brave-search-mcp-server", "--transport", "stdio"],
       "env": {
@@ -37,42 +42,49 @@
     },
     "time": {
       "route": "proxy",
+      "workloads": ["core"],
       "command": "uvx",
       "args": ["mcp-server-time"],
       "description": "Current time + IANA timezone conversion — 프록시 컨테이너 안 uvx."
     },
     "fetch": {
       "route": "proxy",
+      "workloads": ["core"],
       "command": "uvx",
       "args": ["mcp-server-fetch"],
       "description": "URL fetch + HTML→markdown 변환 — 프록시 컨테이너 안 uvx, 무인증."
     },
     "drawio": {
       "route": "proxy",
+      "workloads": ["frontend"],
       "command": "npx",
       "args": ["-y", "@next-ai-drawio/mcp-server@latest"],
       "description": "draw.io(diagrams.net) 다이어그램 생성·편집 — 프록시 컨테이너 안 npx. drawio-diagram skill 과 함께 사용."
     },
     "token-optimizer": {
       "route": "proxy",
+      "workloads": ["core"],
       "command": "npx",
       "args": ["-y", "token-optimizer-mcp"],
       "description": "토큰 사용 최적화 유틸 — 프록시 컨테이너 안 npx, 무인증."
     },
     "aws-documentation": {
       "route": "proxy",
+      "workloads": ["cloud", "ai"],
       "command": "uvx",
       "args": ["awslabs.aws-documentation-mcp-server@latest"],
       "description": "AWS 공식 문서 검색·조회 — 프록시 컨테이너 안 uvx, 무인증. aws-cloud·aws-bedrock skill 과 함께 사용."
     },
     "terraform": {
       "route": "proxy",
+      "workloads": ["cloud"],
       "url": "http://terraform-mcp:8080/mcp",
       "transportType": "streamable-http",
-      "description": "Terraform provider·모듈·정책 조회 — Go 바이너리라 프록시 안에서 못 돌려 별도 컨테이너(hashicorp/terraform-mcp-server)로 실행, 프록시가 내부 네트워크로 전달. compose 의 terraform-mcp 서비스 참고."
+      "description": "Terraform provider·모듈·정책 조회 — Go 바이너리라 프록시 안에서 못 돌려 별도 컨테이너(hashicorp/terraform-mcp-server)로 실행, 프록시가 내부 네트워크로 전달. compose 의 terraform-mcp 서비스 참고. 이 서버가 선택되면 build-mcp-config 가 terraform-mcp compose 서비스도 함께 활성화한다."
     },
     "obsidian": {
       "route": "proxy",
+      "workloads": ["obsidian"],
       "command": "uvx",
       "args": ["mcp-obsidian"],
       "env": {
@@ -84,30 +96,35 @@
     },
     "sentry": {
       "route": "local",
+      "workloads": ["core"],
       "type": "http",
       "url": "https://mcp.sentry.dev/mcp",
       "description": "Sentry errors/issues — 런타임 OAuth 리다이렉트라 프록시 경유 불가. 클라이언트에 직접. Approve on first session via /mcp."
     },
     "playwright": {
       "route": "local",
+      "workloads": ["frontend"],
       "command": "npx",
       "args": ["-y", "@playwright/mcp", "--headless"],
       "description": "Headless browser automation — 호스트 브라우저 필요, 로컬 stdio 유지. --extension 으로 실행 중 브라우저 제어."
     },
     "agent-browser": {
       "route": "local",
+      "workloads": ["frontend"],
       "command": "agent-browser",
       "args": ["mcp"],
       "description": "Vercel Agent Browser official MCP — 호스트 바이너리·브라우저 필요, 로컬 유지. Requires: npm install -g agent-browser && agent-browser install."
     },
     "higgsfield": {
       "route": "local",
+      "workloads": ["social-visual"],
       "type": "http",
       "url": "https://mcp.higgsfield.ai/mcp",
       "description": "Higgsfield AI image/video generation — 런타임 OAuth 라 로컬 직접. authenticate on first use."
     },
     "zapier": {
       "route": "local",
+      "workloads": ["core"],
       "type": "http",
       "url": "https://mcp.zapier.com/api/v1/connect",
       "description": "Zapier MCP (9,000+ 앱) — 런타임 OAuth 라 로컬 직접. sign in at mcp.zapier.com when prompted."

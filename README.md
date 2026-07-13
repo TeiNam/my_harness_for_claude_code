@@ -219,6 +219,7 @@ python 3.12.8
 | playwright, agent-browser | **local** | 호스트 브라우저·바이너리 필요 |
 | higgsfield, zapier | **local** | 런타임 OAuth (샘플 카탈로그에만 포함) |
 
+- **워크로드별 선택 빌드**: 설치 시 모든 MCP 를 통짜로 띄우지 않습니다. `scripts/install/build-mcp-config.js` 가 선택된 워크로드와 매칭되는 `route=proxy` 서버만 골라 `proxy/config.json` 을 빌드합니다. 범용(github·exa·context7·brave-search·time·fetch·token-optimizer)은 `core` 라 항상 포함, 나머지는 성격별 — `aws-documentation`(cloud·ai), `terraform`(cloud), `obsidian`(obsidian), `drawio`(frontend). `terraform` 이 선택되면 compose 의 `terraform-mcp` profile 도 함께 켜집니다. 전체 목록의 SSOT 는 `mcp-configs/mcp-servers.json`(각 서버 `route`·`workloads` 표시)이고, `config.json` 은 그 산출물입니다.
 - 프록시 에셋: `mcp-configs/proxy/` (`docker-compose.yaml` · `config.json` · `.env.example`). `install.sh` 가 설치 중 물어보고(또는 `--with-mcp` 로 바로) `docker compose up -d` 로 기동합니다. **docker 가 없으면** 설치 명령(brew 있으면 `brew install colima docker docker-compose && colima start`, 없으면 Colima/Docker Desktop 링크)과 재실행 커맨드(`./install.sh --with-mcp`)를 안내하고 넘어갑니다. 데몬 미동작·compose v2 부재도 각각 켜는 법을 안내합니다.
 - 활성 클라이언트 설정: `.mcp.json` — 프록시 서버(github·exa·context7·brave-search·time·obsidian·drawio 등)는 `localhost:9090` URL, 로컬 서버(sentry·playwright)는 직접 명령.
 - 복사용 카탈로그: `mcp-configs/mcp-servers.json` — 각 서버에 `route: proxy|local` 표시.
