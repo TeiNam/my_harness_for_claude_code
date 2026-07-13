@@ -214,12 +214,14 @@ python 3.12.8
 | 서버 | 위치 | 이유 |
 |---|---|---|
 | github, exa, context7, brave-search, time, fetch, drawio, token-optimizer, aws-documentation, obsidian | **proxy** | 헤드리스·정적 시크릿(또는 무인증) — 컨테이너 구동 |
+| aws-iam, aws-iac, aws-eks, aws-ecs, aws-serverless, aws-lambda-tool, aws-cloudwatch, aws-prometheus, aws-support, aws-billing-cost, aws-pricing, aws-redshift, aws-knowledge | **proxy** | AWS MCP(`awslabs.*`) — SSO 자격증명(`~/.aws` 마운트) 필요. devops·finops·cloud·data-analysis 워크로드에서만 선택 |
 | terraform | **proxy** | Go 바이너리라 프록시 안에서 못 돌려 별도 컨테이너(`terraform-mcp:8080`), 프록시가 내부 네트워크로 전달 |
 | sentry | **local** | 런타임 OAuth 리다이렉트 — 프록시 경유 불가 |
 | playwright, agent-browser | **local** | 호스트 브라우저·바이너리 필요 |
 | higgsfield, zapier | **local** | 런타임 OAuth (샘플 카탈로그에만 포함) |
 
-- **워크로드별 선택 빌드**: 설치 시 모든 MCP 를 통짜로 띄우지 않습니다. `scripts/install/build-mcp-config.js` 가 선택된 워크로드와 매칭되는 `route=proxy` 서버만 골라 `proxy/config.json` 을 빌드합니다. 범용(github·exa·context7·brave-search·time·fetch·token-optimizer)은 `core` 라 항상 포함, 나머지는 성격별 — `aws-documentation`(cloud·ai), `terraform`(cloud), `obsidian`(obsidian), `drawio`(frontend). `terraform` 이 선택되면 compose 의 `terraform-mcp` profile 도 함께 켜집니다. 전체 목록의 SSOT 는 `mcp-configs/mcp-servers.json`(각 서버 `route`·`workloads` 표시)이고, `config.json` 은 그 산출물입니다.
+- **워크로드별 선택 빌드**: 설치 시 모든 MCP 를 통짜로 띄우지 않습니다. `scripts/install/build-mcp-config.js` 가 선택된 워크로드와 매칭되는 `route=proxy` 서버만 골라 `proxy/config.json` 을 빌드합니다. 범용(github·exa·context7·brave-search·time·fetch·token-optimizer)은 `core` 라 항상 포함, 나머지는 성격별 — `obsidian`(obsidian), `drawio`(frontend), 그리고 AWS MCP 는 `cloud`(Knowledge·Docs·IAM), `devops`(IaC·EKS·ECS·Serverless·Lambda·CloudWatch·Prometheus·Support), `finops`(Billing·Pricing), `data-analysis`(Redshift 등)로 나뉩니다. `terraform` 이 선택되면 compose 의 `terraform-mcp` profile 도 함께 켜집니다. 전체 목록의 SSOT 는 `mcp-configs/mcp-servers.json`(각 서버 `route`·`workloads` 표시)이고, `config.json` 은 그 산출물입니다.
+- **AWS MCP 인증은 SSO 전용**: `awslabs.*` 서버는 IAM 장기 액세스 키가 아니라 SSO(IAM Identity Center)로만 인증합니다. `aws configure sso` → `aws sso login --profile <name>` 후 `.env` 의 `AWS_PROFILE` 에 프로필 이름을 넣으면, 프록시 컨테이너가 `~/.aws:/root/.aws:ro` 마운트로 SSO 캐시를 읽습니다. 세션 만료 시 `aws sso login` 재실행 후 컨테이너 재기동. 프로덕션 IAM·비용 서버는 read-only 권장.
 - 프록시 에셋: `mcp-configs/proxy/` (`docker-compose.yaml` · `config.json` · `.env.example`). `install.sh` 가 설치 중 물어보고(또는 `--with-mcp` 로 바로) `docker compose up -d` 로 기동합니다. **docker 가 없으면** 설치 명령(brew 있으면 `brew install colima docker docker-compose && colima start`, 없으면 Colima/Docker Desktop 링크)과 재실행 커맨드(`./install.sh --with-mcp`)를 안내하고 넘어갑니다. 데몬 미동작·compose v2 부재도 각각 켜는 법을 안내합니다.
 - 활성 클라이언트 설정: `.mcp.json` — 프록시 서버(github·exa·context7·brave-search·time·obsidian·drawio 등)는 `localhost:9090` URL, 로컬 서버(sentry·playwright)는 직접 명령.
 - 복사용 카탈로그: `mcp-configs/mcp-servers.json` — 각 서버에 `route: proxy|local` 표시.

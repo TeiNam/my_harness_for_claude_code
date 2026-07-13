@@ -36,14 +36,18 @@ const ALWAYS = 'core';
 const SECRET_PLACEHOLDERS = {
   YOUR_GITHUB_PAT_HERE: '${GITHUB_PAT}',
   YOUR_BRAVE_API_KEY_HERE: '${BRAVE_API_KEY}',
-  YOUR_OBSIDIAN_API_KEY_HERE: '${OBSIDIAN_API_KEY}',
+  YOUR_OBSIDIAN_API_KEY_HERE: '${OBSIDIAN_API_KEY}'
 };
 
 function parseArgs(argv) {
   const out = { workloads: [], dryRun: false, list: false };
   for (const a of argv) {
     if (a.startsWith('--workload=') || a.startsWith('--workloads=')) {
-      out.workloads = a.split('=')[1].split(',').map(s => s.trim()).filter(Boolean);
+      out.workloads = a
+        .split('=')[1]
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
     } else if (a === '--dry-run') {
       out.dryRun = true;
     } else if (a === '--list') {
@@ -114,9 +118,9 @@ function build(selected) {
       baseURL: 'http://localhost:9090',
       addr: ':9090',
       name: 'Harness MCP Proxy',
-      type: 'streamable-http',
+      type: 'streamable-http'
     },
-    mcpServers: servers,
+    mcpServers: servers
   };
   return { config, keys, needsTerraform };
 }

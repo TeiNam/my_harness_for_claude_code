@@ -8,11 +8,17 @@ services:
     volumes:
       # config.json은 읽기 전용 마운트. 값은 컨테이너 안에서 ${VAR}로 치환됨.
       - ./config.json:/config/config.json:ro
+      # AWS MCP(awslabs.*) 서버가 ~/.aws 자격증명(SSO 캐시 포함)을 읽도록 읽기 전용 마운트.
+      # AWS 워크로드를 안 쓰면 이 경로가 없어도 무해(빈 마운트).
+      - ${HOME}/.aws:/root/.aws:ro
     environment:
       # 같은 폴더의 .env 또는 compose를 실행하는 셸에서 주입.
       BRAVE_API_KEY: ${BRAVE_API_KEY:-}
       GITHUB_PAT: ${GITHUB_PAT:-}
       OBSIDIAN_API_KEY: ${OBSIDIAN_API_KEY:-}
+      # AWS MCP(awslabs.*) 서버용 자격증명 — devops·finops·cloud·data-analysis 워크로드.
+      AWS_PROFILE: ${AWS_PROFILE:-}
+      AWS_REGION: ${AWS_REGION:-}
     extra_hosts:
       # Colima/Docker Desktop에서 컨테이너→호스트(Obsidian REST API 등) 도달용.
       - "host.docker.internal:host-gateway"

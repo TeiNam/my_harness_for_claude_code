@@ -2,7 +2,8 @@
   "_routing": {
     "_comment": "이 파일이 MCP 서버 전체 목록의 SSOT. 각 서버의 route(proxy/local)·workloads 필드가 분류를 표시한다. 실행용 proxy/config.json 은 scripts/install/build-mcp-config.js 가 선택된 워크로드에 맞는 route=proxy 서버만 골라 빌드하는 산출물이다(통짜 설치 금지 — CLAUDE.md 의 동시 MCP 10개 이하 원칙).",
     "route_test": "리눅스 컨테이너에서 무인증(또는 정적 env 시크릿)으로 헤드리스 구동되면 proxy. 호스트 브라우저·GUI·호스트 바이너리·경로·런타임 OAuth 리다이렉트가 필요하면 local.",
-    "workloads": "설치 시 선택된 워크로드와 교집합되는 서버만 config.json 에 들어간다. core 는 항상 포함. 범용(검색·문서·시각화·시간·fetch)은 core, 나머지는 성격별(cloud·obsidian·frontend 등). terraform 이 선택되면 compose 의 terraform-mcp profile 도 함께 켜진다.",
+    "workloads": "설치 시 선택된 워크로드와 교집합되는 서버만 config.json 에 들어간다. core 는 항상 포함. 범용(검색·문서·시각화·시간·fetch)은 core, 나머지는 성격별(cloud·devops·finops·data-analysis·obsidian·frontend 등). terraform 이 선택되면 compose 의 terraform-mcp profile 도 함께 켜진다.",
+    "aws_auth": "AWS MCP(awslabs.*) 서버는 IAM 사용자 장기 액세스 키가 아니라 반드시 SSO(IAM Identity Center)로만 인증한다. `aws sso login --profile <name>` 후 그 프로필의 SSO 캐시가 ~/.aws 에 남고, 프록시 컨테이너가 ~/.aws:/root/.aws:ro 마운트로 읽는다. .env 의 AWS_PROFILE 은 그 SSO 프로필 이름을 가리킨다. 장기 액세스 키(aws_access_key_id/secret)는 하드코딩하지 말 것 — 만료·유출 위험. SSO 세션이 만료되면 `aws sso login` 재실행 후 컨테이너 재기동.",
     "proxy_url": "프록시 경유 서버는 클라이언트에서 http://localhost:9090/<서버키>/mcp 로 붙는다."
   },
   "mcpServers": {
@@ -74,6 +75,109 @@
       "command": "uvx",
       "args": ["awslabs.aws-documentation-mcp-server@latest"],
       "description": "AWS 공식 문서 검색·조회 — 프록시 컨테이너 안 uvx, 무인증. aws-cloud·aws-bedrock skill 과 함께 사용."
+    },
+    "aws-iam": {
+      "route": "proxy",
+      "workloads": ["cloud"],
+      "command": "uvx",
+      "args": ["awslabs.iam-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "AWS IAM 사용자·역할·정책 조회·관리 — uvx. AWS 자격증명 필요(AWS_PROFILE·AWS_REGION). 프로덕션 IAM 은 read-only 권장."
+    },
+    "aws-iac": {
+      "route": "proxy",
+      "workloads": ["devops"],
+      "command": "uvx",
+      "args": ["awslabs.aws-iac-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "Infrastructure as Code 툴킷 (CloudFormation + CDK 문서·검증) — 구 ccapi·CDK 통합. uvx. AWS 자격증명 필요."
+    },
+    "aws-eks": {
+      "route": "proxy",
+      "workloads": ["devops"],
+      "command": "uvx",
+      "args": ["awslabs.eks-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "Amazon EKS 클러스터·워크로드 관리 — uvx. AWS 자격증명 필요."
+    },
+    "aws-ecs": {
+      "route": "proxy",
+      "workloads": ["devops"],
+      "command": "uvx",
+      "args": ["--from", "awslabs-ecs-mcp-server", "ecs-mcp-server"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "Amazon ECS 서비스·태스크 관리 — uvx(--from awslabs-ecs-mcp-server). AWS 자격증명 필요."
+    },
+    "aws-serverless": {
+      "route": "proxy",
+      "workloads": ["devops"],
+      "command": "uvx",
+      "args": ["awslabs.aws-serverless-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "AWS Serverless(SAM 등) 애플리케이션 관리 — uvx. AWS 자격증명 필요."
+    },
+    "aws-lambda-tool": {
+      "route": "proxy",
+      "workloads": ["devops"],
+      "command": "uvx",
+      "args": ["awslabs.lambda-tool-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "Lambda 함수를 MCP 도구로 노출 — uvx. AWS 자격증명 필요."
+    },
+    "aws-cloudwatch": {
+      "route": "proxy",
+      "workloads": ["devops"],
+      "command": "uvx",
+      "args": ["awslabs.cloudwatch-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "CloudWatch 메트릭·로그·알람 조회 — uvx. AWS 자격증명 필요. 관측성 트러블슈팅용."
+    },
+    "aws-prometheus": {
+      "route": "proxy",
+      "workloads": ["devops"],
+      "command": "uvx",
+      "args": ["awslabs.prometheus-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "Amazon Managed Prometheus 쿼리 — uvx. AWS 자격증명 필요."
+    },
+    "aws-support": {
+      "route": "proxy",
+      "workloads": ["devops"],
+      "command": "uvx",
+      "args": ["awslabs.aws-support-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "AWS Support 케이스 조회·생성 — uvx. AWS 자격증명 필요."
+    },
+    "aws-billing-cost": {
+      "route": "proxy",
+      "workloads": ["finops"],
+      "command": "uvx",
+      "args": ["awslabs.billing-cost-management-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "AWS 비용·사용량 분석 (Billing and Cost Management) — uvx. AWS 자격증명 필요. read-only 권장."
+    },
+    "aws-pricing": {
+      "route": "proxy",
+      "workloads": ["finops"],
+      "command": "uvx",
+      "args": ["awslabs.aws-pricing-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "AWS 서비스 요금 조회·견적 — uvx. AWS 자격증명 필요."
+    },
+    "aws-redshift": {
+      "route": "proxy",
+      "workloads": ["data-analysis"],
+      "command": "uvx",
+      "args": ["awslabs.redshift-mcp-server@latest"],
+      "env": { "AWS_PROFILE": "${AWS_PROFILE}", "AWS_REGION": "${AWS_REGION}" },
+      "description": "Amazon Redshift 클러스터·쿼리 — uvx. AWS 자격증명 필요."
+    },
+    "aws-knowledge": {
+      "route": "proxy",
+      "workloads": ["cloud"],
+      "url": "https://knowledge-mcp.global.api.aws",
+      "transportType": "streamable-http",
+      "description": "AWS Knowledge MCP (AWS 관리형 원격, 무인증) — 최신 AWS 문서·API·베스트프랙티스. 프록시가 그대로 전달."
     },
     "terraform": {
       "route": "proxy",

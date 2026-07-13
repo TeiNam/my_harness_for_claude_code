@@ -55,6 +55,8 @@ const CATEGORIES = [
       { id: 'rust',    label: 'Rust',                workloads: ['rust'] },
       { id: 'nodejs',  label: 'Node.js',             workloads: ['nodejs'] },
       { id: 'cloud',   label: 'AWS · Docker · K8s',  workloads: ['cloud'] },
+      { id: 'devops',  label: 'DevOps (IaC·컨테이너·서버리스·관측성)', workloads: ['devops', 'cloud'] },
+      { id: 'finops',  label: 'FinOps (AWS 비용·요금)', workloads: ['finops'] },
       { id: 'ai',      label: 'AI · LLM 파이프라인', workloads: ['ai'] },
     ],
   },
@@ -83,6 +85,7 @@ const CATEGORIES = [
     subOptions: [
       { id: 'duckdb', label: 'DuckDB 세팅 / 쿼리',    workloads: ['python-data'] },
       { id: 'python', label: 'Python (pandas/polars/pytorch/MLE)', workloads: ['python-data', 'ai'] },
+      { id: 'aws',    label: 'AWS 분석 (Glue·Athena·EMR·Redshift)', workloads: ['data-analysis'] },
     ],
   },
   {

@@ -22,7 +22,10 @@ const GROUPS = [
   'python-backend',  // FastAPI / 일반 백엔드 파이썬
   'rust',
   'nodejs',
-  'cloud',           // AWS / Docker / Terraform / K8s
+  'cloud',           // AWS / Docker / Terraform / K8s (범용 AWS·계정·네트워크·IAM·통합)
+  'devops',          // AWS IaC·컨테이너(EKS/ECS)·서버리스·Lambda·관측성(CloudWatch/Prometheus)
+  'finops',          // AWS 비용·요금 (Billing and Cost Management / Pricing)
+  'data-analysis',   // AWS 분석 엔진 (Glue/Athena/EMR/Redshift) — 로컬 pandas/duckdb 는 python-data
   'ai',              // Claude SDK / Bedrock / LLM 파이프라인 / HF STT
 
   // 프론트엔드 카테고리 sub-옵션
