@@ -27,6 +27,9 @@
 #   -WithHooks   hooks 를 settings.json 에 병합. 대화형이면 워크로드 설치 후
 #                hooks·mcp 추가 설치를 물어보므로 생략 가능; 이 플래그를 주면
 #                hooks 는 묻지 않고 바로 병합한다.
+#   -WithMcp     MCP proxy(mcp-configs/proxy/)를 묻지 않고 바로 docker compose
+#                up -d 로 기동한다. 비대화형에서도 동작. docker/데몬/compose
+#                미비 시 경고만 하고 넘어간다.
 #   -NoExtras    워크로드 외(hooks·mcp) 추가 설치 프롬프트를 건너뛴다.
 #   -NoCore      baseline core 워크로드를 제외 (= -SkipWorkload core). core 는
 #                글로벌에만 두고 프로젝트 로컬 설치엔 워크로드만 담고 싶을 때.
@@ -42,6 +45,7 @@ param(
     [switch]$Uninstall,
     [switch]$Force,
     [switch]$WithHooks,
+    [switch]$WithMcp,
     [switch]$NoExtras,
     [switch]$NoCore,
     [switch]$NoHomeLink,
@@ -380,23 +384,35 @@ foreach ($line in Get-Selection -WlCsv $ResolvedWorkloads) {
     }
 }
 
-# 워크로드 외 자산(hooks·mcp). uninstall: 함께 제거. install: -WithHooks 면 바로
-# 병합, 아니면 대화형 콘솔일 때 hooks·mcp 를 각각 물어본다(-NoExtras/리다이렉트 skip).
+# 워크로드 외 자산(hooks·mcp). uninstall: 함께 제거. install: -WithHooks / -WithMcp
+# 면 각각 묻지 않고 바로 실행, 아니면 대화형 콘솔일 때 물어본다(-NoExtras/리다이렉트 skip).
 $hooksDone = $false
+$mcpDone = $false
 if ($Uninstall) {
     Invoke-HookMerge
-} elseif ($WithHooks) {
-    Invoke-HookMerge
-    $hooksDone = $true
-} elseif (-not $NoExtras -and [Environment]::UserInteractive -and -not [Console]::IsInputRedirected) {
-    Write-Host ''
-    Write-Host '──> 워크로드 외 추가 설치 (선택)'
-    if (Confirm-Extra 'hooks 를 settings.json 에 병합할까요? (포맷·품질·세션 훅)') {
+} else {
+    # -WithHooks / -WithMcp 는 프롬프트 없이 바로 실행 (비대화형에서도 동작).
+    if ($WithHooks) {
         Invoke-HookMerge
         $hooksDone = $true
     }
-    if (Confirm-Extra 'MCP proxy 를 지금 설치·기동할까요? (docker compose up -d)') {
+    if ($WithMcp) {
         Set-McpProxy
+        $mcpDone = $true
+    }
+    # 남은 항목은 대화형 콘솔이고 -NoExtras 아닐 때만 물어본다.
+    if (-not $NoExtras -and [Environment]::UserInteractive -and -not [Console]::IsInputRedirected `
+        -and (-not $hooksDone -or -not $mcpDone)) {
+        Write-Host ''
+        Write-Host '──> 워크로드 외 추가 설치 (선택)'
+        if (-not $hooksDone -and (Confirm-Extra 'hooks 를 settings.json 에 병합할까요? (포맷·품질·세션 훅)')) {
+            Invoke-HookMerge
+            $hooksDone = $true
+        }
+        if (-not $mcpDone -and (Confirm-Extra 'MCP proxy 를 지금 설치·기동할까요? (docker compose up -d)')) {
+            Set-McpProxy
+            $mcpDone = $true
+        }
     }
 }
 

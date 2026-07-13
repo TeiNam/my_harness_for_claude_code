@@ -24,6 +24,9 @@
 #   --with-hooks     hooks/hooks.json 을 ~/.claude/settings.json 에 병합.
 #                    TTY 면 워크로드 설치 후 hooks·mcp 추가 설치를 물어본다;
 #                    이 플래그를 주면 hooks 는 묻지 않고 바로 병합한다.
+#   --with-mcp       MCP proxy(mcp-configs/proxy/)를 묻지 않고 바로 docker
+#                    compose up -d 로 기동한다. 비대화형(CI)에서도 동작.
+#                    docker/데몬/compose 미비 시 경고만 하고 넘어간다.
 #   --no-extras      워크로드 외(hooks·mcp) 추가 설치 프롬프트를 건너뛴다.
 #                    비대화형(CI)에서는 기본적으로 묻지 않으므로 불필요.
 #   --no-core        baseline core 워크로드를 제외 (= --skip-workload=core).
@@ -43,6 +46,7 @@ DRY_RUN=0
 UNINSTALL=0
 FORCE=0
 WITH_HOOKS=0
+WITH_MCP=0
 NO_EXTRAS=0
 NO_HOME_LINK=0
 WORKLOAD=""
@@ -57,6 +61,7 @@ for arg in "$@"; do
         --uninstall)            UNINSTALL=1 ;;
         --force)                FORCE=1 ;;
         --with-hooks)           WITH_HOOKS=1 ;;
+        --with-mcp)             WITH_MCP=1 ;;
         --no-extras)            NO_EXTRAS=1 ;;
         --no-home-link)         NO_HOME_LINK=1 ;;
         --workload=*)           WORKLOAD="${arg#--workload=}" ;;
@@ -382,24 +387,37 @@ main() {
     done < <(build_selection)
 
     # ── 워크로드 외 자산(hooks·mcp) ───────────────────────────────────────
-    # uninstall: hooks 도 함께 제거. install: --with-hooks 면 바로 병합,
-    # 아니면 TTY 일 때 hooks·mcp 를 각각 물어본다(--no-extras / 비대화형은 skip).
+    # uninstall: hooks 도 함께 제거. install: --with-hooks / --with-mcp 면
+    # 각각 묻지 않고 바로 실행. 그 외엔 TTY 일 때 물어본다(--no-extras / 비대화형은 skip).
     local hooks_done=0
+    local mcp_done=0
     if [ "$UNINSTALL" -eq 1 ]; then
         merge_hooks || true
-    elif [ "$WITH_HOOKS" -eq 1 ]; then
-        merge_hooks || true
-        hooks_done=1
-    elif [ "$NO_EXTRAS" -eq 0 ] && [ -t 0 ]; then
-        # TTY 일 때만 워크로드 외(hooks·mcp) 추가 설치를 물어본다.
-        echo
-        echo "──> 워크로드 외 추가 설치 (선택)"
-        if prompt_yes_no "hooks 를 settings.json 에 병합할까요? (포맷·품질·세션 훅)"; then
+    else
+        # --with-hooks / --with-mcp 는 프롬프트 없이 바로 실행 (비대화형에서도 동작).
+        if [ "$WITH_HOOKS" -eq 1 ]; then
             merge_hooks || true
             hooks_done=1
         fi
-        if prompt_yes_no "MCP proxy 를 지금 설치·기동할까요? (docker compose up -d)"; then
+        if [ "$WITH_MCP" -eq 1 ]; then
             setup_mcp_proxy || true
+            mcp_done=1
+        fi
+        # 남은 항목은 TTY 이고 --no-extras 아닐 때만 물어본다.
+        if [ "$NO_EXTRAS" -eq 0 ] && [ -t 0 ] \
+            && { [ "$hooks_done" -eq 0 ] || [ "$mcp_done" -eq 0 ]; }; then
+            echo
+            echo "──> 워크로드 외 추가 설치 (선택)"
+            if [ "$hooks_done" -eq 0 ] \
+                && prompt_yes_no "hooks 를 settings.json 에 병합할까요? (포맷·품질·세션 훅)"; then
+                merge_hooks || true
+                hooks_done=1
+            fi
+            if [ "$mcp_done" -eq 0 ] \
+                && prompt_yes_no "MCP proxy 를 지금 설치·기동할까요? (docker compose up -d)"; then
+                setup_mcp_proxy || true
+                mcp_done=1
+            fi
         fi
     fi
 
