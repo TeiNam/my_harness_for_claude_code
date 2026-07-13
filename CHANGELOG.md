@@ -2,8 +2,33 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-13
+
+- docs: README·CLAUDE.md 에 aws-finops·analysis-methodology 스킬 반영 (2166e85)
+- refactor(skills): data-analysis 스킬 → analysis-methodology 로 rename (40c0147)
+- feat(skills): aws-finops + data-analysis 스킬 신설 (2-way 리뷰 반영) (97b4508)
+- fix(workloads): devops 성격 자산을 [cloud, devops] 로 재분류 (52b6229)
+- style(install): select-workloads 에러 메시지 줄바꿈 (linter) (4c125fa)
+- refactor(commands): /cross-review 를 2-way(Claude+Codex)로 — kiro 제거 (eda80b2)
+- style(install): build-mcp-config 경고 메시지 들여쓰기 (linter) (17f0675)
+- fix(install): 3-way 리뷰 발견 2건 — 오설치 유발 플래그 처리 수정 (055aff0)
+- refactor(install): 메뉴를 도메인 축 6대분류로 재편 + research·report 워크로드 분리 (5d150dd)
+- feat(mcp): AWS MCP 2차 배치(42종) + research·integration·aws-rds 워크로드 + core 축소 (3004320)
+- feat(mcp): AWS MCP 서버군 + devops·finops·data-analysis 워크로드 신설 (7144a13)
+- feat(mcp): 워크로드별 선택 빌드 — 필요한 MCP 만 config.json 에 담아 기동 (9f4e72c)
+- docs: README MCP proxy 항목에 docker 미설치 안내 흐름 반영 (--with-mcp·colima) (5461539)
+- fix(install): MCP proxy — docker 미설치·데몬 미동작 시 설치·재실행 안내 명확화 (2b89ec2)
+- feat(install): --with-mcp (-WithMcp) 플래그로 MCP proxy 비대화형 기동 (60e49bb)
+- feat(mcp): drift 6개 서버 harness 편입 (obsidian·drawio·fetch·token-optimizer·aws-documentation·terraform) (f637483)
+- feat(hooks): stop:command-registry — commands/*.md 변경 시 레지스트리 자동 재생성 (61c754d)
+- docs: /cross-review·stop:run-tests 반영 (README·hooks README·레지스트리 카운트 갱신) (ccdbc73)
+- feat(hooks): stop:run-tests — 소스 변경 시 프로젝트 테스트 자동 실행 (strict, 비차단) (7f2df60)
+- feat(commands): /cross-review — codex·kiro-cli 교차 모델 코드리뷰 (2ac763b)
+- feat(install): --no-core 플래그로 baseline core 제외 지원 (5b0a8bc)
+
 ## 2026-07-11
 
+- docs: 설계 문서 상태를 구현 완료로 갱신 (9ddd9c3)
 - docs: README·CLAUDE.md 3단계 메뉴·apple/social 3분할·매니페스트 반영 (405947f)
 - feat(install): 글로벌 상태 검사·매니페스트 기록 플로우 (install.sh/ps1) (e55e314)
 - feat(install): 방향키 체크박스 3-tier 대화형 메뉴 (b10474b)

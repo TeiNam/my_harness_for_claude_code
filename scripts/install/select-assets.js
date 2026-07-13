@@ -8,7 +8,7 @@
  * Asset taxonomy:
  *   - agents/<name>.md          → ~/.claude/agents/_harness/<name>.md
  *   - commands/<name>.md        → ~/.claude/commands/_harness/<name>.md
- *   - skills/<dir>/             → ~/.claude/skills/_harness/<dir>      (whole dir)
+ *   - skills/<dir>/             → ~/.claude/skills/<dir>               (top-level; Claude Code only scans 1 level deep)
  *   - rules/<group>/<file>.md   → ~/.claude/rules/_harness/<group>/<file>.md
  *
  * For agents/commands/rules we link individual files. For skills we link the
@@ -38,18 +38,14 @@
 const fs = require('fs');
 const path = require('path');
 
-const {
-  GROUPS,
-  classify,
-  classifyRulePath,
-  identifierOf,
-  validateGroups,
-  expandAliases,
-} = require('./workloads');
+const { GROUPS, classify, classifyRulePath, identifierOf, validateGroups, expandAliases } = require('./workloads');
 
 function parseList(value) {
   if (!value) return [];
-  return value.split(',').map(s => s.trim()).filter(Boolean);
+  return value
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
 }
 
 function parseArgs(argv) {
@@ -58,7 +54,7 @@ function parseArgs(argv) {
     workload: null,
     skipWorkload: null,
     format: 'lines',
-    root: null,
+    root: null
   };
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
@@ -165,7 +161,8 @@ function selectGroups({ workload, skipWorkload }) {
 function listAgentAssets(root) {
   const dir = path.join(root, 'agents');
   if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir)
+  return fs
+    .readdirSync(dir)
     .filter(f => f.endsWith('.md'))
     .map(f => {
       const filePath = path.join(dir, f);
@@ -175,7 +172,7 @@ function listAgentAssets(root) {
         kind: 'agent',
         sourceRel: path.posix.join('agents', f),
         targetRel: path.posix.join('agents', '_harness', f),
-        groups,
+        groups
       };
     });
 }
@@ -183,7 +180,8 @@ function listAgentAssets(root) {
 function listCommandAssets(root) {
   const dir = path.join(root, 'commands');
   if (!fs.existsSync(dir)) return [];
-  return fs.readdirSync(dir)
+  return fs
+    .readdirSync(dir)
     .filter(f => f.endsWith('.md'))
     .map(f => {
       const filePath = path.join(dir, f);
@@ -193,7 +191,7 @@ function listCommandAssets(root) {
         kind: 'command',
         sourceRel: path.posix.join('commands', f),
         targetRel: path.posix.join('commands', '_harness', f),
-        groups,
+        groups
       };
     });
 }
@@ -211,8 +209,11 @@ function listSkillAssets(root) {
     out.push({
       kind: 'skill',
       sourceRel: path.posix.join('skills', entry.name),
-      targetRel: path.posix.join('skills', '_harness', entry.name),
-      groups,
+      // ponytail: skills land at skills/<name> (top-level), NOT skills/_harness/<name>.
+      // Claude Code only discovers skills one level under ~/.claude/skills/; the
+      // _harness/ namespace hid all 128 harness skills from auto-discovery.
+      targetRel: path.posix.join('skills', entry.name),
+      groups
     });
   }
   return out;
@@ -236,7 +237,7 @@ function listRuleAssets(root) {
           kind: 'rule',
           sourceRel: rel,
           targetRel: rel.replace(/^rules\//, 'rules/_harness/'),
-          groups,
+          groups
         });
       }
     }
@@ -246,12 +247,7 @@ function listRuleAssets(root) {
 }
 
 function listAllAssets(root) {
-  return [
-    ...listAgentAssets(root),
-    ...listCommandAssets(root),
-    ...listSkillAssets(root),
-    ...listRuleAssets(root),
-  ];
+  return [...listAgentAssets(root), ...listCommandAssets(root), ...listSkillAssets(root), ...listRuleAssets(root)];
 }
 
 function intersect(a, b) {
@@ -265,7 +261,7 @@ function selectAssets({ root, workload, skipWorkload }) {
   return {
     activeGroups,
     selected: all.filter(a => intersect(a.groups, activeGroups)),
-    all,
+    all
   };
 }
 
@@ -281,9 +277,9 @@ function main(argv) {
         '  --skip-workload=a,b   Drop groups from the resolved set',
         '  --format=lines        kind\\tsource\\ttarget per line (default)',
         '  --format=json         JSON array',
-        '  --root=PATH           Repo root (default: this file\'s ../..)',
+        "  --root=PATH           Repo root (default: this file's ../..)",
         '',
-        `Groups: ${GROUPS.join(', ')}`,
+        `Groups: ${GROUPS.join(', ')}`
       ].join('\n')
     );
     return 0;
@@ -293,7 +289,7 @@ function main(argv) {
   const { selected, activeGroups } = selectAssets({
     root,
     workload: flags.workload,
-    skipWorkload: flags.skipWorkload,
+    skipWorkload: flags.skipWorkload
   });
 
   if (flags.format === 'json') {
@@ -322,5 +318,5 @@ module.exports = {
   readWorkloads,
   selectGroups,
   selectAssets,
-  listAllAssets,
+  listAllAssets
 };
