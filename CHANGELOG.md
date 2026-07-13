@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-14
+
+- fix(install): skill 을 ~/.claude/skills/ 최상위에 링크 (자동 발견 복구) (0c1dedb)
+
 ## 2026-07-13
 
 - docs: README·CLAUDE.md 에 aws-finops·analysis-methodology 스킬 반영 (2166e85)

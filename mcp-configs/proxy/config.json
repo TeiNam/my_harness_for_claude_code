@@ -13,12 +13,28 @@
       },
       "transportType": "streamable-http"
     },
+    "exa": {
+      "url": "https://mcp.exa.ai/mcp",
+      "transportType": "streamable-http"
+    },
     "context7": {
       "command": "npx",
       "args": [
         "-y",
         "@upstash/context7-mcp@latest"
       ]
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@brave/brave-search-mcp-server",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
     },
     "time": {
       "command": "uvx",
@@ -31,6 +47,23 @@
       "args": [
         "mcp-server-fetch"
       ]
+    },
+    "aws-documentation": {
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-documentation-mcp-server@latest"
+      ]
+    },
+    "obsidian": {
+      "command": "uvx",
+      "args": [
+        "mcp-obsidian"
+      ],
+      "env": {
+        "OBSIDIAN_API_KEY": "${OBSIDIAN_API_KEY}",
+        "OBSIDIAN_HOST": "host.docker.internal",
+        "OBSIDIAN_PORT": "27124"
+      }
     }
   }
 }
