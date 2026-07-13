@@ -3,7 +3,7 @@ name: tech-fidelity-auditor
 description: "원문/노트와 결과 문서를 대조하여 \"기술적 사실이 보존·정확한가\"를 검증하는 감사관. 코드·명령·수치·식별자·버전·API 시그니처·인과관계·순서가 한 글자라도 훼손되거나(윤문) 날조됐는지(작성) 탐지해 edit 단위로 롤백 지시를 내린다. 작성·윤문가의 철칙(정확성)을 수호하는 최후의 방어선."
 model: opus
 tools: Read, Write
-workloads: [writing]
+workloads: [report]
 ---
 # Tech Fidelity Auditor
 

@@ -30,10 +30,9 @@ function runTests() {
   let passed = 0;
   let failed = 0;
 
-  if (test('CATEGORIES exposes the 7 user-facing top levels', () => {
+  if (test('CATEGORIES exposes the 6 user-facing top levels (도메인 축)', () => {
     assert.deepStrictEqual(CATEGORY_IDS, [
-      'backend', 'frontend', 'plugin',
-      'data-analysis', 'data-design', 'writing', 'apple',
+      'dev', 'cloud', 'ai', 'data', 'research', 'writing',
     ]);
   })) passed++; else failed++;
 
@@ -62,7 +61,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('findCategory returns the right object or undefined', () => {
-    assert.strictEqual(findCategory('backend').id, 'backend');
+    assert.strictEqual(findCategory('dev').id, 'dev');
     assert.strictEqual(findCategory('writing').id, 'writing');
     assert.strictEqual(findCategory('made-up'), undefined);
   })) passed++; else failed++;
@@ -72,18 +71,18 @@ function runTests() {
     assert.ok(r.workloads.includes('core'));
   })) passed++; else failed++;
 
-  if (test('resolveSelection: backend=python yields [core, python-backend]', () => {
+  if (test('resolveSelection: dev=python yields [core, python-backend]', () => {
     const r = resolveSelection({
-      categories: ['backend'],
-      subSelections: { backend: ['python'] },
+      categories: ['dev'],
+      subSelections: { dev: ['python'] },
     });
     assert.deepStrictEqual(r.workloads, ['core', 'python-backend']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: data-analysis=python avoids backend python', () => {
+  if (test('resolveSelection: data=python-data avoids backend python', () => {
     const r = resolveSelection({
-      categories: ['data-analysis'],
-      subSelections: { 'data-analysis': ['python'] },
+      categories: ['data'],
+      subSelections: { data: ['python-data'] },
     });
     // python-data + ai (분석에는 LLM 도 함께), python-backend 는 들어가면 안 됨.
     assert.ok(r.workloads.includes('python-data'));
@@ -91,34 +90,35 @@ function runTests() {
     assert.ok(!r.workloads.includes('python-backend'));
   })) passed++; else failed++;
 
-  if (test('resolveSelection: data-design=mysql excludes other engines', () => {
+  if (test('resolveSelection: data=mysql excludes other engines', () => {
     const r = resolveSelection({
-      categories: ['data-design'],
-      subSelections: { 'data-design': ['mysql'] },
+      categories: ['data'],
+      subSelections: { data: ['mysql'] },
     });
     assert.deepStrictEqual(r.workloads, ['core', 'mysql']);
   })) passed++; else failed++;
 
   if (test('resolveSelection: empty sub-selection means "all sub-options"', () => {
     const r = resolveSelection({
-      categories: ['data-design'],
-      subSelections: { 'data-design': [] },
+      categories: ['data'],
+      subSelections: { data: [] },
     });
+    // data 대분류 전체 = 분석(python-data·ai·data-analysis) + 설계(mysql·postgres·mongodb·dynamodb·aws-rds)
     assert.deepStrictEqual(r.workloads.sort(),
-      ['aws-rds', 'core', 'dynamodb', 'mongodb', 'mysql', 'postgres']);
+      ['ai', 'aws-rds', 'core', 'data-analysis', 'dynamodb', 'mongodb', 'mysql', 'postgres', 'python-data']);
   })) passed++; else failed++;
 
   if (test('resolveSelection: writing with no sub-selection means "all" (social 상세 전체 포함)', () => {
     const r = resolveSelection({ categories: ['writing'] });
-    // writing(tech) + social 상세 전체 3키.
+    // writing(general) + social 상세 전체 3키.
     assert.deepStrictEqual(r.workloads,
       ['core', 'social-content', 'social-visual', 'social-voice', 'writing']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: writing.tech excludes all social keys', () => {
+  if (test('resolveSelection: writing.general excludes all social keys', () => {
     const r = resolveSelection({
       categories: ['writing'],
-      subSelections: { writing: ['tech'] },
+      subSelections: { writing: ['general'] },
     });
     assert.deepStrictEqual(r.workloads, ['core', 'writing']);
   })) passed++; else failed++;
@@ -141,41 +141,46 @@ function runTests() {
     assert.deepStrictEqual(r.workloads, ['core', 'social-voice']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: apple (category-level detail) with no detail = all 3 apple keys', () => {
-    const r = resolveSelection({ categories: ['apple'] });
+  if (test('resolveSelection: dev.apple (sub-level detail) with no detail = all 3 apple keys', () => {
+    const r = resolveSelection({
+      categories: ['dev'],
+      subSelections: { dev: ['apple'] },
+    });
     assert.deepStrictEqual(r.workloads,
       ['apple-core', 'apple-platform', 'apple-product', 'core']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: apple detail picks specific areas', () => {
+  if (test('resolveSelection: dev.apple detail picks specific areas', () => {
     const r = resolveSelection({
-      categories: ['apple'],
-      detailSelections: { apple: ['core', 'product'] },
+      categories: ['dev'],
+      subSelections: { dev: ['apple'] },
+      detailSelections: { 'dev.apple': ['core', 'product'] },
     });
     assert.deepStrictEqual(r.workloads, ['apple-core', 'apple-product', 'core']);
   })) passed++; else failed++;
 
   if (test('resolveSelection: unknown detail reported separately', () => {
     const r = resolveSelection({
-      categories: ['apple'],
-      detailSelections: { apple: ['core', 'bogus'] },
+      categories: ['dev'],
+      subSelections: { dev: ['apple'] },
+      detailSelections: { 'dev.apple': ['core', 'bogus'] },
     });
-    assert.deepStrictEqual(r.unknownDetails, ['apple.bogus']);
+    assert.deepStrictEqual(r.unknownDetails, ['dev.apple.bogus']);
     assert.ok(r.workloads.includes('apple-core'));
   })) passed++; else failed++;
 
   if (test('resolveSelection: non-detail leaves (mysql/rust) unchanged — 회귀', () => {
     const r = resolveSelection({
-      categories: ['data-design', 'backend'],
-      subSelections: { 'data-design': ['mysql'], backend: ['rust'] },
+      categories: ['data', 'dev'],
+      subSelections: { data: ['mysql'], dev: ['rust'] },
     });
     assert.deepStrictEqual(r.workloads, ['core', 'mysql', 'rust']);
   })) passed++; else failed++;
 
-  if (test('resolveSelection: plugin=obsidian also drags frontend', () => {
+  if (test('resolveSelection: dev=obsidian also drags frontend', () => {
     const r = resolveSelection({
-      categories: ['plugin'],
-      subSelections: { plugin: ['obsidian'] },
+      categories: ['dev'],
+      subSelections: { dev: ['obsidian'] },
     });
     assert.ok(r.workloads.includes('obsidian'));
     assert.ok(r.workloads.includes('frontend'));
@@ -183,35 +188,36 @@ function runTests() {
 
   if (test('resolveSelection reports unknown categories and subs separately', () => {
     const r = resolveSelection({
-      categories: ['backend', 'imaginary'],
-      subSelections: { backend: ['python', 'made-up'] },
+      categories: ['dev', 'imaginary'],
+      subSelections: { dev: ['python', 'made-up'] },
     });
     assert.deepStrictEqual(r.unknownCategories, ['imaginary']);
-    assert.deepStrictEqual(r.unknownSubs, ['backend.made-up']);
+    assert.deepStrictEqual(r.unknownSubs, ['dev.made-up']);
   })) passed++; else failed++;
 
   if (test('parseCliFlags treats sub-option flag as auto-including its category', () => {
     const { categories, subSelections } = parseCliFlags({
-      backend: 'python,cloud',
+      dev: 'python,rust',
     });
-    assert.deepStrictEqual(categories, ['backend']);
-    assert.deepStrictEqual(subSelections, { backend: ['python', 'cloud'] });
+    assert.deepStrictEqual(categories, ['dev']);
+    assert.deepStrictEqual(subSelections, { dev: ['python', 'rust'] });
   })) passed++; else failed++;
 
   if (test('parseCliFlags accepts comma-string and array equivalently', () => {
-    const a = parseCliFlags({ category: 'backend,writing', backend: 'python' });
-    const b = parseCliFlags({ category: ['backend', 'writing'], backend: ['python'] });
+    const a = parseCliFlags({ category: 'dev,writing', dev: 'python' });
+    const b = parseCliFlags({ category: ['dev', 'writing'], dev: ['python'] });
     assert.deepStrictEqual(a, b);
   })) passed++; else failed++;
 
-  if (test('parseCliFlags: --apple=core,platform routes to category-level detail', () => {
-    const { categories, detailSelections } = parseCliFlags({ apple: 'core,platform' });
-    assert.deepStrictEqual(categories, ['apple']);
-    assert.deepStrictEqual(detailSelections, { apple: ['core', 'platform'] });
+  if (test('parseCliFlags: --dev-apple=core,platform routes to sub-level detail + auto sub', () => {
+    const { categories, subSelections, detailSelections } = parseCliFlags({ 'dev-apple': 'core,platform' });
+    assert.deepStrictEqual(categories, ['dev']);
+    assert.deepStrictEqual(subSelections, { dev: ['apple'] });
+    assert.deepStrictEqual(detailSelections, { 'dev.apple': ['core', 'platform'] });
   })) passed++; else failed++;
 
-  if (test('parseCliFlags: --apple=core resolves to apple-core only', () => {
-    const { categories, subSelections, detailSelections } = parseCliFlags({ apple: 'core' });
+  if (test('parseCliFlags: --dev-apple=core resolves to apple-core only', () => {
+    const { categories, subSelections, detailSelections } = parseCliFlags({ 'dev-apple': 'core' });
     const r = resolveSelection({ categories, subSelections, detailSelections });
     assert.deepStrictEqual(r.workloads, ['apple-core', 'core']);
   })) passed++; else failed++;

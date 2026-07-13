@@ -44,26 +44,26 @@ function runTests() {
     assert.deepStrictEqual(groups.slice().sort(), groups);
   })) passed++; else failed++;
 
-  if (test('--non-interactive --backend=python yields core,python-backend', () => {
-    const out = run(['--non-interactive', '--backend=python']);
+  if (test('--non-interactive --dev=python yields core,python-backend', () => {
+    const out = run(['--non-interactive', '--dev=python']);
     assert.strictEqual(out, 'core,python-backend');
   })) passed++; else failed++;
 
-  if (test('--non-interactive --data-analysis=python avoids python-backend', () => {
-    const out = run(['--non-interactive', '--data-analysis=python']);
+  if (test('--non-interactive --data=python-data avoids python-backend', () => {
+    const out = run(['--non-interactive', '--data=python-data']);
     const groups = out.split(',');
     assert.ok(groups.includes('python-data'));
     assert.ok(groups.includes('ai'));
     assert.ok(!groups.includes('python-backend'));
   })) passed++; else failed++;
 
-  if (test('--non-interactive --data-design=mysql excludes other DB engines', () => {
-    const out = run(['--non-interactive', '--data-design=mysql']);
+  if (test('--non-interactive --data=mysql excludes other DB engines', () => {
+    const out = run(['--non-interactive', '--data=mysql']);
     assert.strictEqual(out, 'core,mysql');
   })) passed++; else failed++;
 
   if (test('multiple categories combine workloads', () => {
-    const out = run(['--non-interactive', '--category=backend,writing', '--backend=python']);
+    const out = run(['--non-interactive', '--category=dev,writing', '--dev=python']);
     const groups = out.split(',');
     assert.ok(groups.includes('python-backend'));
     assert.ok(groups.includes('writing'));
@@ -78,13 +78,13 @@ function runTests() {
     assert.ok(groups.includes('python-backend'));
   })) passed++; else failed++;
 
-  if (test('--apple=core resolves to category-level detail (apple-core)', () => {
-    const out = run(['--non-interactive', '--apple=core']);
+  if (test('--dev-apple=core resolves to sub-level detail (apple-core)', () => {
+    const out = run(['--non-interactive', '--dev-apple=core']);
     assert.strictEqual(out, 'apple-core,core');
   })) passed++; else failed++;
 
-  if (test('--category=apple (alias) expands to all three apple keys', () => {
-    const out = run(['--non-interactive', '--category=apple']);
+  if (test('--dev-apple with no value expands to all three apple keys', () => {
+    const out = run(['--non-interactive', '--dev-apple=core,platform,product']);
     assert.strictEqual(out, 'apple-core,apple-platform,apple-product,core');
   })) passed++; else failed++;
 
@@ -93,18 +93,23 @@ function runTests() {
     assert.strictEqual(out, 'core,social-voice');
   })) passed++; else failed++;
 
-  if (test('--writing=tech excludes all social keys', () => {
-    const out = run(['--non-interactive', '--writing=tech']);
+  if (test('--writing=general excludes all social keys', () => {
+    const out = run(['--non-interactive', '--writing=general']);
     assert.strictEqual(out, 'core,writing');
+  })) passed++; else failed++;
+
+  if (test('--research=report yields core,report (tech-writer)', () => {
+    const out = run(['--non-interactive', '--research=report']);
+    assert.strictEqual(out, 'core,report');
   })) passed++; else failed++;
 
   if (test('unknown detail option fails with non-zero exit code', () => {
     let threw = false;
     try {
-      run(['--non-interactive', '--apple=bogus']);
+      run(['--non-interactive', '--dev-apple=bogus']);
     } catch (e) {
       threw = true;
-      assert.ok(/Unknown detail options: apple\.bogus/.test(e.stderr || e.message));
+      assert.ok(/Unknown detail options: dev\.apple\.bogus/.test(e.stderr || e.message));
     }
     assert.ok(threw, 'expected failure for unknown detail');
   })) passed++; else failed++;
@@ -123,10 +128,10 @@ function runTests() {
   if (test('unknown sub-option fails with non-zero exit code', () => {
     let threw = false;
     try {
-      run(['--non-interactive', '--backend=imaginary']);
+      run(['--non-interactive', '--dev=imaginary']);
     } catch (e) {
       threw = true;
-      assert.ok(/Unknown sub-options: backend\.imaginary/.test(e.stderr || e.message));
+      assert.ok(/Unknown sub-options: dev\.imaginary/.test(e.stderr || e.message));
     }
     assert.ok(threw, 'expected failure for unknown sub');
   })) passed++; else failed++;

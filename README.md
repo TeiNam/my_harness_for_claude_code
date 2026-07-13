@@ -82,11 +82,11 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 - **`claude-api` 스킬** — Bedrock과 Anthropic 직접 SDK를 함께 쓸 때의 스트리밍·tool use·캐싱 패턴.
 - **연계 에이전트** — `devops`(plan·dry-run 우선의 AWS 변경), `security-reviewer`(IAM·자격증명·SDK 호출 경로 점검), `architect`(추론 파이프라인·리트라이/백오프 설계).
 
-워크로드 설치 시 `--backend=ai,cloud` (또는 `--workload=ai,cloud`) 를 고르면 위 자산만 추려서 들어옵니다. 관련 트리거 키워드: `bedrock-runtime`, `Converse`, `InvokeModel`, `BedrockAgent`, `retrieve_and_generate`, `guardrail`, `inference profile`, `provisioned throughput`.
+워크로드 설치 시 `--category=ai,cloud` (또는 `--workload=ai,cloud`) 를 고르면 위 자산만 추려서 들어옵니다. 관련 트리거 키워드: `bedrock-runtime`, `Converse`, `InvokeModel`, `BedrockAgent`, `retrieve_and_generate`, `guardrail`, `inference profile`, `provisioned throughput`.
 
 ## 설치
 
-설치는 7개 톱레벨 카테고리(**백엔드 / 프론트엔드 / 플러그인 / 데이터 분석 / 데이터 설계 / 글쓰기 / Apple 플랫폼**) 로 시작해서 카테고리별 sub-옵션(언어·엔진·플랫폼) 을 다중 선택하는 방식입니다. 선택된 sub-옵션이 워크로드 키로 변환되고, 그 키와 교집합인 자산만 `~/.claude/` 에 파일별 심볼릭 링크로 들어갑니다. 저장소에서 수정한 내용은 즉시 반영됩니다.
+설치는 **도메인 축 6개 톱레벨 카테고리**(**개발 / 클라우드·인프라 / AI / 데이터 / 리서치·리포트 / 글쓰기**) 로 시작해서 카테고리별 중분류(sub-옵션: 언어·엔진·영역) 를 다중 선택하는 방식입니다. 자산이 많은 중분류(dev.apple / writing.social)만 상세 3그룹으로 한 단계 더 드릴다운됩니다. 선택된 sub-옵션이 워크로드 키로 변환되고, 그 키와 교집합인 자산만 `~/.claude/` 에 파일별 심볼릭 링크로 들어갑니다. 저장소에서 수정한 내용은 즉시 반영됩니다.
 
 ### 대화형 메뉴
 
@@ -104,30 +104,31 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 ```bash
 ./install.sh --all                              # 모든 카테고리 · 모든 sub-옵션
-./install.sh --category=backend --backend=python                # FastAPI 등 파이썬 백엔드만
-./install.sh --category=backend --backend=python,cloud          # 백엔드(파이썬 + AWS·Docker)
-./install.sh --category=data-analysis --data-analysis=duckdb,python  # DuckDB + 파이썬 분석
-./install.sh --category=data-design --data-design=mysql         # MySQL 가이드라인만 (Postgres 제외)
-./install.sh --category=plugin --plugin=obsidian                # Obsidian 플러그인 + 프론트
-./install.sh --category=writing --writing=tech                  # 글쓰기 — 기술 문서만 (LinkedIn 콘텐츠 제외)
-./install.sh --category=writing --writing=social                 # 글쓰기 — 소셜 콘텐츠(LinkedIn) 전체
-./install.sh --writing-social=voice,content                      # 소셜 — 보이스 + 콘텐츠 제작만 (시각 자산 제외)
-./install.sh --category=apple                                    # Apple 전체 (핵심 + 플랫폼 + 제품·운영, 23종)
-./install.sh --apple=core                                        # Apple — 핵심 개발만 (Swift/SwiftUI/테스트/생성기 등)
-./install.sh --apple=platform,product                            # Apple — 플랫폼 특화 + 제품·운영
+./install.sh --dev=python                       # FastAPI 등 파이썬 백엔드만
+./install.sh --dev=frontend,python              # 프론트 + 파이썬 백엔드
+./install.sh --cloud=infra,finops               # AWS 인프라·컨테이너 + 비용
+./install.sh --data=duckdb,python-data          # DuckDB + 파이썬 분석
+./install.sh --data=mysql                       # MySQL 가이드라인만 (Postgres 제외)
+./install.sh --dev=obsidian                     # Obsidian 플러그인 + 프론트
+./install.sh --research=websearch               # 웹 검색·자료조사 (exa·brave·deep-researcher)
+./install.sh --research=report                  # 기술 리포트 작성·검증 (tech-writer)
+./install.sh --writing=general                  # 글쓰기 — 일반 글쓰기만 (LinkedIn 콘텐츠 제외)
+./install.sh --writing=social                   # 글쓰기 — 소셜 콘텐츠(LinkedIn) 전체
+./install.sh --writing-social=voice,content     # 소셜 — 보이스 + 콘텐츠 제작만 (시각 자산 제외)
+./install.sh --dev-apple=core                   # Apple — 핵심 개발만 (Swift/SwiftUI/테스트/생성기 등)
+./install.sh --dev-apple=platform,product       # Apple — 플랫폼 특화 + 제품·운영
 ```
 
-| 카테고리 | sub-옵션 | 상세 (3단계) |
+| 카테고리 | sub-옵션(중분류) | 상세 (3단계) |
 |---|---|---|
-| `backend` | `python`, `rust`, `nodejs`, `cloud`, `ai` | — |
-| `frontend` | `react-vite-ts` | — |
-| `plugin` | `obsidian`, `chrome` (예약), `claude` (예약) | — |
-| `data-analysis` | `duckdb`, `python` | — |
-| `data-design` | `mysql`, `postgres`, `mongodb`, `dynamodb` | — |
-| `writing` | `tech`(→ `writing`), `social` | `social`: `voice` / `content` / `visual` (`--writing-social=`) |
-| `apple` | (sub-옵션 없음) | `core` / `platform` / `product` (`--apple=`) |
+| `dev` | `frontend`, `python`, `rust`, `nodejs`, `apple`, `obsidian`, `chrome`(예약), `claude`(예약) | `apple`: `core` / `platform` / `product` (`--dev-apple=`) |
+| `cloud` | `infra`(→ `cloud`+`devops`), `finops`, `integration` | — |
+| `ai` | `llm`(→ `ai`) | — |
+| `data` | `duckdb`, `python-data`, `aws-analytics`, `mysql`, `postgres`, `mongodb`, `dynamodb`, `aws-rds` | — |
+| `research` | `websearch`(→ `research`), `report` | — |
+| `writing` | `general`(→ `writing`), `social` | `social`: `voice` / `content` / `visual` (`--writing-social=`) |
 
-> sub-옵션 플래그(`--backend=...` 등)를 명시하면 해당 카테고리는 자동으로 활성화되므로 `--category=` 는 생략 가능합니다. 상세 플래그(`--apple=`, `--writing-social=`)도 마찬가지입니다. `--category=apple` 은 3개 상세 전체(`apple-core,apple-platform,apple-product`)의 별칭입니다.
+> sub-옵션 플래그(`--dev=...` 등)를 명시하면 해당 카테고리는 자동으로 활성화되므로 `--category=` 는 생략 가능합니다. 상세 플래그(`--dev-apple=`, `--writing-social=`)도 마찬가지입니다.
 
 ### 그 외 옵션
 
@@ -155,10 +156,11 @@ hooks·mcp 는 설치 후 대화형(TTY)일 때 추가 설치할지 물어봅니
 ```powershell
 .\install.ps1                                                         # 대화형 (Windows Terminal)
 .\install.ps1 -All
-.\install.ps1 -Category backend -Backend python,cloud
-.\install.ps1 -DataDesign mysql,postgres -WithHooks
+.\install.ps1 -Dev frontend,python
+.\install.ps1 -Data mysql,postgres -WithHooks
+.\install.ps1 -Cloud infra,finops                                     # AWS 인프라·컨테이너 + 비용
 .\install.ps1 -WithMcp                                                # 묻지 않고 MCP proxy 기동 (docker compose up -d)
-.\install.ps1 -Apple core,platform                                    # Apple 상세 — 핵심 + 플랫폼
+.\install.ps1 -DevApple core,platform                                 # Apple 상세 — 핵심 + 플랫폼
 .\install.ps1 -WritingSocial voice,content                            # 소셜 상세 — 보이스 + 콘텐츠
 ```
 

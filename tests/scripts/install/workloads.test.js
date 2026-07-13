@@ -51,6 +51,7 @@ function runTests() {
         'postgres',
         'python-backend',
         'python-data',
+        'report',
         'research',
         'rust',
         'social-content',

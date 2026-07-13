@@ -45,67 +45,80 @@
  */
 
 /** @type {Category[]} */
+// 대분류(도메인) → 중분류(sub) → 소분류(상세 워크로드).
+// 자산이 많은 중분류(apple/social)만 detailOptions 로 3단째를 편다.
 const CATEGORIES = [
   {
-    id: 'backend',
-    label: '백엔드 개발',
-    subQuestion: '어떤 백엔드를 다루세요?',
+    id: 'dev',
+    label: '개발 (프로그래밍)',
+    subQuestion: '어떤 개발 영역? (여러 개 선택 가능)',
     subOptions: [
-      { id: 'python', label: 'Python (FastAPI 등)', workloads: ['python-backend'] },
-      { id: 'rust', label: 'Rust', workloads: ['rust'] },
-      { id: 'nodejs', label: 'Node.js', workloads: ['nodejs'] },
-      { id: 'cloud', label: 'AWS · Docker · K8s', workloads: ['cloud'] },
-      { id: 'devops', label: 'DevOps (IaC·컨테이너·서버리스·관측성)', workloads: ['devops', 'cloud'] },
-      { id: 'finops', label: 'FinOps (AWS 비용·요금)', workloads: ['finops'] },
-      { id: 'integration', label: 'Integration (SNS·SQS·MQ·Step Functions)', workloads: ['integration'] },
-      { id: 'ai', label: 'AI · LLM 파이프라인', workloads: ['ai'] },
-      { id: 'research', label: 'Research (웹 검색 — exa·brave)', workloads: ['research'] }
+      { id: 'frontend', label: '프론트엔드 (React / Vite / TypeScript)', workloads: ['frontend'] },
+      { id: 'python', label: '백엔드 · Python (FastAPI 등)', workloads: ['python-backend'] },
+      { id: 'rust', label: '백엔드 · Rust', workloads: ['rust'] },
+      { id: 'nodejs', label: '백엔드 · Node.js', workloads: ['nodejs'] },
+      {
+        id: 'apple',
+        label: 'Apple 플랫폼 (iOS/macOS/watchOS/visionOS)',
+        // 상세 tier: 영역별 3분할. 미선택 시 전체.
+        detailQuestion: '어느 영역? (여러 개 선택 가능)',
+        detailOptions: [
+          { id: 'core', label: '핵심 개발 (Swift/SwiftUI/테스트/생성기)', workloads: ['apple-core'] },
+          { id: 'platform', label: '플랫폼 특화 (watchOS/visionOS/ML/Maps)', workloads: ['apple-platform'] },
+          { id: 'product', label: '제품 · 운영 (App Store/성장/법무)', workloads: ['apple-product'] }
+        ]
+      },
+      { id: 'obsidian', label: '플러그인 · Obsidian', workloads: ['obsidian', 'frontend'] },
+      { id: 'chrome', label: '플러그인 · Chrome 확장 (예약)', workloads: ['plugin-chrome', 'frontend'] },
+      { id: 'claude', label: '플러그인 · Claude Code (예약)', workloads: ['plugin-claude'] }
     ]
   },
   {
-    id: 'frontend',
-    label: '프론트엔드 개발',
-    subQuestion: '어떤 프론트엔드 스택?',
-    subOptions: [{ id: 'react-vite-ts', label: 'React / Vite / TypeScript', workloads: ['frontend'] }]
-  },
-  {
-    id: 'plugin',
-    label: '플러그인 개발',
-    subQuestion: '어떤 플러그인 플랫폼?',
+    id: 'cloud',
+    label: '클라우드 · 인프라 운영 (AWS)',
+    subQuestion: '어떤 운영 영역? (여러 개 선택 가능)',
     subOptions: [
-      { id: 'obsidian', label: 'Obsidian 플러그인', workloads: ['obsidian', 'frontend'] },
-      { id: 'chrome', label: 'Chrome 확장 (예약)', workloads: ['plugin-chrome', 'frontend'] },
-      { id: 'claude', label: 'Claude Code 플러그인 (예약)', workloads: ['plugin-claude'] }
+      { id: 'infra', label: '인프라 · 컨테이너 (IaC·EKS·ECS·Lambda·관측성)', workloads: ['cloud', 'devops'] },
+      { id: 'finops', label: '비용 (Billing · Pricing)', workloads: ['finops'] },
+      { id: 'integration', label: '통합 · 메시징 (SNS·SQS·MQ·Step Functions)', workloads: ['integration'] }
     ]
   },
   {
-    id: 'data-analysis',
-    label: '데이터 분석',
-    subQuestion: '어떤 분석 도구?',
+    id: 'ai',
+    label: 'AI',
+    subQuestion: '어떤 AI 작업?',
+    subOptions: [{ id: 'llm', label: 'AI · LLM 파이프라인 (Bedrock·SageMaker·Kendra 등)', workloads: ['ai'] }]
+  },
+  {
+    id: 'data',
+    label: '데이터',
+    subQuestion: '분석 / 설계 중 무엇? (여러 개 선택 가능)',
     subOptions: [
-      { id: 'duckdb', label: 'DuckDB 세팅 / 쿼리', workloads: ['python-data'] },
-      { id: 'python', label: 'Python (pandas/polars/pytorch/MLE)', workloads: ['python-data', 'ai'] },
-      { id: 'aws', label: 'AWS 분석 (Glue·Athena·EMR·Redshift)', workloads: ['data-analysis'] }
+      { id: 'duckdb', label: '분석 · DuckDB 세팅 / 쿼리', workloads: ['python-data'] },
+      { id: 'python-data', label: '분석 · Python (pandas/polars/pytorch/MLE)', workloads: ['python-data', 'ai'] },
+      { id: 'aws-analytics', label: '분석 · AWS (Glue·Athena·EMR·Redshift)', workloads: ['data-analysis'] },
+      { id: 'mysql', label: '설계 · MySQL / Aurora MySQL', workloads: ['mysql'] },
+      { id: 'postgres', label: '설계 · PostgreSQL / Aurora Postgres', workloads: ['postgres'] },
+      { id: 'mongodb', label: '설계 · MongoDB', workloads: ['mongodb'] },
+      { id: 'dynamodb', label: '설계 · DynamoDB', workloads: ['dynamodb'] },
+      { id: 'aws-rds', label: '설계 · AWS 관리형 DB (Aurora·RDS·DSQL·Keyspaces)', workloads: ['aws-rds'] }
     ]
   },
   {
-    id: 'data-design',
-    label: '데이터 설계',
-    subQuestion: '어떤 DB 엔진?',
+    id: 'research',
+    label: '리서치 · 자료조사 · 리포트',
+    subQuestion: '웹 검색 / 리포트 중 무엇? (여러 개 선택 가능)',
     subOptions: [
-      { id: 'mysql', label: 'MySQL / Aurora MySQL', workloads: ['mysql'] },
-      { id: 'postgres', label: 'PostgreSQL / Aurora Postgres', workloads: ['postgres'] },
-      { id: 'mongodb', label: 'MongoDB', workloads: ['mongodb'] },
-      { id: 'dynamodb', label: 'DynamoDB', workloads: ['dynamodb'] },
-      { id: 'aws-rds', label: 'AWS 관리형 DB (Aurora·RDS·DSQL·Keyspaces)', workloads: ['aws-rds'] }
+      { id: 'websearch', label: '웹 검색 · 자료조사 (exa·brave·deep-researcher)', workloads: ['research'] },
+      { id: 'report', label: '기술 리포트 작성 · 검증 (tech-writer)', workloads: ['report'] }
     ]
   },
   {
     id: 'writing',
-    label: '글쓰기 / 콘텐츠',
-    subQuestion: '어떤 글쓰기 작업?',
+    label: '글쓰기 · 콘텐츠',
+    subQuestion: '일반 글쓰기 / 소셜 중 무엇?',
     subOptions: [
-      { id: 'tech', label: '기술 문서 · 블로깅 · PPT', workloads: ['writing'] },
+      { id: 'general', label: '일반 글쓰기 (블로깅 · PPT · 창작 · 번역)', workloads: ['writing'] },
       {
         id: 'social',
         label: '소셜 콘텐츠 (LinkedIn 등)',
@@ -117,17 +130,6 @@ const CATEGORIES = [
           { id: 'visual', label: '시각 자산 (carousel / infographic 등)', workloads: ['social-visual'] }
         ]
       }
-    ]
-  },
-  {
-    id: 'apple',
-    label: 'Apple 플랫폼 개발',
-    // sub-옵션 없이 카테고리 레벨에 상세 tier 를 둔다 (영역별 3분할).
-    detailQuestion: '어느 영역? (여러 개 선택 가능)',
-    detailOptions: [
-      { id: 'core', label: '핵심 개발 (Swift/SwiftUI/테스트/생성기)', workloads: ['apple-core'] },
-      { id: 'platform', label: '플랫폼 특화 (watchOS/visionOS/ML/Maps)', workloads: ['apple-platform'] },
-      { id: 'product', label: '제품 · 운영 (App Store/성장/법무)', workloads: ['apple-product'] }
     ]
   }
 ];
@@ -232,11 +234,11 @@ function resolveSelection({ categories = [], subSelections = {}, detailSelection
 /**
  * CLI 플래그를 메뉴 입력 형태로 정규화.
  *
- *   --category=backend,writing        톱레벨 카테고리
- *   --backend=python,cloud            sub-옵션
- *   --data-design=mysql,mongodb       sub-옵션
- *   --apple=core,platform             카테고리 레벨 상세 (apple 은 sub 없음)
- *   --writing=tech,social             sub-옵션
+ *   --category=dev,cloud              톱레벨 카테고리
+ *   --dev=frontend,python             sub-옵션
+ *   --data=mysql,aws-analytics        sub-옵션
+ *   --dev-apple=core,platform         sub 레벨 상세 (dev.apple)
+ *   --writing=general,social          sub-옵션
  *   --writing-social=voice,content    sub 레벨 상세 (writing.social)
  *
  * @param {Record<string,string|string[]>} flags

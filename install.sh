@@ -7,12 +7,12 @@
 #
 # 워크로드 결정은 두 가지 방식 모두 지원한다:
 #   A) 대화형 메뉴      — 인자가 없고 TTY 가 있을 때.
-#   B) 메뉴 CLI 플래그  — 7개 톱레벨 카테고리와 sub-옵션·상세 플래그.
-#                          예: --category=backend,writing --backend=python,cloud
-#                              --data-design=mysql
-#                          상세(3단계): --apple=core,platform (apple 상세),
+#   B) 메뉴 CLI 플래그  — 6개 톱레벨 카테고리(dev/cloud/ai/data/research/writing)와
+#                          sub-옵션·상세 플래그.
+#                          예: --category=dev,cloud --dev=frontend,python --cloud=infra,finops
+#                              --data=mysql,aws-analytics --research=websearch,report
+#                          상세(3단계): --dev-apple=core,platform (dev.apple 상세),
 #                              --writing-social=voice,content (writing.social 상세).
-#                              --category=apple 은 3개 상세 전체 별칭.
 #   C) 저수준 플래그    — 워크로드 키를 직접 넣고 싶을 때 (--workload=...).
 #
 # 저수준 플래그가 들어오면 메뉴는 무시한다.
@@ -72,7 +72,7 @@ for arg in "$@"; do
         # --skip-workload=core 의 읽기 쉬운 별칭. 둘 다 주면 core 를 합쳐 제외.
         --no-core)              SKIP_WORKLOAD="${SKIP_WORKLOAD:+$SKIP_WORKLOAD,}core" ;;
         --all)                  MENU_ARGS+=("--all") ;;
-        --category=*|--backend=*|--frontend=*|--plugin=*|--data-analysis=*|--data-design=*|--writing=*|--apple=*|--writing-social=*)
+        --category=*|--dev=*|--cloud=*|--ai=*|--data=*|--research=*|--writing=*|--dev-apple=*|--writing-social=*)
                                 MENU_ARGS+=("$arg") ;;
         -h|--help)
             grep '^#' "$0" | sed 's/^# \{0,1\}//'

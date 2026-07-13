@@ -18,8 +18,9 @@ const GROUPS = [
   // baseline — 항상 포함 (github·context7·time·fetch 만)
   'core',
 
-  // 리서치 도구 (웹 검색) — core 에서 분리, 필요할 때만
-  'research', // exa · brave-search
+  // 리서치·리포트 — 웹 검색 + 기술 리포트 작성(tech-writer 계열)
+  'research', // exa · brave-search (웹 검색·자료조사)
+  'report', // tech-writer / tech-doc-* / doc-clarity / doc-quality / tech-fidelity (기술 리포트 작성·검증)
 
   // 백엔드 카테고리 sub-옵션
   'python-backend', // FastAPI / 일반 백엔드 파이썬
@@ -155,6 +156,17 @@ const RULES = [
   { pattern: /^bun[-_]runtime$/i, groups: ['nodejs'] },
   { pattern: /^prisma[-_]/i, groups: ['nodejs'] },
   { pattern: /^nodejs([-_]|$)/i, groups: ['nodejs'] },
+
+  // -- Report (tech-writer 계열: 기술 리포트 작성·검증) -------------------
+  // Writing 블록보다 먼저 — content-* 등 넓은 룰에 흡수되지 않도록.
+  { pattern: /^tech[-_]writer([-_]|$)/i, groups: ['report'] },
+  { pattern: /^tech[-_]doc[-_]writer$/i, groups: ['report'], kind: 'agent' },
+  { pattern: /^tech[-_]fidelity[-_]auditor$/i, groups: ['report'], kind: 'agent' },
+  { pattern: /^doc[-_]clarity[-_]reviewer$/i, groups: ['report'], kind: 'agent' },
+  { pattern: /^doc[-_]quality[-_]detector$/i, groups: ['report'], kind: 'agent' },
+
+  // -- Research (웹 검색·자료조사) ---------------------------------------
+  { pattern: /^deep[-_]research(er)?$/i, groups: ['research'] },
 
   // -- Writing ------------------------------------------------------------
   { pattern: /^article[-_]/i, groups: ['writing'] },

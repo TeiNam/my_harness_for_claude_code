@@ -12,16 +12,15 @@
 #
 # 메뉴 카테고리: backend / frontend / plugin / data-analysis / data-design / writing / apple
 # Sub-옵션 플래그:
-#   -Backend       python, rust, nodejs, cloud, ai
-#   -Frontend      react-vite-ts
-#   -Plugin        obsidian, chrome, claude
-#   -DataAnalysis  duckdb, python
-#   -DataDesign    mysql, postgres, mongodb, dynamodb
-#   -Writing       tech, social
+#   -Dev           frontend, python, rust, nodejs, apple, obsidian, chrome, claude
+#   -Cloud         infra, finops, integration
+#   -Ai            llm
+#   -Data          duckdb, python-data, aws-analytics, mysql, postgres, mongodb, dynamodb, aws-rds
+#   -Research      websearch, report
+#   -Writing       general, social
 # 상세(3단계) 플래그:
-#   -Apple         core, platform, product     (apple 카테고리 상세)
+#   -DevApple      core, platform, product     (dev.apple 상세)
 #   -WritingSocial voice, content, visual       (writing.social 상세)
-#   -Category=apple 는 3개 상세 전체 별칭
 #
 # 그 외 옵션:
 #   -WithHooks   hooks 를 settings.json 에 병합. 대화형이면 워크로드 설치 후
@@ -53,13 +52,13 @@ param(
     [string[]]$Workload,
     [string[]]$SkipWorkload,
     [string[]]$Category,
-    [string[]]$Backend,
-    [string[]]$Frontend,
-    [string[]]$Plugin,
-    [string[]]$DataAnalysis,
-    [string[]]$DataDesign,
-    [string[]]$Writing,
-    [string[]]$Apple,          # 상세: core, platform, product (apple 은 sub 없음)
+    [string[]]$Dev,            # frontend, python, rust, nodejs, apple, obsidian, chrome, claude
+    [string[]]$Cloud,          # infra, finops, integration
+    [string[]]$Ai,             # llm
+    [string[]]$Data,           # duckdb, python-data, aws-analytics, mysql, postgres, mongodb, dynamodb, aws-rds
+    [string[]]$Research,       # websearch, report
+    [string[]]$Writing,        # general, social
+    [string[]]$DevApple,       # 상세: core, platform, product (dev.apple)
     [string[]]$WritingSocial   # 상세: voice, content, visual (writing.social)
 )
 
@@ -96,14 +95,14 @@ function Build-MenuArgs {
     if ($catCsv) { $args += "--category=$catCsv" }
 
     $pairs = @{
-        backend          = (Join-CommaList $Backend)
-        frontend         = (Join-CommaList $Frontend)
-        plugin           = (Join-CommaList $Plugin)
-        'data-analysis'  = (Join-CommaList $DataAnalysis)
-        'data-design'    = (Join-CommaList $DataDesign)
+        dev              = (Join-CommaList $Dev)
+        cloud            = (Join-CommaList $Cloud)
+        ai               = (Join-CommaList $Ai)
+        data             = (Join-CommaList $Data)
+        research         = (Join-CommaList $Research)
         writing          = (Join-CommaList $Writing)
-        apple            = (Join-CommaList $Apple)            # 카테고리 레벨 상세
-        'writing-social' = (Join-CommaList $WritingSocial)    # sub 레벨 상세
+        'dev-apple'      = (Join-CommaList $DevApple)         # sub 레벨 상세 (dev.apple)
+        'writing-social' = (Join-CommaList $WritingSocial)    # sub 레벨 상세 (writing.social)
     }
     foreach ($k in $pairs.Keys) {
         if ($pairs[$k]) { $args += "--$k=$($pairs[$k])" }

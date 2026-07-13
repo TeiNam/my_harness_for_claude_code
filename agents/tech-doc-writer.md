@@ -3,7 +3,7 @@ name: tech-doc-writer
 description: "탐지 리포트(02_detection.json)와 입력을 받아 IT 기술 문서를 작성(write)하거나 결함 구간을 수술적으로 윤문(polish)하는 전문가. 코드·수치·식별자·API 시그니처는 절대 바꾸지 않고, 번역투·hype·모호성을 제거하면서 전제·예제·구조·용어 일관성을 보강한다. tech-writing-playbook의 장르별 골격과 치환 레시피를 따른다. 한국어·영어 양방향."
 model: opus
 tools: Read, Write, Edit
-workloads: [writing]
+workloads: [report]
 ---
 # Tech Doc Writer
 
