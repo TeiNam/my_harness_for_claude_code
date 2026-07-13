@@ -233,14 +233,17 @@ function Set-McpProxy {
     Write-Host '==> MCP proxy (mcp-configs/proxy/)'
 
     if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-        Write-Host '  docker 없음 — Docker Desktop 설치 후 재실행.' -ForegroundColor Yellow
-        Write-Host '  프록시 없이 쓰려면 .mcp.json 의 localhost:9090 항목을 직접 연결로 바꿔야 함.' -ForegroundColor Yellow
+        Write-Host '  x docker 없음 — MCP proxy 는 docker 컨테이너로 돕니다. 먼저 docker 를 설치하세요:' -ForegroundColor Yellow
+        Write-Host '      Docker Desktop: https://docs.docker.com/desktop/windows-install/' -ForegroundColor Yellow
+        Write-Host '  설치 후 다시 실행: .\install.ps1 -WithMcp' -ForegroundColor Yellow
+        Write-Host '  (프록시 없이 쓰려면 .mcp.json 의 localhost:9090 항목을 직접 연결로 바꾸면 됩니다.)' -ForegroundColor Yellow
         return
     }
     if (-not $DryRun) {
         docker info *> $null
         if ($LASTEXITCODE -ne 0) {
-            Write-Host '  docker 데몬 미동작 — Docker Desktop 실행 후 재실행.' -ForegroundColor Yellow
+            Write-Host '  x docker 데몬 미동작 — Docker Desktop 을 먼저 실행하세요.' -ForegroundColor Yellow
+            Write-Host '  그다음 다시 실행: .\install.ps1 -WithMcp' -ForegroundColor Yellow
             return
         }
     }

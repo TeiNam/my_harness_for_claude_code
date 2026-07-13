@@ -253,12 +253,21 @@ setup_mcp_proxy() {
     echo "==> MCP proxy (mcp-configs/proxy/)"
 
     if ! command -v docker >/dev/null 2>&1; then
-        echo "  docker 없음 — Colima(brew install colima) 또는 Docker Desktop 설치 후 재실행." >&2
-        echo "  프록시 없이 쓰려면 .mcp.json 의 localhost:9090 항목을 직접 연결로 바꿔야 함." >&2
+        echo "  ✗ docker 없음 — MCP proxy 는 docker 컨테이너로 돕니다. 먼저 docker 를 설치하세요:" >&2
+        if command -v brew >/dev/null 2>&1; then
+            echo "      brew install colima docker docker-compose && colima start   # 경량 (권장)" >&2
+            echo "      또는 Docker Desktop: https://docs.docker.com/desktop/" >&2
+        else
+            echo "      Colima: https://github.com/abiosoft/colima  /  Docker Desktop: https://docs.docker.com/desktop/" >&2
+        fi
+        echo "  설치 후 다시 실행: ./install.sh --with-mcp" >&2
+        echo "  (프록시 없이 쓰려면 .mcp.json 의 localhost:9090 항목을 직접 연결로 바꾸면 됩니다.)" >&2
         return 1
     fi
     if [ "$DRY_RUN" -eq 0 ] && ! docker info >/dev/null 2>&1; then
-        echo "  docker 데몬 미동작 — 'colima start' 또는 Docker Desktop 실행 후 재실행." >&2
+        echo "  ✗ docker 데몬 미동작 — 데몬을 먼저 켜세요:" >&2
+        echo "      colima start   (Colima)   또는   Docker Desktop 실행" >&2
+        echo "  그다음 다시 실행: ./install.sh --with-mcp" >&2
         return 1
     fi
     ensure_compose || return 1
