@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-14
 
+- chore(mcp): proxy config 에 exa·brave-search·aws-documentation 추가 (0cf1d96)
 - fix(install): skill 을 ~/.claude/skills/ 최상위에 링크 (자동 발견 복구) (0c1dedb)
 
 ## 2026-07-13
