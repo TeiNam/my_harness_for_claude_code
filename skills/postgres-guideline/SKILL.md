@@ -39,14 +39,18 @@ CREATE SCHEMA ref;    -- reference/master tables
 
 ## Naming Rules
 
-Common RDBMS naming conventions (snake_case, singular form, active voice with date column exceptions, prefix/postfix patterns, abbreviation registry, column prefix/suffix system) follow the **`rdbms-naming` skill as single source of truth.**
+Common RDBMS naming conventions (snake_case, singular form, past-participle time columns, prefix/postfix patterns, abbreviation registry, column prefix/suffix system, case-folding, 63-char limit) follow the **`rdbms-naming` skill as single source of truth.**
 Summary + PostgreSQL-specific:
 
-- Tables/Columns: snake_case, tables singular (e.g. `user`, `user_id`)
-- Active voice: `create_date` — exception for datetime columns: `created_at`
-- Indexes: table+column order, **uppercase suffix** — `<table>_<col>_IDX` / `_UIDX` / `_FTX`
+- Tables/Columns: lowercase snake_case, tables singular (e.g. `member`, `member_id`). PG folds unquoted
+  identifiers to lowercase — never rely on uppercase, never quote to preserve case.
+- Time columns: past-participle standard `created_at` / `updated_at` / `deleted_at` (the old active-voice
+  `create_date` rule is retired)
+- Boolean: `is_`/`has_` prefix + native `boolean` (never 'Y'/'N' strings)
+- Constraints/Indexes: **lowercase prefix** — `pk_<table>` / `fk_<child>_<parent>` / `uq_<table>_<col>` /
+  `chk_<table>_<rule>` / `idx_<table>_<col>` / `ftx_<table>_<col>`. (Uppercase suffix `_IDX` breaks under PG
+  case-folding — do not use.)
 - Sequences (PG-specific): `{table}_{column}_seq` (auto-created with IDENTITY)
-- Constraints (PG-specific): `{table}_{type}_{column}` (e.g. `user_pk_user_id`)
 
 ## Data Type Guide
 

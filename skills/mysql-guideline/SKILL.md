@@ -23,21 +23,23 @@ workloads: [mysql]
 - Setting up connection management
 
 ## MySQL Version and Defaults
-- MySQL 8.0.40+
-- Character set: utf8mb4, utf8mb4_general_ci
+- MySQL 8.4 LTS (or 9.7 LTS) — pick an **LTS track** for production; see `release-policy.md`
+- Character set: utf8mb4, collation `utf8mb4_0900_ai_ci` (team standard; `utf8mb4_general_ci` is legacy)
 - Engine: InnoDB
 
 ## Naming Rules
 
-Common RDBMS naming conventions (snake_case, singular form, active voice with date column
-exceptions, prefix/postfix rules, abbreviation dictionary, column prefix/suffix system,
-data types) follow the **`rdbms-naming` skill as the single source of truth.** Summary:
+Common RDBMS naming conventions (snake_case, singular form, time-column standard, prefix/postfix
+rules, abbreviation dictionary, column prefix/suffix system, case-folding, 63-char limit) follow the
+**`rdbms-naming` skill as the single source of truth.** Summary:
 
-- Tables/Columns: snake_case, tables in singular form (e.g. `user`, `user_chat_setting`, `user_id`)
-- Active voice: `create_date` — but date+time columns use `created_at`/`updated_at` as exceptions
-- Indexes: table+column in condition order, **uppercase suffix**
-  - Regular `<table>_<col>_IDX` · Unique `_UIDX` · Fulltext `_FTX`
-  - Examples: `book_like_user_id_IDX`, `book_uuid_UIDX`, `book_name_FTX`
+- Tables/Columns: lowercase snake_case, tables in singular form (e.g. `member`, `member_chat_setting`, `member_id`)
+- Time columns: past-participle standard `created_at` / `updated_at` / `deleted_at` (the old active-voice
+  `create_date` rule is retired)
+- Boolean: `is_`/`has_` prefix + `TINYINT(1)` 0/1 (not the old `use_yn` CHAR(1) 'Y'/'N')
+- Constraints/Indexes: **lowercase prefix** (uppercase suffix `_IDX` breaks PostgreSQL case-folding)
+  - `pk_<table>` · `fk_<child>_<parent>` · `uq_<table>_<col>` · `chk_<table>_<rule>` · `idx_<table>_<col>` · `ftx_<table>_<col>`
+  - Examples: `idx_book_like_member_id`, `uq_member_email`, `ftx_book_name`
 
 ## Data Type Guide
 
@@ -46,25 +48,35 @@ data types) follow the **`rdbms-naming` skill as the single source of truth.** S
 | Tiny PK/flag | `tinyint unsigned` | 0~255 |
 | Small PK | `smallint unsigned` | 0~65535 |
 | Standard PK | `int unsigned` | 0~4.2 billion |
-| Large PK | `bigint unsigned` | Log tables |
-| Boolean | `char(1)` 'Y'/'N' (recommended) or `tinyint(1)` 0/1 | CHAR recommended to avoid 0→NULL/falsy confusion. MySQL has no native boolean → tinyint also viable. Unify within one schema |
-| Variable string | `varchar(n)` | Specify max length |
-| Long text | `text` | No length limit |
-| Fixed string | `char(n)` | Fixed-length codes |
-| Timestamp | `datetime` | With DEFAULT CURRENT_TIMESTAMP |
-| JSON data | `json` | MySQL 8.0+ native JSON |
-| Money | `decimal(p,s)` | Never use float / `decimal(15,2)`: KRW, `decimal(10,2)`: USD, `decimal(5,4)`: ratio (0.1234=12.34%) |
+| Large PK / default surrogate | `bigint unsigned` | Default choice; `int` risks exhaustion (~4.2B) on large tables |
+| Boolean | `tinyint(1)` 0/1 | `BOOLEAN`/`BOOL` is an alias for `tinyint(1)`. Name with `is_`/`has_`. (Legacy `char(1)` 'Y'/'N' only where already entrenched — new designs use `tinyint(1)`) |
+| Variable string | `varchar(n)` | `n` = **character count** (MySQL 4.1+), sized to real max length. Row-wide 65,535B cap limits max `n` (utf8mb4 ≈ 16,383 chars single-column) |
+| Long text | `text` | 4 tiers: `tinytext`(256B)/`text`(64KB)/`mediumtext`(16MB)/`longtext`(4GB). Prefix index only |
+| Fixed string | `char(n)` | Truly fixed-width codes only (e.g. `char(2)` country code) |
+| Date+Time | `datetime` (5B packed binary, 5.6.4+) | With `DEFAULT CURRENT_TIMESTAMP`. Use for values past 2038 (Y2038). +1~3B for fractional seconds |
+| Auto-UTC timestamp | `timestamp` (4B) | Session-tz→UTC auto-conversion, but **≤ 2038-01-19** — never for future/expiry dates |
+| JSON data | `json` | MySQL 8.0+ native (binary format). Index via generated column or multi-valued index (8.0.17+) |
+| IPv4 | `int unsigned` via `INET_ATON` | 4B. IPv4-only |
+| IPv4/IPv6 | `varbinary(16)` via `INET6_ATON` | Dual-stack safe (INET_ATON returns NULL for IPv6) |
+| UUID (external, not PK) | `binary(16)` via `UUID_TO_BIN(v, 1)` | swap_flag=1 for time-ordered; prefer app-generated UUID v7 (MySQL `UUID()` is v1-only) |
+| Money | `decimal(p,s)` | Never float. **Per-currency:** KRW `(15,0)` (no minor unit), multinational `(19,4)`, rate `(19,6)`, ratio `(5,4)`. No blanket `(10,2)` |
 
 ## Prohibited Items
-- Stored Procedures: prohibited
+- Stored Procedures: discouraged (stored-program cache is **per-session**, not a global shared cache like
+  Oracle/PostgreSQL — connection-pool churn re-pays parse/compile cost; plus maintenance/portability/security)
 - Triggers: prohibited
 - Events: prohibited
 - Complex Views: discouraged, simple read-only only
 
 ## Reference Files
 - `schema-design.md` — PK/FK policy, checklists
-- `index-and-query.md` — Index strategy, query patterns
+- `index-and-query.md` — Index strategy (composite ESR order, range-column optimization), query patterns
 - `partitioning.md` — Partitioning strategy, management
 - `connection-and-features.md` — Connection management, transactions
-- `dev-practices.md` — Development principles and anti-patterns: normalization, minimal types, INET_ATON/UUID_TO_BIN, DATETIME vs TIMESTAMP, avoid SP/Trigger, index anti-patterns, avoid COUNT(*), random PK, composite PK, physical FK, JSON
-- `jdbc-driver.md` — Java driver selection: AWS Advanced JDBC Wrapper (recommended, v4.1.0) vs Connector/J, failover tuning
+- `dev-practices.md` — Development principles and anti-patterns: normalization + denormalization criteria,
+  minimal types, VARCHAR char-semantics, INET_ATON/INET6_ATON/UUID_TO_BIN, DATETIME vs TIMESTAMP (Y2038),
+  session-local SP cache, index anti-patterns, COUNT(*) MVCC reason, random PK (UUID v7), composite PK,
+  physical FK (balanced view), JSON (multi-valued index)
+- `jdbc-driver.md` — Java driver selection (2026-07): AWS Advanced JDBC Wrapper (top choice) vs Connector/J
+  9.x; MariaDB Connector/J Aurora EOL, Aurora JDBC Driver EOL; failover tuning
+- `release-policy.md` — Innovation vs LTS tracks: 8.4.x / 9.7.x are LTS, 9.0–9.6 Innovation; production = LTS

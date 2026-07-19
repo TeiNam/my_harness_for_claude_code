@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-16
+
+- feat(skills): archify 다이어그램 스킬 추가 (문서·목록 반영) (aaf971b)
+
 ## 2026-07-14
 
 - chore(mcp): proxy config 에 exa·brave-search·aws-documentation 추가 (0cf1d96)

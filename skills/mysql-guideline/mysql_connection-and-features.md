@@ -39,7 +39,7 @@ pool = mysql.connector.pooling.MySQLConnectionPool(
     database="myapp",
     user="app",
     charset="utf8mb4",
-    collation="utf8mb4_general_ci"
+    collation="utf8mb4_0900_ai_ci"
 )
 
 conn = pool.get_connection()

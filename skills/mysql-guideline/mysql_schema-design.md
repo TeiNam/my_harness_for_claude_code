@@ -12,7 +12,7 @@ CREATE TABLE `user` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
 
 ## Foreign Key Policy
@@ -29,14 +29,14 @@ CREATE TABLE `chat_history` (
   `bot_response` text NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`chat_history_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 ```
 
 ## Application-Level Referential Integrity
 
 ```python
 async def create_chat_history(user_id: int, conversation_id: str, message: str, response: str):
-    user = db.select("user", where={"user_id": user_id, "is_active": "Y"})
+    user = db.select("user", where={"user_id": user_id, "is_active": 1})
     if not user:
         raise ValueError("User does not exist")
 
@@ -66,7 +66,7 @@ Standardize tables requiring soft delete with the `is_active` column.
 
 ```sql
 -- Even with low selectivity, add to composite index if query pattern always includes it
-CREATE INDEX idx_user_active_email ON user (is_active, email);
+CREATE INDEX idx_user_active_email ON user (is_active, email);  -- lowercase idx_ prefix (see rdbms-naming)
 ```
 
 > WARNING: Standalone `is_active` index is ineffective due to low cardinality. Always use in composite index.
