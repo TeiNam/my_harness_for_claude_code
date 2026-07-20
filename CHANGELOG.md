@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-19
+
+- feat(skills): MySQL 개발·네이밍 가이드 두 문서 반영·고도화 (57a5bd3)
+
 ## 2026-07-16
 
 - feat(skills): archify 다이어그램 스킬 추가 (문서·목록 반영) (aaf971b)
