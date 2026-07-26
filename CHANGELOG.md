@@ -4,6 +4,9 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-26
 
+- chore(mcp): 프로젝트 .mcp.json 을 context7 만 남기도록 축소 (f438430)
+- chore(plugin): motion-creative 동반 플러그인 목록에서 제거 (6daa711)
+- refactor(cross-review): Codex 모델 핀 제거 — CLI 기본 모델 사용 (28b3af8)
 - feat(cross-review): Codex 리뷰 축 모델을 gpt-5.6-sol로 고정 (3450c44)
 - chore(release): v0.2.0 — 플러그인 이중 노출 정리·자산 재편 기록 (6d7ac70)
 - fix(install): check-drift 기본 워크로드를 설치 매니페스트에서 읽도록 수정 (2edcc02)

@@ -32,7 +32,7 @@ const PRE_BASH_HOOKS = [
   },
   {
     id: 'pre:bash:git-push-reminder',
-    profiles: 'strict',
+    profiles: 'minimal,standard,strict',
     run: rawInput => runGitPushReminder(rawInput),
   },
   {
