@@ -191,10 +191,9 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 | `codex` | openai/codex-plugin-cc | 교차 모델 세컨드 오피니언 — 하네스 자체 `codex-cli` 스킬은 중복이라 제거됨 |
 | `ui-ux-pro-max` | nextlevelbuilder/ui-ux-pro-max-skill | 디자인 시스템·UI 스타일링 — 하네스 자체 `design-system` 스킬은 중복이라 제거됨 |
 | `claude-dashboard` | uppinote20/claude-dashboard | statusline 사용량 모니터링 (하네스 `cost-tracking`은 SQLite 비용 DB라 별개 유지) |
-| `motion-creative` | Motion-Creative/motion-creative-plugin | 광고 크리에이티브 분석 (웹 애니메이션 `motion-*` 스킬과 무관 — 이름만 유사) |
 | `obsidian` | kepano/obsidian-skills | Obsidian 문서 포맷 (project scope 설치) |
 
-**설치하지 말 것** — `humanize-korean@im-not-ai`(하네스 `skills/humanize-korean`이 v1.6.1로 더 최신), `frontend-design@claude-plugins-official`(하네스 `skills/frontend-design`과 동일 출처 중복). 둘 다 하네스 스킬과 이중 노출을 일으켜 2026-07-26 제거했습니다.
+**설치하지 말 것** — `humanize-korean@im-not-ai`(하네스 `skills/humanize-korean`이 v1.6.1로 더 최신), `frontend-design@claude-plugins-official`(하네스 `skills/frontend-design`과 동일 출처 중복). 둘 다 하네스 스킬과 이중 노출을 일으켜 2026-07-26 제거했습니다. `motion-creative@motion-mcp`(광고 크리에이티브 분석)도 워크로드와 무관해 같은 날 제거했습니다.
 
 ## 필수 도구 버전
 

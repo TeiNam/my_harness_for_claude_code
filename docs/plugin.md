@@ -19,11 +19,7 @@
   claude plugin marketplace add uppinote20/claude-dashboard
   claude plugin install claude-dashboard@claude-dashboard
 
-  # 6) motion-creative  ← 방금 추가
-  claude plugin marketplace add Motion-Creative/motion-creative-plugin
-  claude plugin install motion-creative@motion-mcp
-
-  # 7) obsidian — 유일하게 project scope (홈 디렉터리 프로젝트 한정)
+  # 6) obsidian — 유일하게 project scope (홈 디렉터리 프로젝트 한정)
   claude plugin marketplace add kepano/obsidian-skills
   claude plugin install obsidian@obsidian-skills --scope project
 
@@ -31,3 +27,4 @@
 # humanize-korean@im-not-ai        → 하네스 skills/humanize-korean 이 v1.6.1로 더 최신
 # frontend-design@claude-plugins-official → 하네스 skills/frontend-design 과 동일 출처(anthropics/skills) 중복
 # 둘 다 2026-07-26 제거함. 하네스 쪽을 SSOT로 유지한다.
+# motion-creative@motion-mcp       → 광고 크리에이티브 분석용. 워크로드와 무관해 2026-07-26 제거함.
