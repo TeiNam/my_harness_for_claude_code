@@ -26,3 +26,8 @@
   # 7) obsidian — 유일하게 project scope (홈 디렉터리 프로젝트 한정)
   claude plugin marketplace add kepano/obsidian-skills
   claude plugin install obsidian@obsidian-skills --scope project
+
+# ── 설치 금지 (하네스 스킬과 이중 노출) ──
+# humanize-korean@im-not-ai        → 하네스 skills/humanize-korean 이 v1.6.1로 더 최신
+# frontend-design@claude-plugins-official → 하네스 skills/frontend-design 과 동일 출처(anthropics/skills) 중복
+# 둘 다 2026-07-26 제거함. 하네스 쪽을 SSOT로 유지한다.

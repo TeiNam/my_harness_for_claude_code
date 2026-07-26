@@ -33,18 +33,37 @@ function parseArgs(argv) {
     const eq = a.indexOf('=');
     const key = eq === -1 ? a : a.slice(0, eq);
     const val = eq === -1 ? null : a.slice(eq + 1);
-    const list = v => (v ? v.split(',').map(s => s.trim()).filter(Boolean) : []);
+    const list = v =>
+      v
+        ? v
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+        : [];
     switch (key) {
       case '--workload':
-      case '--workloads': flags.workload = list(val); break;
+      case '--workloads':
+        flags.workload = list(val);
+        break;
       case '--skip-workload':
-      case '--skip-workloads': flags.skipWorkload = list(val); break;
-      case '--json': flags.json = true; break;
-      case '--root': flags.root = val; break;
-      case '--claude-home': flags.claudeHome = val; break;
+      case '--skip-workloads':
+        flags.skipWorkload = list(val);
+        break;
+      case '--json':
+        flags.json = true;
+        break;
+      case '--root':
+        flags.root = val;
+        break;
+      case '--claude-home':
+        flags.claudeHome = val;
+        break;
       case '-h':
-      case '--help': flags.help = true; break;
-      default: throw new Error(`Unknown flag: ${a}`);
+      case '--help':
+        flags.help = true;
+        break;
+      default:
+        throw new Error(`Unknown flag: ${a}`);
     }
   }
   return flags;
@@ -83,7 +102,7 @@ function main(argv) {
         '  --workload=a,b       Limit to these workload groups (default: all)',
         '  --skip-workload=a,b  Drop groups from the resolved set',
         '  --json               Machine-readable output',
-        '  --claude-home=PATH   Override $CLAUDE_HOME',
+        '  --claude-home=PATH   Override $CLAUDE_HOME'
       ].join('\n')
     );
     return 0;
@@ -99,13 +118,15 @@ function main(argv) {
     try {
       const manifest = JSON.parse(fs.readFileSync(path.join(claudeHome, '_harness-manifest.json'), 'utf8'));
       if (Array.isArray(manifest.workloads) && manifest.workloads.length) workload = manifest.workloads;
-    } catch { /* 매니페스트 없음 — 전 그룹 검사로 폴백 */ }
+    } catch {
+      /* 매니페스트 없음 — 전 그룹 검사로 폴백 */
+    }
   }
 
   const { selected, activeGroups } = selectAssets({
     root,
     workload,
-    skipWorkload: flags.skipWorkload,
+    skipWorkload: flags.skipWorkload
   });
 
   const buckets = { ok: [], missing: [], 'wrong-target': [], broken: [], 'not-a-link': [] };
@@ -115,8 +136,7 @@ function main(argv) {
     buckets[classifyLink(absSource, absTarget)].push(a.targetRel);
   }
 
-  const drift = buckets.missing.length + buckets['wrong-target'].length
-    + buckets.broken.length + buckets['not-a-link'].length;
+  const drift = buckets.missing.length + buckets['wrong-target'].length + buckets.broken.length + buckets['not-a-link'].length;
 
   if (flags.json) {
     console.log(JSON.stringify({ activeGroups, selected: selected.length, drift, buckets }, null, 2));

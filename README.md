@@ -194,6 +194,8 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 | `motion-creative` | Motion-Creative/motion-creative-plugin | 광고 크리에이티브 분석 (웹 애니메이션 `motion-*` 스킬과 무관 — 이름만 유사) |
 | `obsidian` | kepano/obsidian-skills | Obsidian 문서 포맷 (project scope 설치) |
 
+**설치하지 말 것** — `humanize-korean@im-not-ai`(하네스 `skills/humanize-korean`이 v1.6.1로 더 최신), `frontend-design@claude-plugins-official`(하네스 `skills/frontend-design`과 동일 출처 중복). 둘 다 하네스 스킬과 이중 노출을 일으켜 2026-07-26 제거했습니다.
+
 ## 필수 도구 버전
 
 `.tool-versions`에 asdf / mise용 핀이 들어 있습니다.
