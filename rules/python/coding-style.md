@@ -32,17 +32,10 @@ uv run <cmd>       # run inside the env — no manual activation needed
 - One-off tool without installing: `uvx <tool>` (e.g. `uvx ruff check .`).
 - Never mix `pip install` into a uv-managed env — it bypasses the lockfile.
 - Legacy `requirements.txt` project: `uv pip install -r requirements.txt` is the transitional form; prefer migrating to `pyproject.toml` + `uv add`.
+- Fall back to `pyenv` / `poetry` / `pdm` only when a project already standardizes on that tool.
 
-## Standards
+### Python Version
 
-- Follow **PEP 8** conventions
-- Use **type annotations** on all function signatures
-
-## Environment & Python Version
-
-- **Default to `uv`** for installing Python, managing virtualenvs, and
-  resolving dependencies with a lockfile. Fall back to `pyenv` / `poetry` /
-  `pdm` only when a project already standardizes on that tool.
 - Prefer a **well-supported stable Python** — not a pre-release, not an
   end-of-life minor. Python has no formal "LTS"; each minor gets ~5 years of
   support, so pick one still in active bugfix/security support.
@@ -52,9 +45,12 @@ uv run <cmd>       # run inside the env — no manual activation needed
 ```bash
 uv python list                  # available versions
 uv python install <version>     # install the version you verified
-uv init myproject && cd myproject
-uv add <deps>                   # writes pyproject.toml + uv.lock
 ```
+
+## Standards
+
+- Follow **PEP 8** conventions
+- Use **type annotations** on all function signatures
 
 ## Immutability
 
