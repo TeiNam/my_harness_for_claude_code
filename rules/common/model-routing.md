@@ -109,3 +109,8 @@ re-prompt), route to the OpenAI Codex CLI via the codex plugin
 (`codex:rescue` skill / `codex:codex-rescue` agent — install per `docs/plugin.md`). Use it for
 adversarial review of Claude-authored code and for large mechanical edits you
 want offloaded. Treat its output as a proposal to verify, never as ground truth.
+
+**Review model: `gpt-5.6-sol`.** 2-way cross review (`/cross-review`) pins the
+Codex axis to `gpt-5.6-sol` via `codex exec --model gpt-5.6-sol` for
+reproducibility. If the local CLI rejects the flag, fall back to the CLI
+default and name the actual model in the report.
