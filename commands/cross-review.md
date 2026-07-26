@@ -37,17 +37,17 @@ diff가 비어 있으면 "리뷰할 변경 없음"으로 보고하고 중단. di
 
 ```bash
 # read-only, stdin 반드시 /dev/null, thinking 억제(2>/dev/null), git 체크 skip
-# 모델은 gpt-5.6-sol 고정 — 리뷰 축의 모델을 명시해 재현성 확보
+# 모델은 핀하지 않는다 — codex CLI 기본 모델을 그대로 쓴다
 codex exec --skip-git-repo-check --sandbox read-only \
-  --model gpt-5.6-sol \
   "Review the diff in <diff-file>. Report only: correctness bugs, security \
 issues (injection/secret/auth), missing error handling, missed edge cases. \
 Tag severity CRITICAL/HIGH/MEDIUM/LOW with file:line. Skip style. \
 Say 'No issues' if clean." </dev/null 2>/dev/null
 ```
 
-`--model gpt-5.6-sol` 이 로컬 codex CLI에서 거부되면(구버전 등) 플래그를 빼고
-CLI 기본 모델로 실행하되, 최종 리포트에 실제 사용 모델을 명시한다.
+`--model` 을 주지 않으므로 codex CLI 설정(`~/.codex/config.toml` 등)의 기본 모델이
+쓰인다. 최종 리포트에는 실제 사용된 모델을 명시한다 — 필요하면 `codex exec` 출력
+헤더나 `codex --version` / 설정에서 확인한다.
 
 Codex는 완료 시점에만 출력하니 **동기 실행**(백그라운드 금지). 최대 ~600s.
 

@@ -110,7 +110,7 @@ re-prompt), route to the OpenAI Codex CLI via the codex plugin
 adversarial review of Claude-authored code and for large mechanical edits you
 want offloaded. Treat its output as a proposal to verify, never as ground truth.
 
-**Review model: `gpt-5.6-sol`.** 2-way cross review (`/cross-review`) pins the
-Codex axis to `gpt-5.6-sol` via `codex exec --model gpt-5.6-sol` for
-reproducibility. If the local CLI rejects the flag, fall back to the CLI
-default and name the actual model in the report.
+**Review model: CLI default.** 2-way cross review (`/cross-review`) does not pin
+the Codex axis — `codex exec` runs without `--model`, so the local CLI's
+configured default applies. Name the actual model in the report. Change the
+default in the Codex CLI config, not in the command.

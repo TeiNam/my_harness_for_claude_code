@@ -2,6 +2,19 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-26
+
+- feat(cross-review): Codex 리뷰 축 모델을 gpt-5.6-sol로 고정 (3450c44)
+- chore(release): v0.2.0 — 플러그인 이중 노출 정리·자산 재편 기록 (6d7ac70)
+- fix(install): check-drift 기본 워크로드를 설치 매니페스트에서 읽도록 수정 (2edcc02)
+- docs(rules): uv 섹션 중복 정리 — 리베이스로 겹친 두 uv 규약을 하나로 병합 (71c7b9d)
+- refactor(skills): 동반 플러그인과 중복인 스킬 4종 제거·참조 재배선 (2ab738a)
+- feat(models): Opus 5 라인업 반영·Fable 5 티어 신설, Python 환경 uv-first 전환 (905751c)
+
+## 2026-07-21
+
+- docs(rules): Python 환경 규약 추가 — uv 기본 + 안정 버전 웹체크 (3b579e0)
+
 ## 2026-07-19
 
 - feat(skills): MySQL 개발·네이밍 가이드 두 문서 반영·고도화 (57a5bd3)
