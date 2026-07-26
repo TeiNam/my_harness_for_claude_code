@@ -1,40 +1,8 @@
 {
   "mcpServers": {
-    "github": {
-      "type": "http",
-      "url": "http://localhost:9090/github/mcp"
-    },
-    "exa": {
-      "type": "http",
-      "url": "http://localhost:9090/exa/mcp"
-    },
     "context7": {
       "type": "http",
       "url": "http://localhost:9090/context7/mcp"
-    },
-    "brave-search": {
-      "type": "http",
-      "url": "http://localhost:9090/brave-search/mcp"
-    },
-    "time": {
-      "type": "http",
-      "url": "http://localhost:9090/time/mcp"
-    },
-    "obsidian": {
-      "type": "http",
-      "url": "http://localhost:9090/obsidian/mcp"
-    },
-    "drawio": {
-      "type": "http",
-      "url": "http://localhost:9090/drawio/mcp"
-    },
-    "sentry": {
-      "type": "http",
-      "url": "https://mcp.sentry.dev/mcp"
-    },
-    "playwright": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp@0.0.69", "--headless"]
     }
   }
 }
