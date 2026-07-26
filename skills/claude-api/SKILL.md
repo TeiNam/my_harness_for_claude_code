@@ -21,18 +21,21 @@ Build applications with the Anthropic Claude API and SDKs.
 
 | Model | ID | Best For |
 |-------|-----|----------|
-| Opus 4.1 | `claude-opus-4-1` | Complex reasoning, architecture, research |
-| Sonnet 4 | `claude-sonnet-4-0` | Balanced coding, most development tasks |
-| Haiku 3.5 | `claude-3-5-haiku-latest` | Fast responses, high-volume, cost-sensitive |
+| Fable 5 | `claude-fable-5` | Frontier long-horizon agents (thinking always on, ~2× Opus cost) |
+| Opus 5 | `claude-opus-5` | Complex reasoning, architecture, agentic coding |
+| Opus 4.8 | `claude-opus-4-8` | Fallback target for Opus 5 refusals; web fetch; Priority Tier |
+| Sonnet 5 | `claude-sonnet-5` | Balanced coding, most development tasks |
+| Haiku 4.5 | `claude-haiku-4-5` | Fast responses, high-volume, cost-sensitive |
 
-Default to Sonnet 4 unless the task requires deep reasoning (Opus) or speed/cost optimization (Haiku). For production, prefer pinned snapshot IDs over aliases.
+Default to Opus 5 unless the task needs speed/cost optimization (Sonnet/Haiku). IDs from the 4.6 generation onward (`claude-opus-5`, `claude-sonnet-5`) are pinned snapshots — no date suffix exists or is needed. On Opus 5 / Sonnet 5 / Fable 5: thinking is adaptive by default, `budget_tokens` and non-default `temperature`/`top_p`/`top_k` return 400, and assistant prefill is rejected. Handle `stop_reason: "refusal"` on Opus 5 / Fable 5 (safety classifiers), ideally with the server-side `fallbacks` beta.
 
 ## Python SDK
 
 ### Installation
 
 ```bash
-pip install anthropic
+command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
+uv add anthropic
 ```
 
 ### Basic Message
@@ -43,7 +46,7 @@ import anthropic
 client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from env
 
 message = client.messages.create(
-    model="claude-sonnet-4-0",
+    model="claude-sonnet-5",
     max_tokens=1024,
     messages=[
         {"role": "user", "content": "Explain async/await in Python"}
@@ -56,7 +59,7 @@ print(message.content[0].text)
 
 ```python
 with client.messages.stream(
-    model="claude-sonnet-4-0",
+    model="claude-sonnet-5",
     max_tokens=1024,
     messages=[{"role": "user", "content": "Write a haiku about coding"}]
 ) as stream:
@@ -68,7 +71,7 @@ with client.messages.stream(
 
 ```python
 message = client.messages.create(
-    model="claude-sonnet-4-0",
+    model="claude-sonnet-5",
     max_tokens=1024,
     system="You are a senior Python developer. Be concise.",
     messages=[{"role": "user", "content": "Review this function"}]
@@ -91,7 +94,7 @@ import Anthropic from "@anthropic-ai/sdk";
 const client = new Anthropic(); // reads ANTHROPIC_API_KEY from env
 
 const message = await client.messages.create({
-  model: "claude-sonnet-4-0",
+  model: "claude-sonnet-5",
   max_tokens: 1024,
   messages: [
     { role: "user", content: "Explain async/await in TypeScript" }
@@ -104,7 +107,7 @@ console.log(message.content[0].text);
 
 ```typescript
 const stream = client.messages.stream({
-  model: "claude-sonnet-4-0",
+  model: "claude-sonnet-5",
   max_tokens: 1024,
   messages: [{ role: "user", content: "Write a haiku" }],
 });
@@ -137,7 +140,7 @@ tools = [
 ]
 
 message = client.messages.create(
-    model="claude-sonnet-4-0",
+    model="claude-sonnet-5",
     max_tokens=1024,
     tools=tools,
     messages=[{"role": "user", "content": "What's the weather in SF?"}]
@@ -150,7 +153,7 @@ for block in message.content:
         result = get_weather(**block.input)
         # Send result back
         follow_up = client.messages.create(
-            model="claude-sonnet-4-0",
+            model="claude-sonnet-5",
             max_tokens=1024,
             tools=tools,
             messages=[
@@ -174,7 +177,7 @@ with open("diagram.png", "rb") as f:
     image_data = base64.standard_b64encode(f.read()).decode("utf-8")
 
 message = client.messages.create(
-    model="claude-sonnet-4-0",
+    model="claude-sonnet-5",
     max_tokens=1024,
     messages=[{
         "role": "user",
@@ -186,18 +189,17 @@ message = client.messages.create(
 )
 ```
 
-## Extended Thinking
+## Adaptive Thinking
 
-For complex reasoning tasks:
+For complex reasoning tasks. On Sonnet 5 / Opus 5 / Fable 5 thinking is adaptive
+(the old `budget_tokens` form returns 400); control depth with `output_config.effort`:
 
 ```python
 message = client.messages.create(
-    model="claude-sonnet-4-0",
+    model="claude-sonnet-5",
     max_tokens=16000,
-    thinking={
-        "type": "enabled",
-        "budget_tokens": 10000
-    },
+    thinking={"type": "adaptive", "display": "summarized"},  # display: default is "omitted" (empty thinking text)
+    output_config={"effort": "high"},  # low | medium | high | xhigh | max
     messages=[{"role": "user", "content": "Solve this math problem step by step..."}]
 )
 
@@ -214,7 +216,7 @@ Cache large system prompts or context to reduce costs:
 
 ```python
 message = client.messages.create(
-    model="claude-sonnet-4-0",
+    model="claude-sonnet-5",
     max_tokens=1024,
     system=[
         {"type": "text", "text": large_system_prompt, "cache_control": {"type": "ephemeral"}}
@@ -238,7 +240,7 @@ batch = client.messages.batches.create(
         {
             "custom_id": f"request-{i}",
             "params": {
-                "model": "claude-sonnet-4-0",
+                "model": "claude-sonnet-5",
                 "max_tokens": 1024,
                 "messages": [{"role": "user", "content": prompt}]
             }
@@ -284,7 +286,7 @@ messages = [{"role": "user", "content": "Review the auth module for security iss
 
 while True:
     response = client.messages.create(
-        model="claude-sonnet-4-0",
+        model="claude-sonnet-5",
         max_tokens=4096,
         tools=tools,
         messages=messages,
@@ -332,7 +334,7 @@ except APIError as e:
 export ANTHROPIC_API_KEY="your-api-key-here"
 
 # Optional: set default model
-export ANTHROPIC_MODEL="claude-sonnet-4-0"
+export ANTHROPIC_MODEL="claude-opus-5"
 ```
 
 Never hardcode API keys. Always use environment variables.

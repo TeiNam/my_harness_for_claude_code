@@ -15,11 +15,17 @@
 - Orchestrating multi-agent workflows
 - Multi-file implementation and refactors
 
-**Opus 4.8** (Deepest reasoning):
+**Opus 5** (Deepest reasoning in standard tiers):
 - Complex architectural decisions
 - Security analysis and adversarial review
 - Ambiguous requirements, system-wide debugging
 - Fast mode (`/fast`) keeps Opus reasoning with faster output
+- Falls back to Opus 4.8 on safety-classifier refusals, web-fetch needs, or Priority Tier capacity
+
+**Fable 5** (Frontier tier, ~2× Opus cost):
+- Longest-horizon autonomous runs (overnight builds, large migrations)
+- Final adversarial judge on highest-stakes output
+- Use sparingly — try Opus 5 at `xhigh` effort first
 
 ## Context Window Management
 

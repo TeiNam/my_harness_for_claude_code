@@ -8,6 +8,31 @@ workloads: [python-backend, python-data]
 
 > This file extends [common/coding-style.md](../common/coding-style.md) with Python specific content.
 
+## Environment: uv First (MANDATORY)
+
+All Python environment and dependency management goes through **uv** — never bare `pip`, `python -m venv`, `virtualenv`, or `conda`.
+
+Before any Python work, check uv exists and bootstrap if missing:
+
+```bash
+command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Then:
+
+```bash
+uv init            # new project (creates pyproject.toml)
+uv venv            # create .venv (existing project without one)
+uv add <pkg>       # add dependency (writes pyproject.toml + uv.lock)
+uv add --dev <pkg> # dev dependency
+uv sync            # install from lockfile
+uv run <cmd>       # run inside the env — no manual activation needed
+```
+
+- One-off tool without installing: `uvx <tool>` (e.g. `uvx ruff check .`).
+- Never mix `pip install` into a uv-managed env — it bypasses the lockfile.
+- Legacy `requirements.txt` project: `uv pip install -r requirements.txt` is the transitional form; prefer migrating to `pyproject.toml` + `uv add`.
+
 ## Standards
 
 - Follow **PEP 8** conventions

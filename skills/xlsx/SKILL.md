@@ -100,7 +100,8 @@ template someone else designed.
 ## Install
 
 ```bash
-pip install openpyxl pandas
+command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
+uv add openpyxl pandas        # in a uv project; one-off script: uv run --with openpyxl,pandas python script.py
 ```
 
 ## Sanity check

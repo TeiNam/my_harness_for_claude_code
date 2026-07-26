@@ -54,7 +54,7 @@ import boto3
 client = boto3.client("bedrock-runtime", region_name="us-east-1")
 
 response = client.converse(
-    modelId="anthropic.claude-sonnet-4-6-20260101-v1:0",
+    modelId="anthropic.claude-sonnet-5",
     messages=[{"role": "user", "content": [{"text": "Summarise this PR"}]}],
     system=[{"text": "You are a senior reviewer. Be concise."}],
     inferenceConfig={"maxTokens": 1024, "temperature": 0.2},
@@ -67,7 +67,7 @@ import { BedrockRuntimeClient, ConverseCommand } from "@aws-sdk/client-bedrock-r
 
 const client = new BedrockRuntimeClient({ region: "us-east-1" });
 const out = await client.send(new ConverseCommand({
-  modelId: "anthropic.claude-sonnet-4-6-20260101-v1:0",
+  modelId: "anthropic.claude-sonnet-5",
   messages: [{ role: "user", content: [{ text: "Summarise this PR" }] }],
   inferenceConfig: { maxTokens: 1024, temperature: 0.2 },
 }));
@@ -80,16 +80,16 @@ same across providers — switching models is a `modelId` change, nothing else.
 
 Bedrock model IDs come in two flavours:
 
-- **Foundation model ARN/ID** — `anthropic.claude-sonnet-4-6-20260101-v1:0`
+- **Foundation model ARN/ID** — `anthropic.claude-sonnet-5`
   (region-bound; only callable in regions where the model is hosted).
-- **Cross-region inference profile** — `us.anthropic.claude-sonnet-4-6-...`
+- **Cross-region inference profile** — `us.anthropic.claude-sonnet-5`
   (`us.*`, `eu.*`, `apac.*`). Routes across AZs/regions for higher availability
   and throughput. **Default to inference profiles** in production unless data
   residency forbids it.
 
 ```python
 # Cross-region profile — recommended default
-modelId = "us.anthropic.claude-sonnet-4-6-20260101-v1:0"
+modelId = "us.anthropic.claude-sonnet-5"
 ```
 
 Each region has different model availability — check `ListFoundationModels`
@@ -166,7 +166,7 @@ response = agent_runtime.retrieve_and_generate(
         "type": "KNOWLEDGE_BASE",
         "knowledgeBaseConfiguration": {
             "knowledgeBaseId": "ABCDEFGHIJ",
-            "modelArn": "anthropic.claude-sonnet-4-6-20260101-v1:0",
+            "modelArn": "anthropic.claude-sonnet-5",
         },
     },
 )

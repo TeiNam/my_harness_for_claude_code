@@ -87,7 +87,8 @@ endpoint. See the `pdf` skill.
 ## Install
 
 ```bash
-pip install python-docx docxtpl
+command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
+uv add python-docx docxtpl
 ```
 
 ## Sanity check

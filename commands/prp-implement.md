@@ -26,7 +26,7 @@ Execute a plan file step-by-step with continuous validation. Every change is ver
 | `pnpm-lock.yaml` | pnpm | `pnpm run` |
 | `yarn.lock` | yarn | `yarn` |
 | `package-lock.json` | npm | `npm run` |
-| `pyproject.toml` or `requirements.txt` | uv / pip | `uv run` or `python -m` |
+| `pyproject.toml` or `requirements.txt` | uv (install if missing: `curl -LsSf https://astral.sh/uv/install.sh \| sh`) | `uv run` |
 | `Cargo.toml` | cargo | `cargo` |
 | `go.mod` | go | `go` |
 

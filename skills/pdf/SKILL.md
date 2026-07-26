@@ -115,8 +115,9 @@ available to the renderer — usually the simpler path for Korean documents.
 ## Install
 
 ```bash
-pip install pypdf reportlab           # core
-pip install pdfplumber weasyprint     # tables / HTML→PDF (weasyprint needs system libs)
+command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
+uv add pypdf reportlab            # core
+uv add pdfplumber weasyprint      # tables / HTML→PDF (weasyprint needs system libs)
 ```
 
 ## Sanity check

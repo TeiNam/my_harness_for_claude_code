@@ -118,13 +118,14 @@ Optimize the tools you use and subagent architecture designed to delegate the ch
 | Exploration/search        | Haiku 4.5     | Fast, cheap, good enough for finding files |
 | Simple edits              | Haiku 4.5     | Single-file changes, clear instructions    |
 | Multi-file implementation | Sonnet 5      | Best balance for coding                    |
-| Complex architecture      | Opus 4.8      | Deep reasoning needed                      |
+| Complex architecture      | Opus 5        | Deep reasoning needed                      |
 | PR reviews                | Sonnet 5      | Understands context, catches nuance        |
-| Security analysis         | Opus 4.8      | Can't afford to miss vulnerabilities       |
+| Security analysis         | Opus 5        | Can't afford to miss vulnerabilities       |
 | Writing docs              | Haiku 4.5     | Structure is simple                        |
-| Debugging complex bugs    | Opus 4.8      | Needs to hold entire system in mind        |
+| Debugging complex bugs    | Opus 5        | Needs to hold entire system in mind        |
+| Overnight autonomous runs | Fable 5       | Longest-horizon coherence (~2× Opus cost)  |
 
-Default to Sonnet 5 for 90% of coding tasks. Upgrade to Opus 4.8 when first attempt failed, task spans 5+ files, architectural decisions, or security-critical code. Full policy: `rules/common/model-routing.md`.
+Default to Sonnet 5 for 90% of coding tasks. Upgrade to Opus 5 when first attempt failed, task spans 5+ files, architectural decisions, or security-critical code. Fall back to Opus 4.8 when Opus 5 hits a safety refusal or needs web fetch / Priority Tier. Full policy: `rules/common/model-routing.md`.
 
 **Pricing Reference:**
 

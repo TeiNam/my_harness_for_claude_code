@@ -96,7 +96,7 @@ class AgentApp(App):
         # 여기서 LLM 호출 (async) → 토큰 스트림을 log.write 로 흘림
 
 if __name__ == "__main__":
-    AgentApp(model="claude-opus-4-8").run()
+    AgentApp(model="claude-opus-5").run()
 ```
 
 ## 비동기 LLM 스트리밍

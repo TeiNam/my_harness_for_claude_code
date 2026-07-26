@@ -117,11 +117,11 @@ Map intent + scope + tech stack (from Phase 0) to specific harness components.
 
 | Intent | Commands | Skills | Agents |
 |--------|----------|--------|--------|
-| New Feature | /plan, /tdd, /code-review, /verify | tdd-workflow, verification-loop | planner, tdd-guide, code-reviewer |
-| Bug Fix | /tdd, /build-fix, /verify | tdd-workflow | tdd-guide, build-error-resolver |
-| Refactor | /refactor-clean, /code-review, /verify | verification-loop | refactor-cleaner, code-reviewer |
+| New Feature | /plan, /tdd, /code-review, /verify | superpowers:test-driven-development, superpowers:verification-before-completion | planner, tdd-guide, code-reviewer |
+| Bug Fix | /tdd, /build-fix, /verify | superpowers:test-driven-development | tdd-guide, build-error-resolver |
+| Refactor | /refactor-clean, /code-review, /verify | superpowers:verification-before-completion | refactor-cleaner, code-reviewer |
 | Research | /plan | search-first, iterative-retrieval | — |
-| Testing | /tdd, /e2e, /test-coverage | tdd-workflow, e2e-testing | tdd-guide, e2e-runner |
+| Testing | /tdd, /e2e, /test-coverage | superpowers:test-driven-development, e2e-testing | tdd-guide, e2e-runner |
 | Review | /code-review | security-review | code-reviewer, security-reviewer |
 | Documentation | /update-docs, /update-codemaps | — | doc-updater |
 | Infrastructure | /plan, /verify | docker-patterns, deployment-patterns, database-migrations | architect |
@@ -179,10 +179,10 @@ For MEDIUM+ tasks, always start with /plan. For EPIC tasks, use blueprint skill.
 
 | Scope | Recommended Model | Rationale |
 |-------|------------------|-----------|
-| TRIVIAL-LOW | Sonnet 4.6 | Fast, cost-efficient for simple tasks |
-| MEDIUM | Sonnet 4.6 | Best coding model for standard work |
-| HIGH | Sonnet 4.6 (main) + Opus 4.6 (planning) | Opus for architecture, Sonnet for implementation |
-| EPIC | Opus 4.6 (blueprint) + Sonnet 4.6 (execution) | Deep reasoning for multi-session planning |
+| TRIVIAL-LOW | Sonnet 5 | Fast, cost-efficient for simple tasks |
+| MEDIUM | Sonnet 5 | Best coding model for standard work |
+| HIGH | Sonnet 5 (main) + Opus 5 (planning) | Opus for architecture, Sonnet for implementation |
+| EPIC | Opus 5 (blueprint) + Sonnet 5 (execution) | Deep reasoning for multi-session planning |
 
 **Multi-prompt splitting** (for HIGH/EPIC scope):
 
@@ -217,9 +217,9 @@ If Phase 0 auto-detected the answer, state it instead of asking.
 | Type | Component | Purpose |
 |------|-----------|---------|
 | Command | /plan | Plan architecture before coding |
-| Skill | tdd-workflow | TDD methodology guidance |
+| Skill | superpowers:test-driven-development | TDD methodology guidance |
 | Agent | code-reviewer | Post-implementation review |
-| Model | Sonnet 4.6 | Recommended for this scope |
+| Model | Sonnet 5 | Recommended for this scope |
 
 ### Section 3: Optimized Prompt — Full Version
 
@@ -381,7 +381,7 @@ Each phase = 1 PR, with /verify gates between phases.
 Use /save-session between phases. Use /resume-session to continue.
 Use git worktrees for parallel service extraction when dependencies allow.
 
-Recommended: Opus 4.6 for blueprint planning, Sonnet 4.6 for phase execution.
+Recommended: Opus 5 for blueprint planning, Sonnet 5 for phase execution.
 ```
 
 ---

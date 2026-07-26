@@ -14,8 +14,10 @@ Use **pytest** as the testing framework.
 
 ## Coverage
 
+Run tests through uv (see [coding-style.md](./coding-style.md) — uv is the env manager):
+
 ```bash
-pytest --cov=src --cov-report=term-missing
+uv run pytest --cov=src --cov-report=term-missing
 ```
 
 ## Test Organization
