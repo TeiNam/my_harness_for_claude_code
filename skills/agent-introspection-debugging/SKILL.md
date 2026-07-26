@@ -28,7 +28,7 @@ Activate this skill for:
 - producing a structured human-readable debug report
 
 Do not use this skill as the primary source for:
-- feature verification after code changes; use `verification-loop`
+- feature verification after code changes; use `superpowers:verification-before-completion`
 - framework-specific debugging when a narrower harness skill already exists
 - runtime promises the current harness cannot enforce automatically
 
@@ -138,7 +138,7 @@ Good pattern:
 
 ## Integration with the harness
 
-- Use `verification-loop` after recovery if code was changed.
+- Use `superpowers:verification-before-completion` after recovery if code was changed.
 - Use `continuous-learning-v2` when the failure pattern is worth turning into an instinct or later skill.
 - Use `council` when the issue is not technical failure but decision ambiguity.
 - Use `workspace-surface-audit` if the failure came from conflicting local state or repo drift.

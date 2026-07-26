@@ -62,9 +62,7 @@
       "type": "review",
       "primaryAgents": [],
       "allAgents": [],
-      "skills": [
-        "codex-cli"
-      ],
+      "skills": [],
       "path": "commands/cross-review.md"
     },
     {
@@ -238,9 +236,7 @@
       "type": "review",
       "primaryAgents": [],
       "allAgents": [],
-      "skills": [
-        "codex-cli"
-      ],
+      "skills": [],
       "path": "commands/model-route.md"
     },
     {
@@ -576,10 +572,6 @@
       {
         "skill": "rust-patterns",
         "count": 3
-      },
-      {
-        "skill": "codex-cli",
-        "count": 2
       },
       {
         "skill": "humanize-korean",

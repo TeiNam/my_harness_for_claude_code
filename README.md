@@ -3,7 +3,7 @@
 ![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-339933.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg)
 ![ESLint](https://img.shields.io/badge/ESLint-9.x-4B32C3.svg)
-![Tests](https://img.shields.io/badge/tests-1571%20passing-brightgreen.svg)
+![Tests](https://img.shields.io/badge/tests-1586%20passing-brightgreen.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/teinam)
@@ -20,12 +20,12 @@
 |---|---:|---|
 | `agents/` | 49 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
 | `commands/` | 53 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 183 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / Codex / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 / Apple 플랫폼 등) |
+| `skills/` | 179 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 / Apple 플랫폼 등) |
 | `rules/` | 37 | common 레이어(모델 라우팅 정책 포함) + 언어별(typescript / python / rust / web) |
 | `hooks/` | 31 | 이벤트 기반 훅 매처 (실행 스크립트 48종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
 | `scripts/` | — | 훅 핸들러 / 설치 / CI 검증 / 세션 관리 도구 |
-| `tests/` | — | 1571개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
+| `tests/` | — | 1586개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
 | `docs/` | — | 장문 가이드(글쓰기 / 보안)와 steering 규칙 |
 
 상세 인덱스는 `docs/COMMAND-REGISTRY.json`에 자동 생성되어 있습니다.
@@ -40,13 +40,14 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 | 별칭 | 현재 매핑 | 성격 | 대표 에이전트 |
 |---|---|---|---|
-| `opus` | **Opus 4.8** | 가장 깊은 추론 — 아키텍처·모호성·적대적 리뷰·시스템 전반 디버깅 | `architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity/quality 감사관 |
+| `fable` | **Fable 5** | Opus 위 프런티어 티어(~2× 비용) — 최장기 자율 실행·최고 스테이크 최종 판정. frontmatter 별칭이 아니라 Agent tool per-call 오버라이드로만 사용 | (오버라이드 전용) |
+| `opus` | **Opus 5** | 가장 깊은 추론 — 아키텍처·모호성·적대적 리뷰·시스템 전반 디버깅. refusal·web fetch·Priority Tier 필요 시 Opus 4.8 폴백 | `architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity/quality 감사관 |
 | `sonnet` | **Sonnet 5** | 최고의 코딩 모델 — 구현·리팩터·PR 리뷰(코딩의 ~90%) | 언어별 리뷰어, `code-*`, `devops`, `tdd-guide`, `refactor-cleaner`, 작성가 |
 | `haiku` | **Haiku 4.5** | Sonnet의 ~90% 성능을 ~3× 저렴하게 — 기계적 편집·검색·문서 스캐폴딩 | `doc-updater`, `docs-lookup`, 고빈도 워커 |
 
-기본은 Sonnet 5. 첫 시도가 실패했거나 · 5개 이상 파일에 걸치거나 · 아키텍처 결정이거나 · 보안이 걸린 작업이면 Opus 4.8로 올리고, 결정적이고 위험이 낮은 작업은 Haiku 4.5로 내립니다. 에이전트 클래스는 평균이 아니라 **틀렸을 때의 최악 비용**으로 고릅니다 (머지를 게이팅하는 리뷰어는 대부분 쉬워도 `opus`).
+기본은 Sonnet 5. 첫 시도가 실패했거나 · 5개 이상 파일에 걸치거나 · 아키텍처 결정이거나 · 보안이 걸린 작업이면 Opus 5로 올리고, Opus 5의 `xhigh` effort로도 부족한 최장기·최고 스테이크 작업만 Fable 5로 올립니다. 결정적이고 위험이 낮은 작업은 Haiku 4.5로 내립니다. 에이전트 클래스는 평균이 아니라 **틀렸을 때의 최악 비용**으로 고릅니다 (머지를 게이팅하는 리뷰어는 대부분 쉬워도 `opus`).
 
-권위 있는 정책(작업 표·에이전트 클래스 맵·오케스트레이션·Codex 핸드오프)은 `rules/common/model-routing.md`에 있고, `/model-route` 커맨드와 `performance.md`가 이를 참조합니다. 다른 모델 패밀리의 독립적 세컨드 오피니언이 필요하면 `skills/codex-cli`로 OpenAI Codex CLI를 호출합니다.
+권위 있는 정책(작업 표·에이전트 클래스 맵·오케스트레이션·Codex 핸드오프)은 `rules/common/model-routing.md`에 있고, `/model-route` 커맨드와 `performance.md`가 이를 참조합니다. 다른 모델 패밀리의 독립적 세컨드 오피니언이 필요하면 codex 플러그인(`codex:rescue` 스킬/`codex:codex-rescue` 에이전트)으로 OpenAI Codex CLI를 호출합니다.
 
 ## 핵심 에이전트
 
@@ -66,7 +67,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 - **SEO/GEO/AEO**: `seo-geo-aeo`(origin: SNLabat/SEO-GEO-AEO-Skill) — SEO·생성형 검색엔진(GEO)·답변엔진(AEO) 3축 웹사이트 감사, Word/PDF 리포트. 기존 `seo` 스킬과 별개, `frontend` 워크로드.
 - **AI / 클라우드**: `claude-api`, `aws-bedrock`, `aws-cloud`, `aws-finops`(FinOps Foundation Framework + AWS 비용관리), `realtime-stt-huggingface`, `cost-aware-llm-pipeline`, `ai-regression-testing`
 - **데이터 분석**: `analysis-methodology`(분석 방법론·판단층 — 프레이밍→기법선택→검증→결정), `python-data-analysis`(pandas/polars/duckdb 도구), `duckdb-patterns`
-- **Codex (교차 모델)**: `codex-cli` — OpenAI Codex CLI를 Claude Code 안에서 호출해 다른 모델 패밀리의 독립 리뷰·tie-break·대규모 기계적 편집 오프로드. `core` 워크로드.
+- **Codex (교차 모델)**: codex 플러그인(openai/codex-plugin-cc, `docs/plugin.md`) — 다른 모델 패밀리의 독립 리뷰·tie-break·대규모 기계적 편집 오프로드. 하네스 자체 스킬은 플러그인과 중복이라 제거.
 - **문서 생성**: `pdf`(pypdf·reportlab·weasyprint), `docx`(python-docx·docxtpl), `xlsx`(openpyxl·pandas) — 프로그래밍 방식 PDF/Word/Excel 산출. 슬라이드는 `ppt-authoring`·`frontend-slides`. `core` 워크로드.
 - **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`, `tech-writer`(한/영 기술 문서 작성·윤문 오케스트레이터, 5개 전용 에이전트)
 - **소셜 콘텐츠 (LinkedIn 개인 브랜딩)**: 17종, origin: charlie947/social-media-skills. `writing`과 분리된 별도 워크로드이며, 파이프라인 단계별 3그룹으로 나뉩니다 — **`social-voice`**(`voice-builder`, `newsletter-voice`, `profile-optimizer`) → **`social-content`**(`post-writer`, `post-formatter`, `post-scorer`, `hook-generator`, `content-matrix`, `niche-research`, `pinned-comment`, `reels-scripting`, `analytics-dashboard`) → **`social-visual`**(`graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `youtube-thumbnail`). 설치 시 글쓰기 › 소셜 상세 tier(`--writing-social=`)로 골라 담습니다.
@@ -178,6 +179,21 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 
 `hooks/prompt-pack.json`은 실행되지 않는 참고용 프롬프트 모음으로, `hooks/README-prompt-pack.md`를 참고해 세션이나 `CLAUDE.md`에 직접 붙여 사용합니다.
 
+## 동반 플러그인 (하네스와 같이 설치)
+
+하네스 설치와 함께 아래 플러그인을 설치합니다 — 설치 명령 전체는 `docs/plugin.md`.
+
+| 플러그인 | 마켓플레이스 | 역할 (하네스와의 관계) |
+|---|---|---|
+| `superpowers` | anthropics/claude-plugins-official | TDD·검증·디버깅·플랜 스킬 — 하네스 자체 `tdd-workflow`·`verification-loop` 스킬은 중복이라 제거됨 |
+| `rust-analyzer-lsp` | anthropics/claude-plugins-official | Rust LSP |
+| `ponytail` | DietrichGebert/ponytail | 최소주의 코딩 모드 |
+| `codex` | openai/codex-plugin-cc | 교차 모델 세컨드 오피니언 — 하네스 자체 `codex-cli` 스킬은 중복이라 제거됨 |
+| `ui-ux-pro-max` | nextlevelbuilder/ui-ux-pro-max-skill | 디자인 시스템·UI 스타일링 — 하네스 자체 `design-system` 스킬은 중복이라 제거됨 |
+| `claude-dashboard` | uppinote20/claude-dashboard | statusline 사용량 모니터링 (하네스 `cost-tracking`은 SQLite 비용 DB라 별개 유지) |
+| `motion-creative` | Motion-Creative/motion-creative-plugin | 광고 크리에이티브 분석 (웹 애니메이션 `motion-*` 스킬과 무관 — 이름만 유사) |
+| `obsidian` | kepano/obsidian-skills | Obsidian 문서 포맷 (project scope 설치) |
+
 ## 필수 도구 버전
 
 `.tool-versions`에 asdf / mise용 핀이 들어 있습니다.
@@ -250,7 +266,7 @@ export BRAVE_API_KEY="BSA_..."   # api.search.brave.com/app/keys
 
 ## 자주 쓰는 슬래시 커맨드
 
-- 시작: `/plan`, `/feature-dev`, `/tdd-workflow`
+- 시작: `/plan`, `/feature-dev` (TDD는 superpowers 플러그인의 `test-driven-development` 스킬)
 - 리뷰: `/code-review`, `/cross-review`(codex·kiro-cli 교차 모델), `/python-review`, `/rust-review`, `/fastapi-review`
 - 빌드 / 테스트: `/build-fix`, `/rust-build`, `/test-coverage`
 - 정리 / 게이트: `/refactor-clean`, `/security-scan`, `/quality-gate`
@@ -263,7 +279,7 @@ export BRAVE_API_KEY="BSA_..."   # api.search.brave.com/app/keys
 
 ```bash
 npm run lint                      # ESLint
-npm test                          # CI 검증 + 전체 테스트 슈트(1571개)
+npm test                          # CI 검증 + 전체 테스트 슈트(1586개)
 node tests/run-all.js             # 테스트만 따로 실행
 npm run command-registry:write    # 커맨드 레지스트리 갱신
 npm run command-registry:check    # 동기화 상태만 확인 (CI용)

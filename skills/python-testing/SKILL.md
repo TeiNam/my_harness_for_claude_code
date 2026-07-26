@@ -77,7 +77,7 @@ Pytest-first testing for Python ≥ 3.9. TDD workflow, fixtures, parametrize, mo
 
 - `python-patterns` — language idioms tests should reflect
 - `fastapi-backend-best-practices/testing/` — API integration tests, factory pattern
-- `tdd-workflow` — universal red/green/refactor cadence
+- `superpowers:test-driven-development` — universal red/green/refactor cadence
 
 ## See Also
 

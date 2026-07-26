@@ -149,7 +149,7 @@ Next step: /plan .claude/prds/{name}.prd.md
 ## Integration
 
 - `/plan <prd-path>` — consume the PRD and produce an implementation plan for the next pending milestone.
-- `tdd-workflow` skill — implement the plan test-first.
+- `superpowers:test-driven-development` skill — implement the plan test-first.
 - `/pr` — open a PR that references the PRD and plan.
 
 ## Success criteria

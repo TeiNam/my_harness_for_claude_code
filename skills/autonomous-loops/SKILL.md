@@ -116,7 +116,7 @@ claude -p --allowedTools "Read,Write,Edit,Bash" "Implement the fixes from securi
 node scripts/claw.js
 
 # Named session with skill context
-CLAW_SESSION=my-project CLAW_SKILLS=tdd-workflow,security-review node scripts/claw.js
+CLAW_SESSION=my-project CLAW_SKILLS=superpowers:test-driven-development,security-review node scripts/claw.js
 ```
 
 ### How It Works
@@ -569,7 +569,7 @@ These patterns compose well:
 
 2. **Continuous Claude + De-Sloppify** — Add `--review-prompt` with a de-sloppify directive to each iteration.
 
-3. **Any loop + Verification** — Use the harness's `/verify` command or `verification-loop` skill as a gate before commits.
+3. **Any loop + Verification** — Use the harness's `/verify` command or `superpowers:verification-before-completion` skill as a gate before commits.
 
 4. **Ralphinho's tiered approach in simpler loops** — Even in a sequential pipeline, you can route simple tasks to Haiku and complex tasks to Opus:
    ```bash
@@ -608,4 +608,4 @@ These patterns compose well:
 | Infinite Agentic Loop | disler | credit: @disler |
 | Continuous Claude | AnandChowdhary | credit: @AnandChowdhary |
 | NanoClaw | harness | `/claw` command in this repo |
-| Verification Loop | harness | `skills/verification-loop/` in this repo |
+| Verification Loop | harness | `superpowers plugin (verification-before-completion)` in this repo |

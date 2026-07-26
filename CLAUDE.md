@@ -32,7 +32,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `mcp-configs/` — MCP server configs (proxy-first: `proxy/` holds the mcp-proxy compose stack; `mcp-servers.json` catalog is the SSOT, marking each server `route: proxy|local` + `workloads: [...]`). 설치 시 `scripts/install/build-mcp-config.js` 가 선택 워크로드와 매칭되는 `route=proxy` 서버만 골라 `proxy/config.json` 을 빌드한다(통짜 X). `terraform` 선택 시 compose 의 `terraform-mcp` profile 동반 기동.
 - `scripts/` — Node.js utilities for hooks, install/uninstall, audits
 - `tests/` — test suite for `scripts/`
-- `docs/` — long-form reference (writing guides, security guide, steering rules)
+- `docs/` — long-form reference (writing guides, security guide, steering rules). `docs/plugin.md` 는 하네스와 함께 설치하는 동반 플러그인 목록(superpowers·codex·ui-ux-pro-max 등) — 이 플러그인들과 겹치는 하네스 자체 스킬(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`)은 2026-07-26 제거됨. 새 스킬 추가 시 플러그인과의 중복 여부를 먼저 확인할 것.
 
 ## High-value Agents
 
@@ -47,7 +47,7 @@ The longer reviewer/architect agents (`code-reviewer`, `python-reviewer`, `types
 
 ### Model Routing (per-agent model tiers)
 
-Agents declare `model:` as an **alias** (`opus` / `sonnet` / `haiku`), never a pinned version ID, so the fleet follows model upgrades without a mass re-tag. Current lineup: `opus`→**Opus 4.8**, `sonnet`→**Sonnet 5**, `haiku`→**Haiku 4.5**. The authoritative policy (task tables, agent-class map, orchestration, Codex handoff) is `rules/common/model-routing.md`; `commands/model-route.md` and `/model-route` defer to it. Classes: reasoning-heavy/high-stakes agents (`architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity/quality auditors) → `opus`; implementation/review specialists → `sonnet`; mechanical high-frequency (`doc-updater`, `docs-lookup`) → `haiku`. Pick by worst-case cost of a wrong answer, not the average. For a genuinely independent cross-family opinion, route to Codex via `skills/codex-cli` (not just a re-prompt of the same model).
+Agents declare `model:` as an **alias** (`opus` / `sonnet` / `haiku`), never a pinned version ID, so the fleet follows model upgrades without a mass re-tag. Current lineup: `opus`→**Opus 5** (Opus 4.8 은 safety-refusal·web fetch·Priority Tier 폴백), `sonnet`→**Sonnet 5**, `haiku`→**Haiku 4.5**, 그리고 frontmatter 별칭이 아닌 상위 티어 **Fable 5**(Agent tool 의 per-call `model: fable` 오버라이드로만 사용 — 최장기 자율 실행·최고 스테이크 최종 판정, Opus ~2× 비용). The authoritative policy (task tables, agent-class map, orchestration, Codex handoff) is `rules/common/model-routing.md`; `commands/model-route.md` and `/model-route` defer to it. Classes: reasoning-heavy/high-stakes agents (`architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity/quality auditors) → `opus`; implementation/review specialists → `sonnet`; mechanical high-frequency (`doc-updater`, `docs-lookup`) → `haiku`. Pick by worst-case cost of a wrong answer, not the average. Opus 5 는 4.8 보다 스스로 검증하고(자체 검증 지시문 제거) 서브에이전트를 더 적극 생성하므로(불필요한 fan-out 은 프롬프트로 캡) 에이전트 프롬프트 재튜닝 시 참고. For a genuinely independent cross-family opinion, route to Codex via the codex plugin (`codex:rescue` — install per `docs/plugin.md`; not just a re-prompt of the same model).
 
 ## High-value Skills for Owner's Workloads
 
@@ -59,7 +59,7 @@ Filled-in (real content, not placeholder):
 - **SEO/GEO/AEO**: `skills/seo-geo-aeo/` (origin: SNLabat/SEO-GEO-AEO-Skill) — URL 하나로 SEO·GEO(생성형 검색엔진)·AEO(답변엔진) 3축 감사, Word/PDF 리포트 산출. 기존 `skills/seo/`(harness 자체 SEO 스킬)와 별개, 둘 다 `frontend` 워크로드.
 - **AI**: `skills/claude-api/` (Anthropic SDK), `skills/foundation-models-on-device/`, `skills/ai-regression-testing/`, `skills/cost-aware-llm-pipeline/`, `skills/aws-bedrock/`, `skills/realtime-stt-huggingface/`, `skills/ai-tui/`
 - **AI TUI (터미널 에이전트 초기화면·두뇌)**: `skills/ai-tui/` — Claude Code·stocker 스타일 터미널 AI 에이전트의 초기화면(배너·로고·입력창·힌트바 6요소)과 두뇌(프롬프트·스킬·MCP·사용룰)를 세팅하는 크로스 언어 레퍼런스. `references/` 4종 — 언어별 3종(`node-pi-tui`, `rust-ratatui`, `python-textual`)과 언어 중립 `agent-brain-setup`. 유지형(pi-tui/textual) vs 즉시형(ratatui) 렌더링 차이와 ANSI 폭 함정을 언어별로 대비. `${CLAUDE_SKILL_DIR}` 토큰 치환. `ai`·`nodejs`·`rust`·`python-backend` 워크로드로 통합.
-- **Codex (교차 모델 세컨드 오피니언)**: `skills/codex-cli/` — OpenAI Codex CLI(`codex exec` / `resume`)를 Claude Code 안에서 호출. 다른 모델 패밀리의 독립적 리뷰(Claude 작성 코드의 adversarial 검토), 어려운 결정의 tie-break, 대규모 기계적 편집 오프로드용. `</dev/null` stdin 리다이렉트(비-TTY 무한 대기 방지)·`2>/dev/null`(thinking 억제)·`--skip-git-repo-check` 3종은 필수. 샌드박스는 최소 권한(`read-only` 기본), `--full-auto`/`danger-full-access`는 사전 승인. Codex 출력은 검증 대상인 제안이지 정답 아님. `core` 워크로드.
+- **Codex (교차 모델 세컨드 오피니언)**: codex **플러그인**(openai/codex-plugin-cc — 설치는 `docs/plugin.md`) — `codex:rescue` 스킬·`codex:codex-rescue` 에이전트로 다른 모델 패밀리의 독립적 리뷰(adversarial 검토)·tie-break·대규모 기계적 편집 오프로드. 하네스 자체 `skills/codex-cli` 는 플러그인과 중복이라 제거됨(2026-07-26). Codex 출력은 검증 대상인 제안이지 정답 아님.
 - **문서 생성 (PDF / DOCX / XLSX)**: `skills/pdf/`(pypdf 읽기·병합·폼필·분할, reportlab/weasyprint 생성, CJK 폰트 등록), `skills/docx/`(python-docx + docxtpl 템플릿 채우기, 스타일·표·한글 eastAsia 폰트), `skills/xlsx/`(openpyxl 스타일 리포트·수식·차트, pandas 핸드오프, `data_only` 함정) — 프로그래밍 방식 오피스 문서 산출. 슬라이드는 `ppt-authoring`+`frontend-slides`, 사람처럼 쓴 한글 산문은 `humanize-korean`가 담당하므로 별도 스킬 미신설. `core` 워크로드.
 - **다이어그램 생성**: `skills/archify/`(origin: tt-a1i, based on Cocoon-AI/architecture-diagram-generator, MIT) — 5개 모드(architecture·workflow·sequence·dataflow·lifecycle)를 JSON→SVG 렌더러로 그리는 자립형 HTML 다이어그램 엔진. 다크/라이트 토글·PNG/JPEG/WebP/듀얼테마 SVG 내보내기 내장, 평문 설명이나 붙여넣은 Mermaid(flowchart/sequenceDiagram/stateDiagram)를 archify 스타일로 재레이아웃. 렌더러는 `ajv` 스키마 검증(선택; `npm install` 안 해도 자체 레이아웃 검사로 동작)이며 생성된 HTML은 무의존. 셸 없으면 architecture 모드로 `assets/template.html`에 수동 SVG 배치. `core` 워크로드. `skills/drawio-diagram/`(draw.io/mxGraph XML, MCP 검증 루프)과 별개 — archify 는 self-contained HTML 산출, drawio 는 .drawio 파일 산출.
 - **Cloud**: `skills/aws-cloud/` (IAM, S3, Lambda, ECS/Fargate, RDS, networking, cost guardrails)
@@ -140,7 +140,7 @@ node tests/hooks/hooks.test.js
 
 ## Key Commands (subset)
 
-- `/tdd-workflow` (skill) / `/plan` / `/feature-dev` — start work
+- `/plan` / `/feature-dev` — start work (TDD는 superpowers 플러그인의 `test-driven-development` 스킬)
 - `/code-review` / `/python-review` / `/rust-review` / `/fastapi-review`
 - `/build-fix` / `/rust-build` / `/test-coverage`
 - `/refactor-clean` / `/security-scan` / `/quality-gate`

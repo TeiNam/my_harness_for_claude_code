@@ -15,8 +15,8 @@ This skill is intentionally narrower than general coding guidance. It is an oper
 
 Pull these harness-native skills into the workflow when relevant:
 
-- `verification-loop` for exact proving steps after changes
-- `tdd-workflow` when the right fix needs regression coverage
+- `superpowers:verification-before-completion` for exact proving steps after changes
+- `superpowers:test-driven-development` when the right fix needs regression coverage
 - `security-review` when secrets, auth, or external inputs are involved
 - `github-ops` when the task depends on CI runs, PR state, or release status
 - `knowledge-ops` when the verified outcome needs to be captured into durable project context

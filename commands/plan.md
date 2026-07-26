@@ -182,7 +182,7 @@ If you want changes, respond with:
 ## Integration with Other Commands
 
 After planning:
-- Use the `tdd-workflow` skill to implement with test-driven development
+- Use the `superpowers:test-driven-development` skill to implement with test-driven development
 - Use `/build-fix` if build errors occur
 - Use `/code-review` to review completed implementation
 - Use `/pr` to open a pull request

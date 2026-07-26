@@ -180,7 +180,7 @@ The agent will stop and report if:
 
 - `/rust-test` - Run tests after build succeeds
 - `/rust-review` - Review code quality
-- `verification-loop` skill - Full verification loop
+- `superpowers:verification-before-completion` skill - Full verification loop
 
 ## Related
 

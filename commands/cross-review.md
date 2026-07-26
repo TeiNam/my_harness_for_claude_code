@@ -62,6 +62,6 @@ Codex가 약한 곳을 특히 본다: 파일 간 정합(예: 두 스크립트의
 ## 참고
 
 - codex 호출 3종 세트(`</dev/null`·`2>/dev/null`·`--skip-git-repo-check`)는 필수 —
-  자세한 규약은 `skills/codex-cli/SKILL.md`.
+  자세한 규약은 codex 플러그인의 `codex:codex-cli-runtime` 스킬 참고.
 - 쓰기 권한(codex `--sandbox workspace-write`)은 리뷰엔 불필요. fix를 Codex에 시키려면
   사용자 승인 후에만.

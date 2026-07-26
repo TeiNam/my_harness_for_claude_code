@@ -105,8 +105,8 @@ If useful, point to the next harness-native lane:
 - `workspace-surface-audit`
 - `api-connector-builder`
 - `dashboard-builder`
-- `tdd-workflow`
-- `verification-loop`
+- `superpowers:test-driven-development`
+- `superpowers:verification-before-completion`
 
 ## Output Format
 
