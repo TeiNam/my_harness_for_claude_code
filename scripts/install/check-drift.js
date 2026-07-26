@@ -92,9 +92,19 @@ function main(argv) {
   const root = flags.root || path.resolve(__dirname, '..', '..');
   const claudeHome = flags.claudeHome || process.env.CLAUDE_HOME || path.join(os.homedir(), '.claude');
 
+  // --workload 미지정 시 설치 매니페스트의 워크로드를 기본값으로 사용한다.
+  // 전 그룹 검사로 폴백하면 수동 전용 그룹(lab)이 영구 오탐 드리프트로 잡힌다.
+  let workload = flags.workload;
+  if (!workload) {
+    try {
+      const manifest = JSON.parse(fs.readFileSync(path.join(claudeHome, '_harness-manifest.json'), 'utf8'));
+      if (Array.isArray(manifest.workloads) && manifest.workloads.length) workload = manifest.workloads;
+    } catch { /* 매니페스트 없음 — 전 그룹 검사로 폴백 */ }
+  }
+
   const { selected, activeGroups } = selectAssets({
     root,
-    workload: flags.workload,
+    workload,
     skipWorkload: flags.skipWorkload,
   });
 
