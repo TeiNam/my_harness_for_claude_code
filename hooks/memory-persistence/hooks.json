@@ -16,20 +16,6 @@
       "blocking": false
     },
     {
-      "event": "PreToolUse",
-      "id": "pre:observe:continuous-learning",
-      "script": "scripts/hooks/observe-runner.js",
-      "purpose": "Record tool intent for continuous learning signals.",
-      "blocking": false
-    },
-    {
-      "event": "PostToolUse",
-      "id": "post:observe:continuous-learning",
-      "script": "scripts/hooks/observe-runner.js",
-      "purpose": "Record tool results for continuous learning signals.",
-      "blocking": false
-    },
-    {
       "event": "PostToolUse",
       "id": "post:session-activity-tracker",
       "script": "scripts/hooks/session-activity-tracker.js",

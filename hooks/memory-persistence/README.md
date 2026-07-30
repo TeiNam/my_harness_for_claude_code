@@ -7,7 +7,6 @@ The executable implementations live in `scripts/hooks/`:
 - `session-start.js` loads bounded prior context, detects project state, and prepares session metadata.
 - `pre-compact.js` captures state before context compaction.
 - `session-end.js` persists session-end summaries when transcript metadata is available.
-- `observe-runner.js` records tool-use observations for continuous learning.
 - `session-activity-tracker.js` records tool usage and file activity for status and observability.
 
 The installed hook graph is still `hooks/hooks.json`. This directory is the stable, human-readable lifecycle definition surface referenced by the harness audit and longform docs.
@@ -18,8 +17,6 @@ The installed hook graph is still `hooks/hooks.json`. This directory is the stab
 |---|---|---|---|
 | `SessionStart` | `session:start` | Load bounded prior context and project metadata | no |
 | `PreCompact` | `pre:compact` | Save state before compaction | no |
-| `PreToolUse` | `pre:observe:continuous-learning` | Capture tool intent for learning signals | no |
-| `PostToolUse` | `post:observe:continuous-learning` | Capture tool result for learning signals | no |
 | `PostToolUse` | `post:session-activity-tracker` | Record tool and file activity for harness metrics | no |
 | `Stop` | `stop:format-typecheck` | Batch quality gate after edits | yes on hook failure |
 | `Stop` | `stop:check-console-log` | Audit modified files for debug logging | warn/error by hook output |
@@ -39,6 +36,5 @@ The installed hook graph is still `hooks/hooks.json`. This directory is the stab
 - `scripts/hooks/session-start.js`
 - `scripts/hooks/pre-compact.js`
 - `scripts/hooks/session-end.js`
-- `scripts/hooks/observe-runner.js`
 - `scripts/hooks/session-activity-tracker.js`
 - `docs/architecture/observability-readiness.md`

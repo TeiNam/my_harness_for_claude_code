@@ -269,7 +269,7 @@ Async hooks run in the background. They cannot block tool execution.
 
 ## Cross-Platform Notes
 
-Hook logic is implemented in Node.js scripts for cross-platform behavior on Windows, macOS, and Linux. The continuous-learning observer is exposed as a Node-mode hook and delegates to its existing `observe.sh` implementation through a profile-gated runner with Windows-safe fallback behavior.
+Hook logic is implemented in Node.js scripts for cross-platform behavior on Windows, macOS, and Linux.
 
 ## Related
 

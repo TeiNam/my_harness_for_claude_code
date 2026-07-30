@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalCommands": 53,
+  "totalCommands": 45,
   "commands": [
     {
       "command": "aside",
@@ -64,17 +64,6 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/cross-review.md"
-    },
-    {
-      "command": "evolve",
-      "description": "Analyze instincts and suggest or generate evolved structures",
-      "type": "testing",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [
-        "continuous-learning-v2"
-      ],
-      "path": "commands/evolve.md"
     },
     {
       "command": "fastapi-review",
@@ -160,37 +149,6 @@
         "humanize-korean"
       ],
       "path": "commands/humanize.md"
-    },
-    {
-      "command": "instinct-export",
-      "description": "Export instincts from project/global scope to a file",
-      "type": "testing",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [],
-      "path": "commands/instinct-export.md"
-    },
-    {
-      "command": "instinct-import",
-      "description": "Import instincts from file or URL into project/global scope",
-      "type": "testing",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [
-        "continuous-learning-v2"
-      ],
-      "path": "commands/instinct-import.md"
-    },
-    {
-      "command": "instinct-status",
-      "description": "Show learned instincts (project + global) with confidence",
-      "type": "review",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [
-        "continuous-learning-v2"
-      ],
-      "path": "commands/instinct-status.md"
     },
     {
       "command": "learn",
@@ -282,28 +240,6 @@
       "path": "commands/project-init.md"
     },
     {
-      "command": "projects",
-      "description": "List known projects and their instinct statistics",
-      "type": "general",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [
-        "continuous-learning-v2"
-      ],
-      "path": "commands/projects.md"
-    },
-    {
-      "command": "promote",
-      "description": "Promote project-scoped instincts to global scope",
-      "type": "review",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [
-        "continuous-learning-v2"
-      ],
-      "path": "commands/promote.md"
-    },
-    {
       "command": "prp-commit",
       "description": "Quick commit with natural language file targeting — describe what to commit in plain English",
       "type": "testing",
@@ -338,17 +274,6 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/prp-prd.md"
-    },
-    {
-      "command": "prune",
-      "description": "Delete pending instincts older than 30 days that were never promoted",
-      "type": "review",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [
-        "continuous-learning-v2"
-      ],
-      "path": "commands/prune.md"
     },
     {
       "command": "python-review",
@@ -497,15 +422,6 @@
       "path": "commands/skill-create.md"
     },
     {
-      "command": "skill-health",
-      "description": "Show skill portfolio health dashboard with charts and analytics",
-      "type": "review",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [],
-      "path": "commands/skill-health.md"
-    },
-    {
       "command": "test-coverage",
       "description": "Analyze coverage, identify gaps, and generate missing tests toward the target threshold.",
       "type": "testing",
@@ -536,11 +452,11 @@
   "statistics": {
     "byType": {
       "build": 1,
-      "general": 8,
+      "general": 7,
       "planning": 1,
       "refactoring": 1,
-      "review": 9,
-      "testing": 33
+      "review": 5,
+      "testing": 30
     },
     "topAgents": [
       {
@@ -565,10 +481,6 @@
       }
     ],
     "topSkills": [
-      {
-        "skill": "continuous-learning-v2",
-        "count": 6
-      },
       {
         "skill": "rust-patterns",
         "count": 3

@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-31
 
+- refactor(skills): Apple 스킬 23개 카테고리 제거 (-155,912줄, 레포의 50%) (#6) (36b4ef6)
 - refactor(models): Fable 티어 제거 — Opus 5 를 천장으로, 그 위는 effort·Codex (#5) (5f74354)
 
 ## 2026-07-30
