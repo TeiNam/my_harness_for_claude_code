@@ -1,8 +1,8 @@
 {
   "name": "my-harness-for-claude-code",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
-  "description": "Personal Claude Code harness — agents, skills, commands, hooks, rules, and MCP configs tailored to my workloads",
+  "description": "Personal Claude Code harness \u2014 agents, skills, commands, hooks, rules, and MCP configs tailored to my workloads",
   "license": "MIT",
   "engines": {
     "node": ">=18"

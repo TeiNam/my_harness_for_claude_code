@@ -63,7 +63,7 @@ uses **one** range per index scan — once `start_date <= :d` seeks, `end_date` 
 scan widens as data grows:
 
 ```sql
--- ❌ start_date range has no lower bound → scans all past rows
+-- WRONG: start_date range has no lower bound → scans all past rows
 SELECT * FROM promotions WHERE start_date <= '2026-07-17' AND end_date >= '2026-07-17';
 ```
 

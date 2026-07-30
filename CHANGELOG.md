@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-31
 
+- refactor(skills): 메뉴 비노출 lab 스킬 30개 제거 (-7,426줄) (#8) (f853b40)
 - refactor: 산출물 0인 자기진화 스택 제거 (-13,062줄) (#7) (627dd9f)
 - refactor(skills): Apple 스킬 23개 카테고리 제거 (-155,912줄, 레포의 50%) (#6) (36b4ef6)
 - refactor(models): Fable 티어 제거 — Opus 5 를 천장으로, 그 위는 effort·Codex (#5) (5f74354)

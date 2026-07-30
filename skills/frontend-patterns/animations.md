@@ -225,5 +225,5 @@ framer-motion's `x`, `y`, `scale`, `rotate`, `opacity` props all use transform u
 
 ## Related
 
-- `motion-foundations`, `motion-patterns`, `motion-ui` — design-direction skills with motion specifics
+- `motion-foundations`, `motion-patterns` — design-direction skills with motion specifics
 - [accessibility.md](accessibility.md) — `prefers-reduced-motion`, focus during transitions

@@ -80,7 +80,7 @@ Patterns for building maintainable, performant, accessible React applications. T
 
 - `vite-patterns` — build, dev server, plugin recipes
 - `nextjs-turbopack` — Next.js app router specifics
-- `motion-foundations` / `motion-patterns` / `motion-ui` — interaction motion
+- `motion-foundations` / `motion-patterns` — interaction motion
 - `frontend-design-direction` / `liquid-glass-design` / `make-interfaces-feel-better` — visual direction
 - `a11y-architect` (agent) — accessibility deep review
 

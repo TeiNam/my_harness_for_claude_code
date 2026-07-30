@@ -42,8 +42,8 @@ jdbc:aws-wrapper:mysql://my-cluster.cluster-xyz.us-east-2.rds.amazonaws.com:3306
 |----------|------|------|
 | **AWS Advanced JDBC Wrapper** | Top choice (Aurora/RDS) | Topology cache + DNS bypass for seconds-level failover (EFM), failover2 default, R/W split, IAM, Secrets Manager, **Blue/Green (Aurora MySQL 3.07+)**, **Aurora Global DB cross-region failover/switchover (v3.0.0+)**. Maven `software.amazon.jdbc:aws-advanced-jdbc-wrapper` (4.x). KMS client-side encryption plugin added 2026-05 |
 | **MySQL Connector/J** | Viable (wrapper underlying or standalone) | Weak automatic failover detection when standalone — tuning required below. Latest 9.x. **Maven groupId changed to `com.mysql:mysql-connector-j`** (was `mysql:mysql-connector-java`) |
-| **MariaDB Connector/J** | ❌ Not for Aurora | **3.0.3 (2023-09) removed Aurora failover entirely** — the old "pin 2.7.11" advice is void (2.7.x near EOL, don't adopt). Pure MariaDB servers only → latest 3.5.x. For Aurora, combine AWS Advanced JDBC Wrapper instead |
-| **Aurora JDBC Driver** (`awslabs/aws-mysql-jdbc`) | ❌ Prohibited | **Hard EOL 2024-07-25** — no version usable |
+| **MariaDB Connector/J** | Not for Aurora | **3.0.3 (2023-09) removed Aurora failover entirely** — the old "pin 2.7.11" advice is void (2.7.x near EOL, don't adopt). Pure MariaDB servers only → latest 3.5.x. For Aurora, combine AWS Advanced JDBC Wrapper instead |
+| **Aurora JDBC Driver** (`awslabs/aws-mysql-jdbc`) | Prohibited | **Hard EOL 2024-07-25** — no version usable |
 
 ## Failover Tuning When Using Standalone Driver
 
