@@ -139,8 +139,8 @@ function readWorkloads(filePath, fallback) {
 }
 
 function selectGroups({ workload, skipWorkload }) {
-  // 옛 통짜 키(예: apple)를 하위 키로 먼저 확장한 뒤 검증한다 — 분할 후
-  // `apple` 은 GROUPS 에 없으므로 확장 전에 validateGroups 를 돌리면 실패한다.
+  // 옛 통짜 키를 하위 키로 먼저 확장한 뒤 검증한다 — 옛 키는 GROUPS 에
+  // 없으므로 확장 전에 validateGroups 를 돌리면 실패한다. (현재 ALIASES 는 비어 있음)
   const wl = workload && workload.length ? expandAliases(workload) : workload;
   const skip = skipWorkload && skipWorkload.length ? expandAliases(skipWorkload) : skipWorkload;
 

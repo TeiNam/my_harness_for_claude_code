@@ -51,10 +51,10 @@ function buildFixture() {
   writeFile(path.join(root, 'rules/python/security.md'), '---\nworkloads: [python-backend, python-data]\n---\n');
   writeFile(path.join(root, 'rules/common/git-workflow.md'), 'no frontmatter at all\n'); // no fm → folder-based fallback (core)
 
-  // apple 3분할 자산 — 별칭(--workload=apple) 확장 검증용.
-  writeFile(path.join(root, 'skills/apple-ios/SKILL.md'), '---\nname: iOS\nworkloads: [apple-core]\n---\n');
-  writeFile(path.join(root, 'skills/apple-watchos/SKILL.md'), '---\nname: watchOS\nworkloads: [apple-platform]\n---\n');
-  writeFile(path.join(root, 'skills/apple-app-store/SKILL.md'), '---\nname: App Store\nworkloads: [apple-product]\n---\n');
+  // social 3분할 자산 — 상세 tier 키가 독립적으로 선택되는지 검증용.
+  writeFile(path.join(root, 'skills/voice-builder/SKILL.md'), '---\nname: Voice\nworkloads: [social-voice]\n---\n');
+  writeFile(path.join(root, 'skills/post-writer/SKILL.md'), '---\nname: Post\nworkloads: [social-content]\n---\n');
+  writeFile(path.join(root, 'skills/gemini-carousel/SKILL.md'), '---\nname: Carousel\nworkloads: [social-visual]\n---\n');
 
   return root;
 }
@@ -184,16 +184,16 @@ function runTests() {
   else failed++;
 
   if (
-    test('selectAssets: --workload=apple 별칭이 3분할 자산 전부 선택', () => {
+    test('selectAssets: 상세 tier 키(social-*)를 독립적으로 선택', () => {
       const root = buildFixture();
-      const aliased = selectAssets({ root, workload: ['apple'] });
-      const ids = aliased.selected.map(a => a.sourceRel).sort();
-      assert.deepStrictEqual(ids, ['skills/apple-app-store', 'skills/apple-ios', 'skills/apple-watchos']);
+      const all3 = selectAssets({ root, workload: ['social-voice', 'social-content', 'social-visual'] });
+      const ids = all3.selected.map(a => a.sourceRel).sort();
+      assert.deepStrictEqual(ids, ['skills/gemini-carousel', 'skills/post-writer', 'skills/voice-builder']);
       // 하위 키 하나만 골랐을 땐 그 그룹만.
-      const coreOnly = selectAssets({ root, workload: ['apple-core'] });
+      const voiceOnly = selectAssets({ root, workload: ['social-voice'] });
       assert.deepStrictEqual(
-        coreOnly.selected.map(a => a.sourceRel),
-        ['skills/apple-ios']
+        voiceOnly.selected.map(a => a.sourceRel),
+        ['skills/voice-builder']
       );
       fs.rmSync(root, { recursive: true, force: true });
     })
@@ -202,8 +202,8 @@ function runTests() {
   else failed++;
 
   if (
-    test('selectGroups: apple 별칭이 3키로 확장', () => {
-      assert.deepStrictEqual(selectGroups({ workload: ['apple'] }).sort(), ['apple-core', 'apple-platform', 'apple-product']);
+    test('selectGroups: 별칭이 없는 키는 그대로 통과 (ALIASES 비어 있음)', () => {
+      assert.deepStrictEqual(selectGroups({ workload: ['social-voice'] }).sort(), ['social-voice']);
     })
   )
     passed++;

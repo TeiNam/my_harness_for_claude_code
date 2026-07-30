@@ -20,7 +20,7 @@
 |---|---:|---|
 | `agents/` | 49 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
 | `commands/` | 53 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 179 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 / Apple 플랫폼 등) |
+| `skills/` | 156 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
 | `rules/` | 37 | common 레이어(모델 라우팅 정책 포함) + 언어별(typescript / python / rust / web) |
 | `hooks/` | 31 | 이벤트 기반 훅 매처 (실행 스크립트 48종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
@@ -32,7 +32,8 @@
 
 ## 대상 워크로드
 
-Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian 플러그인, RDBMS / MongoDB / DuckDB / DynamoDB, AWS + Bedrock, Hugging Face 기반 실시간 STT, Node.js, 창작·기술 블로깅·PPT 작성. (opt-in) Apple 플랫폼(iOS/macOS/watchOS/visionOS, Swift) 개발.
+Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian 플러그인, RDBMS / MongoDB / DuckDB / DynamoDB, AWS + Bedrock, Hugging Face 기반 실시간 STT, Node.js, 창작·기술 블로깅·PPT 작성.
+
 
 ## 모델 라우팅
 
@@ -71,7 +72,6 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 - **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`, `tech-writer`(한/영 기술 문서 작성·윤문 오케스트레이터, 5개 전용 에이전트)
 - **소셜 콘텐츠 (LinkedIn 개인 브랜딩)**: 17종, origin: charlie947/social-media-skills. `writing`과 분리된 별도 워크로드이며, 파이프라인 단계별 3그룹으로 나뉩니다 — **`social-voice`**(`voice-builder`, `newsletter-voice`, `profile-optimizer`) → **`social-content`**(`post-writer`, `post-formatter`, `post-scorer`, `hook-generator`, `content-matrix`, `niche-research`, `pinned-comment`, `reels-scripting`, `analytics-dashboard`) → **`social-visual`**(`graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `youtube-thumbnail`). 설치 시 글쓰기 › 소셜 상세 tier(`--writing-social=`)로 골라 담습니다.
 - **한글 AI 티 제거**: `humanize-korean` — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 패턴을 탐지·윤문(`/humanize`·`/humanize-redo`, Fast/strict 모드). epoko77-ai/im-not-ai 통합.
-- **Apple 플랫폼 개발**: `apple-ios`, `apple-macos`, `apple-swift`, `apple-swiftui`, `apple-design`(Liquid Glass), `apple-testing`, `apple-generators`(63개 코드 생성기), `apple-security`, `apple-performance`, `apple-watchos`, `apple-visionos`, `apple-swiftdata`, `apple-mapkit`, `apple-foundation`, `apple-core-ml`, `apple-apple-intelligence`, `apple-product`(아이디어→App Store 스펙 워크플로), `apple-app-store`, `apple-growth`, `apple-legal`, `apple-monetization`, `apple-release-review`, `apple-shared` — 23개 카테고리, origin: rshankras/claude-code-apple-skills(MIT). 별도 `apple` 워크로드, 다른 워크로드와 독립적으로 opt-in.
 
 ## AWS Bedrock 워크플로 (최적화 포인트)
 
@@ -88,7 +88,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 ## 설치
 
-설치는 **도메인 축 6개 톱레벨 카테고리**(**개발 / 클라우드·인프라 / AI / 데이터 / 리서치·리포트 / 글쓰기**) 로 시작해서 카테고리별 중분류(sub-옵션: 언어·엔진·영역) 를 다중 선택하는 방식입니다. 자산이 많은 중분류(dev.apple / writing.social)만 상세 3그룹으로 한 단계 더 드릴다운됩니다. 선택된 sub-옵션이 워크로드 키로 변환되고, 그 키와 교집합인 자산만 `~/.claude/` 에 파일별 심볼릭 링크로 들어갑니다. 저장소에서 수정한 내용은 즉시 반영됩니다.
+설치는 **도메인 축 6개 톱레벨 카테고리**(**개발 / 클라우드·인프라 / AI / 데이터 / 리서치·리포트 / 글쓰기**) 로 시작해서 카테고리별 중분류(sub-옵션: 언어·엔진·영역) 를 다중 선택하는 방식입니다. 자산이 많은 중분류(writing.social)만 상세 3그룹으로 한 단계 더 드릴다운됩니다. 선택된 sub-옵션이 워크로드 키로 변환되고, 그 키와 교집합인 자산만 `~/.claude/` 에 파일별 심볼릭 링크로 들어갑니다. 저장소에서 수정한 내용은 즉시 반영됩니다.
 
 ### 대화형 메뉴
 
@@ -96,7 +96,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 ./install.sh                                    # 3단계 방향키 체크박스 메뉴를 띄움
 ```
 
-방향키 체크박스로 고릅니다: `↑`/`↓` 이동, `space` 토글, `a` 전체, `enter` 확정. 흐름은 3단계입니다 — **대분류(카테고리) → 중분류(sub-옵션) → 상세(있을 때만)**. 상세 tier 는 자산이 많은 카테고리(**Apple** = 핵심/플랫폼/제품·운영, **글쓰기 › 소셜** = 보이스/콘텐츠/시각)에만 나타나며, 나머지는 중분류에서 바로 끝납니다. 각 단계에서 아무것도 안 고르면 그 단계 전체가 선택됩니다.
+방향키 체크박스로 고릅니다: `↑`/`↓` 이동, `space` 토글, `a` 전체, `enter` 확정. 흐름은 3단계입니다 — **대분류(카테고리) → 중분류(sub-옵션) → 상세(있을 때만)**. 상세 tier 는 자산이 많은 카테고리(**글쓰기 › 소셜** = 보이스/콘텐츠/시각)에만 나타나며, 나머지는 중분류에서 바로 끝납니다. 각 단계에서 아무것도 안 고르면 그 단계 전체가 선택됩니다.
 
 설치는 먼저 **글로벌 baseline 상태**(`absent`/`outdated`/`current`)를 검사해 알려줍니다 — 매니페스트(`~/.claude/_harness-manifest.json`)에 기록된 버전을 저장소 `VERSION` 과 비교하며, 없거나 오래됐으면 새로 깔고 최신이면 선택 워크로드만 반영합니다.
 
@@ -117,20 +117,17 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 ./install.sh --writing=general                  # 글쓰기 — 일반 글쓰기만 (LinkedIn 콘텐츠 제외)
 ./install.sh --writing=social                   # 글쓰기 — 소셜 콘텐츠(LinkedIn) 전체
 ./install.sh --writing-social=voice,content     # 소셜 — 보이스 + 콘텐츠 제작만 (시각 자산 제외)
-./install.sh --dev-apple=core                   # Apple — 핵심 개발만 (Swift/SwiftUI/테스트/생성기 등)
-./install.sh --dev-apple=platform,product       # Apple — 플랫폼 특화 + 제품·운영
 ```
 
 | 카테고리 | sub-옵션(중분류) | 상세 (3단계) |
 |---|---|---|
-| `dev` | `frontend`, `python`, `rust`, `nodejs`, `apple`, `obsidian`, `chrome`(예약), `claude`(예약) | `apple`: `core` / `platform` / `product` (`--dev-apple=`) |
 | `cloud` | `infra`(→ `cloud`+`devops`), `finops`, `integration` | — |
 | `ai` | `llm`(→ `ai`) | — |
 | `data` | `duckdb`, `python-data`, `aws-analytics`, `mysql`, `postgres`, `mongodb`, `dynamodb`, `aws-rds` | — |
 | `research` | `websearch`(→ `research`), `report` | — |
 | `writing` | `general`(→ `writing`), `social` | `social`: `voice` / `content` / `visual` (`--writing-social=`) |
 
-> sub-옵션 플래그(`--dev=...` 등)를 명시하면 해당 카테고리는 자동으로 활성화되므로 `--category=` 는 생략 가능합니다. 상세 플래그(`--dev-apple=`, `--writing-social=`)도 마찬가지입니다.
+> sub-옵션 플래그(`--dev=...` 등)를 명시하면 해당 카테고리는 자동으로 활성화되므로 `--category=` 는 생략 가능합니다. 상세 플래그(`--writing-social=`)도 마찬가지입니다.
 
 ### 그 외 옵션
 
@@ -162,7 +159,6 @@ hooks·mcp 는 설치 후 대화형(TTY)일 때 추가 설치할지 물어봅니
 .\install.ps1 -Data mysql,postgres -WithHooks
 .\install.ps1 -Cloud infra,finops                                     # AWS 인프라·컨테이너 + 비용
 .\install.ps1 -WithMcp                                                # 묻지 않고 MCP proxy 기동 (docker compose up -d)
-.\install.ps1 -DevApple core,platform                                 # Apple 상세 — 핵심 + 플랫폼
 .\install.ps1 -WritingSocial voice,content                            # 소셜 상세 — 보이스 + 콘텐츠
 ```
 
@@ -172,7 +168,7 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 
 각 자산의 그룹은 frontmatter 의 `workloads:` 키로 결정됩니다 (`workloads: [python-backend]`, `workloads: [obsidian, frontend]` 등). 키가 없거나 frontmatter 자체가 없는 파일은 `scripts/install/workloads.js` 의 휴리스틱으로 폴백 분류됩니다 (rules/ 는 부모 폴더 기준). 일괄 재태깅은 `node scripts/install/tag-assets.js --dry-run` 으로 미리보고 `--apply` 로 적용합니다.
 
-전체 워크로드 키 목록: `core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing, social-voice, social-content, social-visual, apple-core, apple-platform, apple-product` (그 외 메뉴 비노출·수동 전용 키 `lab`). 옛 통짜 키 `apple` 은 `apple-core,apple-platform,apple-product` 로 확장되는 별칭으로 계속 동작합니다.
+전체 워크로드 키 목록: `core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing, social-voice, social-content, social-visual` (그 외 메뉴 비노출·수동 전용 키 `lab`).
 
 훅 병합은 `id`(`pre:bash:dispatcher`, `stop:cost-tracker` 등) 기준으로 멱등하게 동작하며, 변경 전 `settings.json.bak.<ISO>` 백업을 남깁니다. 사용자가 수동으로 추가한 훅 항목은 그대로 보존됩니다.
 

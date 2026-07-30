@@ -15,10 +15,7 @@
  * 데이터 분석 카테고리에서 "Python" 만 선택했을 때 FastAPI 가이드가 끌려오지
  * 않도록, python-backend 와 python-data 는 별도 키로 분리되어 있다.
  *
- * 카테고리에 sub-옵션이 없으면 (예: 글쓰기, Apple 플랫폼) 카테고리 자체가
- * 단일 워크로드로 매핑된다. Apple 플랫폼은 iOS/macOS/watchOS/visionOS를
- * 세분화하지 않고 하나의 `apple` 워크로드로 묶는다 — 원본 저장소도 동일
- * 워크플로로 다룬다.
+ * 카테고리에 sub-옵션이 없으면 카테고리 자체가 단일 워크로드로 매핑된다.
  */
 
 /**
@@ -46,7 +43,7 @@
 
 /** @type {Category[]} */
 // 대분류(도메인) → 중분류(sub) → 소분류(상세 워크로드).
-// 자산이 많은 중분류(apple/social)만 detailOptions 로 3단째를 편다.
+// 자산이 많은 중분류(writing.social)만 detailOptions 로 3단째를 편다.
 const CATEGORIES = [
   {
     id: 'dev',
@@ -57,17 +54,6 @@ const CATEGORIES = [
       { id: 'python', label: '백엔드 · Python (FastAPI 등)', workloads: ['python-backend'] },
       { id: 'rust', label: '백엔드 · Rust', workloads: ['rust'] },
       { id: 'nodejs', label: '백엔드 · Node.js', workloads: ['nodejs'] },
-      {
-        id: 'apple',
-        label: 'Apple 플랫폼 (iOS/macOS/watchOS/visionOS)',
-        // 상세 tier: 영역별 3분할. 미선택 시 전체.
-        detailQuestion: '어느 영역? (여러 개 선택 가능)',
-        detailOptions: [
-          { id: 'core', label: '핵심 개발 (Swift/SwiftUI/테스트/생성기)', workloads: ['apple-core'] },
-          { id: 'platform', label: '플랫폼 특화 (watchOS/visionOS/ML/Maps)', workloads: ['apple-platform'] },
-          { id: 'product', label: '제품 · 운영 (App Store/성장/법무)', workloads: ['apple-product'] }
-        ]
-      },
       { id: 'obsidian', label: '플러그인 · Obsidian', workloads: ['obsidian', 'frontend'] },
       { id: 'chrome', label: '플러그인 · Chrome 확장 (예약)', workloads: ['plugin-chrome', 'frontend'] },
       { id: 'claude', label: '플러그인 · Claude Code (예약)', workloads: ['plugin-claude'] }
@@ -147,7 +133,7 @@ function findCategory(id) {
  * @param {DetailOption[]} detailOptions
  * @param {string[]|undefined} requested  고른 상세 id 배열 (빈/미지정 → 전체)
  * @param {Set<string>} wlSet
- * @param {string} nodeKey                미지 상세 id 리포팅용 (예: 'apple', 'writing.social')
+ * @param {string} nodeKey                미지 상세 id 리포팅용 (예: 'writing.social')
  * @param {string[]} unknownDetails
  */
 function addDetailWorkloads(detailOptions, requested, wlSet, nodeKey, unknownDetails) {
@@ -174,7 +160,7 @@ function addDetailWorkloads(detailOptions, requested, wlSet, nodeKey, unknownDet
  *   subSelections: { [categoryId]: subOptionId[] } — sub-옵션을 가진 카테고리의
  *                  선택. 빈 배열 = 전체 sub.
  *   detailSelections: { [nodeKey]: detailId[] } — 상세 tier 선택. nodeKey 는
- *                  카테고리 레벨 상세면 `categoryId`(예: 'apple'), sub 레벨
+ *                  카테고리 레벨 상세면 `categoryId`, sub 레벨
  *                  상세면 `categoryId.subId`(예: 'writing.social'). 빈 배열 = 전체 상세.
  * @returns {{ workloads: string[], unknownCategories: string[], unknownSubs: string[], unknownDetails: string[] }}
  */
@@ -191,7 +177,7 @@ function resolveSelection({ categories = [], subSelections = {}, detailSelection
       continue;
     }
 
-    // (1) 카테고리 레벨 상세 tier (apple: subOptions 없음)
+    // (1) 카테고리 레벨 상세 tier (subOptions 없는 카테고리)
     if (cat.detailOptions && cat.detailOptions.length) {
       addDetailWorkloads(cat.detailOptions, detailSelections[catId], wlSet, catId, unknownDetails);
       continue;
@@ -237,7 +223,7 @@ function resolveSelection({ categories = [], subSelections = {}, detailSelection
  *   --category=dev,cloud              톱레벨 카테고리
  *   --dev=frontend,python             sub-옵션
  *   --data=mysql,aws-analytics        sub-옵션
- *   --dev-apple=core,platform         sub 레벨 상세 (dev.apple)
+ *   --writing-social=voice,content    sub 레벨 상세 (writing.social)
  *   --writing=general,social          sub-옵션
  *   --writing-social=voice,content    sub 레벨 상세 (writing.social)
  *
@@ -257,7 +243,7 @@ function parseCliFlags(flags) {
   };
 
   for (const cat of CATEGORIES) {
-    // 카테고리 레벨 상세 (apple): `--apple=core,platform` → detailSelections['apple']
+    // 카테고리 레벨 상세: `--<category>=a,b` → detailSelections[categoryId]
     if (cat.detailOptions && cat.detailOptions.length) {
       const flag = flags[cat.id];
       if (flag !== undefined) {

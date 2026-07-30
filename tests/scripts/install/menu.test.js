@@ -177,25 +177,25 @@ function runTests() {
   else failed++;
 
   if (
-    test('resolveSelection: dev.apple (sub-level detail) with no detail = all 3 apple keys', () => {
+    test('resolveSelection: writing.social (sub-level detail) with no detail = all 3 social keys', () => {
       const r = resolveSelection({
-        categories: ['dev'],
-        subSelections: { dev: ['apple'] }
+        categories: ['writing'],
+        subSelections: { writing: ['social'] }
       });
-      assert.deepStrictEqual(r.workloads, ['apple-core', 'apple-platform', 'apple-product', 'core']);
+      assert.deepStrictEqual(r.workloads, ['core', 'social-content', 'social-visual', 'social-voice']);
     })
   )
     passed++;
   else failed++;
 
   if (
-    test('resolveSelection: dev.apple detail picks specific areas', () => {
+    test('resolveSelection: writing.social detail picks specific areas', () => {
       const r = resolveSelection({
-        categories: ['dev'],
-        subSelections: { dev: ['apple'] },
-        detailSelections: { 'dev.apple': ['core', 'product'] }
+        categories: ['writing'],
+        subSelections: { writing: ['social'] },
+        detailSelections: { 'writing.social': ['voice', 'visual'] }
       });
-      assert.deepStrictEqual(r.workloads, ['apple-core', 'apple-product', 'core']);
+      assert.deepStrictEqual(r.workloads, ['core', 'social-visual', 'social-voice']);
     })
   )
     passed++;
@@ -204,12 +204,12 @@ function runTests() {
   if (
     test('resolveSelection: unknown detail reported separately', () => {
       const r = resolveSelection({
-        categories: ['dev'],
-        subSelections: { dev: ['apple'] },
-        detailSelections: { 'dev.apple': ['core', 'bogus'] }
+        categories: ['writing'],
+        subSelections: { writing: ['social'] },
+        detailSelections: { 'writing.social': ['voice', 'bogus'] }
       });
-      assert.deepStrictEqual(r.unknownDetails, ['dev.apple.bogus']);
-      assert.ok(r.workloads.includes('apple-core'));
+      assert.deepStrictEqual(r.unknownDetails, ['writing.social.bogus']);
+      assert.ok(r.workloads.includes('social-voice'));
     })
   )
     passed++;
@@ -276,37 +276,37 @@ function runTests() {
   else failed++;
 
   if (
-    test('parseCliFlags: --dev-apple=core,platform routes to sub-level detail + auto sub', () => {
-      const { categories, subSelections, detailSelections } = parseCliFlags({ 'dev-apple': 'core,platform' });
-      assert.deepStrictEqual(categories, ['dev']);
-      assert.deepStrictEqual(subSelections, { dev: ['apple'] });
-      assert.deepStrictEqual(detailSelections, { 'dev.apple': ['core', 'platform'] });
+    test('parseCliFlags: --writing-social=voice,content routes to sub-level detail + auto sub', () => {
+      const { categories, subSelections, detailSelections } = parseCliFlags({ 'writing-social': 'voice,content' });
+      assert.deepStrictEqual(categories, ['writing']);
+      assert.deepStrictEqual(subSelections, { writing: ['social'] });
+      assert.deepStrictEqual(detailSelections, { 'writing.social': ['voice', 'content'] });
     })
   )
     passed++;
   else failed++;
 
   if (
-    test('parseCliFlags: --dev-apple=core resolves to apple-core only', () => {
-      const { categories, subSelections, detailSelections } = parseCliFlags({ 'dev-apple': 'core' });
+    test('parseCliFlags: --writing-social=voice resolves to social-voice only', () => {
+      const { categories, subSelections, detailSelections } = parseCliFlags({ 'writing-social': 'voice' });
       const r = resolveSelection({ categories, subSelections, detailSelections });
-      assert.deepStrictEqual(r.workloads, ['apple-core', 'core']);
+      assert.deepStrictEqual(r.workloads, ['core', 'social-voice']);
     })
   )
     passed++;
   else failed++;
 
   if (
-    test('parseCliFlags: --category=dev + --dev-apple=core 는 dev 전체 유지 (auto-sub 미적용)', () => {
-      // 명시적 --category=dev 는 "전체 sub" 의도 → 상세 플래그가 dev 를 apple 로 좁히면 안 됨.
-      const { categories, subSelections, detailSelections } = parseCliFlags({ category: 'dev', 'dev-apple': 'core' });
-      // subSelections.dev 는 auto-sub 로 ['apple'] 로 채워지지 않아야 한다.
-      assert.ok(!subSelections.dev, 'subSelections.dev 는 비어 있어야 (전체 sub)');
-      assert.deepStrictEqual(detailSelections['dev.apple'], ['core']);
+    test('parseCliFlags: --category=writing + --writing-social=voice 는 writing 전체 유지 (auto-sub 미적용)', () => {
+      // 명시적 --category=writing 은 "전체 sub" 의도 → 상세 플래그가 writing 을 social 로 좁히면 안 됨.
+      const { categories, subSelections, detailSelections } = parseCliFlags({ category: 'writing', 'writing-social': 'voice' });
+      // subSelections.writing 은 auto-sub 로 ['social'] 로 채워지지 않아야 한다.
+      assert.ok(!subSelections.writing, 'subSelections.writing 은 비어 있어야 (전체 sub)');
+      assert.deepStrictEqual(detailSelections['writing.social'], ['voice']);
       const r = resolveSelection({ categories, subSelections, detailSelections });
-      assert.ok(r.workloads.includes('frontend') && r.workloads.includes('rust'), 'dev 전체 유지');
-      assert.ok(r.workloads.includes('apple-core'), 'apple 은 core');
-      assert.ok(!r.workloads.includes('apple-platform'), 'apple-platform 제외');
+      assert.ok(r.workloads.includes('writing'), 'writing 전체 유지 (general sub 포함)');
+      assert.ok(r.workloads.includes('social-voice'), 'social 은 voice');
+      assert.ok(!r.workloads.includes('social-content'), 'social-content 제외');
     })
   )
     passed++;

@@ -60,7 +60,7 @@ function helpText() {
   const lines = [];
   for (const c of CATEGORIES) {
     if (c.detailOptions) {
-      // 카테고리 레벨 상세 (apple)
+      // 카테고리 레벨 상세 (subOptions 없는 카테고리)
       lines.push(`  --${c.id.padEnd(16)}=${c.detailOptions.map(d => d.id).join(',')}   (상세)`);
     } else if (c.subOptions) {
       lines.push(`  --${c.id.padEnd(16)}=${c.subOptions.map(s => s.id).join(',')}`);
@@ -83,7 +83,7 @@ function helpText() {
     'CLI 플래그:',
     '  --category=dev,cloud               사용할 톱레벨 카테고리 (콤마 구분)',
     '  --<category>=<sub1>,<sub2>         각 카테고리의 sub-옵션 (예: --dev=frontend,python)',
-    '  --<category>-<sub>=<detail1>,...  sub 레벨 상세 (예: --dev-apple=core, --writing-social=voice)',
+    '  --<category>-<sub>=<detail1>,...  sub 레벨 상세 (예: --writing-social=voice)',
     ...lines,
     '',
     '출력:',
@@ -158,7 +158,7 @@ async function runInteractive() {
     const cat = CATEGORIES.find(c => c.id === catId);
     if (!cat) continue;
 
-    // 카테고리 레벨 상세 tier (예: apple — sub 없음)
+    // 카테고리 레벨 상세 tier (sub 없는 카테고리)
     if (cat.detailOptions && cat.detailOptions.length) {
       detailSelections[catId] = await checkboxPrompt({
         title: `\n[${cat.label}] ${cat.detailQuestion || '항목을 고르세요'} (미선택 = 전체):`,

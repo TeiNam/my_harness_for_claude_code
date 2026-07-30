@@ -10,16 +10,15 @@
 #   2) 메뉴 CLI 플래그(-Category 등)가 있으면 비대화형으로 select-workloads.js 실행
 #   3) 인자가 없고 콘솔이면 select-workloads.js 가 대화형 메뉴를 띄움
 #
-# 메뉴 카테고리: backend / frontend / plugin / data-analysis / data-design / writing / apple
+# 메뉴 카테고리: dev / cloud / ai / data / research / writing
 # Sub-옵션 플래그:
-#   -Dev           frontend, python, rust, nodejs, apple, obsidian, chrome, claude
+#   -Dev           frontend, python, rust, nodejs, obsidian, chrome, claude
 #   -Cloud         infra, finops, integration
 #   -Ai            llm
 #   -Data          duckdb, python-data, aws-analytics, mysql, postgres, mongodb, dynamodb, aws-rds
 #   -Research      websearch, report
 #   -Writing       general, social
 # 상세(3단계) 플래그:
-#   -DevApple      core, platform, product     (dev.apple 상세)
 #   -WritingSocial voice, content, visual       (writing.social 상세)
 #
 # 그 외 옵션:
@@ -52,13 +51,12 @@ param(
     [string[]]$Workload,
     [string[]]$SkipWorkload,
     [string[]]$Category,
-    [string[]]$Dev,            # frontend, python, rust, nodejs, apple, obsidian, chrome, claude
+    [string[]]$Dev,            # frontend, python, rust, nodejs, obsidian, chrome, claude
     [string[]]$Cloud,          # infra, finops, integration
     [string[]]$Ai,             # llm
     [string[]]$Data,           # duckdb, python-data, aws-analytics, mysql, postgres, mongodb, dynamodb, aws-rds
     [string[]]$Research,       # websearch, report
     [string[]]$Writing,        # general, social
-    [string[]]$DevApple,       # 상세: core, platform, product (dev.apple)
     [string[]]$WritingSocial   # 상세: voice, content, visual (writing.social)
 )
 
@@ -101,7 +99,6 @@ function Build-MenuArgs {
         data             = (Join-CommaList $Data)
         research         = (Join-CommaList $Research)
         writing          = (Join-CommaList $Writing)
-        'dev-apple'      = (Join-CommaList $DevApple)         # sub 레벨 상세 (dev.apple)
         'writing-social' = (Join-CommaList $WritingSocial)    # sub 레벨 상세 (writing.social)
     }
     foreach ($k in $pairs.Keys) {

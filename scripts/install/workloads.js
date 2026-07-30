@@ -58,11 +58,6 @@ const GROUPS = [
   'social-content', // 콘텐츠 제작 (post-writer / hook-generator / content-matrix 등)
   'social-visual', // 시각 자산 (graphic-designer / gemini-* / quote-post / youtube-thumbnail)
 
-  // Apple 플랫폼 개발 3분할 — apple 카테고리 상세 tier
-  'apple-core', // 핵심 개발 (Swift/SwiftUI/테스트/생성기/보안/성능/디자인/메타)
-  'apple-platform', // 플랫폼 특화 (watchOS/visionOS/SwiftData/MapKit/Foundation/ML)
-  'apple-product', // 제품·운영 (App Store/성장/법무/수익화/릴리스 리뷰)
-
   // 메뉴에 노출되지 않는 격리 그룹 — 하네스 메타/실험 자산용.
   // 어떤 카테고리에도 매핑되지 않으므로 --all 에도 끌려오지 않는다.
   // 필요하면 --workload=...,lab 으로 명시 설치한다.
@@ -200,16 +195,6 @@ const RULES = [
   { pattern: /^quote[-_]post$/i, groups: ['social-visual'] },
   { pattern: /^youtube[-_]thumbnail$/i, groups: ['social-visual'] },
 
-  // -- Apple 플랫폼 개발 (rshankras/claude-code-apple-skills) -------------
-  // 영역별 3분할: core / platform / product. 좁은 매칭이 먼저, 넓은 apple- 폴백은 뒤.
-  { pattern: /^apple[-_](ios|macos|swift|swiftui|design|testing|generators|security|performance|shared)([-_]|$)/i, groups: ['apple-core'] },
-  { pattern: /^apple[-_](watchos|visionos|swiftdata|mapkit|foundation|core[-_]ml|apple[-_]intelligence)([-_]|$)/i, groups: ['apple-platform'] },
-  { pattern: /^apple[-_](product|app[-_]store|growth|legal|monetization|release[-_]review)([-_]|$)/i, groups: ['apple-product'] },
-  // 폴백은 두지 않는다 — classifyIdentifier 는 매칭 룰을 합집합하므로 넓은
-  // `^apple[-_]` 폴백을 두면 모든 apple 스킬이 apple-core 로도 이중 태깅돼
-  // 세분화가 무의미해진다. 위 3규칙이 현재 23개를 모두 커버하고, 새 apple
-  // 스킬은 frontmatter `workloads:` 로 명시 태깅한다 (미태깅 시 core 로 폴백).
-
   // -- 기타 reviewer / kind 한정 룰 ------------------------------------
   { pattern: /^rust[-_]reviewer$/i, groups: ['rust'], kind: 'agent' },
   { pattern: /^typescript[-_]reviewer$/i, groups: ['frontend'], kind: 'agent' }
@@ -288,15 +273,14 @@ function classify(asset) {
 
 /**
  * 하위호환 별칭 — 옛 통짜 키를 세분화된 하위 키 집합으로 확장한다.
- * `--workload=apple` 처럼 분할 이전의 키를 쓰던 문서·CI·사용자 스크립트가
- * 안 깨지도록 select-assets 진입 시 1곳에서 확장한다.
+ * select-assets 진입 시 1곳에서 확장하므로, 키를 세분화할 때 옛 키를 여기에
+ * 등록해 두면 문서·CI·사용자 스크립트가 안 깨진다.
  *
+ * 현재는 비어 있다 — 마지막 별칭이던 `apple` 은 Apple 스킬 제거와 함께 사라졌다.
  * `social-content` 는 분할 후에도 "콘텐츠 제작" 그룹의 실제 키로 재사용하므로
- * 별칭에 넣지 않는다 (옛 의미인 17종 전체를 원하면 세 키를 명시).
+ * 별칭이 아니다 (옛 의미인 17종 전체를 원하면 세 키를 명시).
  */
-const ALIASES = {
-  apple: ['apple-core', 'apple-platform', 'apple-product']
-};
+const ALIASES = {};
 
 /**
  * 워크로드 키 배열에서 별칭을 확장한다. 별칭이 아닌 키는 그대로 통과.
