@@ -19,13 +19,13 @@
 | 디렉터리 | 항목 수 | 설명 |
 |---|---:|---|
 | `agents/` | 49 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
-| `commands/` | 53 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 156 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
-| `rules/` | 37 | common 레이어(모델 라우팅 정책 포함) + 언어별(typescript / python / rust / web) |
-| `hooks/` | 31 | 이벤트 기반 훅 매처 (실행 스크립트 48종) |
+| `commands/` | 45 | 슬래시 커맨드 (frontmatter 기반 markdown) |
+| `skills/` | 124 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
+| `rules/` | 36 | common 레이어(모델 라우팅 정책 포함) + 언어별(typescript / python / rust / web) |
+| `hooks/` | 29 | 이벤트 기반 훅 매처 (실행 스크립트 45종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
 | `scripts/` | — | 훅 핸들러 / 설치 / CI 검증 / 세션 관리 도구 |
-| `tests/` | — | 1586개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
+| `tests/` | — | 1509개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
 | `docs/` | — | 장문 가이드(글쓰기 / 보안)와 steering 규칙 |
 
 상세 인덱스는 `docs/COMMAND-REGISTRY.json`에 자동 생성되어 있습니다.

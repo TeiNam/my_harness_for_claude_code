@@ -81,7 +81,7 @@ template approach, or join+rewrite at the paragraph level.
 
 python-docx can't export PDF. Options: LibreOffice headless
 (`soffice --headless --convert-to pdf out.docx`), the `docx2pdf` package
-(needs Word/LibreOffice), or the `nutrient-document-processing` skill's convert
+(needs Word/LibreOffice), or the LibreOffice headless convert
 endpoint. See the `pdf` skill.
 
 ## Install
