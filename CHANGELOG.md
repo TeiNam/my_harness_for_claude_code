@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-30
+
+- feat(ci): 훅 카운트 정합 검증 + cross-review blast radius 프리앰블 (#4) (547079f)
+
 ## 2026-07-26
 
 - feat(git): 커밋→푸시→PR→머지 파이프라인 강제 (#3) (c14070c)
