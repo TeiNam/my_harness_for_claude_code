@@ -97,7 +97,7 @@ function checkCommand(command) {
     `[Hook] ${strict ? 'BLOCKED' : 'WARNING'}: 기본 브랜치(${defaultBranch}) 직접 푸시 — 커밋→푸시→PR→머지 파이프라인 위반`,
     '[Hook] git switch -c <type>/<slug> && git push -u origin <branch> && gh pr create',
     '[Hook] 머지는 gh pr merge --squash --delete-branch',
-    '[Hook] 의도적 직행이면 HARNESS_ALLOW_MAIN_PUSH=1',
+    '[Hook] 의도적 직행이면 HARNESS_ALLOW_MAIN_PUSH=1'
   ].join('\n');
 
   return { blocked: strict, reason };
@@ -116,9 +116,9 @@ function run(rawInput) {
   if (!result.reason) return typeof rawInput === 'string' ? rawInput : JSON.stringify(rawInput);
 
   return {
-    stdout: result.blocked ? '' : (typeof rawInput === 'string' ? rawInput : JSON.stringify(rawInput)),
+    stdout: result.blocked ? '' : typeof rawInput === 'string' ? rawInput : JSON.stringify(rawInput),
     stderr: result.reason,
-    exitCode: result.blocked ? 2 : 0,
+    exitCode: result.blocked ? 2 : 0
   };
 }
 

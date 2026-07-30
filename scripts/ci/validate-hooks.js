@@ -10,6 +10,8 @@ const Ajv = require('ajv');
 
 const HOOKS_FILE = path.join(__dirname, '../../hooks/hooks.json');
 const HOOKS_SCHEMA_PATH = path.join(__dirname, '../../schemas/hooks.schema.json');
+const CLAUDE_MD = path.join(__dirname, '../../CLAUDE.md');
+const PROFILES = ['minimal', 'standard', 'strict'];
 const VALID_EVENTS = [
   'SessionStart',
   'UserPromptSubmit',
@@ -233,7 +235,80 @@ function validateHooks() {
     process.exit(1);
   }
 
+  if (validateProfileCounts(hooks)) {
+    process.exit(1);
+  }
+
   console.log(`Validated ${totalMatchers} hook matchers`);
+}
+
+/**
+ * 훅 그룹이 run-with-flags 에 넘기는 프로파일 CSV 를 뽑는다.
+ *
+ * 두 가지 배선 형태를 모두 지원한다:
+ *   A) Pre/Post — `run-with-flags.js <id> <script> <csv>` (공백 인자)
+ *   B) Stop/SessionEnd — 인라인 bootstrap 의 `spawnSync(execPath, [script,'<id>','<script>','<csv>'])`
+ *
+ * @returns {string|null} CSV, 또는 게이트 없이 직접 실행되는 그룹이면 null
+ */
+function extractProfileCsv(command) {
+  const spaceForm = command.match(/run-with-flags\.js\s+\S+\s+scripts\/hooks\/\S+\s+([a-z,]+)/);
+  if (spaceForm) return spaceForm[1];
+
+  const arrayForm = command.match(/\[script,'[a-z:*-]+','scripts\/hooks\/[^']+','([a-z,]+)'\]/);
+  if (arrayForm) return arrayForm[1];
+
+  return null;
+}
+
+/** 프로파일별로 실제 활성화되는 훅 그룹 수를 센다. CSV 없는 그룹(직접 실행)은 모든 프로파일에 포함. */
+function countHooksByProfile(hooks) {
+  const csvs = [];
+  for (const list of Object.values(hooks || {})) {
+    for (const group of Array.isArray(list) ? list : []) {
+      const command = (group.hooks || []).map(h => h.command || '').join(' ');
+      csvs.push(extractProfileCsv(command));
+    }
+  }
+
+  const counts = {};
+  for (const profile of PROFILES) {
+    counts[profile] = csvs.filter(csv => csv === null || csv.split(',').includes(profile)).length;
+  }
+  return counts;
+}
+
+/**
+ * CLAUDE.md 가 문서화한 프로파일별 훅 수(`**minimal (9훅)**`)를 hooks.json 실측과 대조한다.
+ *
+ * 서브훅(dispatcher 내부)을 그룹으로 착각해 카운트를 틀리는 실수를 막는다 —
+ * hooks.json 의 그룹만 세는 것이 정답이고, 이 값은 기계가 정확히 계산할 수 있다.
+ */
+function validateProfileCounts(hooks) {
+  if (!fs.existsSync(CLAUDE_MD)) return false;
+
+  const doc = fs.readFileSync(CLAUDE_MD, 'utf8');
+  const actual = countHooksByProfile(hooks);
+  let hasErrors = false;
+
+  for (const profile of PROFILES) {
+    const match = doc.match(new RegExp(`\\*\\*${profile} \\((\\d+)훅\\)\\*\\*`));
+    if (!match) continue; // 문서가 그 프로파일을 언급하지 않으면 검사 대상 아님
+
+    const documented = Number(match[1]);
+    if (documented !== actual[profile]) {
+      console.error(
+        `ERROR: CLAUDE.md says ${profile} has ${documented} hooks, but hooks.json has ${actual[profile]}`
+      );
+      hasErrors = true;
+    }
+  }
+
+  if (hasErrors) {
+    console.error('       프로파일 카운트는 hooks.json 의 그룹 수만 센다 — dispatcher 내부 서브훅은 별도로 세지 않는다.');
+  }
+
+  return hasErrors;
 }
 
 validateHooks();

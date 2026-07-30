@@ -29,6 +29,46 @@ Codex의 시선으로 메우고, 두 관점이 겹치는 지적은 신뢰도가 
 diff가 비어 있으면 "리뷰할 변경 없음"으로 보고하고 중단. diff가 크면(수백 줄+)
 데이터·생성물 덩어리는 빼고 **로직 파일만** 추려 리뷰 신호를 높인다.
 
+## 1.5 Blast radius — "바뀌지 않았지만 검토할 것"
+
+diff는 *무엇이 바뀌었나*만 말해준다. *그래서 어디가 깨지나*는 모른다. 두 리뷰 축에
+넘기기 전에 **diff 밖 영향권**을 뽑는다. 인덱스를 만들지 않으므로 stale 될 것이 없다.
+
+```bash
+# 변경 파일 목록 (PR 모드면 `gh pr diff <n> --name-only`)
+changed() { git diff --name-only HEAD; git diff --cached --name-only; }
+
+# (a) 역참조 — 바뀐 모듈을 require/import 하는 파일
+changed | sort -u | while IFS= read -r f; do
+  case "$f" in *.js|*.ts|*.tsx) base=$(basename "${f%.*}");; *) continue;; esac
+  rg -l "(require|from)\s*\(?\s*['\"][^'\"]*${base}['\"]" . --glob '!node_modules' </dev/null 2>/dev/null
+done | sort -u
+
+# (b) 동반변경 — 히스토리상 같은 커밋에 자주 등장한 파일 (import 관계가 없어도 잡힌다)
+changed | sort -u | while IFS= read -r f; do
+  git log --format='C%H' --name-only -- "$f" </dev/null \
+    | awk -v t="$f" '/^C/{if(n>1&&n<20){for(i=1;i<=n;i++)if(f[i]!=t)print f[i]};n=0;next} NF{f[++n]=$0}' \
+    | sort | uniq -c | sort -rn | head -5
+done | sort -rn
+```
+
+> **셸 함정 두 개** — 실측으로 확인했다. ① `rg` 에 **경로 인자(`.`)와 `</dev/null` 을 반드시**
+> 준다. 경로 없이 쓰면 rg 가 stdin 을 읽어 `while` 루프의 입력을 삼켜 **첫 파일만 처리하고
+> 조용히 끝난다**(빈 결과처럼 보인다). ② `$CHANGED` 를 `for` 로 돌리지 말고 위처럼 한 줄씩
+> 읽는다 — 공백 있는 경로가 깨지고, `awk -v` 에 개행이 섞여 `newline in string` 으로 죽는다.
+
+결과에서 **diff에 포함되지 않은 파일만** 남겨 "참조 대상" 목록으로 만들고, 2단계의 두
+축에 함께 넘긴다. 특히 이 두 부류를 노린다:
+
+- **카운터·카탈로그 정합** — diff가 어떤 숫자·목록을 고쳤으면 그 숫자의 *출처* 파일을 연다.
+  (실제 사례: `CLAUDE.md` 훅 카운트를 고치면서 `hooks/hooks.json`을 안 봐서 틀린 값을 커밋. diff만 보면 완벽히 타당해 보이므로 두 리뷰 축 모두 통과했다. 지금은 `scripts/ci/validate-hooks.js`가 이 부류를 기계로 잡는다.)
+- **import 없는 커플링** — (b)만 잡는 종류. 예: `install/menu.js` 와 `tests/.../workloads.test.js` 는
+  import 관계가 없는데 워크로드 키가 양쪽에 걸쳐 있어 6회 동반변경됐다.
+
+**한계를 알고 쓴다.** (b)는 히스토리 깊이가 필요하다 — 커밋이 1~2개뿐인 신규 파일에서는
+빈 결과가 정상이며, 그때는 (a)에만 의존한다. 목록이 20개를 넘으면 상위 5개만 쓰고
+**잘랐다는 사실을 리포트에 남긴다**(조용한 절단 금지).
+
 ## 2. 두 관점으로 리뷰
 
 **(A) Codex — 독립 축.** diff를 임시 파일에 저장한 뒤(프롬프트 인자로 직접 넘기면
