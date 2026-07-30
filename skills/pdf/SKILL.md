@@ -22,7 +22,7 @@ text = "\n".join(page.extract_text() or "" for page in reader.pages)
 ```
 
 `extract_text()` is fine for digital PDFs. For **scanned** PDFs it returns
-empty — that's OCR territory (`ocrmypdf`, or the `nutrient-document-processing`
+empty — that's OCR territory (`ocrmypdf`
 skill's OCR endpoint). Tables extract poorly with pypdf; use `pdfplumber` when
 you need cell structure.
 
@@ -129,5 +129,4 @@ r = PdfReader("a.pdf")
 assert len(PdfReader("merged.pdf").pages) == len(r.pages) + len(PdfReader("b.pdf").pages)
 ```
 
-Related: `nutrient-document-processing` (commercial API for OCR/redact/sign at
-scale), `ppt-authoring` + `frontend-slides` (slides), `docx`, `xlsx`.
+Related: `ppt-authoring` + `frontend-slides` (slides), `docx`, `xlsx`.

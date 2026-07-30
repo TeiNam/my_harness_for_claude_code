@@ -144,5 +144,3 @@ two decimals are enough.
 
 - `/cost-report` - Command-form report using the same database.
 - `cost-aware-llm-pipeline` - Model-routing and budget-design patterns.
-- `token-budget-advisor` - Context and token-budget planning.
-- `strategic-compact` - Context compaction to reduce repeated token spend.
