@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-26
 
+- feat(git): 커밋→푸시→PR→머지 파이프라인 강제 (#3) (c14070c)
 - chore(mcp): 프로젝트 .mcp.json 을 context7 만 남기도록 축소 (f438430)
 - chore(plugin): motion-creative 동반 플러그인 목록에서 제거 (6daa711)
 - refactor(cross-review): Codex 모델 핀 제거 — CLI 기본 모델 사용 (28b3af8)

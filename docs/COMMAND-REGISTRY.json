@@ -59,7 +59,7 @@
     {
       "command": "cross-review",
       "description": "교차 모델 코드리뷰 — 현재 diff(또는 PR)를 Claude 자체 리뷰 + OpenAI Codex 독립 리뷰로 2-way 대조·종합",
-      "type": "review",
+      "type": "testing",
       "primaryAgents": [],
       "allAgents": [],
       "skills": [],
@@ -539,8 +539,8 @@
       "general": 8,
       "planning": 1,
       "refactoring": 1,
-      "review": 10,
-      "testing": 32
+      "review": 9,
+      "testing": 33
     },
     "topAgents": [
       {
