@@ -99,7 +99,7 @@ reuses it only within that connection; the compiled form dies with the connectio
 
 Problem areas: maintenance (logic scattered, IDE debugging impossible), portability (DBMS vendor lock-in),
 performance (caching integration with Redis etc. difficult, scale-out limitations), productivity (version
-control, testing, deployment automation absent), logic duplication (app↔SP consistency degraded), security
+control, testing, deployment automation absent), logic duplication (app<->SP consistency degraded), security
 (DEFINER/INVOKER confusion; **string-concatenated dynamic SQL inside an SP is an injection risk**). Keep
 business logic in the application layer.
 
@@ -133,9 +133,9 @@ Note: "Oracle stores `row_num` so it's fast" is **false** — Oracle also scans 
 For an **existence check**, don't total everything — short-circuit:
 
 ```sql
--- ❌ existence via full count
+-- WRONG: existence via full count
 SELECT COUNT(*) FROM orders WHERE user_id = 42;
--- ✅ stop at first row
+-- OK: stop at first row
 SELECT EXISTS(SELECT 1 FROM orders WHERE user_id = 42);
 SELECT 1 FROM orders WHERE user_id = 42 LIMIT 1;
 ```

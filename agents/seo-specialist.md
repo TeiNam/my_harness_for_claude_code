@@ -69,4 +69,5 @@ Fix: Exact change to make
 
 ## Reference
 
-Use `skills/seo` for the canonical SEO workflow and implementation guidance.
+Use `skills/seo-geo-aeo` for the canonical SEO / GEO / AEO audit workflow and
+implementation guidance (URL 감사 → 3축 신호 분석 → 스코어 → 리포트 산출).

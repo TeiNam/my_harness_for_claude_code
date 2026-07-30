@@ -79,7 +79,10 @@ export function applyTemplate(template, { title, subtitle, footer, svg, cards })
 // CJK and other fullwidth glyphs render at roughly twice the advance width of
 // ASCII in the monospace stacks the template uses. Includes the supplementary
 // CJK extensions and emoji, which also render double-width.
-const FULLWIDTH_RE = /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦　-〿\u{1F000}-\u{1FAFF}\u{20000}-\u{3FFFD}]/u;
+// 범위 경계는 리터럴 문자가 아니라 \u{...} escape 로 적는다 — U+115F(한글 채움문자)나
+// U+3000(전각 공백)처럼 보이지 않는 문자가 소스에 박히면 판독·수정이 위험해진다.
+const FULLWIDTH_RE =
+  /[\u{1100}-\u{115F}\u{2E80}-\u{A4CF}\u{AC00}-\u{D7A3}\u{F900}-\u{FAFF}\u{FE30}-\u{FE4F}\u{FF00}-\u{FF60}\u{FFE0}-\u{FFE6}\u{3000}-\u{303F}\u{1F000}-\u{1FAFF}\u{20000}-\u{3FFFD}]/u;
 
 export function textUnits(text) {
   let units = 0;

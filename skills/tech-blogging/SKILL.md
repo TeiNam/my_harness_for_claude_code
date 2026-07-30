@@ -185,4 +185,4 @@ outranks your own site.
 - `[skills/crosspost]` — multi-platform distribution mechanics
 - `[skills/brand-voice]` — voice consistency across destinations
 - `[skills/markdown-writing]` — the source format for most blog tools
-- `[skills/seo]` — when SEO is the primary driver
+- `[skills/seo-geo-aeo]` — when SEO is the primary driver
