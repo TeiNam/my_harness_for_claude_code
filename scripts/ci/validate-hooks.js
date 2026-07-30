@@ -30,7 +30,7 @@ const VALID_EVENTS = [
   'ConfigChange',
   'WorktreeCreate',
   'WorktreeRemove',
-  'SessionEnd',
+  'SessionEnd'
 ];
 const VALID_HOOK_TYPES = ['command', 'http', 'prompt', 'agent'];
 const EVENTS_WITHOUT_MATCHER = new Set(['UserPromptSubmit', 'Notification', 'Stop', 'SubagentStop']);
@@ -297,9 +297,7 @@ function validateProfileCounts(hooks) {
 
     const documented = Number(match[1]);
     if (documented !== actual[profile]) {
-      console.error(
-        `ERROR: CLAUDE.md says ${profile} has ${documented} hooks, but hooks.json has ${actual[profile]}`
-      );
+      console.error(`ERROR: CLAUDE.md says ${profile} has ${documented} hooks, but hooks.json has ${actual[profile]}`);
       hasErrors = true;
     }
   }

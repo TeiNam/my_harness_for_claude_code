@@ -8,8 +8,7 @@ the agent frontmatter all defer to it.
 
 | Alias | Resolves to | Character |
 |-------|-------------|-----------|
-| `fable` | **Fable 5** | Frontier tier above Opus. Longest-horizon agentic work, hardest verify/judge stages. Always-on thinking; $10/$50 per MTok (~2× Opus). Not a frontmatter alias — use as a per-call `model` override on the Agent tool. |
-| `opus` | **Opus 5** | Deepest reasoning in the standard tiers. Architecture, ambiguity, adversarial review, hard debugging. Same price as Opus 4.8 ($5/$25). Also runs Fast mode (`/fast`) — same model, ~2.5× faster output at premium price (Claude API only). |
+| `opus` | **Opus 5** | Top tier here. Deepest reasoning: architecture, ambiguity, adversarial review, hard debugging, long-horizon autonomous runs, final high-stakes judge. Same price as Opus 4.8 ($5/$25). Also runs Fast mode (`/fast`) — same model, ~2.5× faster output at premium price (Claude API only). Escalate *within* the tier via effort (`high` → `xhigh` → `max`), not to another model. |
 | `sonnet` | **Sonnet 5** | Best coding model. Default for implementation, refactors, PR review. Handles ~90% of coding. |
 | `haiku` | **Haiku 4.5** | ~90% of Sonnet's capability at ~3× cost savings. Mechanical edits, search, doc scaffolding, high-frequency workers. |
 
@@ -52,13 +51,15 @@ default responses run longer (prompt explicitly for target length).
 | Security analysis | `opus` | Can't afford a missed vuln |
 | Ambiguous / underspecified work | `opus` | Reasoning about intent |
 | Debugging system-wide bugs | `opus` | Must hold the whole system in mind |
-| Overnight / long-horizon autonomous runs | `fable` | Sustains multi-hour agentic coherence |
-| Final adversarial verify on high-stakes output | `fable` | Highest-ceiling judge when a miss is expensive |
+| Overnight / long-horizon autonomous runs | `opus` at `xhigh` | Deepest reasoning available; raise effort, not tier |
+| Final adversarial verify on high-stakes output | `opus` at `xhigh`/`max` | Highest-ceiling judge when a miss is expensive |
+| Independent cross-family second opinion | **Codex** | Different model family — catches what re-prompting Claude cannot (see below) |
 
 **Default to Sonnet 5.** Escalate to Opus 5 when: the first Sonnet attempt
 failed, the task spans 5+ files, it's an architectural decision, or it's
-security-critical. Escalate further to Fable 5 only for the longest-horizon or
-highest-stakes work — it costs ~2× Opus. Drop to Haiku 4.5 for anything
+security-critical. Opus 5 is the ceiling — past it, raise **effort**
+(`high` → `xhigh` → `max`) rather than reaching for another tier, then get a
+**cross-family** opinion from Codex. Drop to Haiku 4.5 for anything
 deterministic and low-risk.
 
 ## Agent Class → Model
@@ -81,19 +82,19 @@ most reviews are easy.
 
 ## Multi-Agent Orchestration
 
-- Main loop / orchestrator on `fable` when the session itself runs on Fable 5
-  (Claude Code main loop) — subagents inherit it unless overridden. Otherwise
-  orchestrate on `sonnet` (or `opus` if the plan itself is the hard part).
+- Orchestrate on `sonnet` (or `opus` if the plan itself is the hard part) —
+  subagents inherit the session model unless overridden.
 - Fan-out workers on the cheapest model sufficient for their leaf task —
   usually `haiku` for search/extract, `sonnet` for edits.
 - Adversarial verify / judge stages on `opus` — that's where reasoning depth
-  pays for itself. Reserve `fable` for the single final judge on work where a
-  missed defect is very expensive (security gate, production migration).
+  pays for itself. Where a missed defect is very expensive (security gate,
+  production migration), run `opus` at `xhigh`/`max` **and** add a Codex axis;
+  two model families disagreeing is a stronger signal than one model retried.
 - Opus 5 delegates to subagents more eagerly than 4.8 — in orchestrator prompts,
   state explicitly when NOT to spawn (single-file reads, sequential steps).
 - Effort routing inside a tier is cheaper than jumping tiers: `low` for
-  mechanical workers, default `high`, `xhigh` for the hardest verify/judge
-  stages. Try `opus` at `xhigh` before escalating to `fable`.
+  mechanical workers, default `high`, `xhigh`/`max` for the hardest
+  verify/judge stages.
 
 ## Fast Mode
 
@@ -104,11 +105,31 @@ mode is Claude API only (not Bedrock/Vertex/Foundry).
 
 ## Cross-Model: Codex
 
-For a genuinely independent second opinion (different model family, not just a
-re-prompt), route to the OpenAI Codex CLI via the codex plugin
-(`codex:rescue` skill / `codex:codex-rescue` agent — install per `docs/plugin.md`). Use it for
-adversarial review of Claude-authored code and for large mechanical edits you
-want offloaded. Treat its output as a proposal to verify, never as ground truth.
+With Opus 5 as the ceiling, the remaining axis of escalation is **sideways, not
+up**: a different model family. Route to the OpenAI Codex CLI via the codex
+plugin (`codex:rescue` skill / `codex:codex-rescue` agent — install per
+`docs/plugin.md`). Treat its output as a proposal to verify, never as ground truth.
+
+### When to hand a subagent to Codex
+
+Codex earns the handoff where **independence** or **grind** is the value, not
+where harness-specific context is. Delegate to Codex when:
+
+| Situation | Why Codex over another Claude subagent |
+|-----------|----------------------------------------|
+| Adversarial review of Claude-authored code | Claude reviewing Claude shares blind spots — same training, same failure modes. A second family is the only way to break correlation |
+| Tie-break after two Claude attempts disagree | A third Claude opinion correlates with the first two; Codex doesn't |
+| Large mechanical edits (rename across N files, codemod) | Offloads grind without spending Opus context; verify the diff after |
+| Second diagnosis when Claude is stuck in a loop | Fresh framing beats re-prompting the model that got stuck |
+
+Keep on a Claude subagent when the task needs harness context (rules, skills,
+workload tags, project conventions), tool orchestration, or Korean-language
+output — Codex starts cold on all of it.
+
+**The rule that makes this pay off:** never let Codex be the *only* reader of
+something that matters. Its value is as a disagreeing second voice; a finding
+only Codex reports still needs Claude to confirm against the actual code, and
+findings both families flag independently are the high-confidence ones.
 
 **Review model: CLI default.** 2-way cross review (`/cross-review`) does not pin
 the Codex axis — `codex exec` runs without `--model`, so the local CLI's

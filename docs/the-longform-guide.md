@@ -123,9 +123,10 @@ Optimize the tools you use and subagent architecture designed to delegate the ch
 | Security analysis         | Opus 5        | Can't afford to miss vulnerabilities       |
 | Writing docs              | Haiku 4.5     | Structure is simple                        |
 | Debugging complex bugs    | Opus 5        | Needs to hold entire system in mind        |
-| Overnight autonomous runs | Fable 5       | Longest-horizon coherence (~2× Opus cost)  |
+| Overnight autonomous runs | Opus 5 `xhigh`| Longest-horizon coherence — raise effort, not tier |
+| Independent 2nd opinion   | Codex         | Different model family, not a Claude tier   |
 
-Default to Sonnet 5 for 90% of coding tasks. Upgrade to Opus 5 when first attempt failed, task spans 5+ files, architectural decisions, or security-critical code. Fall back to Opus 4.8 when Opus 5 hits a safety refusal or needs web fetch / Priority Tier. Full policy: `rules/common/model-routing.md`.
+Default to Sonnet 5 for 90% of coding tasks. Upgrade to Opus 5 when first attempt failed, task spans 5+ files, architectural decisions, or security-critical code. Opus 5 is the ceiling — past it, raise effort (`high` → `xhigh` → `max`), then reach sideways to Codex for a cross-family check. Fall back to Opus 4.8 when Opus 5 hits a safety refusal or needs web fetch / Priority Tier. Full policy: `rules/common/model-routing.md`.
 
 **Pricing Reference:**
 
