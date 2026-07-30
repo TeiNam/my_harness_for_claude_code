@@ -11,7 +11,7 @@
 #                          sub-옵션·상세 플래그.
 #                          예: --category=dev,cloud --dev=frontend,python --cloud=infra,finops
 #                              --data=mysql,aws-analytics --research=websearch,report
-#                          상세(3단계): --dev-apple=core,platform (dev.apple 상세),
+#                          상세(3단계): --writing-social=voice,content (writing.social 상세),
 #                              --writing-social=voice,content (writing.social 상세).
 #   C) 저수준 플래그    — 워크로드 키를 직접 넣고 싶을 때 (--workload=...).
 #
@@ -72,7 +72,7 @@ for arg in "$@"; do
         # --skip-workload=core 의 읽기 쉬운 별칭. 둘 다 주면 core 를 합쳐 제외.
         --no-core)              SKIP_WORKLOAD="${SKIP_WORKLOAD:+$SKIP_WORKLOAD,}core" ;;
         --all)                  MENU_ARGS+=("--all") ;;
-        --category=*|--dev=*|--cloud=*|--ai=*|--data=*|--research=*|--writing=*|--dev-apple=*|--writing-social=*)
+        --category=*|--dev=*|--cloud=*|--ai=*|--data=*|--research=*|--writing=*|--writing-social=*)
                                 MENU_ARGS+=("$arg") ;;
         -h|--help)
             grep '^#' "$0" | sed 's/^# \{0,1\}//'

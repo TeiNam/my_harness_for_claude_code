@@ -4,6 +4,12 @@
 - **대상**: `install.sh`, `install.ps1`, `scripts/install/*`
 - **상태**: 구현 완료 (전체 테스트 1570 pass, 교차소속·자산손실 감사 통과)
 
+> **역사 기록 (2026-07-31 갱신)**: 이 문서는 설계 당시 상태를 보존한다. 이후
+> `skills/apple-*` 23개 카테고리(428파일)가 제거되면서 `apple-core`/`apple-platform`/
+> `apple-product` 워크로드 키와 `--dev-apple=` 플래그, `apple` 별칭이 함께 사라졌다.
+> 상세 tier(3단째)를 쓰는 중분류는 이제 `writing.social` 하나뿐이다.
+> 현재 메뉴 구조는 `scripts/install/menu.js` 와 `CLAUDE.md` 가 정본이다.
+
 ## 1. 목적
 
 설치를 대화형으로 만들고 워크로드 선택을 3단계로 세분화하여, 사용자가 원하는 것만 설치하도록 한다. 요청된 플로우:

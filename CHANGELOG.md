@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-07-31
+
+- refactor(models): Fable 티어 제거 — Opus 5 를 천장으로, 그 위는 effort·Codex (#5) (5f74354)
+
 ## 2026-07-30
 
 - feat(ci): 훅 카운트 정합 검증 + cross-review blast radius 프리앰블 (#4) (547079f)

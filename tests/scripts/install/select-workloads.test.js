@@ -103,18 +103,9 @@ function runTests() {
   else failed++;
 
   if (
-    test('--dev-apple=core resolves to sub-level detail (apple-core)', () => {
-      const out = run(['--non-interactive', '--dev-apple=core']);
-      assert.strictEqual(out, 'apple-core,core');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    test('--dev-apple with no value expands to all three apple keys', () => {
-      const out = run(['--non-interactive', '--dev-apple=core,platform,product']);
-      assert.strictEqual(out, 'apple-core,apple-platform,apple-product,core');
+    test('--writing-social 상세 전부 나열 = 3키 모두', () => {
+      const out = run(['--non-interactive', '--writing-social=voice,content,visual']);
+      assert.strictEqual(out, 'core,social-content,social-visual,social-voice');
     })
   )
     passed++;
@@ -151,10 +142,10 @@ function runTests() {
     test('unknown detail option fails with non-zero exit code', () => {
       let threw = false;
       try {
-        run(['--non-interactive', '--dev-apple=bogus']);
+        run(['--non-interactive', '--writing-social=bogus']);
       } catch (e) {
         threw = true;
-        assert.ok(/Unknown detail options: dev\.apple\.bogus/.test(e.stderr || e.message));
+        assert.ok(/Unknown detail options: writing\.social\.bogus/.test(e.stderr || e.message));
       }
       assert.ok(threw, 'expected failure for unknown detail');
     })
@@ -178,17 +169,15 @@ function runTests() {
   else failed++;
 
   if (
-    test('--category=dev + --dev-apple=core 는 dev 전체 + apple 은 core 만 (좁혀지지 않음)', () => {
-      const out = run(['--non-interactive', '--category=dev', '--dev-apple=core']);
+    test('--category=writing + --writing-social=voice 는 writing 전체 + social 은 voice 만 (좁혀지지 않음)', () => {
+      const out = run(['--non-interactive', '--category=writing', '--writing-social=voice']);
       const groups = out.split(',');
-      // dev 전체가 살아있어야: frontend·python-backend·rust 포함
-      assert.ok(groups.includes('frontend'), 'dev 전체 유지 (frontend)');
-      assert.ok(groups.includes('python-backend'), 'dev 전체 유지 (python-backend)');
-      assert.ok(groups.includes('rust'), 'dev 전체 유지 (rust)');
-      // apple 은 core 만: platform·product 는 없어야
-      assert.ok(groups.includes('apple-core'), 'apple-core 포함');
-      assert.ok(!groups.includes('apple-platform'), 'apple-platform 제외');
-      assert.ok(!groups.includes('apple-product'), 'apple-product 제외');
+      // writing 전체가 살아있어야: general sub 의 writing 키 포함
+      assert.ok(groups.includes('writing'), 'writing 전체 유지 (general)');
+      // social 은 voice 만: content·visual 은 없어야
+      assert.ok(groups.includes('social-voice'), 'social-voice 포함');
+      assert.ok(!groups.includes('social-content'), 'social-content 제외');
+      assert.ok(!groups.includes('social-visual'), 'social-visual 제외');
     })
   )
     passed++;

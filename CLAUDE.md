@@ -20,7 +20,6 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - **Node.js**: server + tooling
 - **Writing**: creative writing, tech blogging, presentation (PPT) authoring
 - **Social Content**: LinkedIn personal-branding content production (voice profile, posts, hooks, graphics, carousels) — separate social workload split into `social-voice` / `social-content` / `social-visual`, not bundled into `writing`
-- **Apple Platforms**: iOS/macOS/watchOS/visionOS development, Swift, SwiftUI, App Store lifecycle — separate `apple` workload, opt-in only
 
 ## Layout
 
@@ -70,12 +69,6 @@ Filled-in (real content, not placeholder):
 - **Tech Writer (기술 문서 작성·윤문)**: `skills/tech-writer/` — 한/영 기술 문서를 새로 쓰거나(write) 기존 초안을 윤문(polish)하는 오케스트레이터. `references/` 3종(quick-rules, tech-doc-taxonomy, tech-writing-playbook)과 전용 에이전트 5종(`tech-doc-writer`, `doc-clarity-reviewer`, `doc-quality-detector`, `tech-fidelity-auditor`, `tech-writer-monolith`)을 둔다. `${CLAUDE_SKILL_DIR}` 토큰 치환으로 경로 독립. `writing` 워크로드로 통합.
 - **Humanize (한글 AI 티 제거)**: `skills/humanize-korean/` — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 패턴을 탐지·윤문. Fast 모드(monolith 1콜)와 strict 5인 파이프라인. 진입 커맨드 `/humanize`·`/humanize-redo`. **런타임 에이전트(`writing` 상시 로드)**: `humanize-monolith`, `ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`. **스킬 유지·확장용 메타 에이전트는 `lab` 그룹으로 격리**(상시 로드 제외, 분류체계 v2.0 승격·학술 인용·metric 엔지니어링·웹 확장 시에만 수동 호출): `korean-ai-tell-taxonomist`, `taxonomy-gap-analyzer`, `translationese-research-distiller`, `post-editese-metric-engineer`, `quick-rules-integrator`, `korean-translation-scholar`, `humanize-web-architect`. 원본 epoko77-ai/im-not-ai 를 `writing` 워크로드로 통합.
 - **Social Content (LinkedIn 개인 브랜딩 콘텐츠 제작)**: origin: charlie947/social-media-skills. 기술 문서/블로깅용 `writing` 워크로드와 분리했으므로 글쓰기 카테고리에서 "기술 문서"만 고르면 이 17종은 끌려오지 않는다. 설치 시 글쓰기 › 소셜 상세 tier(`--writing-social=`)로 파이프라인 단계별 3그룹을 골라 담는다 — **`social-voice`**(`voice-builder`(voice.md/about-me.md 생성), `newsletter-voice`, `profile-optimizer`) → **`social-content`**(콘텐츠 제작·검증: `post-writer`, `post-formatter`, `hook-generator`, `content-matrix`, `niche-research`, `pinned-comment`, `reels-scripting`, `post-scorer`, `analytics-dashboard`) → **`social-visual`**(`graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `youtube-thumbnail`). `reels-scripting`은 `APIFY_API_TOKEN`·`GOOGLE_AI_API_KEY` 환경변수 필요.
-- **Apple 플랫폼 개발**: `skills/apple-*` 23개 카테고리 — origin: rshankras/claude-code-apple-skills (MIT, upstream LICENSE 사본은 `skills/apple-shared/LICENSE-upstream.txt`). iOS/macOS/watchOS/visionOS를 플랫폼별로 세분화하지 않는 대신, 영역별 상세 tier 3그룹으로 나눴다 — **`apple-core`**(핵심 개발: ios·macos·swift·swiftui·design·testing·generators·security·performance + 메타 `shared`, 10종), **`apple-platform`**(플랫폼 특화: watchos·visionos·swiftdata·mapkit·foundation·core-ml·apple-intelligence, 7종), **`apple-product`**(제품·운영: product·app-store·growth·legal·monetization·release-review, 6종). 설치 시 `--apple=core,platform,product` 로 고르거나 `--category=apple`(=3그룹 별칭)로 전체를 담는다. 각 카테고리는 `skills/apple-<name>/SKILL.md` 가 라우터이고, 하위 서브스킬(`skills/apple-<name>/<sub>/SKILL.md`)은 라우터가 참고 파일로 읽어들이는 2단 구조 — Claude Code의 스킬 탐색은 1단 중첩만 인식하므로 서브스킬 자체는 자동 발견되지 않는다.
-  - **핵심 개발**: `apple-ios`, `apple-macos`, `apple-swift`(동시성·Swift 6.2), `apple-swiftui`(AlarmKit/WebKit/텍스트편집/툴바/3D차트), `apple-design`(Liquid Glass), `apple-testing`(TDD/스냅샷/특성화 테스트), `apple-generators`(63개 코드 생성기 — 로깅/분석/인증/페이월/설정화면/영속성/온보딩 등), `apple-security`, `apple-performance`(Instruments/SwiftUI 리렌더 진단)
-  - **플랫폼 특화**: `apple-watchos`, `apple-visionos`, `apple-swiftdata`, `apple-mapkit`, `apple-foundation`, `apple-core-ml`, `apple-apple-intelligence`(Foundation Models/Visual Intelligence/App Intents)
-  - **제품·운영**: `apple-product`(아이디어→PRD→아키텍처→App Store 7종 스펙 문서 워크플로), `apple-app-store`(ASO/키워드/리젝 대응), `apple-growth`(분석·PR·커뮤니티), `apple-legal`(개인정보정책/이용약관), `apple-monetization`, `apple-release-review`(배포 전 감사 체크리스트)
-  - **메타**: `apple-shared`(`skill-creator`/`skill-auditor` — 새 Apple 스킬 작성·감사용)
-  - 카테고리 간 상호 참조 경로는 접두사 없는 원본 경로(`skills/ios/...`, `skills/generators/...` 등)를 전부 `skills/apple-<name>/...` 로 재작성했고, 원저작자 로컬 경로(`/Users/ravishankar/...`)는 제거했다(`scripts/ci/validate-no-personal-paths.js` 통과 확인).
 
 ## Still Placeholder Skills
 
@@ -85,19 +78,19 @@ are added later, list them here so they're easy to find and complete.
 ## Workload-based Install (2-tier 메뉴)
 
 설치는 **도메인 축 6개 톱레벨 카테고리**(**dev / cloud / ai / data / research / writing**) 와 중분류(sub-옵션)·상세로 결정되는 **3단계(대분류→중분류→소분류)** 메뉴다. sub-옵션이 곧 워크로드 키와 매칭되어, 예컨대 "데이터 → MySQL" 만 골랐을 때 Postgres 가이드까지 끌려오지 않는다. 대분류 구성:
-  - **dev**(개발): frontend · 백엔드(python-backend/rust/nodejs) · Apple(상세 3그룹 `apple-core`/`apple-platform`/`apple-product`) · 플러그인(obsidian/chrome/claude)
+  - **dev**(개발): frontend · 백엔드(python-backend/rust/nodejs) · 플러그인(obsidian/chrome/claude)
   - **cloud**(AWS 운영): 인프라·컨테이너(cloud+devops) · finops · integration
   - **ai**: ai(Bedrock·SageMaker·Kendra 등)
   - **data**: 분석(python-data/data-analysis) · 설계(mysql/postgres/mongodb/dynamodb/aws-rds)
   - **research**(리서치·리포트): 웹 검색(research) · 기술 리포트(report=tech-writer)
   - **writing**(글쓰기): 일반 글쓰기(writing) · 소셜(상세 3그룹 `social-voice`/`social-content`/`social-visual`)
-  상세 tier(3단째)는 자산이 많은 dev.apple(23)·writing.social(17) 두 중분류에만 붙였고, 나머지는 leaf(3단계 미진입)다. 옛 카테고리(backend/plugin/data-design/data-analysis/apple 톱레벨)는 이 도메인 축으로 재편되면서 dev·data 등으로 흡수됐다.
+  상세 tier(3단째)는 자산이 많은 writing.social(17) 한 중분류에만 붙였고, 나머지는 leaf(3단계 미진입)다. 옛 카테고리(backend/plugin/data-design/data-analysis 톱레벨)는 이 도메인 축으로 재편되면서 dev·data 등으로 흡수됐다.
 
 - 톱레벨 카테고리 → sub-옵션 → 상세(`detailOptions`) 매핑은 `scripts/install/menu.js` 한 곳에서 정의된다. `detailOptions` 는 leaf 가 될 수 있는 노드(subOptions 없는 category, 또는 subOption)에 부착한다.
-- 워크로드 키 카탈로그는 `scripts/install/workloads.js` (`core, research, report, python-backend, python-data, rust, nodejs, cloud, devops, finops, integration, aws-rds, data-analysis, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing, social-voice, social-content, social-visual, apple-core, apple-platform, apple-product`). `core` 는 항상 포함되며 이제 **최소 baseline**(github·context7·time·fetch MCP + 범용 에이전트)만 담는다. AWS MCP 분류용 키 — `devops`(IaC·컨테이너·서버리스·관측성)·`finops`(비용·요금)·`integration`(SNS·SQS·MQ·Step Functions)·`aws-rds`(Aurora·RDS·DSQL·Keyspaces, 로컬 DB설계와 분리)·`data-analysis`(Glue·Athena·Redshift·Neptune) — 로 `cloud` 통짜 바구니를 막는다. `research`(exa·brave·deep-researcher, 웹 검색·자료조사)·`report`(tech-writer 계열, 기술 리포트)는 각각 core·writing 에서 분리했다. 옛 통짜 키 `apple` 은 `workloads.js` 의 `expandAliases()` 가 `apple-core,apple-platform,apple-product` 로 확장하는 별칭으로 계속 동작한다(`--workload=apple`, `--category=apple`). `lab` 은 메뉴에 노출되지 않는 수동 전용 키로 (`--workload=...,lab`), humanize 메타 에이전트 격리에만 쓴다.
+- 워크로드 키 카탈로그는 `scripts/install/workloads.js` (`core, research, report, python-backend, python-data, rust, nodejs, cloud, devops, finops, integration, aws-rds, data-analysis, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing, social-voice, social-content, social-visual`). `core` 는 항상 포함되며 이제 **최소 baseline**(github·context7·time·fetch MCP + 범용 에이전트)만 담는다. AWS MCP 분류용 키 — `devops`(IaC·컨테이너·서버리스·관측성)·`finops`(비용·요금)·`integration`(SNS·SQS·MQ·Step Functions)·`aws-rds`(Aurora·RDS·DSQL·Keyspaces, 로컬 DB설계와 분리)·`data-analysis`(Glue·Athena·Redshift·Neptune) — 로 `cloud` 통짜 바구니를 막는다. `research`(exa·brave·deep-researcher, 웹 검색·자료조사)·`report`(tech-writer 계열, 기술 리포트)는 각각 core·writing 에서 분리했다. `expandAliases()` 는 옛 통짜 키를 하위 키로 확장하는 자리이며 현재 ALIASES 는 비어 있다(마지막 별칭 `apple` 은 Apple 스킬 제거와 함께 사라졌다). `lab` 은 메뉴에 노출되지 않는 수동 전용 키로 (`--workload=...,lab`), humanize 메타 에이전트 격리에만 쓴다.
 - 설치 시작 시 `scripts/install/check-global.js` 가 글로벌 baseline 상태(`absent`/`outdated`/`current`)를 판정한다 — `$CLAUDE_HOME/_harness-manifest.json`(설치 종료 시 `manifest.js` 가 기록: version·workloads·installedAt) 의 버전을 repo `VERSION` 과 비교. 심볼릭 설치는 멱등이라 세 상태 모두 링크 루프를 그대로 태우고, 사용자에겐 상태만 알린다.
 - 진입점은 `scripts/install/select-workloads.js` 로, 다음 셋 중 하나를 자동으로 고른다:
-  - 메뉴 CLI 플래그(`--category=`, `--backend=`, `--apple=`, `--writing-social=` …) 가 있으면 비대화형으로 그 값 사용
+  - 메뉴 CLI 플래그(`--category=`, `--dev=`, `--data=`, `--writing-social=` …) 가 있으면 비대화형으로 그 값 사용
   - 인자가 없고 TTY 면 방향키 체크박스 3단계 메뉴(`scripts/install/checkbox-prompt.js`, 의존성 0)
   - 그 외엔 `--all` 폴백
 - 결정된 워크로드는 `scripts/install/select-assets.js` 로 넘어가 자산 frontmatter `workloads:` 와 교집합 매칭 → `kind\tsource\ttarget` 라인 출력 → install.sh / install.ps1 가 파일별 심볼릭 링크로 `$CLAUDE_HOME/<kind>s/_harness/...` 에 설치한다. 워크로드 흐름에 들어오는 kind 는 **agent·command·skill·rule** 4종뿐이다.
