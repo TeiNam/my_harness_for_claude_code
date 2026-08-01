@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-02
 
+- fix(install): build-mcp-config 가 미인식 인자에 config 를 덮어쓰지 않게 (#11) (e3bbf7e)
 - fix(mcp): uvx 서버에 mcp<2 핀 + terraform 프록시 라우팅 추가 (#10) (ca050ce)
 
 ## 2026-07-31
