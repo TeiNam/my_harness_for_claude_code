@@ -6,6 +6,9 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
+const { spawnSync } = require('child_process');
 const { build, selectServers, toRuntimeEntry, parseArgs } = require('../../../scripts/install/build-mcp-config');
 
 function test(name, fn) {
@@ -128,6 +131,40 @@ function runTests() {
       assert.deepStrictEqual(parseArgs(['--servers=github,exa']).servers, ['github', 'exa']);
       assert.strictEqual(parseArgs(['--workload=core']).servers, null);
       assert.strictEqual(parseArgs(['--dry-run']).dryRun, true);
+      assert.deepStrictEqual(parseArgs(['--workload=core']).unknown, []);
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
+    test('parseArgs: 미인식 인자를 unknown 으로 모은다 (조용히 무시하면 config 를 덮어씀)', () => {
+      assert.deepStrictEqual(parseArgs(['--dryrun']).unknown, ['--dryrun']);
+      assert.deepStrictEqual(parseArgs(['--workload=core', '--nope']).unknown, ['--nope']);
+      assert.strictEqual(parseArgs(['--help']).help, true);
+      assert.strictEqual(parseArgs(['-h']).help, true);
+      assert.deepStrictEqual(parseArgs(['--help']).unknown, [], '--help 은 unknown 아님');
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
+    test('CLI: --help 과 미인식 인자는 config.json 을 쓰지 않는다', () => {
+      const script = path.join(__dirname, '..', '..', '..', 'scripts', 'install', 'build-mcp-config.js');
+      const output = path.join(__dirname, '..', '..', '..', 'mcp-configs', 'proxy', 'config.json');
+      const before = fs.existsSync(output) ? fs.readFileSync(output, 'utf8') : null;
+
+      const help = spawnSync(process.execPath, [script, '--help'], { encoding: 'utf8' });
+      assert.strictEqual(help.status, 0, '--help 은 exit 0');
+      assert.ok(/usage:/.test(help.stdout), '--help 은 usage 를 stdout 으로');
+
+      const bad = spawnSync(process.execPath, [script, '--dryrun'], { encoding: 'utf8' });
+      assert.strictEqual(bad.status, 2, '미인식 인자는 exit 2');
+      assert.ok(/알 수 없는 인자/.test(bad.stderr), '미인식 인자를 stderr 로 알림');
+
+      const after = fs.existsSync(output) ? fs.readFileSync(output, 'utf8') : null;
+      assert.strictEqual(after, before, 'config.json 이 변경되면 안 됨');
     })
   )
     passed++;

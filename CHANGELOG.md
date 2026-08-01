@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-08-02
+
+- fix(mcp): uvx 서버에 mcp<2 핀 + terraform 프록시 라우팅 추가 (#10) (ca050ce)
+
 ## 2026-07-31
 
 - chore: npm test 초록화 + v0.3.0 승격 + 중복 자산 정리 (-2,606줄) (#9) (ff86b41)
