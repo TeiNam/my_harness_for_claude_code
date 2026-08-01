@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-07-31
 
+- chore: npm test 초록화 + v0.3.0 승격 + 중복 자산 정리 (-2,606줄) (#9) (ff86b41)
 - refactor(skills): 메뉴 비노출 lab 스킬 30개 제거 (-7,426줄) (#8) (f853b40)
 - refactor: 산출물 0인 자기진화 스택 제거 (-13,062줄) (#7) (627dd9f)
 - refactor(skills): Apple 스킬 23개 카테고리 제거 (-155,912줄, 레포의 50%) (#6) (36b4ef6)

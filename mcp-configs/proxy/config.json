@@ -39,12 +39,16 @@
     "time": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp<2",
         "mcp-server-time"
       ]
     },
     "fetch": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp<2",
         "mcp-server-fetch"
       ]
     },
@@ -57,6 +61,8 @@
     "obsidian": {
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp<2",
         "mcp-obsidian"
       ],
       "env": {
@@ -64,6 +70,10 @@
         "OBSIDIAN_HOST": "host.docker.internal",
         "OBSIDIAN_PORT": "27124"
       }
+    },
+    "terraform": {
+      "url": "http://harness-terraform-mcp:8080/mcp",
+      "transportType": "streamable-http"
     }
   }
 }
