@@ -39,6 +39,21 @@ function runTests() {
   else failed++;
 
   if (
+    test('uvx 서버는 mcp<2 핀을 유지한다 (SDK 2.x 에서 Server.list_tools 소멸)', () => {
+      // 핀은 카탈로그(SSOT)에 있어야 한다. 생성물 config.json 에만 손으로 넣으면
+      // 다음 재빌드에서 날아가고 해당 서버가 기동 실패한다.
+      const pinned = build(['core', 'obsidian']).config.mcpServers;
+      for (const name of ['time', 'fetch', 'obsidian']) {
+        const args = (pinned[name] || {}).args || [];
+        assert.ok(args.includes('mcp<2'), `${name} 에 mcp<2 핀이 없음: ${JSON.stringify(args)}`);
+        assert.strictEqual(args[args.indexOf('mcp<2') - 1], '--with', `${name}: mcp<2 앞에 --with 필요`);
+      }
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
     test('research 는 웹 검색만 (exa·brave-search)', () => {
       const r = build(['research']);
       assert.ok(r.keys.includes('exa') && r.keys.includes('brave-search'), 'research → exa·brave');

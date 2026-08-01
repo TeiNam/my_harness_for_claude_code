@@ -64,9 +64,11 @@
       ],
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp<2",
         "mcp-server-time"
       ],
-      "description": "Current time + IANA timezone conversion — 프록시 컨테이너 안 uvx."
+      "description": "Current time + IANA timezone conversion — 프록시 컨테이너 안 uvx. mcp<2 핀: SDK 2.x 에서 Server.list_tools 가 사라져 기동 실패."
     },
     "fetch": {
       "route": "proxy",
@@ -75,9 +77,11 @@
       ],
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp<2",
         "mcp-server-fetch"
       ],
-      "description": "URL fetch + HTML→markdown 변환 — 프록시 컨테이너 안 uvx, 무인증."
+      "description": "URL fetch + HTML→markdown 변환 — 프록시 컨테이너 안 uvx, 무인증. mcp<2 핀: SDK 2.x 에서 Server.list_tools 가 사라져 기동 실패."
     },
     "drawio": {
       "route": "proxy",
@@ -322,6 +326,8 @@
       ],
       "command": "uvx",
       "args": [
+        "--with",
+        "mcp<2",
         "mcp-obsidian"
       ],
       "env": {
@@ -329,7 +335,7 @@
         "OBSIDIAN_HOST": "host.docker.internal",
         "OBSIDIAN_PORT": "27124"
       },
-      "description": "Obsidian vault 읽기·검색·편집 (Local REST API 플러그인) — 프록시 컨테이너 안 uvx, host.docker.internal 로 호스트 Obsidian 접근. 시크릿은 프록시 .env 의 OBSIDIAN_API_KEY."
+      "description": "Obsidian vault 읽기·검색·편집 (Local REST API 플러그인) — 프록시 컨테이너 안 uvx, host.docker.internal 로 호스트 Obsidian 접근. 시크릿은 프록시 .env 의 OBSIDIAN_API_KEY. mcp<2 핀: SDK 2.x 에서 Server.list_tools 가 사라져 기동 실패."
     },
     "sentry": {
       "route": "local",
