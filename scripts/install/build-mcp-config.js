@@ -43,8 +43,20 @@ const SECRET_PLACEHOLDERS = {
   YOUR_OBSIDIAN_API_KEY_HERE: '${OBSIDIAN_API_KEY}'
 };
 
+const USAGE = [
+  'usage: build-mcp-config.js [--workload=a,b] [--servers=x,y] [--dry-run] [--list]',
+  '',
+  '  --workload=core,cloud   워크로드 CSV (core 는 항상 포함)',
+  '  --servers=github,exa    서버 단위 명시 선택 (워크로드 매칭 건너뜀)',
+  '  --dry-run               config.json 을 쓰지 않고 미리보기',
+  '  --list                  선택된 서버 키만 stdout 으로',
+  '  --help                  이 도움말'
+].join('\n');
+
+/** 미인식 인자는 조용히 무시하지 않는다 — 무시하면 workloads 가 빈 배열로
+ *  떨어져 core 기본값으로 config.json 을 덮어쓴다(오타 한 번에 서버 유실). */
 function parseArgs(argv) {
-  const out = { workloads: [], servers: null, dryRun: false, list: false };
+  const out = { workloads: [], servers: null, dryRun: false, list: false, help: false, unknown: [] };
   for (const a of argv) {
     if (a.startsWith('--workload=') || a.startsWith('--workloads=')) {
       out.workloads = a
@@ -63,6 +75,10 @@ function parseArgs(argv) {
       out.dryRun = true;
     } else if (a === '--list') {
       out.list = true;
+    } else if (a === '--help' || a === '-h') {
+      out.help = true;
+    } else {
+      out.unknown.push(a);
     }
   }
   return out;
@@ -147,6 +163,17 @@ function build(selected, serverAllowlist = null) {
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+
+  if (args.help) {
+    process.stdout.write(USAGE + '\n');
+    return;
+  }
+  if (args.unknown.length) {
+    process.stderr.write(`[build-mcp-config] 알 수 없는 인자: ${args.unknown.join(' ')}\n${USAGE}\n`);
+    process.exitCode = 2;
+    return;
+  }
+
   const { config, keys, needsTerraform } = build(args.workloads, args.servers);
 
   if (args.list) {
