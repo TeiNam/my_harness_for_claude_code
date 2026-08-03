@@ -30,7 +30,9 @@ const EMPTY = JSON.stringify({});
 
 // ponytail 의 상태 파일. 플러그인이 SessionStart 에서 기록한다.
 function readPonytailMode() {
-  const env = String(process.env.PONYTAIL_DEFAULT_MODE || '').trim().toLowerCase();
+  const env = String(process.env.PONYTAIL_DEFAULT_MODE || '')
+    .trim()
+    .toLowerCase();
   if (env) return env;
 
   const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
@@ -43,23 +45,52 @@ function readPonytailMode() {
 
 // ponytail: 플러그인 SKILL.md 를 읽어오지 않고 압축본을 인라인한다 —
 // 전문(약 2k 토큰)을 모든 서브에이전트에 붙이면 절약하려던 토큰을 되쓴다.
-const BRIEF = [
-  'SUBAGENT BUDGET (ponytail — 이 서브에이전트 실행 전체에 적용)',
-  '',
+const HEADER = 'SUBAGENT BUDGET (ponytail — 이 서브에이전트 실행 전체에 적용)';
+
+// 탐색·실행 규율. 리뷰든 구현이든 공통이다.
+const COMMON = [
   '- 요청된 것만 답하고 멈춘다. 범위 확장·"하는 김에" 추가 작업 금지.',
   '- 서브에이전트를 더 생성하지 않는다. 너는 leaf 다.',
   '- 좁게 읽는다: 전체 파일 훑기보다 표적 grep/glob, 재독보다 1패스.',
+  '- 절대 줄이지 않는 것: 입력 검증, 데이터 손실을 막는 에러 처리, 보안,',
+  '  접근성, 사용자가 명시적으로 요구한 것.'
+];
+
+const BRIEF = [
+  HEADER,
+  '',
+  ...COMMON,
   '- 코드는 최소로: stdlib > 네이티브 기능 > 이미 설치된 의존성 > 새 의존성.',
   '  요청되지 않은 추상화·"나중을 위한" 스캐폴딩 금지.',
   '- 증거 덤프가 아니라 결론을 반환한다: 코드 블록 붙여넣기보다 file:line 참조.',
   '- 보고 오버헤드는 짧게(몇 줄). 단, 과업이 요구한 산출물(코드·윤문 결과·문서·',
-  '  리뷰 리포트)은 오버헤드가 아니다 — 온전히 만들어낸다.',
-  '- 절대 줄이지 않는 것: 입력 검증, 데이터 손실을 막는 에러 처리, 보안,',
-  '  접근성, 사용자가 명시적으로 요구한 것.',
+  '  리뷰 리포트)은 오버헤드가 아니다 — 온전히 만들어낸다.'
 ].join('\n');
 
+// 리뷰·감사 에이전트용 변형. 과탐색은 여전히 막지만 결함 수를 압박하지 않는다 —
+// 짧게 쓰라는 지시가 findings 누락으로 번지면 리뷰의 존재 이유가 사라진다.
+// 간결성 자체를 판정하는 건 ponytail-review 스킬의 일이고, 이 훅의 일이 아니다.
+const REVIEW_BRIEF = [
+  HEADER,
+  '',
+  ...COMMON,
+  '- 발견한 결함은 빠짐없이 보고한다 — 개수를 줄이지 않는다. 간결성 압박은',
+  '  findings 가 아니라 그 서술에만 적용된다.',
+  '- 결함 1건 = 몇 줄: file:line + 무엇이 왜 깨지는지. 코드 전체 재인용 금지.',
+  '- 과잉설계 판정(무엇을 지울지)은 ponytail-review 스킬 담당이다. 요청받지',
+  '  않았다면 그 렌즈로 리뷰를 갈아타지 말고 주어진 축만 본다.'
+].join('\n');
+
+// 리뷰/감사 계열 판별. 하네스 에이전트는 -reviewer/-auditor/-detector 접미사나
+// code-review 계열 이름을 쓴다.
+const REVIEW_AGENT = /review|audit|detector|scorer|critic|analyzer/i;
+
 function run(inputOrRaw, _options = {}) {
-  if (String(process.env.HARNESS_SUBAGENT_BUDGET || '').trim().toLowerCase() === 'off') {
+  if (
+    String(process.env.HARNESS_SUBAGENT_BUDGET || '')
+      .trim()
+      .toLowerCase() === 'off'
+  ) {
     return { stdout: EMPTY, exitCode: 0 };
   }
 
@@ -74,28 +105,27 @@ function run(inputOrRaw, _options = {}) {
 
   let input;
   try {
-    input = typeof inputOrRaw === 'string'
-      ? (inputOrRaw.trim() ? JSON.parse(inputOrRaw) : {})
-      : (inputOrRaw || {});
+    input = typeof inputOrRaw === 'string' ? (inputOrRaw.trim() ? JSON.parse(inputOrRaw) : {}) : inputOrRaw || {};
   } catch {
     input = {};
   }
 
   const agentType = String(input?.agent_type || '').trim();
-  const header = agentType ? `${BRIEF}\n\n(agent_type: ${agentType})` : BRIEF;
+  const brief = REVIEW_AGENT.test(agentType) ? REVIEW_BRIEF : BRIEF;
+  const header = agentType ? `${brief}\n\n(agent_type: ${agentType})` : brief;
 
   return {
     stdout: JSON.stringify({
       hookSpecificOutput: {
         hookEventName: 'SubagentStart',
-        additionalContext: header,
-      },
+        additionalContext: header
+      }
     }),
-    exitCode: 0,
+    exitCode: 0
   };
 }
 
-module.exports = { run, BRIEF, readPonytailMode, HOOK_ID };
+module.exports = { run, BRIEF, REVIEW_BRIEF, REVIEW_AGENT, readPonytailMode, HOOK_ID };
 
 // spawnSync 실행용 stdin 폴백
 if (require.main === module) {
