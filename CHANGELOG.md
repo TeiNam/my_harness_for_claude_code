@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-03
 
+- fix(hooks): 리뷰 에이전트에는 findings 압박 없는 예산 브리프 적용 (#15) (faee6d9)
 - fix(hooks): 서브에이전트에 ponytail 예산 브리프 주입 (subagent:budget) (#14) (35130c8)
 - fix(rules): 서브에이전트 남발 통제 게이트 추가 (#13) (51e1cc9)
 

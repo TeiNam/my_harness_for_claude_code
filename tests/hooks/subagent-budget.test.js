@@ -108,9 +108,7 @@ test('브리프는 서브에이전트 재귀 생성을 금지한다', () => {
 test('리뷰 계열 에이전트는 findings 압박 없는 변형 브리프를 받는다', () => {
   withMode('full', () => {
     for (const type of ['code-reviewer', 'security-reviewer', 'tech-fidelity-auditor', 'doc-quality-detector']) {
-      const ctx = JSON.parse(
-        run(JSON.stringify({ agent_type: type })).stdout
-      ).hookSpecificOutput.additionalContext;
+      const ctx = JSON.parse(run(JSON.stringify({ agent_type: type })).stdout).hookSpecificOutput.additionalContext;
       assert.match(ctx, /개수를 줄이지 않는다/, `${type} 은 리뷰 브리프를 받아야 한다`);
       assert.ok(!ctx.includes('보고 오버헤드는 짧게'), `${type} 에 장문 억제 문구가 새어들었다`);
     }
@@ -120,9 +118,7 @@ test('리뷰 계열 에이전트는 findings 압박 없는 변형 브리프를 �
 test('구현 계열 에이전트는 기본 브리프를 받는다', () => {
   withMode('full', () => {
     for (const type of ['general-purpose', 'Explore', 'tdd-guide', 'devops']) {
-      const ctx = JSON.parse(
-        run(JSON.stringify({ agent_type: type })).stdout
-      ).hookSpecificOutput.additionalContext;
+      const ctx = JSON.parse(run(JSON.stringify({ agent_type: type })).stdout).hookSpecificOutput.additionalContext;
       assert.match(ctx, /보고 오버헤드는 짧게/, `${type} 은 기본 브리프를 받아야 한다`);
     }
   });
