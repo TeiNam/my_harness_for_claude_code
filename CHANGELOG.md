@@ -2,8 +2,13 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-08-03
+
+- fix(rules): 서브에이전트 남발 통제 게이트 추가 (#13) (51e1cc9)
+
 ## 2026-08-02
 
+- fix(mcp): mcp<2 핀을 카탈로그(SSOT)로 이전 (#12) (ba903f0)
 - fix(install): build-mcp-config 가 미인식 인자에 config 를 덮어쓰지 않게 (#11) (e3bbf7e)
 - fix(mcp): uvx 서버에 mcp<2 핀 + terraform 프록시 라우팅 추가 (#10) (ca050ce)
 

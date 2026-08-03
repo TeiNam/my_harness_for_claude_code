@@ -369,6 +369,20 @@
         "description": "Session end lifecycle marker (non-blocking)",
         "id": "session:end:marker"
       }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const raw=fs.readFileSync(0,'utf8');const rel=path.join('scripts','hooks','subagent-budget.js');const has=c=>{const v=typeof c==='string'?c.trim():'';return v.length>0&&fs.existsSync(path.join(path.resolve(v),rel));};const root=(()=>{const e=process.env.CLAUDE_PLUGIN_ROOT||'';if(has(e))return path.resolve(e.trim());const c=[];if(process.env.CLAUDE_PROJECT_DIR){const j=path.join(process.env.CLAUDE_PROJECT_DIR,'.claude');c.push(path.join(j,'_harness'),j);}const h=require('os').homedir();const d=path.join(h,'.claude');c.push(d,path.join(d,'_harness'),path.join(d,'plugins','_harness'));for(const x of c){if(has(x))return x;}return null;})();if(!root){process.stdout.write('{}');process.exit(0);}const r=spawnSync(process.execPath,[path.join(root,rel)],{input:raw,encoding:'utf8',env:process.env,cwd:process.cwd(),timeout:10000});process.stdout.write(typeof r.stdout==='string'&&r.stdout.trim()?r.stdout:'{}');process.exit(0);\"",
+            "timeout": 10
+          }
+        ],
+        "description": "Inject the ponytail budget brief into every subagent (SessionStart context is not inherited by subagents)",
+        "id": "subagent:budget"
+      }
     ]
   }
 }
