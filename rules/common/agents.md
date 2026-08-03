@@ -1,5 +1,35 @@
 # Agent Orchestration
 
+## Subagent Gate (overrides "PROACTIVELY" / "MUST BE USED" phrasing everywhere)
+
+**Default is inline work in the main loop. A subagent is the exception, not the reflex.**
+Any "use PROACTIVELY", "MUST BE USED", or "immediately" wording in other rules or in
+agent descriptions marks a *candidate*, not a command — this gate decides.
+
+Spawn a subagent ONLY when at least one of these holds:
+
+1. **User asked** — named an agent, a review, or multi-agent work explicitly.
+2. **Context protection** — the task needs reading across many files or produces large
+   output where only the conclusion matters (broad search, repo-wide audit).
+3. **True parallelism** — 2+ genuinely independent tasks that would otherwise run serially.
+4. **A command/skill pipeline requires that agent** (e.g. /humanize strict stages).
+
+Hard limits:
+
+- **Max 3 concurrent subagents** unless the user explicitly asks for more scale
+  (workflow / ultracode opt-in).
+- **No speculative reviewers** — do not auto-spawn code-reviewer / security-reviewer /
+  tdd-guide after every edit. Spawn them when the change is security-sensitive, spans
+  5+ files, or the user asks.
+- **No agent for what one command answers** — a single grep, test run, or file read
+  is done inline.
+- **No chains** — never spawn an agent whose main job is to spawn more agents.
+- **Smell test** — if writing the agent prompt takes longer than doing the task,
+  do the task.
+
+Rationale: Opus 5-class models delegate eagerly by default; uncapped, this multiplies
+latency and token cost with no quality gain on small tasks.
+
 ## Available Agents
 
 Located in `~/.claude/agents/`:
@@ -18,17 +48,20 @@ Located in `~/.claude/agents/`:
 | rust-reviewer | Rust code review | Rust projects |
 | harmonyos-app-resolver | HarmonyOS app development | HarmonyOS/ArkTS projects |
 
-## Immediate Agent Usage
+## Agent Candidates by Situation
 
-No user prompt needed:
-1. Complex feature requests - Use **planner** agent
-2. Code just written/modified - Use **code-reviewer** agent
-3. Bug fix or new feature - Use **tdd-guide** agent
-4. Architectural decision - Use **architect** agent
+Subject to the Subagent Gate above (these are candidates, not auto-spawns):
+1. Complex feature requests (multi-phase, 5+ files) - **planner** agent
+2. Security-sensitive or large (5+ files) changes - **code-reviewer** agent
+3. Architectural decision with system-wide impact - **architect** agent
+4. TDD process explicitly requested - **tdd-guide** agent
+
+Small edits, single-file fixes, and doc changes: review inline yourself, no agent.
 
 ## Parallel Task Execution
 
-ALWAYS use parallel Task execution for independent operations:
+When the gate justifies multiple agents, launch independent ones in parallel
+(max 3 concurrent unless the user asked for more):
 
 ```markdown
 # GOOD: Parallel execution
