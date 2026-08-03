@@ -11,7 +11,7 @@ const os = require('os');
 const path = require('path');
 const { spawnSync } = require('child_process');
 
-const { run, BRIEF } = require('../../scripts/hooks/subagent-budget.js');
+const { run, BRIEF, REVIEW_BRIEF } = require('../../scripts/hooks/subagent-budget.js');
 const script = path.join(__dirname, '..', '..', 'scripts', 'hooks', 'subagent-budget.js');
 
 let passed = 0;
@@ -105,6 +105,35 @@ test('브리프는 서브에이전트 재귀 생성을 금지한다', () => {
   assert.match(BRIEF, /입력 검증/); // 안전 예외가 살아있어야 한다
 });
 
+test('리뷰 계열 에이전트는 findings 압박 없는 변형 브리프를 받는다', () => {
+  withMode('full', () => {
+    for (const type of ['code-reviewer', 'security-reviewer', 'tech-fidelity-auditor', 'doc-quality-detector']) {
+      const ctx = JSON.parse(
+        run(JSON.stringify({ agent_type: type })).stdout
+      ).hookSpecificOutput.additionalContext;
+      assert.match(ctx, /개수를 줄이지 않는다/, `${type} 은 리뷰 브리프를 받아야 한다`);
+      assert.ok(!ctx.includes('보고 오버헤드는 짧게'), `${type} 에 장문 억제 문구가 새어들었다`);
+    }
+  });
+});
+
+test('구현 계열 에이전트는 기본 브리프를 받는다', () => {
+  withMode('full', () => {
+    for (const type of ['general-purpose', 'Explore', 'tdd-guide', 'devops']) {
+      const ctx = JSON.parse(
+        run(JSON.stringify({ agent_type: type })).stdout
+      ).hookSpecificOutput.additionalContext;
+      assert.match(ctx, /보고 오버헤드는 짧게/, `${type} 은 기본 브리프를 받아야 한다`);
+    }
+  });
+});
+
+test('리뷰 브리프는 과잉설계 렌즈를 ponytail-review 로 넘긴다', () => {
+  assert.match(REVIEW_BRIEF, /ponytail-review 스킬 담당/);
+  assert.match(REVIEW_BRIEF, /입력 검증/); // 안전 예외는 양쪽 모두 유지
+  assert.match(REVIEW_BRIEF, /서브에이전트를 더 생성하지 않는다/);
+});
+
 test('실제 프로세스 실행 경로도 유효한 JSON 만 낸다', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'subagent-budget-proc-'));
   fs.writeFileSync(path.join(dir, '.ponytail-active'), 'full');
@@ -112,7 +141,7 @@ test('실제 프로세스 실행 경로도 유효한 JSON 만 낸다', () => {
     const result = spawnSync(process.execPath, [script], {
       input,
       encoding: 'utf8',
-      env: { ...process.env, CLAUDE_CONFIG_DIR: dir, PONYTAIL_DEFAULT_MODE: '' },
+      env: { ...process.env, CLAUDE_CONFIG_DIR: dir, PONYTAIL_DEFAULT_MODE: '' }
     });
     assert.strictEqual(result.status, 0);
     const parsed = JSON.parse(result.stdout);
@@ -122,5 +151,7 @@ test('실제 프로세스 실행 경로도 유효한 JSON 만 낸다', () => {
   }
 });
 
-console.log(`\n${passed} passed, ${failed} failed`);
+// run-all.js 는 `Passed: N` / `Failed: N` 패턴만 집계한다 — 형식을 벗어나면
+// 이 파일의 테스트가 전체 합계에서 조용히 빠진다.
+console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
 process.exit(failed > 0 ? 1 : 0);
