@@ -13,10 +13,20 @@ Recommend the best model tier for the current task by complexity and budget.
 
 ## Routing Heuristic
 
+First ask: **is the box open or closed?** Reasoning depth only pays when the
+shape of the answer is undecided. Criteria already supplied, or cause and fix
+already established → nothing left to search → `sonnet`.
+
 - `haiku` (Haiku 4.5): deterministic, low-risk mechanical changes, search
-- `sonnet` (Sonnet 5): default for implementation and refactors — ~90% of coding
-- `opus` (Opus 5): architecture, security, deep review, ambiguous requirements
+- `sonnet` (Sonnet 5): default — implementation, refactors, scanning against a
+  supplied rubric, rewriting what a detector already flagged, applying a fix
+  whose cause is known (~90% of coding)
+- `opus` (Opus 5): architecture, security, deep/adversarial review, ambiguous
+  requirements, diagnosing an unknown cause, judging whether meaning survived
 - Codex (cross-family): independent second opinion, tie-break, mechanical grind — not a Claude tier
+
+Tier **per stage, not per pipeline**: detect → fix → judge is
+`sonnet` → `sonnet` → `opus`, not `opus` × 3.
 
 Default to Sonnet 5; escalate to Opus 5 on failed first attempt, 5+ files,
 architectural, or security-critical work. Opus 5 is the ceiling — past it raise

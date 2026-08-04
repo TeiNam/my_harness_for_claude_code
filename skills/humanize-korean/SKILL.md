@@ -150,7 +150,12 @@ v1.1 5인 파이프라인 그대로. 검증 분리·재윤문 루프가 의미 �
 
 ## 에이전트 호출 규칙
 
-**모델:** 모두 `model: opus` 통일 (v1.1 베이스라인). 모델 다운그레이드는 v1.4에서 시도했으나 도구 호출 chain이 진짜 병목이라 효과 미미했음.
+**모델:** 단계별로 나눠 태깅한다 (`rules/common/model-routing.md` 의 closed/open box 기준).
+
+- `sonnet` — 박스가 닫힌 단계: `ai-tell-detector`(taxonomy 대조 스캔), `korean-style-rewriter`(탐지 리포트대로 윤문), `humanize-monolith`(fast path 일괄 실행).
+- `opus` — 박스가 열린 단계: `content-fidelity-auditor`(임의 내용의 의미 동등성 판정), `naturalness-reviewer`(미분류 패턴 발견 + 과윤문 판정), `korean-ai-tell-taxonomist`(분류 체계 설계).
+
+v1.4 의 다운그레이드 시도는 *wall-clock* 개선이 목표였고, 병목이 도구 호출 chain 이라 실패했다. 이번 분리는 latency 가 아니라 **토큰 낭비** 축이다 — 기준이 이미 주어진 단계에 추론 예산을 태우지 않는 것.
 
 **에이전트 정의 위치:** 하네스 `agents/`에 12종 정의. `writing` 워크로드 설치 시 하네스 install.sh 가 `agents/*.md` 를 `$CLAUDE_HOME/agents/_harness/` 에 파일별 심링크하므로 Claude Code 가 전역으로 탐색한다. (원본 im-not-ai 의 플러그인/단독 install.sh 경로 대신 하네스 워크로드 설치 모델을 따른다.)
 

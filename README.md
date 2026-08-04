@@ -41,11 +41,13 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 | 별칭 | 현재 매핑 | 성격 | 대표 에이전트 |
 |---|---|---|---|
-| `opus` | **Opus 5** | 최상위 티어 — 아키텍처·모호성·적대적 리뷰·시스템 전반 디버깅·최장기 자율 실행. 더 필요하면 티어가 아니라 effort(`high`→`xhigh`→`max`)를 올린다. refusal·web fetch·Priority Tier 필요 시 Opus 4.8 폴백 | `architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity/quality 감사관 |
-| `sonnet` | **Sonnet 5** | 최고의 코딩 모델 — 구현·리팩터·PR 리뷰(코딩의 ~90%) | 언어별 리뷰어, `code-*`, `devops`, `tdd-guide`, `refactor-cleaner`, 작성가 |
+| `opus` | **Opus 5** | 최상위 티어 — 답의 형태가 미정인 일: 설계·미지의 원인 진단·사실 보존 판정·미분류 패턴 발견·보안/적대적 리뷰. 더 필요하면 티어가 아니라 effort(`high`→`xhigh`→`max`)를 올린다. refusal·web fetch·Priority Tier 필요 시 Opus 4.8 폴백 | `architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity 감사관, 최종 리뷰어 |
+| `sonnet` | **Sonnet 5** | 최고의 코딩 모델 — 기준이 이미 주어진 일: 구현·리팩터·PR 리뷰·rubric 대조 스캔·리포트대로 윤문·원인이 확정된 수리(코딩의 ~90%) | 언어별 리뷰어, `code-*`, `devops`, `tdd-guide`, `refactor-cleaner`, 탐지기, 작성가/윤문가 |
 | `haiku` | **Haiku 4.5** | Sonnet의 ~90% 성능을 ~3× 저렴하게 — 기계적 편집·검색·문서 스캐폴딩 | `doc-updater`, `docs-lookup`, 고빈도 워커 |
 
-기본은 Sonnet 5. 첫 시도가 실패했거나 · 5개 이상 파일에 걸치거나 · 아키텍처 결정이거나 · 보안이 걸린 작업이면 Opus 5로 올립니다. Opus 5가 천장이므로 그 위로는 **티어가 아니라 effort**(`high`→`xhigh`→`max`)를 올리고, 그다음은 위가 아니라 **옆(Codex, 다른 모델 패밀리)**으로 갑니다. 결정적이고 위험이 낮은 작업은 Haiku 4.5로 내립니다. 에이전트 클래스는 평균이 아니라 **틀렸을 때의 최악 비용**으로 고릅니다 (머지를 게이팅하는 리뷰어는 대부분 쉬워도 `opus`).
+**티어를 가르는 질문은 "박스가 열려 있는가"입니다.** 추론 깊이는 답의 형태가 미정일 때만 값을 합니다. taxonomy·rubric 이 이미 주어졌거나 원인과 해결이 확정된 상태에서 실행만 하는 일은 탐색 공간이 없으므로 Sonnet 5 로 충분합니다 — 이게 함대에서 가장 흔한 낭비였습니다. 반대로 설계·미지의 원인 진단·의미 보존 판정처럼 답을 스스로 만들어야 하는 일은 Opus 5. Opus 5가 천장이므로 그 위로는 **티어가 아니라 effort**(`high`→`xhigh`→`max`)를 올리고, 그다음은 위가 아니라 **옆(Codex, 다른 모델 패밀리)**으로 갑니다.
+
+함정 둘: ① "중요한 파이프라인이니 전부 opus" — 중요도는 추론 깊이가 아닙니다(40패턴 taxonomy 대조는 lookup). ② "수리니까 sonnet" — 원인이 *확정된 뒤에만* 참입니다(원인 찾기는 열린 박스). **파이프라인이 아니라 단계별로 태깅**합니다: detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. 두 축이 충돌하면(닫힌 박스인데 미스 비용이 큼) 평균이 아니라 **틀렸을 때의 최악 비용**이 이깁니다 (머지를 게이팅하는 리뷰어는 대부분 쉬워도 `opus`).
 
 권위 있는 정책(작업 표·에이전트 클래스 맵·오케스트레이션·Codex 핸드오프)은 `rules/common/model-routing.md`에 있고, `/model-route` 커맨드와 `performance.md`가 이를 참조합니다. 다른 모델 패밀리의 독립적 세컨드 오피니언이 필요하면 codex 플러그인(`codex:rescue` 스킬/`codex:codex-rescue` 에이전트)으로 OpenAI Codex CLI를 호출합니다.
 

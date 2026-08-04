@@ -204,7 +204,10 @@ fidelity와 clarity 결과를 **AND로 종합**한다. clarity의 5개 verdict�
 
 ## 에이전트 호출 규칙
 
-**모델:** 모두 `model: opus` 통일.
+**모델:** 단계별로 나눠 태깅한다 (`rules/common/model-routing.md` 의 closed/open box 기준).
+
+- `sonnet` — 박스가 닫힌 단계: `doc-quality-detector`(taxonomy 대조 스캔), `tech-doc-writer`(탐지 리포트대로 작성·윤문), `tech-writer-monolith`(fast path 일괄 실행).
+- `opus` — 박스가 열린 단계: `tech-fidelity-auditor`(코드·수치·시그니처 훼손/날조 판정), `doc-clarity-reviewer`(미분류 결함 발견 + 구조 위반·과윤문 판정).
 
 **호출 방식:** 오케스트레이터(SKILL.md)가 `Agent` 도구로 각 워커 에이전트를 이름으로 직접 호출한다. 워커는 `~/.claude/agents/`에 설치되며 서로 직접 통신하지 못한다 — 모든 핸드오프는 오케스트레이터가 `_workspace` 파일로 중계한다.
 
