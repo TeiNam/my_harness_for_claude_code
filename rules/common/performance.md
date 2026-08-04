@@ -14,11 +14,16 @@
 - Main development work
 - Orchestrating multi-agent workflows
 - Multi-file implementation and refactors
+- **Closed-box work**: scanning against a supplied rubric/taxonomy, rewriting
+  spans a detector already flagged, implementing a fix whose cause and remedy
+  are known. No search space left → no reason to pay for reasoning depth.
 
 **Opus 5** (Top tier — deepest reasoning available):
 - Complex architectural decisions
 - Security analysis and adversarial review
 - Ambiguous requirements, system-wide debugging
+- **Open-box work**: diagnosing an unknown cause, judging whether meaning or
+  fact survived a transformation, finding what the taxonomy doesn't cover yet
 - Long-horizon autonomous runs (overnight builds, large migrations) at `xhigh` effort
 - Final adversarial judge on highest-stakes output at `xhigh`/`max`
 - Fast mode (`/fast`) keeps Opus reasoning with faster output

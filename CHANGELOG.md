@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-08-04
+
+- chore(tests): subagent-budget 테스트 포맷 정리 (#16) (c89fd0e)
+
 ## 2026-08-03
 
 - fix(hooks): 리뷰 에이전트에는 findings 압박 없는 예산 브리프 적용 (#15) (faee6d9)

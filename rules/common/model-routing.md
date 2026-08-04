@@ -47,7 +47,11 @@ default responses run longer (prompt explicitly for target length).
 | Multi-file implementation | `sonnet` | Best coding/latency balance |
 | Refactors | `sonnet` | Holds moderate context, reliable diffs |
 | PR / code review | `sonnet` | Catches nuance in context |
+| Implementing a fix whose cause + remedy are already known | `sonnet` | Nothing left to reason about — just apply it |
+| Scanning input against a supplied rubric / taxonomy | `sonnet` | Lookup against given criteria, not open judgment |
+| Rewriting / polishing spans already flagged by a detector | `sonnet` | The what-to-fix decision is upstream |
 | Complex architecture | `opus` | Needs deep reasoning |
+| Diagnosing a cause that is *not* yet known | `opus` | Open search space; wrong guess costs a whole cycle |
 | Security analysis | `opus` | Can't afford a missed vuln |
 | Ambiguous / underspecified work | `opus` | Reasoning about intent |
 | Debugging system-wide bugs | `opus` | Must hold the whole system in mind |
@@ -64,21 +68,50 @@ deterministic and low-risk.
 
 ## Agent Class → Model
 
-The agent fleet already encodes this in frontmatter. The classes:
+### The deciding question: is the box open or closed?
 
-- **`opus`** — reasoning-heavy or high-stakes: `architect`, `planner`,
-  `deep-researcher`, `security-reviewer`, and the fidelity/quality auditors
-  where a missed regression is expensive (the humanize / tech-writer auditor
-  and taxonomist agents).
-- **`sonnet`** — implementation, review, and specialist work: the language
-  reviewers, `code-*`, `devops`, `tdd-guide`, `refactor-cleaner`, writers,
-  build/error resolvers.
-- **`haiku`** — mechanical, high-frequency: `doc-updater`, `docs-lookup`, and
-  any future search/scaffold worker.
+Reasoning depth only pays when the *shape of the answer* is undecided. If the
+criteria, the diagnosis, or the fix is already given and the agent's job is to
+execute against it, Opus burns thinking tokens on a problem that has no search
+space left. That's the single most common waste in the fleet.
 
-When adding an agent, pick the class by the *worst-case* cost of a wrong
-answer, not the average case. A reviewer that gates a merge is `opus` even if
-most reviews are easy.
+**Closed box → `sonnet`.** The rubric/taxonomy/spec is supplied, the cause is
+known, the output format is fixed:
+
+- Scan input against a supplied checklist or taxonomy → structured report
+- Rewrite/polish spans a detection report already flagged
+- Implement a fix whose cause and remedy are already established
+- Build/type-error repair, codemods, mechanical integration, PR/CHANGELOG drafting
+- Write to a given outline in a given voice
+
+**Open box → `opus`.** The answer's shape is genuinely undetermined, or a miss
+is expensive and unrecoverable:
+
+- Design decisions: what should exist, how it should be structured (`architect`, `planner`, `code-architect`)
+- Diagnosis when the cause is *not* yet known (system-wide debugging, stuck loops)
+- Judging whether meaning/fact survived a transformation — an open-ended
+  equivalence call over arbitrary content (`content-fidelity-auditor`, `tech-fidelity-auditor`)
+- Finding what the taxonomy *doesn't* cover yet (`naturalness-reviewer`,
+  `doc-clarity-reviewer`, taxonomist/gap-analyzer agents)
+- Security review, adversarial review, ambiguous requirements
+- Multi-source synthesis with no fixed answer shape (`deep-researcher`)
+
+**`haiku`** — mechanical, high-frequency: `doc-updater`, `docs-lookup`, and any
+future search/scaffold worker.
+
+### Two traps
+
+1. **"It's an important pipeline, so `opus` everywhere."** Importance is not
+   reasoning depth. A detector reading a 40-pattern taxonomy is doing lookup, not
+   reasoning — `sonnet`. Uniform-`opus` pipelines are how a 5-stage flow costs 5×
+   what it needs to.
+2. **"It's just a fix, so `sonnet`."** True only once the cause is *established*.
+   Finding the cause is open-box work; applying the known fix is closed-box.
+   Split the stages rather than tiering the whole thing up.
+
+When the two axes disagree — closed box but an expensive miss — the miss wins.
+Pick by *worst-case* cost of a wrong answer, not the average. A reviewer that
+gates a merge is `opus` even if most reviews are easy.
 
 ## Multi-Agent Orchestration
 
@@ -90,6 +123,10 @@ most reviews are easy.
   pays for itself. Where a missed defect is very expensive (security gate,
   production migration), run `opus` at `xhigh`/`max` **and** add a Codex axis;
   two model families disagreeing is a stronger signal than one model retried.
+- **Tier per stage, not per pipeline.** A detect → fix → judge flow is
+  `sonnet` → `sonnet` → `opus`, not `opus` × 3. Tiering the whole pipeline to its
+  hardest stage is the default failure mode; the closed/open box test above is
+  applied stage by stage.
 - Opus 5 delegates to subagents more eagerly than 4.8 — in orchestrator prompts,
   state explicitly when NOT to spawn (single-file reads, sequential steps).
 - Effort routing inside a tier is cheaper than jumping tiers: `low` for
