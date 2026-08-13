@@ -138,7 +138,10 @@ function listInstalledLinks(claudeHome, root) {
           continue;
         }
         const resolved = path.isAbsolute(target) ? target : path.resolve(path.dirname(abs), target);
-        if (insideRepo(resolved)) found.push(path.relative(claudeHome, abs));
+        // targetRel values are built with forward slashes, so normalize before
+        // comparing — on Windows path.relative() would otherwise return
+        // backslashes and every healthy link would read as an orphan.
+        if (insideRepo(resolved)) found.push(path.relative(claudeHome, abs).split(path.sep).join('/'));
         continue;
       }
       if (entry.isDirectory() && recurse) walk(abs, true);
@@ -230,9 +233,17 @@ function main(argv) {
     const wl = flags.workload && flags.workload.length ? ` --workload=${flags.workload.join(',')}` : '';
     console.log(`\nDrift detected. Re-sync with:\n  ./install.sh --force${wl}`);
     if (buckets.orphan.length) {
+      // --uninstall clears everything the harness installed, so the re-install
+      // must name the same workloads (otherwise the menu/--all decides for you)
+      // and re-apply the optional hook stack if it was in use. Spell both out —
+      // an incomplete instruction here costs the user their setup.
+      const restoreWl = wl || (activeGroups.length ? ` --workload=${activeGroups.join(',')}` : '');
       console.log(
-        `\n  orphan links are not removed by --force (it only re-links what the repo declares).` +
-          `\n  Clear them with:\n    ./install.sh --uninstall && ./install.sh${wl}`
+        '\n  orphan links are not removed by --force (it only re-links what the repo declares).' +
+          `\n  Clear them with:\n    ./install.sh --uninstall && ./install.sh${restoreWl}` +
+          '\n  Note: --uninstall drops every harness link and hook. Re-run with the same' +
+          '\n  workloads (above), and add `node scripts/install/merge-hooks.js --optional`' +
+          '\n  afterwards if you were running the optional hook stack.'
       );
     }
     return 1;

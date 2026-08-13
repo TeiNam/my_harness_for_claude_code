@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- fix(install): id 충돌은 이벤트별로, 직계 링크 스캔은 skills 로 한정 (5e4516f)
 - fix(install): uninstall·비대상 이벤트는 id 가 아니라 실행 스크립트로만 판정 (b94db1a)
 - docs: Loop Control 표의 루프 서명 설명을 실제 구현(입력 전체 해시)에 맞춤 (8481960)
 - fix: 6차 리뷰 반영 — 동작 불가한 컨텍스트 경고 제거, id 충돌 경고 추가 (ca01805)
