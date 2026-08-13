@@ -197,6 +197,25 @@ unlink_one() {
     # 하네스가 만들지 않은 링크는 건드리지 않는다 (uninstall 은 best-effort).
 }
 
+# 선언(build_selection) 기반 unlink 는 *레포에 아직 있는* 자산만 지운다. 자산을
+# 지우거나 옮긴 뒤에 남은 링크(orphan)는 그 목록에 없으므로 영구히 남는다 —
+# 링크가 살아 있으면 rule 은 계속 매 세션 로드된다. `_harness` 는 하네스 전용
+# 네임스페이스라, 그 트리의 심볼릭은 전부 우리 것으로 보고 정리해도 안전하다.
+unlink_orphans() {
+    local kind base
+    for kind in agents commands skills rules; do
+        base="$CLAUDE_DIR/$kind/_harness"
+        [ -d "$base" ] || continue
+        while IFS= read -r link; do
+            [ -z "$link" ] && continue
+            run rm "\"$link\""
+            echo "unlink(orphan): $link"
+        done < <(find "$base" -type l 2>/dev/null)
+        # 비게 된 디렉토리는 정리 (내용 있으면 rmdir 이 조용히 실패한다)
+        find "$base" -depth -type d -empty -exec rmdir {} + 2>/dev/null || true
+    done
+}
+
 merge_hooks() {
     local merge_args=()
     if [ "$DRY_RUN" -eq 1 ]; then merge_args+=("--dry-run"); fi
@@ -405,6 +424,11 @@ main() {
             symlink_one "$src_rel" "$dest_rel"
         fi
     done < <(build_selection)
+
+    # uninstall 은 선언에 없는 잔여 링크까지 쓸어야 완결된다.
+    if [ "$UNINSTALL" -eq 1 ]; then
+        unlink_orphans
+    fi
 
     # ── 워크로드 외 자산(hooks·mcp) ───────────────────────────────────────
     # uninstall: hooks 도 함께 제거. install: --with-hooks / --with-mcp 면

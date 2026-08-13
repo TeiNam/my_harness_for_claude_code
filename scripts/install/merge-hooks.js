@@ -28,15 +28,51 @@ const os = require('os');
 
 const HARNESS_ID_PREFIXES = ['pre:', 'post:', 'session:', 'stop:', 'subagent:'];
 
-// Legacy installs wrote hook groups without an `id`. They are still recognizable
-// by the harness script they invoke, so they can be swept instead of duplicated.
-// Inline bootstrappers spell the path both ways, hence the path.join() variant.
-const HARNESS_COMMAND_MARKERS = [
-  'scripts/hooks/',
-  "'scripts','hooks'",
-  'plugin-hook-bootstrap',
-  'run-with-flags',
-];
+/**
+ * Ownership is decided by the script a group actually invokes, never by its id.
+ * An id prefix like `pre:` is a harness convention, not a fact — a third-party
+ * hook may use the same shape, and deleting it would silently disable it.
+ *
+ * A group is harness-owned when its command references `scripts/hooks/<name>`
+ * where <name> is a real file in this repo's scripts/hooks. Inline bootstrappers
+ * spell that path as a literal or via path.join('scripts','hooks',…), so the
+ * separator is matched loosely — but the basename must be one we ship, which is
+ * what keeps a vendor's own /vendor/scripts/hooks/security.js from matching.
+ */
+const SCRIPTS_HOOKS_PREFIX = /scripts["'\s,\\/]+hooks["'\s,\\/]+/;
+
+let harnessScriptNamesCache = null;
+
+function harnessScriptNames() {
+  if (harnessScriptNamesCache) return harnessScriptNamesCache;
+  const dir = path.resolve(__dirname, '..', 'hooks');
+  let names = [];
+  try {
+    names = fs.readdirSync(dir).filter(f => f.endsWith('.js') || f.endsWith('.sh'));
+  } catch {
+    names = [];
+  }
+  harnessScriptNamesCache = new Set(names);
+  return harnessScriptNamesCache;
+}
+
+/** Does this command invoke a script this repo ships under scripts/hooks/? */
+function referencesHarnessScript(command) {
+  if (typeof command !== 'string' || !command) return false;
+  const names = harnessScriptNames();
+  if (names.size === 0) return false;
+
+  let rest = command;
+  for (;;) {
+    const match = SCRIPTS_HOOKS_PREFIX.exec(rest);
+    if (!match) return false;
+    const after = rest.slice(match.index + match[0].length);
+    // Next token is the script name: stop at the first quote/space/comma/slash.
+    const name = (after.match(/^[A-Za-z0-9._-]+/) || [''])[0];
+    if (names.has(name)) return true;
+    rest = after;
+  }
+}
 
 function parseArgs(argv) {
   const args = argv.slice(2);
@@ -78,7 +114,11 @@ function backupSettings(file) {
   return dest;
 }
 
-function isHarnessId(id) {
+/**
+ * Harness ids follow this shape by convention. Used for reporting only — never
+ * for deciding ownership, since a third-party hook may use the same shape.
+ */
+function looksLikeHarnessId(id) {
   if (typeof id !== 'string' || !id) return false;
   return HARNESS_ID_PREFIXES.some(p => id.startsWith(p));
 }
@@ -97,18 +137,24 @@ function collectHarnessIds(hooksDoc) {
 function isLegacyHarnessGroup(group) {
   if (!group || typeof group !== 'object') return false;
   if (typeof group.id === 'string' && group.id) return false;
-  const commands = (Array.isArray(group.hooks) ? group.hooks : [])
-    .map(h => (h && typeof h.command === 'string' ? h.command : ''))
-    .join(' ');
-  return HARNESS_COMMAND_MARKERS.some(marker => commands.includes(marker));
+  return (Array.isArray(group.hooks) ? group.hooks : []).some(
+    h => h && referencesHarnessScript(h.command)
+  );
 }
 
-/** True for any group the harness owns: a harness id, or a legacy id-less group. */
+/**
+ * True for any group the harness owns. Two ways to qualify:
+ *   1. its id is in the set being merged, or
+ *   2. it invokes a script this repo ships (covers retired ids and legacy
+ *      id-less groups alike).
+ * A third-party group with a `pre:`-shaped id but no harness script is NOT ours.
+ */
 function isHarnessGroup(group, ownedIds) {
   if (!group || typeof group !== 'object') return false;
   if (typeof group.id === 'string' && ownedIds.has(group.id)) return true;
-  if (typeof group.id === 'string' && group.id && isHarnessId(group.id)) return true;
-  return isLegacyHarnessGroup(group);
+  return (Array.isArray(group.hooks) ? group.hooks : []).some(
+    h => h && referencesHarnessScript(h.command)
+  );
 }
 
 function mergeEvent(existingGroups, harnessGroups, ownedIds) {
@@ -133,8 +179,16 @@ function loadHooksDocs(corePath, flags = {}) {
   }
 
   const optionalPath = path.join(path.dirname(corePath), 'hooks-optional.json');
-  const optional = flags.optional || flags.uninstall ? readJson(optionalPath) : null;
-  if (!optional || !optional.hooks) return { doc: core, sources: [corePath] };
+  const wantOptional = flags.optional || flags.uninstall;
+  const optional = wantOptional ? readJson(optionalPath) : null;
+  if (!optional || !optional.hooks) {
+    // --optional with no readable file would silently sweep the optional stack
+    // instead of installing it. Fail loudly rather than doing the opposite.
+    if (flags.optional) {
+      throw new Error(`--optional requested but hooks-optional.json missing or invalid: ${optionalPath}`);
+    }
+    return { doc: core, sources: [corePath] };
+  }
 
   const merged = { ...core, hooks: {} };
   for (const src of [core, optional]) {
@@ -289,7 +343,8 @@ module.exports = {
   loadHooksDocs,
   planMerge,
   planUninstall,
-  isHarnessId,
+  looksLikeHarnessId,
   isHarnessGroup,
   isLegacyHarnessGroup,
+  referencesHarnessScript,
 };

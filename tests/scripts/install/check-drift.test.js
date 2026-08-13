@@ -1,0 +1,111 @@
+/**
+ * Tests for scripts/install/check-drift.js — orphan detection in particular.
+ *
+ * Orphans are the failure mode the selection-driven check cannot see: an asset
+ * the repo no longer declares, whose link survives in $CLAUDE_HOME. A stale rule
+ * link that still resolves keeps loading into every session, so drift must be
+ * non-zero when one exists.
+ */
+
+'use strict';
+
+const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const { execFileSync } = require('child_process');
+
+const SCRIPT = path.join(__dirname, '..', '..', '..', 'scripts', 'install', 'check-drift.js');
+const REPO_ROOT = path.join(__dirname, '..', '..', '..');
+
+function tmp(prefix) {
+  return fs.mkdtempSync(path.join(os.tmpdir(), `harness-check-drift-${prefix}-`));
+}
+
+function run(args) {
+  try {
+    const stdout = execFileSync('node', [SCRIPT, ...args], { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+    return { code: 0, stdout };
+  } catch (e) {
+    return { code: e.status || 1, stdout: e.stdout || '', stderr: e.stderr || '' };
+  }
+}
+
+/** Link every selected asset for a workload so the baseline is drift-free. */
+function installLinks(claudeHome, workload) {
+  const { selectAssets } = require('../../../scripts/install/select-assets');
+  const { selected } = selectAssets({ root: REPO_ROOT, workload });
+  for (const a of selected) {
+    const target = path.join(claudeHome, a.targetRel);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.symlinkSync(path.join(REPO_ROOT, a.sourceRel), target);
+  }
+  return selected.length;
+}
+
+function test(name, fn) {
+  try {
+    fn();
+    console.log(`  ✓ ${name}`);
+    return true;
+  } catch (e) {
+    console.log(`  ✗ ${name}\n    Error: ${e.message}`);
+    return false;
+  }
+}
+
+function runTests() {
+  console.log('\n=== Testing scripts/install/check-drift.js ===\n');
+  let passed = 0;
+  let failed = 0;
+
+  if (test('reports no drift when every selected asset is linked', () => {
+    const home = tmp('clean');
+    const count = installLinks(home, ['core']);
+    assert.ok(count > 0, 'core should select at least one asset');
+    const r = run([`--claude-home=${home}`, '--workload=core', '--json']);
+    const out = JSON.parse(r.stdout);
+    assert.strictEqual(out.drift, 0, JSON.stringify(out.buckets));
+    assert.strictEqual(r.code, 0);
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('flags an orphan link the repo no longer declares', () => {
+    const home = tmp('orphan');
+    installLinks(home, ['core']);
+    // A rule that used to live in rules/common but has since moved to docs/.
+    const orphan = path.join(home, 'rules', '_harness', 'common', 'retired-rule.md');
+    fs.mkdirSync(path.dirname(orphan), { recursive: true });
+    fs.symlinkSync(path.join(REPO_ROOT, 'docs', 'rules-reference', 'testing.md'), orphan);
+
+    const r = run([`--claude-home=${home}`, '--workload=core', '--json']);
+    const out = JSON.parse(r.stdout);
+    assert.deepStrictEqual(out.buckets.orphan, ['rules/_harness/common/retired-rule.md']);
+    assert.strictEqual(out.drift, 1);
+    assert.strictEqual(r.code, 1, 'orphans must fail the check');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('orphan report tells the user --force will not clear it', () => {
+    const home = tmp('orphan-msg');
+    installLinks(home, ['core']);
+    const orphan = path.join(home, 'commands', '_harness', 'retired-command.md');
+    fs.mkdirSync(path.dirname(orphan), { recursive: true });
+    fs.symlinkSync(path.join(REPO_ROOT, 'CLAUDE.md'), orphan);
+
+    const r = run([`--claude-home=${home}`, '--workload=core']);
+    assert.strictEqual(r.code, 1);
+    assert.ok(r.stdout.includes('orphan (1)'), r.stdout);
+    assert.ok(r.stdout.includes('--uninstall'), 'must point at the command that actually clears orphans');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
+  return failed === 0;
+}
+
+if (require.main === module) {
+  process.exit(runTests() ? 0 : 1);
+}
+
+module.exports = { runTests };

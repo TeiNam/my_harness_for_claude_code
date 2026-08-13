@@ -91,6 +91,39 @@ function classifyLink(absSource, absTarget) {
   return 'ok';
 }
 
+/**
+ * Walk the harness-owned link trees and return every link found, relative to
+ * $CLAUDE_HOME. Needed because the selection-driven check above can only see
+ * assets the repo still declares: a link left behind after an asset is deleted,
+ * renamed, or moved out of an installed folder is invisible to it. Those
+ * leftovers matter — a stale rule link that still resolves keeps getting loaded
+ * into every session.
+ */
+function listInstalledLinks(claudeHome) {
+  const found = [];
+  for (const kind of ['agents', 'commands', 'skills', 'rules']) {
+    const base = path.join(claudeHome, kind, '_harness');
+    const walk = dir => {
+      let entries;
+      try {
+        entries = fs.readdirSync(dir, { withFileTypes: true });
+      } catch {
+        return;
+      }
+      for (const entry of entries) {
+        const abs = path.join(dir, entry.name);
+        if (entry.isSymbolicLink()) {
+          found.push(path.relative(claudeHome, abs));
+          continue;
+        }
+        if (entry.isDirectory()) walk(abs);
+      }
+    };
+    walk(base);
+  }
+  return found;
+}
+
 function main(argv) {
   const flags = parseArgs(argv);
   if (flags.help) {
@@ -129,14 +162,25 @@ function main(argv) {
     skipWorkload: flags.skipWorkload
   });
 
-  const buckets = { ok: [], missing: [], 'wrong-target': [], broken: [], 'not-a-link': [] };
+  const buckets = { ok: [], missing: [], 'wrong-target': [], broken: [], 'not-a-link': [], orphan: [] };
   for (const a of selected) {
     const absSource = path.join(root, a.sourceRel);
     const absTarget = path.join(claudeHome, a.targetRel);
     buckets[classifyLink(absSource, absTarget)].push(a.targetRel);
   }
 
-  const drift = buckets.missing.length + buckets['wrong-target'].length + buckets.broken.length + buckets['not-a-link'].length;
+  // Links present under _harness/ that the current selection does not declare.
+  const expected = new Set(selected.map(a => a.targetRel));
+  for (const rel of listInstalledLinks(claudeHome)) {
+    if (!expected.has(rel)) buckets.orphan.push(rel);
+  }
+
+  const drift =
+    buckets.missing.length +
+    buckets['wrong-target'].length +
+    buckets.broken.length +
+    buckets['not-a-link'].length +
+    buckets.orphan.length;
 
   if (flags.json) {
     console.log(JSON.stringify({ activeGroups, selected: selected.length, drift, buckets }, null, 2));
@@ -145,7 +189,7 @@ function main(argv) {
 
   console.log(`workloads: ${activeGroups.join(', ')}`);
   console.log(`selected assets: ${selected.length}  |  linked ok: ${buckets.ok.length}  |  drift: ${drift}`);
-  for (const kind of ['missing', 'wrong-target', 'broken', 'not-a-link']) {
+  for (const kind of ['missing', 'wrong-target', 'broken', 'not-a-link', 'orphan']) {
     if (!buckets[kind].length) continue;
     console.log(`\n  ${kind} (${buckets[kind].length}):`);
     buckets[kind].slice(0, 30).forEach(t => console.log(`    - ${t}`));
@@ -155,6 +199,12 @@ function main(argv) {
   if (drift > 0) {
     const wl = flags.workload && flags.workload.length ? ` --workload=${flags.workload.join(',')}` : '';
     console.log(`\nDrift detected. Re-sync with:\n  ./install.sh --force${wl}`);
+    if (buckets.orphan.length) {
+      console.log(
+        `\n  orphan links are not removed by --force (it only re-links what the repo declares).` +
+          `\n  Clear them with:\n    ./install.sh --uninstall && ./install.sh${wl}`
+      );
+    }
     return 1;
   }
   console.log('\nNo drift — global install matches the repo selection.');
