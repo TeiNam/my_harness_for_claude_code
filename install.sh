@@ -216,8 +216,14 @@ unlink_orphans() {
         while IFS= read -r -d '' link; do
             target="$(readlink "$link" 2>/dev/null || true)"
             case "$target" in
+                # `..` 가 섞이면 문자열 비교로는 레포 안팎을 가릴 수 없다
+                # ($HARNESS_DIR/../foreign 은 접두어만 같고 레포 밖이다). 정규화
+                # 없이 지우는 대신 건너뛴다 — check-drift 는 경로를 제대로 resolve
+                # 하므로 이런 링크도 orphan 으로 보고된다. 설치가 만드는 링크는
+                # 항상 절대경로라 실제로는 걸리지 않는다.
+                *..*) continue ;;
                 "$HARNESS_DIR"|"$HARNESS_DIR"/*) ;;
-                *) continue ;;   # 레포 밖을 가리키는 링크는 우리 것이 아니다
+                *) continue ;;   # 레포 밖(또는 상대경로)을 가리키는 링크는 우리 것이 아니다
             esac
             if [ "$DRY_RUN" -eq 1 ]; then
                 echo "[dry-run] rm -- $link"
@@ -487,9 +493,10 @@ main() {
 
     if [ "$UNINSTALL" -eq 1 ]; then
         # 비어 있는 _harness 컨테이너만 정리. 사용자 자산은 안 건드림.
+        # dry-run 은 부작용이 없어야 하므로 실제 삭제는 건너뛴다.
         for sub in agents commands skills rules; do
             local container="$CLAUDE_DIR/$sub/_harness"
-            if [ -d "$container" ]; then
+            if [ -d "$container" ] && [ "$DRY_RUN" -eq 0 ]; then
                 find "$container" -type d -empty -delete 2>/dev/null || true
             fi
         done

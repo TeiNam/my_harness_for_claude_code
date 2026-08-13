@@ -74,6 +74,20 @@ function runTests() {
     assert.notStrictEqual(first, second);
   })) passed++; else failed++;
 
+  if (test('edits differing only past the old length cutoff still differ', () => {
+    // The signature used to truncate at 2048 chars, so a long old_string could
+    // swallow the new_string that actually distinguishes two edits.
+    const file = '/repo/big.txt';
+    const filler = 'x'.repeat(4000);
+    const a = hashToolCall('Edit', { file_path: file, old_string: filler, new_string: 'A' });
+    const b = hashToolCall('Edit', { file_path: file, old_string: filler, new_string: 'B' });
+    assert.notStrictEqual(a, b);
+
+    const long1 = hashToolCall('Write', { file_path: file, content: `${filler}tail-1` });
+    const long2 = hashToolCall('Write', { file_path: file, content: `${filler}tail-2` });
+    assert.notStrictEqual(long1, long2);
+  })) passed++; else failed++;
+
   if (test('distinct Bash commands stay distinct, identical ones collapse', () => {
     assert.notStrictEqual(
       hashToolCall('Bash', { command: 'npm test' }),

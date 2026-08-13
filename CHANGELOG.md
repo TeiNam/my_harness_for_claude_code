@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- feat(loop): 루프 제어를 명문화하고 루프 감지 오탐을 고친다 (c3b801b)
 - fix(install): 2차 리뷰 반영 — 소유권 판정을 링크 타깃·런처 기준으로 (c23a9f4)
 - fix(install): orphan 링크 탐지·정리 — 선언 기반 uninstall 의 사각지대 (11367a3)
 - refactor(orca): Orca 와의 역할 분리 명문화, 죽은 statusline 경로 제거 (cf9f816)

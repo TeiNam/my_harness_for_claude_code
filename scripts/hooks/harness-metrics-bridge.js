@@ -63,8 +63,12 @@ function hashToolCall(toolName, toolInput) {
     const payload = EDIT_PAYLOAD_KEYS.filter(k => k in input)
       .map(k => stableStringify(input[k]))
       .join('|');
+    // Digest the payload instead of truncating it: two edits that differ only
+    // past a length cutoff (long file content, a long old_string followed by a
+    // short new_string) must not collapse into one signature.
+    const payloadDigest = payload ? crypto.createHash('sha256').update(payload).digest('hex').slice(0, 16) : '';
     // Read/Glob have no payload — path alone is the right signature there.
-    key = `${input.file_path}|${payload}`.slice(0, HASH_INPUT_LIMIT);
+    key = `${input.file_path}|${payloadDigest}`;
   } else {
     key = stableStringify(input).slice(0, HASH_INPUT_LIMIT);
   }
