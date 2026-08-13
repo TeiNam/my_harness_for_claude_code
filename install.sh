@@ -225,10 +225,12 @@ unlink_orphans() {
         # 빈 배열을 쓰지 않는다: macOS 기본 bash 3.2 는 `set -u` 에서 `"${arr[@]}"`
         # 확장을 unbound variable 로 죽이고, 이 find 는 process substitution 안에
         # 있어서 그 실패가 부모에 전파되지 않는다 — 스캔이 조용히 0건이 된다.
+        # -H: 인자로 준 경로가 심볼릭 링크면 그것만 따라간다. `~/.claude/skills`
+        # 자체를 링크로 두는 설정에서도 그 안의 orphan 을 찾을 수 있어야 한다.
         find_links() {
             case "$1" in
-                */_harness) find "$1" -type l -print0 2>/dev/null ;;   # 중첩 전부
-                *)          find "$1" -maxdepth 1 -type l -print0 2>/dev/null ;;  # 직계만
+                */_harness) find -H "$1" -type l -print0 2>/dev/null ;;   # 중첩 전부
+                *)          find -H "$1" -maxdepth 1 -type l -print0 2>/dev/null ;;  # 직계만
             esac
         }
         while IFS= read -r -d '' link; do

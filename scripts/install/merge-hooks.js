@@ -56,6 +56,13 @@ const SCRIPTS_HOOKS_PREFIX = /scripts["'\s,\\/]+hooks["'\s,\\/]+/;
  * the basename is unique enough to stand in as its fingerprint. If a new hook
  * launches some third way, add its marker here and the "every shipped group is
  * recognised" test will tell you if you forgot.
+ *
+ * Hard limit, accepted: a command string can always be imitated. A plugin that
+ * shipped its own `scripts/hooks/run-with-flags.js` would be read as ours. Static
+ * text is all settings.json gives us — harness hooks resolve their root at
+ * runtime, so there is no absolute path to compare. These names are coined here
+ * rather than generic, which is as far as the signal goes; the timestamped backup
+ * and the `--dry-run` sweep list are what make a wrong call recoverable.
  */
 const HARNESS_LAUNCHER_MARKERS = ['plugin-hook-bootstrap', 'run-with-flags', 'subagent-budget.js'];
 
