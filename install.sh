@@ -96,9 +96,12 @@ resolve_workloads() {
         return 0
     fi
 
-    local sel_args=("${MENU_ARGS[@]}")
-    if [ ${#sel_args[@]} -gt 0 ]; then
-        sel_args=("--non-interactive" "${sel_args[@]}")
+    # macOS 기본 bash 3.2 는 `set -u` 에서 빈 배열의 `"${arr[@]}"` 확장을 unbound
+    # variable 로 죽인다. 인자 없이 `./install.sh` 를 돌리면 MENU_ARGS 가 비어 있어
+    # 여기서 바로 종료됐다 — 대화형 설치 경로가 통째로 막혀 있었다.
+    local sel_args=()
+    if [ ${#MENU_ARGS[@]} -gt 0 ]; then
+        sel_args=("--non-interactive" "${MENU_ARGS[@]}")
     fi
 
     # `local resolved=$(...)` 는 set -e 환경에서도 exit code 를 가린다.
