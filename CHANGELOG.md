@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-13
 
+- refactor(rules): 상시 로드를 불변 제약 4개로 축소 (15.4k → 1.8k tok) (3fe9e0c)
 - refactor(hooks): 코어 스택 7그룹으로 축소, 기본 프로파일 minimal (af5209a)
 
 ## 2026-08-04

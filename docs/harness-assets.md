@@ -1,0 +1,47 @@
+# Harness Assets — 스킬·에이전트 카탈로그
+
+> CLAUDE.md 에서 옮겨온 상세 목록. 스킬·에이전트를 추가·정리·중복 확인할 때 읽는다.
+> 설치된 스킬의 `description` 은 이미 매 세션 로드되므로, 이 문서는 *어떤 자산이 왜 있는지*와
+> 워크로드 매핑을 기록하는 용도다.
+
+## High-value Agents
+
+- `rdbms-data-modeler` — forces target-DB confirmation (Aurora MySQL / MySQL / Aurora PG / PG), then routes to `mysql-guideline` or `postgres-guideline` skill before writing DDL.
+- `article-writer` — long-form articles, guides, blog posts, newsletters in distinctive voice
+- `content-creator` — platform-native social content (X, LinkedIn, newsletter, video scripts)
+- `devops` — AWS / Docker / Terraform / K8s; always plans/dry-runs before mutations
+- `translator-docs` — Korean / English bidirectional translation + README/API docs
+- `deep-researcher` — multi-source web research with citations
+
+The longer reviewer/architect agents (`code-reviewer`, `python-reviewer`, `typescript-reviewer`, `rust-reviewer`, `architect`, etc.) are kept alongside shorter counterparts — they overlap but are more detailed.
+
+### Model Routing (per-agent model tiers)
+
+Agents declare `model:` as an **alias** (`opus` / `sonnet` / `haiku`), never a pinned version ID, so the fleet follows model upgrades without a mass re-tag. Current lineup: `opus`→**Opus 5** (Opus 4.8 은 safety-refusal·web fetch·Priority Tier 폴백), `sonnet`→**Sonnet 5**, `haiku`→**Haiku 4.5**. **Opus 5 가 천장이다** — 더 깊은 추론이 필요하면 상위 티어를 찾지 말고 effort 를 올리고(`high`→`xhigh`→`max`), 그다음은 위가 아니라 **옆(Codex, 다른 모델 패밀리)** 으로 간다. The authoritative policy (task tables, agent-class map, orchestration, Codex handoff) is `docs/rules-reference/model-routing.md`; `commands/model-route.md` and `/model-route` defer to it. **티어 결정 기준은 "박스가 열려 있는가"다** — 추론 깊이는 *답의 형태가 미정일 때만* 값을 한다. 기준(taxonomy·rubric)이 이미 주어졌거나 원인·해결이 이미 확정된 상태에서 실행만 하는 일은 탐색 공간이 없으므로 `sonnet` 이면 충분하다. **닫힌 박스 → `sonnet`**: 주어진 체크리스트 대조 스캔, 탐지 리포트대로 윤문, 원인이 밝혀진 버그의 수리 구현, 빌드·타입 에러 수리, codemod, PR/CHANGELOG 초안. **열린 박스 → `opus`**: 설계(`architect`·`planner`·`code-architect`), 원인이 *아직* 모르는 진단, 의미·사실 보존 판정(`content-fidelity-auditor`·`tech-fidelity-auditor`), taxonomy 가 아직 못 덮은 것 발견(`naturalness-reviewer`·`doc-clarity-reviewer`·taxonomist), 보안·적대적 리뷰, 다출처 종합(`deep-researcher`). **`haiku`**: 기계적 고빈도(`doc-updater`·`docs-lookup`). 함정 둘 — ① "중요한 파이프라인이니 전부 opus" (중요도 ≠ 추론 깊이; 40패턴 taxonomy 대조는 lookup 이다) ② "수리니까 sonnet" (원인이 *확정된 뒤에만* 참 — 원인 찾기는 열린 박스). **파이프라인이 아니라 단계별로 태깅한다** — detect→fix→judge 는 `sonnet`→`sonnet`→`opus`, opus×3 이 아니다. 두 축이 충돌하면(닫힌 박스인데 미스 비용이 큼) 미스가 이긴다 — 평균이 아니라 최악 비용으로 고른다. Opus 5 는 4.8 보다 스스로 검증하고(자체 검증 지시문 제거) 서브에이전트를 더 적극 생성하므로(불필요한 fan-out 은 프롬프트로 캡) 에이전트 프롬프트 재튜닝 시 참고. **서브에이전트를 Codex 에 맡기는 기준** — Codex 가 이기는 건 *독립성*과 *노가다*이지 하네스 맥락이 아니다. Codex 로 보낼 것: ① Claude 가 쓴 코드의 적대적 리뷰(Claude 가 Claude 를 보면 blind spot 이 상관돼 있다 — 패밀리를 바꾸는 것만이 상관을 끊는다) ② Claude 두 시도가 갈렸을 때 tie-break(세 번째 Claude 의견은 앞의 둘과 상관됨) ③ 대규모 기계적 편집(rename·codemod — Opus 컨텍스트를 아낀다) ④ 루프에 빠졌을 때 두 번째 진단. Claude 서브에이전트에 남길 것: 하네스 맥락(rules·skills·워크로드 태그·프로젝트 관례)이 필요한 일, 도구 오케스트레이션, 한국어 산출물 — Codex 는 이 전부를 cold 로 시작한다. 철칙: **Codex 를 유일한 독자로 두지 않는다** — Codex 만 지적한 건 Claude 가 코드로 확인해야 하고, 두 패밀리가 독립적으로 잡은 것이 고신뢰 항목이다. 설치는 `docs/plugin.md` 의 codex 플러그인(`codex:rescue`).
+
+## High-value Skills for Owner's Workloads
+
+Filled-in (real content, not placeholder):
+
+- **DB**: `skills/postgres-guideline/`, `skills/mysql-guideline/`, `skills/mongodb-guideline/`, `skills/dynamodb-guideline/` — schema / index / partitioning / sharding / connection
+- **Frontend**: `skills/obsidian-plugin-develop/` (TypeScript + i18n + Chromium + release checklist), `skills/vite-patterns/`, `skills/frontend-patterns/`, `skills/frontend-design/` (origin: anthropics/skills — aesthetic direction, typography, anti-template judgment)
+- **Supanova (한글 랜딩페이지 디자인 엔진)**: `skills/taste-skill/`, `skills/redesign-skill/`, `skills/soft-skill/`, `skills/output-skill/` — origin: supanova-design-skill-main (based on Leonxlnx/taste-skill). Standalone HTML + Tailwind CDN 랜딩페이지를 한글 우선(Pretendard, `word-break: keep-all`, 자연스러운 한국어 카피)으로 생성/리디자인. `taste-skill` 상단에 `DESIGN_VARIANCE`/`MOTION_INTENSITY`/`VISUAL_DENSITY`/`LANDING_PURPOSE` 4개 설정값. 새 랜딩페이지는 `taste-skill`+`output-skill`, 기존 페이지 개선은 `redesign-skill`, 최고 퀄리티는 세 개 다 + `soft-skill`. `frontend` 워크로드로 통합.
+- **SEO/GEO/AEO**: `skills/seo-geo-aeo/` (origin: SNLabat/SEO-GEO-AEO-Skill) — URL 하나로 SEO·GEO(생성형 검색엔진)·AEO(답변엔진) 3축 감사, Word/PDF 리포트 산출. `frontend` 워크로드. (harness 자체 `skills/seo/` 는 이 스킬의 부분집합이라 2026-07-31 제거됨 — SEO 작업은 이 스킬 하나로 통합.)
+- **AI**: `skills/claude-api/` (Anthropic SDK), `skills/foundation-models-on-device/`, `skills/ai-regression-testing/`, `skills/cost-aware-llm-pipeline/`, `skills/aws-bedrock/`, `skills/realtime-stt-huggingface/`, `skills/ai-tui/`
+- **AI TUI (터미널 에이전트 초기화면·두뇌)**: `skills/ai-tui/` — Claude Code·stocker 스타일 터미널 AI 에이전트의 초기화면(배너·로고·입력창·힌트바 6요소)과 두뇌(프롬프트·스킬·MCP·사용룰)를 세팅하는 크로스 언어 레퍼런스. `references/` 4종 — 언어별 3종(`node-pi-tui`, `rust-ratatui`, `python-textual`)과 언어 중립 `agent-brain-setup`. 유지형(pi-tui/textual) vs 즉시형(ratatui) 렌더링 차이와 ANSI 폭 함정을 언어별로 대비. `${CLAUDE_SKILL_DIR}` 토큰 치환. `ai`·`nodejs`·`rust`·`python-backend` 워크로드로 통합.
+- **Codex (교차 모델 세컨드 오피니언)**: codex **플러그인**(openai/codex-plugin-cc — 설치는 `docs/plugin.md`) — `codex:rescue` 스킬·`codex:codex-rescue` 에이전트로 다른 모델 패밀리의 독립적 리뷰(adversarial 검토)·tie-break·대규모 기계적 편집 오프로드. 하네스 자체 `skills/codex-cli` 는 플러그인과 중복이라 제거됨(2026-07-26). Codex 출력은 검증 대상인 제안이지 정답 아님.
+- **문서 생성 (PDF / DOCX / XLSX)**: `skills/pdf/`(pypdf 읽기·병합·폼필·분할, reportlab/weasyprint 생성, CJK 폰트 등록), `skills/docx/`(python-docx + docxtpl 템플릿 채우기, 스타일·표·한글 eastAsia 폰트), `skills/xlsx/`(openpyxl 스타일 리포트·수식·차트, pandas 핸드오프, `data_only` 함정) — 프로그래밍 방식 오피스 문서 산출. 슬라이드는 `ppt-authoring`+`frontend-slides`, 사람처럼 쓴 한글 산문은 `humanize-korean`가 담당하므로 별도 스킬 미신설. `core` 워크로드.
+- **다이어그램 생성**: `skills/archify/`(origin: tt-a1i, based on Cocoon-AI/architecture-diagram-generator, MIT) — 5개 모드(architecture·workflow·sequence·dataflow·lifecycle)를 JSON→SVG 렌더러로 그리는 자립형 HTML 다이어그램 엔진. 다크/라이트 토글·PNG/JPEG/WebP/듀얼테마 SVG 내보내기 내장, 평문 설명이나 붙여넣은 Mermaid(flowchart/sequenceDiagram/stateDiagram)를 archify 스타일로 재레이아웃. 렌더러는 `ajv` 스키마 검증(선택; `npm install` 안 해도 자체 레이아웃 검사로 동작)이며 생성된 HTML은 무의존. 셸 없으면 architecture 모드로 `assets/template.html`에 수동 SVG 배치. `core` 워크로드. `skills/drawio-diagram/`(draw.io/mxGraph XML, MCP 검증 루프)과 별개 — archify 는 self-contained HTML 산출, drawio 는 .drawio 파일 산출.
+- **Cloud**: `skills/aws-cloud/` (IAM, S3, Lambda, ECS/Fargate, RDS, networking, cost guardrails)
+- **FinOps**: `skills/aws-finops/` — FinOps Foundation Framework(Inform/Optimize/Operate) + AWS Cost Management(Cost Explorer·CUR·Budgets·Anomaly, 태깅·Cost Categories, Savings Plans vs RI, Compute Optimizer, 단위경제학, showback/chargeback). `finops` 워크로드. AWS 청구서·커밋먼트 계층 담당(인프라 구성은 `aws-cloud`, LLM 토큰비용은 `cost-aware-llm-pipeline`).
+- **데이터 분석 방법론**: `skills/analysis-methodology/` — 도구가 아닌 판단층(문제 프레이밍→기법 결정트리→검증→의사결정). references 3종(analysis-type-decision·experiment-design·domain-playbooks). 도구·문법은 `skills/python-data-analysis/`(pandas/polars/duckdb)로 위임. `python-data` 워크로드. 워크로드 키 `data-analysis`(AWS Glue/Athena/Redshift MCP)와는 이름만 다르게 분리.
+- **Backend**: `skills/fastapi-backend-best-practices/` (api-design, async-patterns, deployment, domain-modeling, project-structure, security, testing), `skills/python-patterns/`, `skills/rust-patterns/`
+- **Writing**: `skills/markdown-writing/`, `skills/article-writing/`, `skills/brand-voice/`, `skills/crosspost/`, `skills/frontend-slides/`, `skills/tech-blogging/`, `skills/creative-writing/`, `skills/ppt-authoring/`, `skills/tech-writer/`
+- **Tech Writer (기술 문서 작성·윤문)**: `skills/tech-writer/` — 한/영 기술 문서를 새로 쓰거나(write) 기존 초안을 윤문(polish)하는 오케스트레이터. `references/` 3종(quick-rules, tech-doc-taxonomy, tech-writing-playbook)과 전용 에이전트 5종(`tech-doc-writer`, `doc-clarity-reviewer`, `doc-quality-detector`, `tech-fidelity-auditor`, `tech-writer-monolith`)을 둔다. `${CLAUDE_SKILL_DIR}` 토큰 치환으로 경로 독립. `writing` 워크로드로 통합.
+- **Humanize (한글 AI 티 제거)**: `skills/humanize-korean/` — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 패턴을 탐지·윤문. Fast 모드(monolith 1콜)와 strict 5인 파이프라인. 진입 커맨드 `/humanize`·`/humanize-redo`. **런타임 에이전트(`writing` 상시 로드)**: `humanize-monolith`, `ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`. **스킬 유지·확장용 메타 에이전트는 `lab` 그룹으로 격리**(상시 로드 제외, 분류체계 v2.0 승격·학술 인용·metric 엔지니어링·웹 확장 시에만 수동 호출): `korean-ai-tell-taxonomist`, `taxonomy-gap-analyzer`, `translationese-research-distiller`, `post-editese-metric-engineer`, `quick-rules-integrator`, `korean-translation-scholar`, `humanize-web-architect`. 원본 epoko77-ai/im-not-ai 를 `writing` 워크로드로 통합.
+- **Social Content (LinkedIn 개인 브랜딩 콘텐츠 제작)**: origin: charlie947/social-media-skills. 기술 문서/블로깅용 `writing` 워크로드와 분리했으므로 글쓰기 카테고리에서 "기술 문서"만 고르면 이 17종은 끌려오지 않는다. 설치 시 글쓰기 › 소셜 상세 tier(`--writing-social=`)로 파이프라인 단계별 3그룹을 골라 담는다 — **`social-voice`**(`voice-builder`(voice.md/about-me.md 생성), `newsletter-voice`, `profile-optimizer`) → **`social-content`**(콘텐츠 제작·검증: `post-writer`, `post-formatter`, `hook-generator`, `content-matrix`, `niche-research`, `pinned-comment`, `reels-scripting`, `post-scorer`, `analytics-dashboard`) → **`social-visual`**(`graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `youtube-thumbnail`). `reels-scripting`은 `APIFY_API_TOKEN`·`GOOGLE_AI_API_KEY` 환경변수 필요.
+
+## Still Placeholder Skills
+
+None — all previously-scaffolded skills are now filled in. If new placeholders
+are added later, list them here so they're easy to find and complete.
