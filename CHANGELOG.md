@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- fix(install): 소유권 마커에서 CLAUDE_PLUGIN_ROOT 제거 — 범용 값이라 오탐원 (4c4d5dc)
 - fix(install): 인자 없는 설치가 bash 3.2 에서 죽던 문제 + 회귀 테스트 (36fd93a)
 - fix(install): bash 3.2 에서 조용히 죽던 orphan 스캔, CLAUDE_HOME 인용 (0bdf99b)
 - fix(check-drift): 복구 안내에 검사한 CLAUDE_HOME 을 실어 보낸다 (f18d71c)

@@ -164,6 +164,28 @@ function runTests() {
     fs.rmSync(home, { recursive: true, force: true });
   })) passed++; else failed++;
 
+  if (test('recovery re-install carries --with-hooks only when hooks are installed', () => {
+    // --uninstall strips the hook stack; a re-install without --with-hooks would
+    // leave the safety hooks off for good in a non-interactive shell.
+    const withHooks = tmp('hooks-on');
+    installLinks(withHooks, ['core']);
+    fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'gone'), path.join(withHooks, 'skills', 'stale'));
+    fs.writeFileSync(
+      path.join(withHooks, 'settings.json'),
+      JSON.stringify({ hooks: { Stop: [{ matcher: '*', id: 'stop:cost-tracker', hooks: [{ command: 'x' }] }] } })
+    );
+    let out = run([`--claude-home=${withHooks}`, '--workload=core']).stdout;
+    assert.ok(/--uninstall && .*--with-hooks/s.test(out), `expected --with-hooks:\n${out}`);
+    fs.rmSync(withHooks, { recursive: true, force: true });
+
+    const noHooks = tmp('hooks-off');
+    installLinks(noHooks, ['core']);
+    fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'gone'), path.join(noHooks, 'skills', 'stale'));
+    out = run([`--claude-home=${noHooks}`, '--workload=core']).stdout;
+    assert.ok(!out.includes('--with-hooks'), `should not suggest hooks:\n${out}`);
+    fs.rmSync(noHooks, { recursive: true, force: true });
+  })) passed++; else failed++;
+
   if (test('orphan report tells the user --force will not clear it', () => {
     const home = tmp('orphan-msg');
     installLinks(home, ['core']);

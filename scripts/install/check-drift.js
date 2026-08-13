@@ -155,6 +155,18 @@ function listInstalledLinks(claudeHome, root) {
   return found;
 }
 
+/** Are harness-owned hook groups currently merged into settings.json? */
+function hasHarnessHooks(claudeHome) {
+  try {
+    const settings = JSON.parse(fs.readFileSync(path.join(claudeHome, 'settings.json'), 'utf8'));
+    return Object.values(settings.hooks || {}).some(groups =>
+      (groups || []).some(g => g && typeof g.id === 'string' && /^(pre|post|session|stop|subagent):/.test(g.id))
+    );
+  } catch {
+    return false;
+  }
+}
+
 function main(argv) {
   const flags = parseArgs(argv);
   if (flags.help) {
@@ -243,9 +255,14 @@ function main(argv) {
       // and re-apply the optional hook stack if it was in use. Spell both out —
       // an incomplete instruction here costs the user their setup.
       const restoreWl = wl || (activeGroups.length ? ` --workload=${activeGroups.join(',')}` : '');
+      // --uninstall also strips the hook stack. Without --with-hooks the
+      // re-install would leave the safety/lifecycle hooks off for good in a
+      // non-interactive shell (the prompt defaults to N), so only suggest it to
+      // people who actually have harness hooks installed right now.
+      const restoreHooks = hasHarnessHooks(claudeHome) ? ' --with-hooks' : '';
       console.log(
         '\n  orphan links are not removed by --force (it only re-links what the repo declares).' +
-          `\n  Clear them with:\n    ${home}./install.sh --uninstall && ${home}./install.sh${restoreWl}` +
+          `\n  Clear them with:\n    ${home}./install.sh --uninstall && ${home}./install.sh${restoreWl}${restoreHooks}` +
           '\n  Note: --uninstall drops every harness link and hook. Re-run with the same' +
           `\n  workloads (above), and add \`${home}node scripts/install/merge-hooks.js --optional\`` +
           '\n  afterwards if you were running the optional hook stack.'
