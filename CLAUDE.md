@@ -28,10 +28,13 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `commands/` — slash commands (markdown with `description:` frontmatter)
 - `hooks/` — trigger-based hook configs (JSON + handler scripts)
 - `rules/` — **컨텍스트 예산이지 문서 폴더가 아니다.** 설치된 rule 은 `paths:` frontmatter 가 없으면 모든 프로젝트의 모든 세션에 로드된다. 그래서 `rules/common/` 에는 언제나 참인 불변 제약 4개만 둔다(`korean-language`·`git-workflow`·`security`·`coding-style`, 합계 <12KB). 언어·도메인 폴더(`python/`·`typescript/`·`rust/`·`web/`)는 전부 `paths:` 로 게이팅해 해당 파일을 건드릴 때만 로드된다. 절차·참고 자료(테스트 전략, 리뷰 체크리스트, 모델 라우팅, README 배지 규칙 등)는 `docs/rules-reference/` 로 — 필요할 때 읽는다. 두 규칙은 `tests/scripts/install/workloads.test.js` 가 강제한다.
-- `mcp-configs/` — MCP server configs (proxy-first: `proxy/` holds the mcp-proxy compose stack; `mcp-servers.json` catalog is the SSOT, marking each server `route: proxy|local` + `workloads: [...]`). 설치 시 `scripts/install/build-mcp-config.js` 가 선택 워크로드와 매칭되는 `route=proxy` 서버만 골라 `proxy/config.json` 을 빌드한다(통짜 X). `terraform` 선택 시 compose 의 `terraform-mcp` profile 동반 기동.
+- `mcp-configs/` — MCP server configs (proxy-first: `proxy/` holds the mcp-proxy compose stack; `mcp-servers.json` catalog is the SSOT, marking each server `route: proxy|local` + `workloads: [...]`). 설치 시 `scripts/install/build-mcp-config.js` 가 선택 워크로드와 매칭되는 `route=proxy` 서버만 골라 `proxy/config.json` 을 빌드한다. `terraform` 선택 시 compose 의 `terraform-mcp` profile 동반 기동.
+  - **함정: `--with-mcp` 는 config.json 을 워크로드 전체 기준으로 덮어쓴다.** AWS 세분 워크로드(`cloud`·`ai`·`devops`·`finops`·`aws-rds`·`data-analysis`·`integration`)를 다 켜면 **65개**가 되고, 실측하면 디스크 9Gi 소비 + 프록시 메모리 3.0GiB(VM 4GiB 의 80%) + MCP 도구 목록으로 컨텍스트 잠식이 일어난다(2026-08-14 사고). 그래서 **커밋된 `proxy/config.json`(9개: github·exa·context7·brave-search·time·fetch·aws-documentation·obsidian·terraform)이 실사용 SSOT** 다.
+  - 빌더는 `RECOMMENDED_MAX` 초과 시 stderr 로 경고한다 — 설치 출력을 잘라 읽다가 그 경고를 놓치면 위 사고가 재현된다. MCP 만 다시 띄울 때는 `--with-mcp` 대신 `cd mcp-configs/proxy && docker compose --profile terraform up -d` 를 쓰고, 서버를 바꿀 때만 `node scripts/install/build-mcp-config.js --servers=a,b,c` 로 명시 빌드한다.
 - `scripts/` — Node.js utilities for hooks, install/uninstall, audits
 - `tests/` — test suite for `scripts/`
 - `docs/rules-reference/` — 옛 `rules/common/` 중 상시 로드가 필요 없는 9개(`testing`·`patterns`·`performance`·`hooks`·`code-review`·`development-workflow`·`agents`·`model-routing`·`readme-rule`)와 rules 설치 안내 `README.md`. 설치되지 않으므로 컨텍스트를 먹지 않는다. 언어별 rule 의 `> This file extends …` 링크가 여기를 가리킨다.
+- `docs/orca-dependencies.md` — Orca 와 `~/.claude` 를 공유하는 지점 전체(훅 11개·스킬 5종·역할 분리·점검 명령·Orca 없이 쓸 때).
 - `docs/harness-assets.md` · `docs/install-menu.md` — CLAUDE.md 에서 옮겨온 스킬·에이전트 카탈로그와 설치 메뉴 상세. CLAUDE.md 는 매 세션 100% 로드되므로 "작업할 때만 필요한 목록"은 여기 둔다.
 - `docs/` — long-form reference (writing guides, security guide, steering rules). `docs/plugin.md` 는 하네스와 함께 설치하는 동반 플러그인 목록(superpowers·codex·ui-ux-pro-max 등) — 이 플러그인들과 겹치는 하네스 자체 스킬(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`)은 2026-07-26 제거됨. 새 스킬 추가 시 플러그인과의 중복 여부를 먼저 확인할 것.
 
@@ -104,18 +107,16 @@ node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기�
 
 ## Orca Integration
 
-이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅(`~/.orca/agent-hooks/claude-hook.sh`)을 `~/.claude/settings.json` 의 **11개 이벤트**에 이미 붙여 두었다(SessionStart · UserPromptSubmit · PreToolUse · PostToolUse · PostToolUseFailure · Stop · StopFailure · SubagentStart · SubagentStop · TeammateIdle · PermissionRequest). 하네스와 Orca 가 같은 파일을 공유하므로 규칙이 필요하다.
+이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅(`~/.orca/agent-hooks/claude-hook.sh`)을 `~/.claude/settings.json` 의 **11개 이벤트**에 심고(전부 `matcher: "*"`; Orca 밖에서는 환경변수가 없어 즉시 exit 하는 no-op), 자체 스킬 5종을 `~/.agents/skills/` 에서 링크한다(상시 ~878 tok).
 
-- **settings.json 의 hooks 를 손으로 편집하지 않는다.** `scripts/install/merge-hooks.js` 를 쓴다. 머저는 하네스 소유분만 걷어내고 Orca 훅은 보존한다(Orca 명령에는 하네스 스크립트 경로 마커가 없다). 이 보존은 `merge-hooks.test.js` 가 검증한다.
-- **역할 분리** — 겹치는 기능은 한쪽만 쓴다:
-  | 관심사 | 담당 |
-  |--------|------|
-  | 컨텍스트 내 팬아웃(같은 세션에서 병렬 에이전트) | `Workflow` 도구 / `Agent` 도구 + `subagent:budget` |
-  | 워크트리 격리 실행·소유권 핸드오프·터미널 제어 | Orca (`orca-cli` 스킬) |
-  | 여러 에이전트의 DAG·블로킹 ask/reply·coordinator 루프 | Orca (`orchestration` 스킬) |
-  | statusLine | claude-dashboard 플러그인 (하네스 `harness-statusline.js` 는 2026-08 제거 — 등록되지 않은 죽은 경로였다) |
-  | 세션 재개 | Claude Code 네이티브 `/resume` 또는 Orca 워크트리가 1순위. 하네스 `/save-session`·`/resume-session` 은 *요약된* 컨텍스트를 남기고 싶을 때만 |
-- 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 7개)**. 오케스트레이션·세션 상태·핸드오프는 Orca 에 맡긴다.
+지켜야 할 것 둘:
+
+- **`settings.json` 의 `hooks` 를 손으로 편집하지 않는다.** `scripts/install/merge-hooks.js` 를 쓴다. 머저의 소유권 판정은 "우리가 배포하는 스크립트를 우리 런처로 부르는가" 하나이므로 Orca 훅은 자동 보존된다 — 머저는 Orca 를 알지 못하고 알 필요도 없다.
+- **겹치는 기능은 한쪽만 쓴다.** 컨텍스트 내 팬아웃 = `Workflow`/`Agent`, 워크트리 격리·핸드오프 = `orca-cli`, 에이전트 DAG·coordinator 루프 = `orchestration`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`.
+
+하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 7개)**.
+
+전체 의존 지점·역할 분리 표·점검 명령·Orca 없이 쓸 때 무엇이 달라지는지는 **`docs/orca-dependencies.md`**.
 
 ## Self-evolution (학습 메커니즘)
 
