@@ -26,6 +26,7 @@ const path = require('path');
 const os = require('os');
 
 const { selectAssets } = require('./select-assets');
+const { runsHarnessScript } = require('./merge-hooks');
 
 function parseArgs(argv) {
   const flags = { workload: null, skipWorkload: null, json: false, root: null, claudeHome: null };
@@ -155,13 +156,17 @@ function listInstalledLinks(claudeHome, root) {
   return found;
 }
 
-/** Are harness-owned hook groups currently merged into settings.json? */
+/**
+ * Are harness-owned hook groups currently merged into settings.json?
+ *
+ * Uses merge-hooks' ownership test rather than an id-prefix guess: id shape is a
+ * convention a third party can copy, and legacy harness groups have no id at all.
+ * Same predicate the merger uses, so the two never disagree.
+ */
 function hasHarnessHooks(claudeHome) {
   try {
     const settings = JSON.parse(fs.readFileSync(path.join(claudeHome, 'settings.json'), 'utf8'));
-    return Object.values(settings.hooks || {}).some(groups =>
-      (groups || []).some(g => g && typeof g.id === 'string' && /^(pre|post|session|stop|subagent):/.test(g.id))
-    );
+    return Object.values(settings.hooks || {}).some(groups => (groups || []).some(g => runsHarnessScript(g)));
   } catch {
     return false;
   }

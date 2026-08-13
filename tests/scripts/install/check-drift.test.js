@@ -172,7 +172,18 @@ function runTests() {
     fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'gone'), path.join(withHooks, 'skills', 'stale'));
     fs.writeFileSync(
       path.join(withHooks, 'settings.json'),
-      JSON.stringify({ hooks: { Stop: [{ matcher: '*', id: 'stop:cost-tracker', hooks: [{ command: 'x' }] }] } })
+      // A real harness hook command: launcher marker + a script we ship.
+      JSON.stringify({
+        hooks: {
+          Stop: [
+            {
+              matcher: '*',
+              id: 'stop:cost-tracker',
+              hooks: [{ command: 'node -e "plugin-hook-bootstrap.js" node scripts/hooks/cost-tracker.js' }]
+            }
+          ]
+        }
+      })
     );
     let out = run([`--claude-home=${withHooks}`, '--workload=core']).stdout;
     assert.ok(/--uninstall && .*--with-hooks/s.test(out), `expected --with-hooks:\n${out}`);
@@ -181,6 +192,11 @@ function runTests() {
     const noHooks = tmp('hooks-off');
     installLinks(noHooks, ['core']);
     fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'gone'), path.join(noHooks, 'skills', 'stale'));
+    // A third-party hook with a harness-shaped id must not count as ours.
+    fs.writeFileSync(
+      path.join(noHooks, 'settings.json'),
+      JSON.stringify({ hooks: { Stop: [{ matcher: '*', id: 'stop:vendor', hooks: [{ command: 'node /opt/vendor/x.js' }] }] } })
+    );
     out = run([`--claude-home=${noHooks}`, '--workload=core']).stdout;
     assert.ok(!out.includes('--with-hooks'), `should not suggest hooks:\n${out}`);
     fs.rmSync(noHooks, { recursive: true, force: true });
