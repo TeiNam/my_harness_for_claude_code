@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-08-14
+
+- refactor(docs): CLAUDE.md 30.8KB → 14.7KB, 카탈로그·설치 상세를 docs 로 분리 (ef054b0)
+
 ## 2026-08-13
 
 - refactor(rules): 상시 로드를 불변 제약 4개로 축소 (15.4k → 1.8k tok) (3fe9e0c)

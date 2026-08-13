@@ -79,6 +79,21 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `scripts/install/merge-hooks.js` — the underlying merger. **머지는 선언적이다**: 실행 후 settings.json 의 하네스 소유분은 머지한 집합과 정확히 일치하고, 그 밖의 하네스 훅은 전부 걷힌다 — hooks.json 에서 은퇴한 id, 그리고 **옛 설치가 남긴 `id` 없는 그룹**까지(`isLegacyHarnessGroup`: command 에 하네스 스크립트 경로 마커가 있으면 하네스 소유로 판정). 서드파티 훅(예: `~/.orca/agent-hooks/claude-hook.sh` 를 부르는 Orca 훅 11개)은 마커가 없어 보존된다. `--dry-run` 으로 sweep 목록을 먼저 확인할 것. Tests: `tests/scripts/install/merge-hooks.test.js`.
 - `hooks/prompt-pack.json` — two reference-only prompts (`ref:pre-write-guard`, `ref:review-on-stop`). Not runnable; see `hooks/README-prompt-pack.md` for what they overlap with and how to wire them up if needed.
 
+## Orca Integration
+
+이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅(`~/.orca/agent-hooks/claude-hook.sh`)을 `~/.claude/settings.json` 의 **11개 이벤트**에 이미 붙여 두었다(SessionStart · UserPromptSubmit · PreToolUse · PostToolUse · PostToolUseFailure · Stop · StopFailure · SubagentStart · SubagentStop · TeammateIdle · PermissionRequest). 하네스와 Orca 가 같은 파일을 공유하므로 규칙이 필요하다.
+
+- **settings.json 의 hooks 를 손으로 편집하지 않는다.** `scripts/install/merge-hooks.js` 를 쓴다. 머저는 하네스 소유분만 걷어내고 Orca 훅은 보존한다(Orca 명령에는 하네스 스크립트 경로 마커가 없다). 이 보존은 `merge-hooks.test.js` 가 검증한다.
+- **역할 분리** — 겹치는 기능은 한쪽만 쓴다:
+  | 관심사 | 담당 |
+  |--------|------|
+  | 컨텍스트 내 팬아웃(같은 세션에서 병렬 에이전트) | `Workflow` 도구 / `Agent` 도구 + `subagent:budget` |
+  | 워크트리 격리 실행·소유권 핸드오프·터미널 제어 | Orca (`orca-cli` 스킬) |
+  | 여러 에이전트의 DAG·블로킹 ask/reply·coordinator 루프 | Orca (`orchestration` 스킬) |
+  | statusLine | claude-dashboard 플러그인 (하네스 `harness-statusline.js` 는 2026-08 제거 — 등록되지 않은 죽은 경로였다) |
+  | 세션 재개 | Claude Code 네이티브 `/resume` 또는 Orca 워크트리가 1순위. 하네스 `/save-session`·`/resume-session` 은 *요약된* 컨텍스트를 남기고 싶을 때만 |
+- 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 7개)**. 오케스트레이션·세션 상태·핸드오프는 Orca 에 맡긴다.
+
 ## Self-evolution (학습 메커니즘)
 
 세 층위로 무게가 다르다. 가벼운 것부터 무거운 것 순:

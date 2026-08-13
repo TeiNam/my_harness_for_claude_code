@@ -3,7 +3,8 @@
  * Harness Metrics Bridge — PostToolUse hook
  *
  * Maintains a running session aggregate in /tmp/harness-metrics-{session}.json.
- * This bridge file is read by harness-statusline.js and harness-context-monitor.js,
+ * This bridge file is read by harness-context-monitor.js (statusLine is owned by the
+ * claude-dashboard plugin, so the harness statusline reader was removed in 2026-08),
  * avoiding the need to scan large JSONL logs on every invocation.
  */
 
