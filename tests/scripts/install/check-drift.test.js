@@ -146,6 +146,24 @@ function runTests() {
     fs.rmSync(home, { recursive: true, force: true });
   })) passed++; else failed++;
 
+  if (test('recovery commands carry the inspected CLAUDE_HOME', () => {
+    // Without it the user would wipe the default ~/.claude instead of the
+    // install they just checked.
+    const home = tmp('custom-home');
+    installLinks(home, ['core']);
+    fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'gone'), path.join(home, 'skills', 'stale-link'));
+
+    const r = run([`--claude-home=${home}`, '--workload=core']);
+    assert.strictEqual(r.code, 1);
+    const lines = r.stdout.split('\n').filter(l => l.includes('./install.sh'));
+    assert.ok(lines.length > 0, r.stdout);
+    for (const line of lines) {
+      assert.ok(line.includes(`CLAUDE_HOME=${home}`), `missing CLAUDE_HOME in: ${line}`);
+    }
+    assert.ok(r.stdout.includes(`CLAUDE_HOME=${home} node scripts/install/merge-hooks.js --optional`));
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
   if (test('orphan report tells the user --force will not clear it', () => {
     const home = tmp('orphan-msg');
     installLinks(home, ['core']);

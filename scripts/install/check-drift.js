@@ -231,7 +231,10 @@ function main(argv) {
 
   if (drift > 0) {
     const wl = flags.workload && flags.workload.length ? ` --workload=${flags.workload.join(',')}` : '';
-    console.log(`\nDrift detected. Re-sync with:\n  ./install.sh --force${wl}`);
+    // A command that omits CLAUDE_HOME would operate on the default ~/.claude —
+    // i.e. wipe a different install than the one just inspected.
+    const home = claudeHome === path.join(os.homedir(), '.claude') ? '' : `CLAUDE_HOME=${claudeHome} `;
+    console.log(`\nDrift detected. Re-sync with:\n  ${home}./install.sh --force${wl}`);
     if (buckets.orphan.length) {
       // --uninstall clears everything the harness installed, so the re-install
       // must name the same workloads (otherwise the menu/--all decides for you)
@@ -240,9 +243,9 @@ function main(argv) {
       const restoreWl = wl || (activeGroups.length ? ` --workload=${activeGroups.join(',')}` : '');
       console.log(
         '\n  orphan links are not removed by --force (it only re-links what the repo declares).' +
-          `\n  Clear them with:\n    ./install.sh --uninstall && ./install.sh${restoreWl}` +
+          `\n  Clear them with:\n    ${home}./install.sh --uninstall && ${home}./install.sh${restoreWl}` +
           '\n  Note: --uninstall drops every harness link and hook. Re-run with the same' +
-          '\n  workloads (above), and add `node scripts/install/merge-hooks.js --optional`' +
+          `\n  workloads (above), and add \`${home}node scripts/install/merge-hooks.js --optional\`` +
           '\n  afterwards if you were running the optional hook stack.'
       );
     }
