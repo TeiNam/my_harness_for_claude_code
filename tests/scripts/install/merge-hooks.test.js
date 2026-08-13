@@ -81,18 +81,37 @@ function runTests() {
     assert.strictEqual(looksLikeHarnessId(null), false);
   })) passed++; else failed++;
 
-  if (test('referencesHarnessScript matches only scripts we actually ship', () => {
-    assert.ok(referencesHarnessScript('node scripts/hooks/pre-bash-dispatcher.js'));
-    assert.ok(referencesHarnessScript("path.join('scripts','hooks','subagent-budget.js')"));
+  if (test('referencesHarnessScript needs a shipped script AND our launcher', () => {
+    const boot = 'CLAUDE_PLUGIN_ROOT';
+    assert.ok(referencesHarnessScript(`node -e "${boot}" node scripts/hooks/pre-bash-dispatcher.js`));
+    assert.ok(referencesHarnessScript(`${boot} path.join('scripts','hooks','subagent-budget.js')`));
     // spaced path.join() variant
-    assert.ok(referencesHarnessScript("path.join('scripts', 'hooks', 'session-end.js')"));
+    assert.ok(referencesHarnessScript(`${boot} path.join('scripts', 'hooks', 'session-end.js')`));
     // windows separators
-    assert.ok(referencesHarnessScript('node scripts\\hooks\\cost-tracker.js'));
-    // a vendor's own scripts/hooks dir with a basename we don't ship
-    assert.strictEqual(referencesHarnessScript('/vendor/scripts/hooks/security.js'), false);
+    assert.ok(referencesHarnessScript(`${boot} node scripts\\hooks\\cost-tracker.js`));
+    // array-form command (settings.json ships strings, but be tolerant)
+    assert.ok(referencesHarnessScript(['node', '-e', `${boot} scripts/hooks/session-end.js`]));
+    // a vendor file that merely shares our basename must NOT match
+    assert.strictEqual(referencesHarnessScript('node /vendor/scripts/hooks/cost-tracker.js'), false);
+    // our launcher but a basename we don't ship
+    assert.strictEqual(referencesHarnessScript(`${boot} node scripts/hooks/security.js`), false);
     assert.strictEqual(referencesHarnessScript('sh ~/.orca/agent-hooks/claude-hook.sh'), false);
     assert.strictEqual(referencesHarnessScript(''), false);
     assert.strictEqual(referencesHarnessScript(null), false);
+  })) passed++; else failed++;
+
+  if (test('every group in the shipped hook files is recognised as ours', () => {
+    // A false negative here means a re-merge appends a duplicate instead of
+    // replacing, so the hook runs twice. Guard both files.
+    for (const flags of [{}, { optional: true }]) {
+      const { doc } = loadHooksDocs(REAL_HOOKS, flags);
+      for (const [event, groups] of Object.entries(doc.hooks)) {
+        for (const group of groups) {
+          const detected = (group.hooks || []).some(h => referencesHarnessScript(h.command));
+          assert.ok(detected, `${event}:${group.id} not recognised as harness-owned`);
+        }
+      }
+    }
   })) passed++; else failed++;
 
   if (test('third-party hooks survive even with a harness-shaped id', () => {
@@ -189,15 +208,17 @@ function runTests() {
 
   if (test('planMerge sweeps legacy id-less harness groups but keeps third-party ones', () => {
     const orcaCommand = "if [ -f '/Users/x/.orca/agent-hooks/claude-hook.sh' ]; then exec sh; fi";
+    // Real harness commands always go through the inline bootstrapper.
+    const boot = 'node -e "var e=process.env.CLAUDE_PLUGIN_ROOT;"';
     const settings = {
       hooks: {
         PreToolUse: [
-          { matcher: 'Bash', hooks: [{ type: 'command', command: 'node scripts/hooks/pre-bash-dispatcher.js' }] },
+          { matcher: 'Bash', hooks: [{ type: 'command', command: `${boot} node scripts/hooks/pre-bash-dispatcher.js` }] },
           { matcher: '*', hooks: [{ type: 'command', command: orcaCommand }] },
         ],
         SubagentStart: [
           // inline bootstrapper spelling the path via path.join()
-          { matcher: '*', hooks: [{ type: 'command', command: "path.join('scripts','hooks','subagent-budget.js')" }] },
+          { matcher: '*', hooks: [{ type: 'command', command: `${boot} path.join('scripts','hooks','subagent-budget.js')` }] },
         ],
       },
     };
@@ -206,10 +227,10 @@ function runTests() {
     assert.strictEqual(next.hooks.PreToolUse.length, 3); // orca kept + 2 harness groups
     assert.ok(next.hooks.PreToolUse.some(g => g.hooks[0].command === orcaCommand));
     assert.ok(!('SubagentStart' in next.hooks)); // legacy-only event pruned
-    assert.ok(isLegacyHarnessGroup({ hooks: [{ command: 'node scripts/hooks/cost-tracker.js' }] }));
+    assert.ok(isLegacyHarnessGroup({ hooks: [{ command: `${boot} node scripts/hooks/cost-tracker.js` }] }));
     assert.ok(!isLegacyHarnessGroup({ hooks: [{ command: orcaCommand }] }));
     // id present → not "legacy", even though the script is ours
-    assert.ok(!isLegacyHarnessGroup({ id: 'stop:cost-tracker', hooks: [{ command: 'node scripts/hooks/cost-tracker.js' }] }));
+    assert.ok(!isLegacyHarnessGroup({ id: 'stop:cost-tracker', hooks: [{ command: `${boot} node scripts/hooks/cost-tracker.js` }] }));
   })) passed++; else failed++;
 
   if (test('planMerge removes retired harness ids no longer in hooks.json', () => {
@@ -219,8 +240,8 @@ function runTests() {
           {
             matcher: '*',
             id: 'post:harness-metrics-bridge',
-            // a real retired group still invokes the harness script it ran
-            hooks: [{ type: 'command', command: 'node scripts/hooks/harness-metrics-bridge.js' }],
+            // a real retired group still invokes the harness script through our launcher
+            hooks: [{ type: 'command', command: 'node -e "process.env.CLAUDE_PLUGIN_ROOT" node scripts/hooks/harness-metrics-bridge.js' }],
           },
         ],
       },

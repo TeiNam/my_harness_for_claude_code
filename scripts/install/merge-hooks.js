@@ -41,28 +41,44 @@ const HARNESS_ID_PREFIXES = ['pre:', 'post:', 'session:', 'stop:', 'subagent:'];
  */
 const SCRIPTS_HOOKS_PREFIX = /scripts["'\s,\\/]+hooks["'\s,\\/]+/;
 
+/**
+ * Every harness hook goes through our own launcher: the inline bootstrapper that
+ * resolves CLAUDE_PLUGIN_ROOT, plugin-hook-bootstrap.js, or run-with-flags.js.
+ * Requiring one of these *in addition to* a shipped basename is what separates
+ * our `scripts/hooks/cost-tracker.js` from a vendor's identically-named file.
+ */
+const HARNESS_LAUNCHER_MARKERS = ['CLAUDE_PLUGIN_ROOT', 'plugin-hook-bootstrap', 'run-with-flags'];
+
 let harnessScriptNamesCache = null;
 
 function harnessScriptNames() {
   if (harnessScriptNamesCache) return harnessScriptNamesCache;
   const dir = path.resolve(__dirname, '..', 'hooks');
-  let names = [];
-  try {
-    names = fs.readdirSync(dir).filter(f => f.endsWith('.js') || f.endsWith('.sh'));
-  } catch {
-    names = [];
-  }
+  // A repo-local read that fails is not a normal condition. Treating it as "no
+  // scripts" would silently make every legacy group unrecognizable, so the merge
+  // would append duplicates instead of replacing them. Fail loudly instead.
+  const names = fs.readdirSync(dir).filter(f => f.endsWith('.js') || f.endsWith('.sh'));
   harnessScriptNamesCache = new Set(names);
   return harnessScriptNamesCache;
 }
 
-/** Does this command invoke a script this repo ships under scripts/hooks/? */
+/** settings.json ships string commands; tolerate array form defensively. */
+function commandText(command) {
+  if (typeof command === 'string') return command;
+  if (Array.isArray(command)) return command.filter(c => typeof c === 'string').join(' ');
+  return '';
+}
+
+/** Does this command invoke a script this repo ships, through our launcher? */
 function referencesHarnessScript(command) {
-  if (typeof command !== 'string' || !command) return false;
+  const text = commandText(command);
+  if (!text) return false;
+  if (!HARNESS_LAUNCHER_MARKERS.some(marker => text.includes(marker))) return false;
+
   const names = harnessScriptNames();
   if (names.size === 0) return false;
 
-  let rest = command;
+  let rest = text;
   for (;;) {
     const match = SCRIPTS_HOOKS_PREFIX.exec(rest);
     if (!match) return false;

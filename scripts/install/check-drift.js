@@ -92,34 +92,53 @@ function classifyLink(absSource, absTarget) {
 }
 
 /**
- * Walk the harness-owned link trees and return every link found, relative to
+ * Every link under the asset folders that points into this repo, relative to
  * $CLAUDE_HOME. Needed because the selection-driven check above can only see
  * assets the repo still declares: a link left behind after an asset is deleted,
  * renamed, or moved out of an installed folder is invisible to it. Those
  * leftovers matter — a stale rule link that still resolves keeps getting loaded
  * into every session.
+ *
+ * Ownership is decided by where the link points, not by the folder it sits in:
+ * skills install as `skills/<name>` rather than under `_harness/`, and links
+ * pointing outside the repo belong to other plugins or the user.
  */
-function listInstalledLinks(claudeHome) {
+function listInstalledLinks(claudeHome, root) {
   const found = [];
+  const insideRepo = target => {
+    const abs = path.resolve(root);
+    const resolved = path.resolve(target);
+    return resolved === abs || resolved.startsWith(abs + path.sep);
+  };
+
   for (const kind of ['agents', 'commands', 'skills', 'rules']) {
-    const base = path.join(claudeHome, kind, '_harness');
     const walk = dir => {
       let entries;
       try {
         entries = fs.readdirSync(dir, { withFileTypes: true });
-      } catch {
-        return;
+      } catch (e) {
+        // A missing folder just means nothing of that kind is installed. Any
+        // other error (permissions, I/O) must not read as "no orphans".
+        if (e.code === 'ENOENT') return;
+        throw e;
       }
       for (const entry of entries) {
         const abs = path.join(dir, entry.name);
         if (entry.isSymbolicLink()) {
-          found.push(path.relative(claudeHome, abs));
+          let target;
+          try {
+            target = fs.readlinkSync(abs);
+          } catch {
+            continue;
+          }
+          const resolved = path.isAbsolute(target) ? target : path.resolve(path.dirname(abs), target);
+          if (insideRepo(resolved)) found.push(path.relative(claudeHome, abs));
           continue;
         }
         if (entry.isDirectory()) walk(abs);
       }
     };
-    walk(base);
+    walk(path.join(claudeHome, kind));
   }
   return found;
 }
@@ -169,10 +188,12 @@ function main(argv) {
     buckets[classifyLink(absSource, absTarget)].push(a.targetRel);
   }
 
-  // Links present under _harness/ that the current selection does not declare.
-  const expected = new Set(selected.map(a => a.targetRel));
-  for (const rel of listInstalledLinks(claudeHome)) {
-    if (!expected.has(rel)) buckets.orphan.push(rel);
+  // Orphans are judged against everything the repo *could* install, not against
+  // the workload subset being checked — otherwise `--workload=core` would report
+  // every other workload's healthy links as orphans and tell you to uninstall.
+  const declared = new Set(selectAssets({ root }).selected.map(a => a.targetRel));
+  for (const rel of listInstalledLinks(claudeHome, root)) {
+    if (!declared.has(rel)) buckets.orphan.push(rel);
   }
 
   const drift =

@@ -199,21 +199,41 @@ unlink_one() {
 
 # 선언(build_selection) 기반 unlink 는 *레포에 아직 있는* 자산만 지운다. 자산을
 # 지우거나 옮긴 뒤에 남은 링크(orphan)는 그 목록에 없으므로 영구히 남는다 —
-# 링크가 살아 있으면 rule 은 계속 매 세션 로드된다. `_harness` 는 하네스 전용
-# 네임스페이스라, 그 트리의 심볼릭은 전부 우리 것으로 보고 정리해도 안전하다.
+# 링크가 살아 있으면 rule 은 계속 매 세션 로드된다.
+#
+# 소유권 판정은 디렉토리 이름이 아니라 **링크가 가리키는 곳**으로 한다: 타깃이 이
+# 레포 안이면 우리가 만든 링크다. 그래야 `skills/<name>` 처럼 `_harness` 밖에 깔리는
+# 자산도 함께 잡히고, 다른 플러그인·수동 링크는 타깃이 레포 밖이라 손대지 않는다.
+#
+# `run`(eval)을 쓰지 않고 직접 rm 한다 — 여기 경로는 선언이 아니라 파일시스템에서
+# 온 것이라 이름에 `$(...)` 가 섞이면 eval 이 그걸 실행해버린다. find 는 -print0,
+# rm 은 `--` 로 받아 개행·하이픈이 든 이름도 안전하게 넘긴다.
 unlink_orphans() {
-    local kind base
+    local kind base link target removed=0
     for kind in agents commands skills rules; do
-        base="$CLAUDE_DIR/$kind/_harness"
+        base="$CLAUDE_DIR/$kind"
         [ -d "$base" ] || continue
-        while IFS= read -r link; do
-            [ -z "$link" ] && continue
-            run rm "\"$link\""
+        while IFS= read -r -d '' link; do
+            target="$(readlink "$link" 2>/dev/null || true)"
+            case "$target" in
+                "$HARNESS_DIR"|"$HARNESS_DIR"/*) ;;
+                *) continue ;;   # 레포 밖을 가리키는 링크는 우리 것이 아니다
+            esac
+            if [ "$DRY_RUN" -eq 1 ]; then
+                echo "[dry-run] rm -- $link"
+            else
+                rm -- "$link"
+            fi
             echo "unlink(orphan): $link"
-        done < <(find "$base" -type l 2>/dev/null)
-        # 비게 된 디렉토리는 정리 (내용 있으면 rmdir 이 조용히 실패한다)
-        find "$base" -depth -type d -empty -exec rmdir {} + 2>/dev/null || true
+            removed=$((removed + 1))
+        done < <(find "$base" -type l -print0 2>/dev/null)
+        # 비게 된 하네스 서브디렉토리 정리 (dry-run 에서는 건드리지 않는다)
+        if [ "$DRY_RUN" -eq 0 ] && [ -d "$base/_harness" ]; then
+            find "$base/_harness" -depth -type d -empty -exec rmdir {} + 2>/dev/null || true
+        fi
     done
+    [ "$removed" -gt 0 ] && echo "orphan links removed: $removed"
+    return 0
 }
 
 merge_hooks() {

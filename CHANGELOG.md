@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- fix(install): orphan 링크 탐지·정리 — 선언 기반 uninstall 의 사각지대 (11367a3)
 - refactor(orca): Orca 와의 역할 분리 명문화, 죽은 statusline 경로 제거 (cf9f816)
 - refactor(docs): CLAUDE.md 30.8KB → 14.7KB, 카탈로그·설치 상세를 docs 로 분리 (ef054b0)
 

@@ -86,6 +86,39 @@ function runTests() {
     fs.rmSync(home, { recursive: true, force: true });
   })) passed++; else failed++;
 
+  // Skills install as skills/<name>, not under _harness/ — a namespace-only scan
+  // misses them entirely, which is how five deleted skills stayed linked for weeks.
+  if (test('flags a deleted skill link that lives outside _harness', () => {
+    const home = tmp('orphan-skill');
+    installLinks(home, ['core']);
+    const orphan = path.join(home, 'skills', 'deleted-skill');
+    fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'deleted-skill'), orphan); // dangling on purpose
+
+    const out = JSON.parse(run([`--claude-home=${home}`, '--workload=core', '--json']).stdout);
+    assert.deepStrictEqual(out.buckets.orphan, ['skills/deleted-skill']);
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('leaves links that point outside the repo alone', () => {
+    const home = tmp('foreign');
+    installLinks(home, ['core']);
+    const foreign = path.join(home, 'skills', 'someone-elses-plugin');
+    fs.symlinkSync(path.join(os.tmpdir(), 'not-this-repo'), foreign);
+
+    const out = JSON.parse(run([`--claude-home=${home}`, '--workload=core', '--json']).stdout);
+    assert.deepStrictEqual(out.buckets.orphan, [], 'third-party links must not be reported');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('checking one workload does not report other workloads as orphans', () => {
+    const home = tmp('subset');
+    // Install a wider set, then check a narrow one.
+    installLinks(home, ['core', 'rust']);
+    const out = JSON.parse(run([`--claude-home=${home}`, '--workload=core', '--json']).stdout);
+    assert.deepStrictEqual(out.buckets.orphan, [], 'rust links are declared by the repo, not orphans');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
   if (test('orphan report tells the user --force will not clear it', () => {
     const home = tmp('orphan-msg');
     installLinks(home, ['core']);
