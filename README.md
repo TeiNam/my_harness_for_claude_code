@@ -178,19 +178,22 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 
 ## 동반 플러그인 (하네스와 같이 설치)
 
-하네스 설치와 함께 아래 플러그인을 설치합니다 — 설치 명령 전체는 `docs/plugin.md`.
+설치 스크립트는 플러그인을 건드리지 않습니다 — 아래는 손으로 설치하며, 명령 전체는 `docs/plugin.md`.
+6종 합계 상시 컨텍스트 비용은 스킬 `description` 기준 약 3.4k tok 입니다.
 
 | 플러그인 | 마켓플레이스 | 역할 (하네스와의 관계) |
 |---|---|---|
 | `superpowers` | anthropics/claude-plugins-official | TDD·검증·디버깅·플랜 스킬 — 하네스 자체 `tdd-workflow`·`verification-loop` 스킬은 중복이라 제거됨 |
-| `rust-analyzer-lsp` | anthropics/claude-plugins-official | Rust LSP |
 | `ponytail` | DietrichGebert/ponytail | 최소주의 코딩 모드 |
 | `codex` | openai/codex-plugin-cc | 교차 모델 세컨드 오피니언 — 하네스 자체 `codex-cli` 스킬은 중복이라 제거됨 |
 | `ui-ux-pro-max` | nextlevelbuilder/ui-ux-pro-max-skill | 디자인 시스템·UI 스타일링 — 하네스 자체 `design-system` 스킬은 중복이라 제거됨 |
-| `claude-dashboard` | uppinote20/claude-dashboard | statusline 사용량 모니터링 (하네스 `cost-tracking`은 SQLite 비용 DB라 별개 유지) |
+| `claude-dashboard` | uppinote20/claude-dashboard | **statusLine 담당** — 하네스 `harness-statusline.js`는 등록되지 않는 죽은 경로라 2026-08 제거. 비용 DB(`cost-tracking`)는 SQLite 기반이라 별개 유지 |
 | `obsidian` | kepano/obsidian-skills | Obsidian 문서 포맷 (project scope 설치) |
 
-**설치하지 말 것** — `humanize-korean@im-not-ai`(하네스 `skills/humanize-korean`이 v1.6.1로 더 최신), `frontend-design@claude-plugins-official`(하네스 `skills/frontend-design`과 동일 출처 중복). 둘 다 하네스 스킬과 이중 노출을 일으켜 2026-07-26 제거했습니다. `motion-creative@motion-mcp`(광고 크리에이티브 분석)도 워크로드와 무관해 같은 날 제거했습니다.
+**설치하지 말 것**
+
+- 하네스 스킬과 이중 노출 (2026-07-26 제거, 하네스 쪽이 SSOT): `humanize-korean@im-not-ai`(하네스 `skills/humanize-korean`이 v1.6.1로 더 최신), `frontend-design@claude-plugins-official`(하네스 `skills/frontend-design`과 동일 출처 중복).
+- 워크로드와 무관 (2026-08-14 제거 — 마켓플레이스 등록·캐시까지 정리): `motion-creative@motion-mcp`(광고 크리에이티브 분석, 17스킬 395 tok — 2026-07-26에 뺐다가 재설치돼 있던 것), `scroll-world@scroll-world`(스크롤 시네마틱 랜딩 — 랜딩페이지는 하네스 `taste`/`redesign`/`soft`/`output-skill`이 담당), `rust-analyzer-lsp@claude-plugins-official`(LSP 서버, 스킬 0개라 컨텍스트 비용은 없었으나 Rust 작업에서 쓰지 않음).
 
 ## 필수 도구 버전
 
