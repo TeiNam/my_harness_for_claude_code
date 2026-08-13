@@ -58,6 +58,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 설치는 **도메인 축 6개 톱레벨**(dev / cloud / ai / data / research / writing) → 중분류 → 상세의 3단계 체크박스 메뉴다. 중분류가 곧 워크로드 키라서 "데이터 → MySQL" 만 골랐을 때 Postgres 가이드가 끌려오지 않는다.
 
 - 메뉴 정의는 `scripts/install/menu.js`, 워크로드 키 카탈로그는 `scripts/install/workloads.js`. 자산 추가는 파일을 두고 frontmatter 에 `workloads: [...]` 만 적으면 끝(휴리스틱 폴백도 있음).
+- **메뉴 baseline 은 `core` + `writing` + `report`** (`menu.js` 의 `ALWAYS_INCLUDED`). 글·문서 작업 비중이 높아 매번 고르는 것이 의미가 없으므로 고르지 않아도 따라온다(합계 상시 비용 ~1.7k tok — 스킬은 description 만 로드되고 본문은 호출 시 읽힌다). 소셜 콘텐츠(`social-*`)는 별도 축이라 옵트인으로 남긴다. 이 baseline 은 **메뉴 경로에만** 적용된다 — `--workload=` 저수준 플래그는 "정확히 이것만"이라는 뜻이므로 그대로이고, 프로젝트 로컬 설치에서 글쓰기를 빼려면 그 경로를 쓴다.
 - 워크로드 흐름에 들어오는 kind 는 **agent·command·skill·rule** 4종. hooks·mcp 는 분류 밖이라 설치 후 별도로 묻는다(`--with-hooks` / `--with-mcp` / `--no-extras`).
 - 드리프트 점검: `npm run check-drift` — 레포가 깔아야 할 자산 vs 실제 심볼릭을 대조한다. 읽기 전용.
 - **컨텍스트 절감 목적으로 워크로드를 줄이는 건 헛수고다**(2026-08 실측): 안 쓰는 워크로드 6개를 다 빼도 상시 비용은 13 tok 만 줄었다. `aws-rds`·`devops`·`integration`·`data-analysis` 는 MCP 분류용 키라 스킬·에이전트 자산이 아예 없다. 컨텍스트를 줄이려면 rules(`rules/` 항목 참조)와 CLAUDE.md 를 손대야 한다.

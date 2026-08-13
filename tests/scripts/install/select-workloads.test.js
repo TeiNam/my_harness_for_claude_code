@@ -9,6 +9,12 @@
 
 const assert = require('assert');
 const { execFileSync } = require('child_process');
+
+/** Baseline (core + writing + report) plus what the flags add, CSV-sorted. */
+const { ALWAYS_INCLUDED } = require('../../../scripts/install/menu');
+function baseCsv(...extra) {
+  return [...new Set([...ALWAYS_INCLUDED, ...extra])].sort().join(',');
+}
 const path = require('path');
 
 const SCRIPT = path.resolve(__dirname, '../../../scripts/install/select-workloads.js');
@@ -51,7 +57,7 @@ function runTests() {
   if (
     test('--non-interactive --dev=python yields core,python-backend', () => {
       const out = run(['--non-interactive', '--dev=python']);
-      assert.strictEqual(out, 'core,python-backend');
+      assert.strictEqual(out, baseCsv('python-backend'));
     })
   )
     passed++;
@@ -72,7 +78,7 @@ function runTests() {
   if (
     test('--non-interactive --data=mysql excludes other DB engines', () => {
       const out = run(['--non-interactive', '--data=mysql']);
-      assert.strictEqual(out, 'core,mysql');
+      assert.strictEqual(out, baseCsv('mysql'));
     })
   )
     passed++;
@@ -105,7 +111,7 @@ function runTests() {
   if (
     test('--writing-social 상세 전부 나열 = 3키 모두', () => {
       const out = run(['--non-interactive', '--writing-social=voice,content,visual']);
-      assert.strictEqual(out, 'core,social-content,social-visual,social-voice');
+      assert.strictEqual(out, baseCsv('social-content', 'social-visual', 'social-voice'));
     })
   )
     passed++;
@@ -114,7 +120,7 @@ function runTests() {
   if (
     test('--writing-social=voice resolves sub-level detail', () => {
       const out = run(['--non-interactive', '--writing-social=voice']);
-      assert.strictEqual(out, 'core,social-voice');
+      assert.strictEqual(out, baseCsv('social-voice'));
     })
   )
     passed++;
@@ -123,7 +129,7 @@ function runTests() {
   if (
     test('--writing=general excludes all social keys', () => {
       const out = run(['--non-interactive', '--writing=general']);
-      assert.strictEqual(out, 'core,writing');
+      assert.strictEqual(out, baseCsv('writing'));
     })
   )
     passed++;
@@ -132,7 +138,7 @@ function runTests() {
   if (
     test('--research=report yields core,report (tech-writer)', () => {
       const out = run(['--non-interactive', '--research=report']);
-      assert.strictEqual(out, 'core,report');
+      assert.strictEqual(out, baseCsv('report'));
     })
   )
     passed++;

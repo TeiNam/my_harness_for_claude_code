@@ -4,33 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
-- fix(merge-hooks): 하네스 명령과 다른 명령이 섞인 그룹을 경고한다 (c5b8a5c)
-- fix(install): 심볼릭 링크된 skills 디렉토리에서도 orphan 을 찾는다 (2b4532b)
-- fix(check-drift): 복구 안내에 --skip-workload 를 실어 보낸다 (d479da1)
-- fix(check-drift): hasHarnessHooks 도 merge-hooks 의 소유권 판정을 재사용 (dd729ad)
-- fix(check-drift): 복구 안내의 재설치에 --with-hooks 를 붙인다 (f297972)
-- fix(install): 소유권 마커에서 CLAUDE_PLUGIN_ROOT 제거 — 범용 값이라 오탐원 (4c4d5dc)
-- fix(install): 인자 없는 설치가 bash 3.2 에서 죽던 문제 + 회귀 테스트 (36fd93a)
-- fix(install): bash 3.2 에서 조용히 죽던 orphan 스캔, CLAUDE_HOME 인용 (0bdf99b)
-- fix(check-drift): 복구 안내에 검사한 CLAUDE_HOME 을 실어 보낸다 (f18d71c)
-- fix(install): orphan 복구 안내 정확화, Windows 경로 정규화, ps1 한계 명시 (28a4e3f)
-- fix(install): id 충돌은 이벤트별로, 직계 링크 스캔은 skills 로 한정 (5e4516f)
-- fix(install): uninstall·비대상 이벤트는 id 가 아니라 실행 스크립트로만 판정 (b94db1a)
-- docs: Loop Control 표의 루프 서명 설명을 실제 구현(입력 전체 해시)에 맞춤 (8481960)
-- fix: 6차 리뷰 반영 — 동작 불가한 컨텍스트 경고 제거, id 충돌 경고 추가 (ca01805)
-- fix: 5차 리뷰 반영 — 루프 서명은 입력 전체, orphan 스캔은 설치 형태로 제한 (a9c2295)
-- fix(loop): 해시 절단을 전부 제거 — MultiEdit·긴 Bash 명령까지 구분 (888f9cc)
-- fix: 3차 리뷰 반영 — 경로 정규화·해시 절단·dry-run 부작용 (3a10328)
-- feat(loop): 루프 제어를 명문화하고 루프 감지 오탐을 고친다 (c3b801b)
-- fix(install): 2차 리뷰 반영 — 소유권 판정을 링크 타깃·런처 기준으로 (c23a9f4)
-- fix(install): orphan 링크 탐지·정리 — 선언 기반 uninstall 의 사각지대 (11367a3)
-- refactor(orca): Orca 와의 역할 분리 명문화, 죽은 statusline 경로 제거 (cf9f816)
-- refactor(docs): CLAUDE.md 30.8KB → 14.7KB, 카탈로그·설치 상세를 docs 로 분리 (ef054b0)
-
-## 2026-08-13
-
-- refactor(rules): 상시 로드를 불변 제약 4개로 축소 (15.4k → 1.8k tok) (3fe9e0c)
-- refactor(hooks): 코어 스택 7그룹으로 축소, 기본 프로파일 minimal (af5209a)
+- refactor: 하네스 최소화 — 훅 30→7, 상시 rule 15.4k→1.8k tok, Orca 역할 분리, 루프 제어 (#18) (4be1e39)
 
 ## 2026-08-04
 
