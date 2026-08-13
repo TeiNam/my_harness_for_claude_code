@@ -195,9 +195,14 @@ function runsHarnessScript(group) {
  */
 function hasForeignCommandAlongsideOurs(group) {
   if (!runsHarnessScript(group)) return false;
-  return (Array.isArray(group.hooks) ? group.hooks : []).some(
-    h => h && commandText(h.command).trim() && !referencesHarnessScript(h.command)
-  );
+  return (Array.isArray(group.hooks) ? group.hooks : []).some(h => {
+    if (!h) return false;
+    // Non-command entries (type: 'http', 'prompt', …) are never ours, so their
+    // presence alongside our command still means the group is mixed.
+    if (!('command' in h)) return true;
+    const text = commandText(h.command).trim();
+    return text.length > 0 && !referencesHarnessScript(h.command);
+  });
 }
 
 /**
@@ -305,6 +310,7 @@ function planMerge(settings, hooksDoc) {
       }
       if (!(group && typeof group.id === 'string' && eventIds.has(group.id))) {
         summary.swept.push(`${event}:${describeGroup(group)}`);
+        if (hasForeignCommandAlongsideOurs(group)) summary.mixedGroups.push(`${event}:${describeGroup(group)}`);
       }
     }
 
@@ -316,7 +322,10 @@ function planMerge(settings, hooksDoc) {
     if (hooksDoc.hooks[event]) continue;
     const existing = next.hooks[event] || [];
     for (const group of existing) {
-      if (runsHarnessScript(group)) summary.swept.push(`${event}:${describeGroup(group)}`);
+      if (runsHarnessScript(group)) {
+        summary.swept.push(`${event}:${describeGroup(group)}`);
+        if (hasForeignCommandAlongsideOurs(group)) summary.mixedGroups.push(`${event}:${describeGroup(group)}`);
+      }
     }
     const filtered = uninstallEvent(existing);
     if (filtered.length === 0) delete next.hooks[event];
@@ -332,13 +341,17 @@ function planUninstall(settings, _hooksDoc) {
   const next = JSON.parse(JSON.stringify(settings || {}));
   next.hooks = next.hooks || {};
 
-  const summary = { removed: [], preservedUserIds: [] };
+  const summary = { removed: [], mixedGroups: [], preservedUserIds: [] };
 
   for (const event of Object.keys(next.hooks)) {
     const existing = next.hooks[event] || [];
     for (const group of existing) {
-      if (runsHarnessScript(group)) summary.removed.push(`${event}:${describeGroup(group)}`);
-      else if (group && typeof group.id === 'string' && group.id) summary.preservedUserIds.push(group.id);
+      if (runsHarnessScript(group)) {
+        summary.removed.push(`${event}:${describeGroup(group)}`);
+        if (hasForeignCommandAlongsideOurs(group)) summary.mixedGroups.push(`${event}:${describeGroup(group)}`);
+      } else if (group && typeof group.id === 'string' && group.id) {
+        summary.preservedUserIds.push(group.id);
+      }
     }
     const filtered = uninstallEvent(existing);
     if (filtered.length === 0) delete next.hooks[event];
@@ -397,7 +410,7 @@ function main(argv = process.argv) {
     console.log(
       `\n  WARNING: ${summary.mixedGroups.length} group(s) mix a harness command with another one:` +
         `\n    ${summary.mixedGroups.join(', ')}` +
-        '\n  Replacing the group drops the other command (one id cannot hold two groups).' +
+        '\n  Removing/replacing the group drops the other entry (one id cannot hold two groups).' +
         '\n  Move it to its own group with a distinct id, then re-run. Backup is written below.'
     );
   }

@@ -183,6 +183,44 @@ function runTests() {
     assert.deepStrictEqual(summary.mixedGroups, ['Stop:stop:cost-tracker']);
     assert.deepStrictEqual(summary.overwrittenUserGroups, [], 'it is our group, just contaminated');
 
+    // Non-command entries (http, prompt, …) count as foreign too.
+    const httpMix = {
+      hooks: {
+        Stop: [
+          {
+            matcher: '*',
+            id: 'stop:cost-tracker',
+            hooks: [
+              { type: 'command', command: `${boot} node scripts/hooks/cost-tracker.js` },
+              { type: 'http', url: 'https://example.test/hook' }
+            ]
+          }
+        ]
+      }
+    };
+    assert.deepStrictEqual(planMerge(httpMix, SAMPLE_HOOKS).summary.mixedGroups, ['Stop:stop:cost-tracker']);
+    // The sweep and uninstall paths drop the group too, so they must warn as well.
+    assert.deepStrictEqual(planUninstall(httpMix, SAMPLE_HOOKS).summary.mixedGroups, ['Stop:stop:cost-tracker']);
+    const retired = {
+      hooks: {
+        PostToolUse: [
+          {
+            matcher: '*',
+            id: 'post:harness-metrics-bridge',
+            hooks: [
+              { type: 'command', command: `${boot} node scripts/hooks/harness-metrics-bridge.js` },
+              { type: 'command', command: 'my own check' }
+            ]
+          }
+        ]
+      }
+    };
+    assert.deepStrictEqual(
+      planMerge(retired, SAMPLE_HOOKS).summary.mixedGroups,
+      ['PostToolUse:post:harness-metrics-bridge'],
+      'a retired group being swept can also be mixed'
+    );
+
     // A clean harness group must not be flagged.
     const clean = {
       hooks: {
