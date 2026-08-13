@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- fix(check-drift): 복구 안내에 검사한 CLAUDE_HOME 을 실어 보낸다 (f18d71c)
 - fix(install): orphan 복구 안내 정확화, Windows 경로 정규화, ps1 한계 명시 (28a4e3f)
 - fix(install): id 충돌은 이벤트별로, 직계 링크 스캔은 skills 로 한정 (5e4516f)
 - fix(install): uninstall·비대상 이벤트는 id 가 아니라 실행 스크립트로만 판정 (b94db1a)

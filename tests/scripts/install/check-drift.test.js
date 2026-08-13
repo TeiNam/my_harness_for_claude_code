@@ -158,9 +158,9 @@ function runTests() {
     const lines = r.stdout.split('\n').filter(l => l.includes('./install.sh'));
     assert.ok(lines.length > 0, r.stdout);
     for (const line of lines) {
-      assert.ok(line.includes(`CLAUDE_HOME=${home}`), `missing CLAUDE_HOME in: ${line}`);
+      assert.ok(line.includes(`CLAUDE_HOME="${home}"`), `missing quoted CLAUDE_HOME in: ${line}`);
     }
-    assert.ok(r.stdout.includes(`CLAUDE_HOME=${home} node scripts/install/merge-hooks.js --optional`));
+    assert.ok(r.stdout.includes(`CLAUDE_HOME="${home}" node scripts/install/merge-hooks.js --optional`));
     fs.rmSync(home, { recursive: true, force: true });
   })) passed++; else failed++;
 

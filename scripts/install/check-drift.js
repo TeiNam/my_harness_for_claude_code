@@ -233,7 +233,9 @@ function main(argv) {
     const wl = flags.workload && flags.workload.length ? ` --workload=${flags.workload.join(',')}` : '';
     // A command that omits CLAUDE_HOME would operate on the default ~/.claude —
     // i.e. wipe a different install than the one just inspected.
-    const home = claudeHome === path.join(os.homedir(), '.claude') ? '' : `CLAUDE_HOME=${claudeHome} `;
+    // Quote the path: an unquoted CLAUDE_HOME with a space in it produces a
+    // command that silently targets the wrong directory when pasted.
+    const home = claudeHome === path.join(os.homedir(), '.claude') ? '' : `CLAUDE_HOME="${claudeHome}" `;
     console.log(`\nDrift detected. Re-sync with:\n  ${home}./install.sh --force${wl}`);
     if (buckets.orphan.length) {
       // --uninstall clears everything the harness installed, so the re-install

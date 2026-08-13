@@ -209,7 +209,7 @@ unlink_one() {
 # 온 것이라 이름에 `$(...)` 가 섞이면 eval 이 그걸 실행해버린다. find 는 -print0,
 # rm 은 `--` 로 받아 개행·하이픈이 든 이름도 안전하게 넘긴다.
 unlink_orphans() {
-    local kind base depth link target removed=0
+    local kind base link target removed=0
     # 설치가 만드는 두 형태만 훑는다. 전 디렉토리를 재귀하면 사용자가 자기 skill
     # *안에* 만든 링크까지 orphan 으로 보고 지워버린다.
     #   1. <kind>/_harness/**  — agents·commands·rules (중첩)
@@ -219,10 +219,15 @@ unlink_orphans() {
     for kind in agents/_harness commands/_harness skills/_harness rules/_harness skills; do
         base="$CLAUDE_DIR/$kind"
         [ -d "$base" ] || continue
-        case "$kind" in
-            */_harness) depth=() ;;              # 중첩 전부
-            *)          depth=(-maxdepth 1) ;;   # 직계만
-        esac
+        # 빈 배열을 쓰지 않는다: macOS 기본 bash 3.2 는 `set -u` 에서 `"${arr[@]}"`
+        # 확장을 unbound variable 로 죽이고, 이 find 는 process substitution 안에
+        # 있어서 그 실패가 부모에 전파되지 않는다 — 스캔이 조용히 0건이 된다.
+        find_links() {
+            case "$1" in
+                */_harness) find "$1" -type l -print0 2>/dev/null ;;   # 중첩 전부
+                *)          find "$1" -maxdepth 1 -type l -print0 2>/dev/null ;;  # 직계만
+            esac
+        }
         while IFS= read -r -d '' link; do
             target="$(readlink "$link" 2>/dev/null || true)"
             case "$target" in
@@ -242,7 +247,7 @@ unlink_orphans() {
             fi
             echo "unlink(orphan): $link"
             removed=$((removed + 1))
-        done < <(find "$base" "${depth[@]}" -type l -print0 2>/dev/null)
+        done < <(find_links "$base")
         # 비게 된 하네스 서브디렉토리 정리 (dry-run 에서는 건드리지 않는다)
         case "$kind" in
             */_harness)
