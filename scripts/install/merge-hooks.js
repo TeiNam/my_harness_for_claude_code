@@ -42,20 +42,22 @@ const HARNESS_ID_PREFIXES = ['pre:', 'post:', 'session:', 'stop:', 'subagent:'];
 const SCRIPTS_HOOKS_PREFIX = /scripts["'\s,\\/]+hooks["'\s,\\/]+/;
 
 /**
- * Every harness hook goes through our own launcher: the inline bootstrapper that
- * resolves CLAUDE_PLUGIN_ROOT, plugin-hook-bootstrap.js, or run-with-flags.js.
- * Requiring one of these *in addition to* a shipped basename is what separates
- * our `scripts/hooks/cost-tracker.js` from a vendor's identically-named file.
+ * Every harness hook is launched through one of our own files, and each name here
+ * is harness-specific rather than a generic convention. Requiring one of them *in
+ * addition to* a shipped basename is what separates our
+ * `scripts/hooks/cost-tracker.js` from a vendor's identically-named file.
  *
- * Residual risk, accepted: CLAUDE_PLUGIN_ROOT is not harness-exclusive, so a
- * plugin that also ships `scripts/hooks/<one of our exact basenames>` and reads
- * that env var would be treated as ours. It cannot be narrowed further from a
- * command string alone — subagent:budget's inline launcher uses neither
- * plugin-hook-bootstrap nor run-with-flags, so dropping the env marker would make
- * our own hook unrecognizable and duplicate it on re-merge. The backup file and
- * `--dry-run` sweep list are the mitigations.
+ * `CLAUDE_PLUGIN_ROOT` deliberately does NOT appear: every plugin reads that env
+ * var, so any plugin shipping a file whose basename matches one of ours (a
+ * `session-end.js`, say) would have been claimed — and deleted — as ours.
+ *
+ * `subagent-budget.js` is listed because that hook's inline launcher resolves the
+ * root itself instead of going through plugin-hook-bootstrap or run-with-flags;
+ * the basename is unique enough to stand in as its fingerprint. If a new hook
+ * launches some third way, add its marker here and the "every shipped group is
+ * recognised" test will tell you if you forgot.
  */
-const HARNESS_LAUNCHER_MARKERS = ['CLAUDE_PLUGIN_ROOT', 'plugin-hook-bootstrap', 'run-with-flags'];
+const HARNESS_LAUNCHER_MARKERS = ['plugin-hook-bootstrap', 'run-with-flags', 'subagent-budget.js'];
 
 let harnessScriptNamesCache = null;
 

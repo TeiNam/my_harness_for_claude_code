@@ -82,7 +82,8 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('referencesHarnessScript needs a shipped script AND our launcher', () => {
-    const boot = 'CLAUDE_PLUGIN_ROOT';
+    // The launcher marker must be one of ours, not a generic env var.
+    const boot = 'node -e "plugin-hook-bootstrap.js"';
     assert.ok(referencesHarnessScript(`node -e "${boot}" node scripts/hooks/pre-bash-dispatcher.js`));
     assert.ok(referencesHarnessScript(`${boot} path.join('scripts','hooks','subagent-budget.js')`));
     // spaced path.join() variant
@@ -95,6 +96,8 @@ function runTests() {
     assert.strictEqual(referencesHarnessScript('node /vendor/scripts/hooks/cost-tracker.js'), false);
     // our launcher but a basename we don't ship
     assert.strictEqual(referencesHarnessScript(`${boot} node scripts/hooks/security.js`), false);
+    // a generic CLAUDE_PLUGIN_ROOT is NOT a harness fingerprint — every plugin has it
+    assert.strictEqual(referencesHarnessScript('CLAUDE_PLUGIN_ROOT node scripts/hooks/session-end.js'), false);
     assert.strictEqual(referencesHarnessScript('sh ~/.orca/agent-hooks/claude-hook.sh'), false);
     assert.strictEqual(referencesHarnessScript(''), false);
     assert.strictEqual(referencesHarnessScript(null), false);
@@ -130,7 +133,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('our own hooks are not reported as overwritten user groups', () => {
-    const boot = 'node -e "process.env.CLAUDE_PLUGIN_ROOT"';
+    const boot = 'node -e "plugin-hook-bootstrap.js"';
     const settings = {
       hooks: {
         Stop: [
@@ -230,7 +233,7 @@ function runTests() {
   if (test('planUninstall removes groups running our scripts and prunes empty events', () => {
     // Ownership on the uninstall path is decided by the script, not the id —
     // there is no merge key to resolve, so a borrowed id must survive.
-    const boot = 'node -e "process.env.CLAUDE_PLUGIN_ROOT"';
+    const boot = 'node -e "plugin-hook-bootstrap.js"';
     const settings = {
       hooks: {
         PreToolUse: [
@@ -269,7 +272,7 @@ function runTests() {
   if (test('planMerge sweeps legacy id-less harness groups but keeps third-party ones', () => {
     const orcaCommand = "if [ -f '/Users/x/.orca/agent-hooks/claude-hook.sh' ]; then exec sh; fi";
     // Real harness commands always go through the inline bootstrapper.
-    const boot = 'node -e "var e=process.env.CLAUDE_PLUGIN_ROOT;"';
+    const boot = 'node -e "plugin-hook-bootstrap.js"';
     const settings = {
       hooks: {
         PreToolUse: [
@@ -301,7 +304,7 @@ function runTests() {
             matcher: '*',
             id: 'post:harness-metrics-bridge',
             // a real retired group still invokes the harness script through our launcher
-            hooks: [{ type: 'command', command: 'node -e "process.env.CLAUDE_PLUGIN_ROOT" node scripts/hooks/harness-metrics-bridge.js' }],
+            hooks: [{ type: 'command', command: 'node -e "plugin-hook-bootstrap.js" node scripts/hooks/harness-metrics-bridge.js' }],
           },
         ],
       },
