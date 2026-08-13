@@ -6,7 +6,16 @@
 
 const assert = require('assert');
 
-const { CATEGORIES, CATEGORY_IDS, findCategory, resolveSelection, parseCliFlags } = require('../../../scripts/install/menu');
+const { ALWAYS_INCLUDED, CATEGORIES, CATEGORY_IDS, findCategory, resolveSelection, parseCliFlags } = require('../../../scripts/install/menu');
+
+/**
+ * Expected workload set: the always-included baseline plus whatever the selection
+ * adds. Built from ALWAYS_INCLUDED so these cases keep testing the *selection*
+ * logic; the baseline's contents are pinned by their own test below.
+ */
+function withBase(...extra) {
+  return [...new Set([...ALWAYS_INCLUDED, ...extra])].sort();
+}
 
 function test(name, fn) {
   try {
@@ -77,13 +86,26 @@ function runTests() {
     passed++;
   else failed++;
 
+
+  if (
+    test('ALWAYS_INCLUDED pins the menu baseline (core + writing + report)', () => {
+      // Writing and technical docs are a large share of the owner's work, so the
+      // menu stops asking. Social content stays opt-in — separate axis, 17 assets.
+      assert.deepStrictEqual(ALWAYS_INCLUDED.slice().sort(), ['core', 'report', 'writing']);
+      assert.ok(!ALWAYS_INCLUDED.some(w => w.startsWith('social-')), 'social stays opt-in');
+      // Selecting nothing still yields the baseline.
+      assert.deepStrictEqual(resolveSelection({ categories: [] }).workloads.slice().sort(), withBase());
+    })
+  )
+    passed++;
+  else failed++;
   if (
     test('resolveSelection: dev=python yields [core, python-backend]', () => {
       const r = resolveSelection({
         categories: ['dev'],
         subSelections: { dev: ['python'] }
       });
-      assert.deepStrictEqual(r.workloads, ['core', 'python-backend']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('python-backend'));
     })
   )
     passed++;
@@ -110,7 +132,7 @@ function runTests() {
         categories: ['data'],
         subSelections: { data: ['mysql'] }
       });
-      assert.deepStrictEqual(r.workloads, ['core', 'mysql']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('mysql'));
     })
   )
     passed++;
@@ -123,7 +145,7 @@ function runTests() {
         subSelections: { data: [] }
       });
       // data 대분류 전체 = 분석(python-data·ai·data-analysis) + 설계(mysql·postgres·mongodb·dynamodb·aws-rds)
-      assert.deepStrictEqual(r.workloads.sort(), ['ai', 'aws-rds', 'core', 'data-analysis', 'dynamodb', 'mongodb', 'mysql', 'postgres', 'python-data']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('ai', 'aws-rds', 'data-analysis', 'dynamodb', 'mongodb', 'mysql', 'postgres', 'python-data'));
     })
   )
     passed++;
@@ -133,7 +155,7 @@ function runTests() {
     test('resolveSelection: writing with no sub-selection means "all" (social 상세 전체 포함)', () => {
       const r = resolveSelection({ categories: ['writing'] });
       // writing(general) + social 상세 전체 3키.
-      assert.deepStrictEqual(r.workloads, ['core', 'social-content', 'social-visual', 'social-voice', 'writing']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('social-content', 'social-visual', 'social-voice', 'writing'));
     })
   )
     passed++;
@@ -145,7 +167,7 @@ function runTests() {
         categories: ['writing'],
         subSelections: { writing: ['general'] }
       });
-      assert.deepStrictEqual(r.workloads, ['core', 'writing']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('writing'));
     })
   )
     passed++;
@@ -157,7 +179,7 @@ function runTests() {
         categories: ['writing'],
         subSelections: { writing: ['social'] }
       });
-      assert.deepStrictEqual(r.workloads, ['core', 'social-content', 'social-visual', 'social-voice']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('social-content', 'social-visual', 'social-voice'));
     })
   )
     passed++;
@@ -170,7 +192,7 @@ function runTests() {
         subSelections: { writing: ['social'] },
         detailSelections: { 'writing.social': ['voice'] }
       });
-      assert.deepStrictEqual(r.workloads, ['core', 'social-voice']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('social-voice'));
     })
   )
     passed++;
@@ -182,7 +204,7 @@ function runTests() {
         categories: ['writing'],
         subSelections: { writing: ['social'] }
       });
-      assert.deepStrictEqual(r.workloads, ['core', 'social-content', 'social-visual', 'social-voice']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('social-content', 'social-visual', 'social-voice'));
     })
   )
     passed++;
@@ -195,7 +217,7 @@ function runTests() {
         subSelections: { writing: ['social'] },
         detailSelections: { 'writing.social': ['voice', 'visual'] }
       });
-      assert.deepStrictEqual(r.workloads, ['core', 'social-visual', 'social-voice']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('social-visual', 'social-voice'));
     })
   )
     passed++;
@@ -221,7 +243,7 @@ function runTests() {
         categories: ['data', 'dev'],
         subSelections: { data: ['mysql'], dev: ['rust'] }
       });
-      assert.deepStrictEqual(r.workloads, ['core', 'mysql', 'rust']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('mysql', 'rust'));
     })
   )
     passed++;
@@ -290,7 +312,7 @@ function runTests() {
     test('parseCliFlags: --writing-social=voice resolves to social-voice only', () => {
       const { categories, subSelections, detailSelections } = parseCliFlags({ 'writing-social': 'voice' });
       const r = resolveSelection({ categories, subSelections, detailSelections });
-      assert.deepStrictEqual(r.workloads, ['core', 'social-voice']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('social-voice'));
     })
   )
     passed++;
@@ -319,7 +341,7 @@ function runTests() {
       assert.deepStrictEqual(subSelections, { writing: ['social'] });
       assert.deepStrictEqual(detailSelections, { 'writing.social': ['voice'] });
       const r = resolveSelection({ categories, subSelections, detailSelections });
-      assert.deepStrictEqual(r.workloads, ['core', 'social-voice']);
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('social-voice'));
     })
   )
     passed++;

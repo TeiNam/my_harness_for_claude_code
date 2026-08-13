@@ -127,6 +127,22 @@ function findCategory(id) {
 }
 
 /**
+ * 메뉴로 설치할 때 고르지 않아도 항상 따라오는 워크로드.
+ *
+ * `core` 는 baseline(github·context7·time·fetch MCP + 범용 에이전트)이고, 여기에
+ * 글쓰기(`writing`)와 기술 문서(`report`)를 더한다 — 소유자의 실제 작업에서 글·문서
+ * 비중이 높아 매번 고르는 것이 의미가 없다. 두 그룹 합계 상시 비용은 약 1.7k tok
+ * (스킬은 description 만 로드되고 본문은 호출할 때 읽힌다).
+ *
+ * 소셜 콘텐츠(`social-*`)는 별도 축이라 포함하지 않는다 — 17종이고 파이프라인 단계별로
+ * 고르는 편이 맞다.
+ *
+ * 이 목록은 **메뉴 경로에만** 적용된다. `--workload=` 저수준 플래그는 "정확히 이것만"
+ * 이라는 뜻이므로 그대로 둔다(프로젝트 로컬 설치에서 글쓰기를 빼고 싶을 수 있다).
+ */
+const ALWAYS_INCLUDED = ['core', 'writing', 'report'];
+
+/**
  * detailOptions 를 가진 노드(카테고리 또는 sub-옵션)의 워크로드를 산출한다.
  * 고른 상세 id 들의 workloads 합집합을 wlSet 에 더한다.
  *
@@ -165,7 +181,7 @@ function addDetailWorkloads(detailOptions, requested, wlSet, nodeKey, unknownDet
  * @returns {{ workloads: string[], unknownCategories: string[], unknownSubs: string[], unknownDetails: string[] }}
  */
 function resolveSelection({ categories = [], subSelections = {}, detailSelections = {} } = {}) {
-  const wlSet = new Set(['core']); // core 는 항상 포함
+  const wlSet = new Set(ALWAYS_INCLUDED); // 고르지 않아도 따라오는 것들
   const unknownCategories = [];
   const unknownSubs = [];
   const unknownDetails = [];
@@ -280,6 +296,7 @@ function parseCliFlags(flags) {
 }
 
 module.exports = {
+  ALWAYS_INCLUDED,
   CATEGORIES,
   CATEGORY_IDS,
   findCategory,
