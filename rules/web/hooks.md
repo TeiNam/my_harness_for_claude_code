@@ -1,4 +1,15 @@
-> This file extends [common/hooks.md](../common/hooks.md) with web-specific hook recommendations.
+---
+paths:
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+  - "**/*.scss"
+  - "**/*.html"
+  - "**/*.vue"
+  - "**/*.svelte"
+workloads: [frontend]
+---
+> This file extends [common/hooks.md](../../docs/rules-reference/hooks.md) with web-specific hook recommendations.
 
 # Web Hooks
 

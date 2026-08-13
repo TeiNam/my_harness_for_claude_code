@@ -1,4 +1,15 @@
-> This file extends [common/testing.md](../common/testing.md) with web-specific testing content.
+---
+paths:
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+  - "**/*.scss"
+  - "**/*.html"
+  - "**/*.vue"
+  - "**/*.svelte"
+workloads: [frontend]
+---
+> This file extends [common/testing.md](../../docs/rules-reference/testing.md) with web-specific testing content.
 
 # Web Testing Rules
 

@@ -6,7 +6,7 @@ workloads: [rust]
 ---
 # Rust Hooks
 
-> This file extends [common/hooks.md](../common/hooks.md) with Rust-specific content.
+> This file extends [common/hooks.md](../../docs/rules-reference/hooks.md) with Rust-specific content.
 
 ## PostToolUse Hooks
 

@@ -96,9 +96,12 @@ resolve_workloads() {
         return 0
     fi
 
-    local sel_args=("${MENU_ARGS[@]}")
-    if [ ${#sel_args[@]} -gt 0 ]; then
-        sel_args=("--non-interactive" "${sel_args[@]}")
+    # macOS 기본 bash 3.2 는 `set -u` 에서 빈 배열의 `"${arr[@]}"` 확장을 unbound
+    # variable 로 죽인다. 인자 없이 `./install.sh` 를 돌리면 MENU_ARGS 가 비어 있어
+    # 여기서 바로 종료됐다 — 대화형 설치 경로가 통째로 막혀 있었다.
+    local sel_args=()
+    if [ ${#MENU_ARGS[@]} -gt 0 ]; then
+        sel_args=("--non-interactive" "${MENU_ARGS[@]}")
     fi
 
     # `local resolved=$(...)` 는 set -e 환경에서도 exit code 를 가린다.
@@ -195,6 +198,72 @@ unlink_one() {
         echo "unlink: $dest"
     fi
     # 하네스가 만들지 않은 링크는 건드리지 않는다 (uninstall 은 best-effort).
+}
+
+# 선언(build_selection) 기반 unlink 는 *레포에 아직 있는* 자산만 지운다. 자산을
+# 지우거나 옮긴 뒤에 남은 링크(orphan)는 그 목록에 없으므로 영구히 남는다 —
+# 링크가 살아 있으면 rule 은 계속 매 세션 로드된다.
+#
+# 소유권 판정은 디렉토리 이름이 아니라 **링크가 가리키는 곳**으로 한다: 타깃이 이
+# 레포 안이면 우리가 만든 링크다. 그래야 `skills/<name>` 처럼 `_harness` 밖에 깔리는
+# 자산도 함께 잡히고, 다른 플러그인·수동 링크는 타깃이 레포 밖이라 손대지 않는다.
+#
+# `run`(eval)을 쓰지 않고 직접 rm 한다 — 여기 경로는 선언이 아니라 파일시스템에서
+# 온 것이라 이름에 `$(...)` 가 섞이면 eval 이 그걸 실행해버린다. find 는 -print0,
+# rm 은 `--` 로 받아 개행·하이픈이 든 이름도 안전하게 넘긴다.
+unlink_orphans() {
+    local kind base link target removed=0
+    # 설치가 만드는 두 형태만 훑는다. 전 디렉토리를 재귀하면 사용자가 자기 skill
+    # *안에* 만든 링크까지 orphan 으로 보고 지워버린다.
+    #   1. <kind>/_harness/**  — agents·commands·rules (중첩)
+    #   2. <kind>/<name>       — skills (직계 자식 하나)
+    # 직계 링크는 skills 뿐이다 — agents·commands·rules 는 _harness/ 아래에만 깔린다.
+    # 그 폴더 최상위의 사용자 링크는 우리 것이 아니므로 훑지 않는다.
+    for kind in agents/_harness commands/_harness skills/_harness rules/_harness skills; do
+        base="$CLAUDE_DIR/$kind"
+        [ -d "$base" ] || continue
+        # 빈 배열을 쓰지 않는다: macOS 기본 bash 3.2 는 `set -u` 에서 `"${arr[@]}"`
+        # 확장을 unbound variable 로 죽이고, 이 find 는 process substitution 안에
+        # 있어서 그 실패가 부모에 전파되지 않는다 — 스캔이 조용히 0건이 된다.
+        # -H: 인자로 준 경로가 심볼릭 링크면 그것만 따라간다. `~/.claude/skills`
+        # 자체를 링크로 두는 설정에서도 그 안의 orphan 을 찾을 수 있어야 한다.
+        find_links() {
+            case "$1" in
+                */_harness) find -H "$1" -type l -print0 2>/dev/null ;;   # 중첩 전부
+                *)          find -H "$1" -maxdepth 1 -type l -print0 2>/dev/null ;;  # 직계만
+            esac
+        }
+        while IFS= read -r -d '' link; do
+            target="$(readlink "$link" 2>/dev/null || true)"
+            case "$target" in
+                # `..` 가 섞이면 문자열 비교로는 레포 안팎을 가릴 수 없다
+                # ($HARNESS_DIR/../foreign 은 접두어만 같고 레포 밖이다). 정규화
+                # 없이 지우는 대신 건너뛴다 — check-drift 는 경로를 제대로 resolve
+                # 하므로 이런 링크도 orphan 으로 보고된다. 설치가 만드는 링크는
+                # 항상 절대경로라 실제로는 걸리지 않는다.
+                *..*) continue ;;
+                "$HARNESS_DIR"|"$HARNESS_DIR"/*) ;;
+                *) continue ;;   # 레포 밖(또는 상대경로)을 가리키는 링크는 우리 것이 아니다
+            esac
+            if [ "$DRY_RUN" -eq 1 ]; then
+                echo "[dry-run] rm -- $link"
+            else
+                rm -- "$link"
+            fi
+            echo "unlink(orphan): $link"
+            removed=$((removed + 1))
+        done < <(find_links "$base")
+        # 비게 된 하네스 서브디렉토리 정리 (dry-run 에서는 건드리지 않는다)
+        case "$kind" in
+            */_harness)
+                if [ "$DRY_RUN" -eq 0 ]; then
+                    find "$base" -depth -type d -empty -exec rmdir {} + 2>/dev/null || true
+                fi
+                ;;
+        esac
+    done
+    [ "$removed" -gt 0 ] && echo "orphan links removed: $removed"
+    return 0
 }
 
 merge_hooks() {
@@ -406,6 +475,11 @@ main() {
         fi
     done < <(build_selection)
 
+    # uninstall 은 선언에 없는 잔여 링크까지 쓸어야 완결된다.
+    if [ "$UNINSTALL" -eq 1 ]; then
+        unlink_orphans
+    fi
+
     # ── 워크로드 외 자산(hooks·mcp) ───────────────────────────────────────
     # uninstall: hooks 도 함께 제거. install: --with-hooks / --with-mcp 면
     # 각각 묻지 않고 바로 실행. 그 외엔 TTY 일 때 물어본다(--no-extras / 비대화형은 skip).
@@ -443,9 +517,10 @@ main() {
 
     if [ "$UNINSTALL" -eq 1 ]; then
         # 비어 있는 _harness 컨테이너만 정리. 사용자 자산은 안 건드림.
+        # dry-run 은 부작용이 없어야 하므로 실제 삭제는 건너뛴다.
         for sub in agents commands skills rules; do
             local container="$CLAUDE_DIR/$sub/_harness"
-            if [ -d "$container" ]; then
+            if [ -d "$container" ] && [ "$DRY_RUN" -eq 0 ]; then
                 find "$container" -type d -empty -delete 2>/dev/null || true
             fi
         done

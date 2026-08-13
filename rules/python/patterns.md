@@ -6,7 +6,7 @@ workloads: [python-backend, python-data]
 ---
 # Python Patterns
 
-> This file extends [common/patterns.md](../common/patterns.md) with Python specific content.
+> This file extends [common/patterns.md](../../docs/rules-reference/patterns.md) with Python specific content.
 
 ## Protocol (Duck Typing)
 

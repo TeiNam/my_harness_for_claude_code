@@ -190,6 +190,12 @@ function Remove-HarnessSymlink {
 function Get-Selection {
     param([string]$WlCsv)
     # uninstall 시에는 모든 자산을 순회해서 이전(더 넓은) 설치 흔적까지 정리.
+    #
+    # 한계: 이 순회는 선언 기반이라 **레포에서 이미 사라진 자산**의 링크(orphan)는
+    # 지우지 못한다. install.sh 에는 unlink_orphans() 가 있지만 여기에는 없다 —
+    # Windows 에서 검증할 수 없는 삭제 코드를 넣지 않기로 했다. Windows 사용자는
+    # `npm run check-drift` 로 orphan 목록을 확인하고 (읽기 전용, 크로스 플랫폼)
+    # 나온 경로를 직접 지운다.
     $args = @($SelectAssetsScript)
     if (-not $Uninstall) {
         if ($WlCsv)           { $args += "--workload=$WlCsv" }

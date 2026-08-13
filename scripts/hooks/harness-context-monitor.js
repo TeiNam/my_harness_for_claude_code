@@ -3,8 +3,11 @@
  * Harness Context Monitor — PostToolUse hook
  *
  * Reads bridge file from harness-metrics-bridge.js and injects agent-facing
- * warnings when thresholds are crossed: context exhaustion, high cost,
- * scope creep, or tool loops.
+ * warnings when thresholds are crossed: high cost, scope creep, or tool loops.
+ *
+ * Context-remaining warnings used to live here too, but only a statusLine hook
+ * can see that number and that slot belongs to the claude-dashboard plugin —
+ * see evaluateConditions().
  */
 
 'use strict';
@@ -15,17 +18,11 @@ const os = require('os');
 const path = require('path');
 const { sanitizeSessionId, readBridge, renameWithRetry } = require('../lib/session-bridge');
 
-// 1M 컨텍스트 모델 기준. 퍼센트로 두면 200k 시절과 동일한 절대 여유(약 70k/50k
-// 남음)에서 경고가 뜬다. 200k 가정(35/25)을 그대로 쓰면 1M 에서 350k 가 남았는데도
-// "복잡한 작업 시작 금지" 경고가 떠 작업이 불필요하게 끊긴다.
-const CONTEXT_WARNING_PCT = 7;
-const CONTEXT_CRITICAL_PCT = 5;
 const COST_NOTICE_USD = 5;
 const COST_WARNING_USD = 10;
 const COST_CRITICAL_USD = 50;
 const FILES_WARNING_COUNT = 20;
 const LOOP_THRESHOLD = 3;
-const STALE_SECONDS = 60;
 const DEBOUNCE_CALLS = 5;
 
 function isEnabledEnv(value, defaultValue = true) {
@@ -124,27 +121,13 @@ function detectLoop(recentTools) {
  */
 function evaluateConditions(bridge, options = {}) {
   const warnings = [];
-  const remaining = bridge.context_remaining_pct;
 
-  // Context warnings (skip if no context data)
-  if (remaining !== null && remaining !== undefined) {
-    if (remaining <= CONTEXT_CRITICAL_PCT) {
-      warnings.push({
-        severity: 3,
-        type: 'context',
-        message:
-          `CONTEXT CRITICAL: ${remaining}% remaining. Context nearly exhausted. ` +
-          'Inform the user that context is low and ask how they want to proceed. ' +
-          'Do NOT autonomously save state or write handoff files unless the user asks.'
-      });
-    } else if (remaining <= CONTEXT_WARNING_PCT) {
-      warnings.push({
-        severity: 2,
-        type: 'context',
-        message: `CONTEXT WARNING: ${remaining}% remaining. ` + 'Be aware that context is getting limited. Avoid starting new complex work.'
-      });
-    }
-  }
+  // No context-remaining warnings here. Context percentage is only visible to a
+  // statusLine hook (tool hooks don't receive it), and that single slot belongs to
+  // the claude-dashboard plugin — which already shows the number to the user. The
+  // harness reader was removed in 2026-08, so this bridge field had no writer;
+  // keeping the branch would have meant warning off a value frozen at whatever it
+  // was when the reader last ran.
 
   // Cost warnings
   if (options.costWarnings !== false) {
@@ -217,15 +200,7 @@ function run(rawInput) {
     const bridge = readBridge(sessionId);
     if (!bridge) return rawInput;
 
-    // Stale check for context warnings
-    const now = Math.floor(Date.now() / 1000);
-    const lastTs = bridge.last_timestamp ? Math.floor(new Date(bridge.last_timestamp).getTime() / 1000) : 0;
-    const isStale = lastTs > 0 && now - lastTs > STALE_SECONDS;
-
-    // If bridge is stale, null out context data (still check cost/scope/loop)
-    const evalBridge = isStale ? { ...bridge, context_remaining_pct: null } : bridge;
-
-    const warnings = evaluateConditions(evalBridge, { costWarnings: costWarningsEnabled() });
+    const warnings = evaluateConditions(bridge, { costWarnings: costWarningsEnabled() });
     if (warnings.length === 0) return rawInput;
 
     // Debounce logic

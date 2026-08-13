@@ -27,91 +27,94 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `skills/` — domain knowledge / workflow definitions
 - `commands/` — slash commands (markdown with `description:` frontmatter)
 - `hooks/` — trigger-based hook configs (JSON + handler scripts)
-- `rules/` — always-follow guidelines (common + per-language)
+- `rules/` — **컨텍스트 예산이지 문서 폴더가 아니다.** 설치된 rule 은 `paths:` frontmatter 가 없으면 모든 프로젝트의 모든 세션에 로드된다. 그래서 `rules/common/` 에는 언제나 참인 불변 제약 4개만 둔다(`korean-language`·`git-workflow`·`security`·`coding-style`, 합계 <12KB). 언어·도메인 폴더(`python/`·`typescript/`·`rust/`·`web/`)는 전부 `paths:` 로 게이팅해 해당 파일을 건드릴 때만 로드된다. 절차·참고 자료(테스트 전략, 리뷰 체크리스트, 모델 라우팅, README 배지 규칙 등)는 `docs/rules-reference/` 로 — 필요할 때 읽는다. 두 규칙은 `tests/scripts/install/workloads.test.js` 가 강제한다.
 - `mcp-configs/` — MCP server configs (proxy-first: `proxy/` holds the mcp-proxy compose stack; `mcp-servers.json` catalog is the SSOT, marking each server `route: proxy|local` + `workloads: [...]`). 설치 시 `scripts/install/build-mcp-config.js` 가 선택 워크로드와 매칭되는 `route=proxy` 서버만 골라 `proxy/config.json` 을 빌드한다(통짜 X). `terraform` 선택 시 compose 의 `terraform-mcp` profile 동반 기동.
 - `scripts/` — Node.js utilities for hooks, install/uninstall, audits
 - `tests/` — test suite for `scripts/`
+- `docs/rules-reference/` — 옛 `rules/common/` 중 상시 로드가 필요 없는 9개(`testing`·`patterns`·`performance`·`hooks`·`code-review`·`development-workflow`·`agents`·`model-routing`·`readme-rule`)와 rules 설치 안내 `README.md`. 설치되지 않으므로 컨텍스트를 먹지 않는다. 언어별 rule 의 `> This file extends …` 링크가 여기를 가리킨다.
+- `docs/harness-assets.md` · `docs/install-menu.md` — CLAUDE.md 에서 옮겨온 스킬·에이전트 카탈로그와 설치 메뉴 상세. CLAUDE.md 는 매 세션 100% 로드되므로 "작업할 때만 필요한 목록"은 여기 둔다.
 - `docs/` — long-form reference (writing guides, security guide, steering rules). `docs/plugin.md` 는 하네스와 함께 설치하는 동반 플러그인 목록(superpowers·codex·ui-ux-pro-max 등) — 이 플러그인들과 겹치는 하네스 자체 스킬(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`)은 2026-07-26 제거됨. 새 스킬 추가 시 플러그인과의 중복 여부를 먼저 확인할 것.
 
 ## High-value Agents
 
-- `rdbms-data-modeler` — forces target-DB confirmation (Aurora MySQL / MySQL / Aurora PG / PG), then routes to `mysql-guideline` or `postgres-guideline` skill before writing DDL.
-- `article-writer` — long-form articles, guides, blog posts, newsletters in distinctive voice
-- `content-creator` — platform-native social content (X, LinkedIn, newsletter, video scripts)
-- `devops` — AWS / Docker / Terraform / K8s; always plans/dry-runs before mutations
-- `translator-docs` — Korean / English bidirectional translation + README/API docs
-- `deep-researcher` — multi-source web research with citations
-
-The longer reviewer/architect agents (`code-reviewer`, `python-reviewer`, `typescript-reviewer`, `rust-reviewer`, `architect`, etc.) are kept alongside shorter counterparts — they overlap but are more detailed.
+`agents/` 41종. 대표: `rdbms-data-modeler`(대상 DB 확인 후 mysql/postgres 가이드라인 스킬로 라우팅) · `article-writer` · `content-creator` · `devops`(mutation 전 항상 plan/dry-run) · `translator-docs` · `deep-researcher`. 전체 목록과 선정 이유는 **`docs/harness-assets.md`**.
 
 ### Model Routing (per-agent model tiers)
 
-Agents declare `model:` as an **alias** (`opus` / `sonnet` / `haiku`), never a pinned version ID, so the fleet follows model upgrades without a mass re-tag. Current lineup: `opus`→**Opus 5** (Opus 4.8 은 safety-refusal·web fetch·Priority Tier 폴백), `sonnet`→**Sonnet 5**, `haiku`→**Haiku 4.5**. **Opus 5 가 천장이다** — 더 깊은 추론이 필요하면 상위 티어를 찾지 말고 effort 를 올리고(`high`→`xhigh`→`max`), 그다음은 위가 아니라 **옆(Codex, 다른 모델 패밀리)** 으로 간다. The authoritative policy (task tables, agent-class map, orchestration, Codex handoff) is `rules/common/model-routing.md`; `commands/model-route.md` and `/model-route` defer to it. **티어 결정 기준은 "박스가 열려 있는가"다** — 추론 깊이는 *답의 형태가 미정일 때만* 값을 한다. 기준(taxonomy·rubric)이 이미 주어졌거나 원인·해결이 이미 확정된 상태에서 실행만 하는 일은 탐색 공간이 없으므로 `sonnet` 이면 충분하다. **닫힌 박스 → `sonnet`**: 주어진 체크리스트 대조 스캔, 탐지 리포트대로 윤문, 원인이 밝혀진 버그의 수리 구현, 빌드·타입 에러 수리, codemod, PR/CHANGELOG 초안. **열린 박스 → `opus`**: 설계(`architect`·`planner`·`code-architect`), 원인이 *아직* 모르는 진단, 의미·사실 보존 판정(`content-fidelity-auditor`·`tech-fidelity-auditor`), taxonomy 가 아직 못 덮은 것 발견(`naturalness-reviewer`·`doc-clarity-reviewer`·taxonomist), 보안·적대적 리뷰, 다출처 종합(`deep-researcher`). **`haiku`**: 기계적 고빈도(`doc-updater`·`docs-lookup`). 함정 둘 — ① "중요한 파이프라인이니 전부 opus" (중요도 ≠ 추론 깊이; 40패턴 taxonomy 대조는 lookup 이다) ② "수리니까 sonnet" (원인이 *확정된 뒤에만* 참 — 원인 찾기는 열린 박스). **파이프라인이 아니라 단계별로 태깅한다** — detect→fix→judge 는 `sonnet`→`sonnet`→`opus`, opus×3 이 아니다. 두 축이 충돌하면(닫힌 박스인데 미스 비용이 큼) 미스가 이긴다 — 평균이 아니라 최악 비용으로 고른다. Opus 5 는 4.8 보다 스스로 검증하고(자체 검증 지시문 제거) 서브에이전트를 더 적극 생성하므로(불필요한 fan-out 은 프롬프트로 캡) 에이전트 프롬프트 재튜닝 시 참고. **서브에이전트를 Codex 에 맡기는 기준** — Codex 가 이기는 건 *독립성*과 *노가다*이지 하네스 맥락이 아니다. Codex 로 보낼 것: ① Claude 가 쓴 코드의 적대적 리뷰(Claude 가 Claude 를 보면 blind spot 이 상관돼 있다 — 패밀리를 바꾸는 것만이 상관을 끊는다) ② Claude 두 시도가 갈렸을 때 tie-break(세 번째 Claude 의견은 앞의 둘과 상관됨) ③ 대규모 기계적 편집(rename·codemod — Opus 컨텍스트를 아낀다) ④ 루프에 빠졌을 때 두 번째 진단. Claude 서브에이전트에 남길 것: 하네스 맥락(rules·skills·워크로드 태그·프로젝트 관례)이 필요한 일, 도구 오케스트레이션, 한국어 산출물 — Codex 는 이 전부를 cold 로 시작한다. 철칙: **Codex 를 유일한 독자로 두지 않는다** — Codex 만 지적한 건 Claude 가 코드로 확인해야 하고, 두 패밀리가 독립적으로 잡은 것이 고신뢰 항목이다. 설치는 `docs/plugin.md` 의 codex 플러그인(`codex:rescue`).
+`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5, `sonnet`→Sonnet 5, `haiku`→Haiku 4.5. **Opus 5 가 천장이다**: 더 깊은 추론이 필요하면 티어를 올리지 말고 effort 를 올리고(`high`→`xhigh`→`max`), 그다음은 위가 아니라 **옆(Codex)** 으로 간다.
+
+티어 판단 기준은 **"박스가 열려 있는가"** 하나다. 답의 형태가 이미 정해졌으면(rubric·taxonomy 가 주어짐, 원인·해결이 확정됨, 출력 형식이 고정됨) 탐색 공간이 없으므로 **`sonnet`**. 답의 형태가 미정이거나(원인 미상 진단, 설계, 의미 보존 판정, taxonomy 가 못 덮은 것 발견) 미스 비용이 회복 불가면 **`opus`**. 기계적 고빈도는 **`haiku`**. **파이프라인이 아니라 단계별로 태깅한다** — detect→fix→judge 는 `sonnet`→`sonnet`→`opus` 이고 opus×3 이 아니다. 두 축이 충돌하면 최악 비용이 이긴다.
+
+권위 있는 정책(작업 표·에이전트 클래스 맵·오케스트레이션·Codex 핸드오프 기준)은 **`docs/rules-reference/model-routing.md`**; `/model-route` 도 이를 따른다.
 
 ## High-value Skills for Owner's Workloads
 
-Filled-in (real content, not placeholder):
+`skills/` 128종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
 
-- **DB**: `skills/postgres-guideline/`, `skills/mysql-guideline/`, `skills/mongodb-guideline/`, `skills/dynamodb-guideline/` — schema / index / partitioning / sharding / connection
-- **Frontend**: `skills/obsidian-plugin-develop/` (TypeScript + i18n + Chromium + release checklist), `skills/vite-patterns/`, `skills/frontend-patterns/`, `skills/frontend-design/` (origin: anthropics/skills — aesthetic direction, typography, anti-template judgment)
-- **Supanova (한글 랜딩페이지 디자인 엔진)**: `skills/taste-skill/`, `skills/redesign-skill/`, `skills/soft-skill/`, `skills/output-skill/` — origin: supanova-design-skill-main (based on Leonxlnx/taste-skill). Standalone HTML + Tailwind CDN 랜딩페이지를 한글 우선(Pretendard, `word-break: keep-all`, 자연스러운 한국어 카피)으로 생성/리디자인. `taste-skill` 상단에 `DESIGN_VARIANCE`/`MOTION_INTENSITY`/`VISUAL_DENSITY`/`LANDING_PURPOSE` 4개 설정값. 새 랜딩페이지는 `taste-skill`+`output-skill`, 기존 페이지 개선은 `redesign-skill`, 최고 퀄리티는 세 개 다 + `soft-skill`. `frontend` 워크로드로 통합.
-- **SEO/GEO/AEO**: `skills/seo-geo-aeo/` (origin: SNLabat/SEO-GEO-AEO-Skill) — URL 하나로 SEO·GEO(생성형 검색엔진)·AEO(답변엔진) 3축 감사, Word/PDF 리포트 산출. `frontend` 워크로드. (harness 자체 `skills/seo/` 는 이 스킬의 부분집합이라 2026-07-31 제거됨 — SEO 작업은 이 스킬 하나로 통합.)
-- **AI**: `skills/claude-api/` (Anthropic SDK), `skills/foundation-models-on-device/`, `skills/ai-regression-testing/`, `skills/cost-aware-llm-pipeline/`, `skills/aws-bedrock/`, `skills/realtime-stt-huggingface/`, `skills/ai-tui/`
-- **AI TUI (터미널 에이전트 초기화면·두뇌)**: `skills/ai-tui/` — Claude Code·stocker 스타일 터미널 AI 에이전트의 초기화면(배너·로고·입력창·힌트바 6요소)과 두뇌(프롬프트·스킬·MCP·사용룰)를 세팅하는 크로스 언어 레퍼런스. `references/` 4종 — 언어별 3종(`node-pi-tui`, `rust-ratatui`, `python-textual`)과 언어 중립 `agent-brain-setup`. 유지형(pi-tui/textual) vs 즉시형(ratatui) 렌더링 차이와 ANSI 폭 함정을 언어별로 대비. `${CLAUDE_SKILL_DIR}` 토큰 치환. `ai`·`nodejs`·`rust`·`python-backend` 워크로드로 통합.
-- **Codex (교차 모델 세컨드 오피니언)**: codex **플러그인**(openai/codex-plugin-cc — 설치는 `docs/plugin.md`) — `codex:rescue` 스킬·`codex:codex-rescue` 에이전트로 다른 모델 패밀리의 독립적 리뷰(adversarial 검토)·tie-break·대규모 기계적 편집 오프로드. 하네스 자체 `skills/codex-cli` 는 플러그인과 중복이라 제거됨(2026-07-26). Codex 출력은 검증 대상인 제안이지 정답 아님.
-- **문서 생성 (PDF / DOCX / XLSX)**: `skills/pdf/`(pypdf 읽기·병합·폼필·분할, reportlab/weasyprint 생성, CJK 폰트 등록), `skills/docx/`(python-docx + docxtpl 템플릿 채우기, 스타일·표·한글 eastAsia 폰트), `skills/xlsx/`(openpyxl 스타일 리포트·수식·차트, pandas 핸드오프, `data_only` 함정) — 프로그래밍 방식 오피스 문서 산출. 슬라이드는 `ppt-authoring`+`frontend-slides`, 사람처럼 쓴 한글 산문은 `humanize-korean`가 담당하므로 별도 스킬 미신설. `core` 워크로드.
-- **다이어그램 생성**: `skills/archify/`(origin: tt-a1i, based on Cocoon-AI/architecture-diagram-generator, MIT) — 5개 모드(architecture·workflow·sequence·dataflow·lifecycle)를 JSON→SVG 렌더러로 그리는 자립형 HTML 다이어그램 엔진. 다크/라이트 토글·PNG/JPEG/WebP/듀얼테마 SVG 내보내기 내장, 평문 설명이나 붙여넣은 Mermaid(flowchart/sequenceDiagram/stateDiagram)를 archify 스타일로 재레이아웃. 렌더러는 `ajv` 스키마 검증(선택; `npm install` 안 해도 자체 레이아웃 검사로 동작)이며 생성된 HTML은 무의존. 셸 없으면 architecture 모드로 `assets/template.html`에 수동 SVG 배치. `core` 워크로드. `skills/drawio-diagram/`(draw.io/mxGraph XML, MCP 검증 루프)과 별개 — archify 는 self-contained HTML 산출, drawio 는 .drawio 파일 산출.
-- **Cloud**: `skills/aws-cloud/` (IAM, S3, Lambda, ECS/Fargate, RDS, networking, cost guardrails)
-- **FinOps**: `skills/aws-finops/` — FinOps Foundation Framework(Inform/Optimize/Operate) + AWS Cost Management(Cost Explorer·CUR·Budgets·Anomaly, 태깅·Cost Categories, Savings Plans vs RI, Compute Optimizer, 단위경제학, showback/chargeback). `finops` 워크로드. AWS 청구서·커밋먼트 계층 담당(인프라 구성은 `aws-cloud`, LLM 토큰비용은 `cost-aware-llm-pipeline`).
-- **데이터 분석 방법론**: `skills/analysis-methodology/` — 도구가 아닌 판단층(문제 프레이밍→기법 결정트리→검증→의사결정). references 3종(analysis-type-decision·experiment-design·domain-playbooks). 도구·문법은 `skills/python-data-analysis/`(pandas/polars/duckdb)로 위임. `python-data` 워크로드. 워크로드 키 `data-analysis`(AWS Glue/Athena/Redshift MCP)와는 이름만 다르게 분리.
-- **Backend**: `skills/fastapi-backend-best-practices/` (api-design, async-patterns, deployment, domain-modeling, project-structure, security, testing), `skills/python-patterns/`, `skills/rust-patterns/`
-- **Writing**: `skills/markdown-writing/`, `skills/article-writing/`, `skills/brand-voice/`, `skills/crosspost/`, `skills/frontend-slides/`, `skills/tech-blogging/`, `skills/creative-writing/`, `skills/ppt-authoring/`, `skills/tech-writer/`
-- **Tech Writer (기술 문서 작성·윤문)**: `skills/tech-writer/` — 한/영 기술 문서를 새로 쓰거나(write) 기존 초안을 윤문(polish)하는 오케스트레이터. `references/` 3종(quick-rules, tech-doc-taxonomy, tech-writing-playbook)과 전용 에이전트 5종(`tech-doc-writer`, `doc-clarity-reviewer`, `doc-quality-detector`, `tech-fidelity-auditor`, `tech-writer-monolith`)을 둔다. `${CLAUDE_SKILL_DIR}` 토큰 치환으로 경로 독립. `writing` 워크로드로 통합.
-- **Humanize (한글 AI 티 제거)**: `skills/humanize-korean/` — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 패턴을 탐지·윤문. Fast 모드(monolith 1콜)와 strict 5인 파이프라인. 진입 커맨드 `/humanize`·`/humanize-redo`. **런타임 에이전트(`writing` 상시 로드)**: `humanize-monolith`, `ai-tell-detector`, `korean-style-rewriter`, `content-fidelity-auditor`, `naturalness-reviewer`. **스킬 유지·확장용 메타 에이전트는 `lab` 그룹으로 격리**(상시 로드 제외, 분류체계 v2.0 승격·학술 인용·metric 엔지니어링·웹 확장 시에만 수동 호출): `korean-ai-tell-taxonomist`, `taxonomy-gap-analyzer`, `translationese-research-distiller`, `post-editese-metric-engineer`, `quick-rules-integrator`, `korean-translation-scholar`, `humanize-web-architect`. 원본 epoko77-ai/im-not-ai 를 `writing` 워크로드로 통합.
-- **Social Content (LinkedIn 개인 브랜딩 콘텐츠 제작)**: origin: charlie947/social-media-skills. 기술 문서/블로깅용 `writing` 워크로드와 분리했으므로 글쓰기 카테고리에서 "기술 문서"만 고르면 이 17종은 끌려오지 않는다. 설치 시 글쓰기 › 소셜 상세 tier(`--writing-social=`)로 파이프라인 단계별 3그룹을 골라 담는다 — **`social-voice`**(`voice-builder`(voice.md/about-me.md 생성), `newsletter-voice`, `profile-optimizer`) → **`social-content`**(콘텐츠 제작·검증: `post-writer`, `post-formatter`, `hook-generator`, `content-matrix`, `niche-research`, `pinned-comment`, `reels-scripting`, `post-scorer`, `analytics-dashboard`) → **`social-visual`**(`graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `youtube-thumbnail`). `reels-scripting`은 `APIFY_API_TOKEN`·`GOOGLE_AI_API_KEY` 환경변수 필요.
-
-## Still Placeholder Skills
-
-None — all previously-scaffolded skills are now filled in. If new placeholders
-are added later, list them here so they're easy to find and complete.
+새 스킬을 추가할 때 확인할 것 두 가지: ① 동반 플러그인(`docs/plugin.md`)과 겹치지 않는지 — 겹쳐서 제거된 전례가 있다(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`) ② 기존 스킬의 부분집합이 아닌지(`seo` 가 `seo-geo-aeo` 에 흡수된 전례).
 
 ## Workload-based Install (2-tier 메뉴)
 
-설치는 **도메인 축 6개 톱레벨 카테고리**(**dev / cloud / ai / data / research / writing**) 와 중분류(sub-옵션)·상세로 결정되는 **3단계(대분류→중분류→소분류)** 메뉴다. sub-옵션이 곧 워크로드 키와 매칭되어, 예컨대 "데이터 → MySQL" 만 골랐을 때 Postgres 가이드까지 끌려오지 않는다. 대분류 구성:
-  - **dev**(개발): frontend · 백엔드(python-backend/rust/nodejs) · 플러그인(obsidian/chrome/claude)
-  - **cloud**(AWS 운영): 인프라·컨테이너(cloud+devops) · finops · integration
-  - **ai**: ai(Bedrock·SageMaker·Kendra 등)
-  - **data**: 분석(python-data/data-analysis) · 설계(mysql/postgres/mongodb/dynamodb/aws-rds)
-  - **research**(리서치·리포트): 웹 검색(research) · 기술 리포트(report=tech-writer)
-  - **writing**(글쓰기): 일반 글쓰기(writing) · 소셜(상세 3그룹 `social-voice`/`social-content`/`social-visual`)
-  상세 tier(3단째)는 자산이 많은 writing.social(17) 한 중분류에만 붙였고, 나머지는 leaf(3단계 미진입)다. 옛 카테고리(backend/plugin/data-design/data-analysis 톱레벨)는 이 도메인 축으로 재편되면서 dev·data 등으로 흡수됐다.
+설치는 **도메인 축 6개 톱레벨**(dev / cloud / ai / data / research / writing) → 중분류 → 상세의 3단계 체크박스 메뉴다. 중분류가 곧 워크로드 키라서 "데이터 → MySQL" 만 골랐을 때 Postgres 가이드가 끌려오지 않는다.
 
-- 톱레벨 카테고리 → sub-옵션 → 상세(`detailOptions`) 매핑은 `scripts/install/menu.js` 한 곳에서 정의된다. `detailOptions` 는 leaf 가 될 수 있는 노드(subOptions 없는 category, 또는 subOption)에 부착한다.
-- 워크로드 키 카탈로그는 `scripts/install/workloads.js` (`core, research, report, python-backend, python-data, rust, nodejs, cloud, devops, finops, integration, aws-rds, data-analysis, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing, social-voice, social-content, social-visual`). `core` 는 항상 포함되며 이제 **최소 baseline**(github·context7·time·fetch MCP + 범용 에이전트)만 담는다. AWS MCP 분류용 키 — `devops`(IaC·컨테이너·서버리스·관측성)·`finops`(비용·요금)·`integration`(SNS·SQS·MQ·Step Functions)·`aws-rds`(Aurora·RDS·DSQL·Keyspaces, 로컬 DB설계와 분리)·`data-analysis`(Glue·Athena·Redshift·Neptune) — 로 `cloud` 통짜 바구니를 막는다. `research`(exa·brave·deep-researcher, 웹 검색·자료조사)·`report`(tech-writer 계열, 기술 리포트)는 각각 core·writing 에서 분리했다. `expandAliases()` 는 옛 통짜 키를 하위 키로 확장하는 자리이며 현재 ALIASES 는 비어 있다(마지막 별칭 `apple` 은 Apple 스킬 제거와 함께 사라졌다). `lab` 은 메뉴에 노출되지 않는 수동 전용 키로 (`--workload=...,lab`), humanize 메타 에이전트 격리에만 쓴다.
-- 설치 시작 시 `scripts/install/check-global.js` 가 글로벌 baseline 상태(`absent`/`outdated`/`current`)를 판정한다 — `$CLAUDE_HOME/_harness-manifest.json`(설치 종료 시 `manifest.js` 가 기록: version·workloads·installedAt) 의 버전을 repo `VERSION` 과 비교. 심볼릭 설치는 멱등이라 세 상태 모두 링크 루프를 그대로 태우고, 사용자에겐 상태만 알린다.
-- 진입점은 `scripts/install/select-workloads.js` 로, 다음 셋 중 하나를 자동으로 고른다:
-  - 메뉴 CLI 플래그(`--category=`, `--dev=`, `--data=`, `--writing-social=` …) 가 있으면 비대화형으로 그 값 사용
-  - 인자가 없고 TTY 면 방향키 체크박스 3단계 메뉴(`scripts/install/checkbox-prompt.js`, 의존성 0)
-  - 그 외엔 `--all` 폴백
-- 결정된 워크로드는 `scripts/install/select-assets.js` 로 넘어가 자산 frontmatter `workloads:` 와 교집합 매칭 → `kind\tsource\ttarget` 라인 출력 → install.sh / install.ps1 가 파일별 심볼릭 링크로 `$CLAUDE_HOME/<kind>s/_harness/...` 에 설치한다. 워크로드 흐름에 들어오는 kind 는 **agent·command·skill·rule** 4종뿐이다.
-- **워크로드 외(hooks·mcp) 추가 설치 프롬프트**: hooks·mcp 는 워크로드 분류 밖(별도 파일, 통째 설치)이라, 워크로드 자산 설치 후 **TTY 면 두 번 물어본다** — (1) hooks 를 settings.json 에 머지할지, (2) MCP proxy 를 `docker compose up -d` 로 기동할지. 둘 다 기본값 N. `--with-hooks`(`-WithHooks`) 를 주면 hooks 는 묻지 않고 바로 머지하고, `--with-mcp`(`-WithMcp`) 를 주면 MCP proxy 를 묻지 않고 바로 기동한다(둘 다 비대화형에서도 동작; docker/데몬/compose 미비 시 경고만 하고 넘어감 — `setup_mcp_proxy`/`Set-McpProxy`). `--no-extras`(`-NoExtras`) 또는 비대화형(파이프/CI)이면 프롬프트를 건너뛰고 워크로드만 설치(기존 동작 보존). MCP 는 proxy-first(`mcp-configs/proxy/` compose 스택)이고, 클라이언트 `.mcp.json` 은 프록시 서버를 `localhost:9090/<서버>/mcp` URL 로, 로컬 서버(sentry·playwright)는 직접 명령으로 참조한다.
-- repo-root 링크 `$CLAUDE_HOME/_harness` 는 항상 생성된다 — `hooks/hooks.json` 의 inline bootstrap 이 root 후보로 본다. 부트스트랩 우선순위: `$CLAUDE_PLUGIN_ROOT` → `$CLAUDE_PROJECT_DIR/.claude(_harness)` → `$HOME/.claude(_harness, plugins/_harness)`. 따라서 `CLAUDE_HOME` 을 프로젝트 로컬로 둬도 (예: `$PWD/.claude`) `CLAUDE_PROJECT_DIR` 만 주입되면 동작한다.
-- `--with-hooks` 로 hooks 를 머지하고 `CLAUDE_HOME` 이 `$HOME/.claude` 가 아닌 경우, 일부 환경 (CLAUDE_PROJECT_DIR 미주입 등) 을 위한 안전망으로 `$HOME/.claude/_harness` 보조 링크가 함께 생성된다. 끄려면 `--no-home-link` (`-NoHomeLink`).
-- 자산 추가: 파일을 두고 frontmatter 에 `workloads: [...]` 만 적으면 끝. 휴리스틱에 맡길 수도 있다. 일괄 재태깅은 `node scripts/install/tag-assets.js --apply --force`.
-- 저수준 모드: `--workload=python-backend,mysql` 를 직접 지정하면 메뉴를 무시하고 그 값만 사용한다.
-- **드리프트 점검**: `npm run check-drift [-- --workload=core]` (= `scripts/install/check-drift.js`). `--workload` 미지정 시 `$CLAUDE_HOME/_harness-manifest.json` 의 설치 워크로드를 기본값으로 사용한다(매니페스트 없으면 전 그룹) — 수동 전용 `lab` 그룹이 영구 오탐 드리프트로 잡히는 것을 방지. 선택 워크로드 기준으로 "레포가 깔아야 할 자산" vs "실제 `$CLAUDE_HOME` 심볼릭"을 대조해 missing / wrong-target / broken 을 보고하고 drift 가 있으면 exit 1 + `./install.sh --force` 안내. 읽기 전용 — 링크를 만들거나 지우지 않는다. "자산은 옛 상태로 stale 인데 훅만 풀 주입" 같은 어긋남을 한 방에 드러내려는 용도(과거 글로벌이 거의 비어 있었던 사고의 재발 방지).
-- 테스트: `tests/scripts/install/{workloads,menu,select-workloads,select-assets,tag-assets,merge-hooks,manifest,check-global,checkbox-prompt}.test.js`.
+- 메뉴 정의는 `scripts/install/menu.js`, 워크로드 키 카탈로그는 `scripts/install/workloads.js`. 자산 추가는 파일을 두고 frontmatter 에 `workloads: [...]` 만 적으면 끝(휴리스틱 폴백도 있음).
+- 워크로드 흐름에 들어오는 kind 는 **agent·command·skill·rule** 4종. hooks·mcp 는 분류 밖이라 설치 후 별도로 묻는다(`--with-hooks` / `--with-mcp` / `--no-extras`).
+- 드리프트 점검: `npm run check-drift` — 레포가 깔아야 할 자산 vs 실제 심볼릭을 대조한다. 읽기 전용.
+- **컨텍스트 절감 목적으로 워크로드를 줄이는 건 헛수고다**(2026-08 실측): 안 쓰는 워크로드 6개를 다 빼도 상시 비용은 13 tok 만 줄었다. `aws-rds`·`devops`·`integration`·`data-analysis` 는 MCP 분류용 키라 스킬·에이전트 자산이 아예 없다. 컨텍스트를 줄이려면 rules(`rules/` 항목 참조)와 CLAUDE.md 를 손대야 한다.
+
+메뉴 구조·플래그·워크로드 키 전체 목록은 **`docs/install-menu.md`**.
 
 ## Hooks (status)
 
-- `hooks/hooks.json` — main hook stack. Install via `./install.sh --with-hooks` (or `install.ps1 -WithHooks`), which merges entries into `~/.claude/settings.json` keyed by `id`. Re-runs are idempotent; user-added entries are preserved. `--with-hooks --dry-run` previews the change; `--with-hooks --uninstall` removes only harness-owned ids.
-- **글로벌 기본은 `HARNESS_HOOK_PROFILE=minimal`** (`~/.claude/settings.json` 의 `env`). hooks.json 의 모든 그룹은 `run-with-flags.js <id> <script> <profilesCsv>` 로 게이팅되고(Stop/SessionEnd 훅은 인라인 bootstrap 래퍼가 같은 CSV 를 spawnSync 인자로 넘긴다), `scripts/lib/hook-flags.js` 가 profile 과 `HARNESS_DISABLED_HOOKS` CSV 를 읽어 실행 여부를 결정한다. 3단계는 누적 포함 관계다:
-  - **minimal (10훅)**: 라이프사이클·안전·메트릭만 — `session:start`·`session:end:marker`·`stop:session-end`·`stop:evaluate-session`·`stop:capture-lessons`·`stop:cost-tracker`·`post:harness-metrics-bridge`·`pre/post:bash:dispatcher`·`subagent:budget`. (앞 3개는 게이트 없는 직접 실행이라 항상 ON.) `subagent:budget` 은 SubagentStart 훅으로, 서브에이전트가 SessionStart 컨텍스트(= ponytail 규율)를 상속하지 않는 구멍을 메운다 — Agent 호출마다 예산 브리프를 서브에이전트 컨텍스트에 주입해 과탐색·장문 보고를 억제한다. 브리프는 두 종류다: 기본형(구현·탐색용, 최소 코드 + 짧은 보고)과 **리뷰 변형**(`agent_type` 이 review/audit/detector/scorer/critic/analyzer 매칭 시). 리뷰 변형은 탐색 규율만 유지하고 **findings 개수는 압박하지 않는다** — 짧게 쓰라는 지시가 결함 누락으로 번지면 리뷰의 존재 이유가 사라지고, 과잉설계 판정 렌즈는 `ponytail-review` 스킬 담당이기 때문이다. ponytail 이 `off` 면 주입하지 않고, `HARNESS_SUBAGENT_BUDGET=off` 로 개별 차단한다. dispatcher 안의 서브훅 `pre:bash:git-push-reminder`(기본 브랜치 직접 푸시 게이트 — minimal/standard 경고, strict 차단)도 이 프로파일부터 동작한다 — dispatcher 그룹에 포함되므로 총계는 늘지 않는다.
-  - **standard (27훅)**: minimal + 품질·관찰·거버넌스 **경고** 훅 (governance·quality-gate·console-warn·design-quality·context-monitor·mcp-health-check·format-typecheck·command-registry 등). 코드 프로젝트 권장값. `stop:command-registry` 는 하네스 repo 에서 `commands/*.md` 가 바뀌면 `COMMAND-REGISTRY.json` 을 재생성하는 비차단 훅(다른 repo 에선 조용히 skip).
-  - **strict (30훅)**: standard + **차단형(blocking)** 훅 2종 — `pre:config-protection`(linter/formatter config 수정 차단)·`pre:edit-write:gateguard-fact-force`(파일당 첫 Edit 차단+사실확인 강제) — 과 **테스트 자동 실행** `stop:run-tests`(소스 변경 시 npm/pnpm/yarn/bun test·pytest·cargo test 를 프로젝트 루트별로 실행, 실패 시 경고만 하는 비차단형). 이 셋만 `strict` 단독 CSV 라 strict 에서만 켜진다. `stop:run-tests` 는 `HARNESS_STOP_TESTS=off` 로 개별 차단 가능.
-  - 더 엄격히: 프로젝트 `.claude/settings.json` 에 `env.HARNESS_HOOK_PROFILE=standard`(또는 `strict`). 특정 훅만 끄려면 `HARNESS_DISABLED_HOOKS=stop:cost-tracker,…`.
-- `scripts/install/merge-hooks.js` — the underlying merger; can be called directly when you don't want the symlink step. id 가 없는 (사용자가 손으로 박은) 훅 그룹은 추적 못 하므로 재머지 시 중복될 수 있다 — 머지 전 settings.json 의 id-less 하네스 훅은 정리할 것. Tests live at `tests/scripts/install/merge-hooks.test.js`.
+**설계 기준: 훅은 "되돌리기 어려운 행위 차단 + 라이프사이클"만 담당한다.** 품질·관찰·거버넌스는 훅이 아니라 커맨드(`/quality-gate`, `/code-review`, `/cost-report`)로 사람이 부를 때 돈다. 이유는 비용이 아니라 **간섭**이다 — Opus 5 는 지시가 많을 때보다 *서로 반대되는 지시*가 있을 때 판단이 무너지고, 매 Edit 마다 끼어드는 경고·차단 훅이 그 충돌의 최대 공급원이었다. `Edit`·`Write` 에 붙는 코어 훅은 **0개**다.
+
+- `hooks/hooks.json` — **코어 스택 7그룹.** Install via `./install.sh --with-hooks` (or `install.ps1 -WithHooks`).
+  `pre:bash:dispatcher` · `post:bash:dispatcher` · `session:start` · `stop:session-end` · `stop:cost-tracker` · `session:end:marker` · `subagent:budget`.
+  전 프로파일에서 동일하게 7그룹이다(**minimal (7훅)** / **standard (7훅)** / **strict (7훅)**) — 프로파일은 이제 그룹 수가 아니라 **dispatcher 내부 서브훅의 강도**만 바꾼다.
+- `hooks/hooks-optional.json` — **옵트인 23그룹.** 품질 게이트·차단형·관찰 훅 전부(quality-gate, design-quality-check, console-warn, governance-capture, mcp-health-check, context-monitor, metrics-bridge, activity-tracker, format-typecheck, run-tests, command-registry, gateguard-fact-force, config-protection, doc-file-warning, suggest-compact, pre-compact, evaluate-session, capture-lessons, desktop-notify 등). 필요한 프로젝트에서만 `node scripts/install/merge-hooks.js --optional` 로 추가한다. 머지는 **선언적**이라 `--optional` 없이 재실행하면 이 스택은 다시 걷힌다.
+- **글로벌 기본은 `HARNESS_HOOK_PROFILE=minimal`** (`~/.claude/settings.json` 의 `env`, `hook-flags.js` 의 코드 기본값도 동일). `run-with-flags.js <id> <script> <profilesCsv>` 게이팅과 `HARNESS_DISABLED_HOOKS` CSV 는 그대로다.
+  - `pre:bash:dispatcher` 서브훅: **minimal 부터** `block-no-verify`·`git-push-reminder`(기본 브랜치 직행 — minimal/standard 경고, strict 차단) / **standard** 부터 `auto-tmux-dev` / **strict 전용** `tmux-reminder`·`commit-quality`·`gateguard-fact-force`.
+  - `gateguard-fact-force` 는 **strict 전용이다.** 과거 dispatcher 쪽 사본만 `standard,strict` 로 새어 있어서 standard 프로파일에서 매 세션 첫 Bash 가 차단됐다 — 문서가 strict 라고 적어둔 것과 코드가 어긋난 사례이므로, 프로파일 CSV 를 바꿀 때는 hooks.json 과 dispatcher 양쪽을 함께 본다.
+  - `subagent:budget` 은 SubagentStart 훅으로, 서브에이전트가 SessionStart 컨텍스트(= ponytail 규율)를 상속하지 않는 구멍을 메운다 — Agent 호출마다 예산 브리프를 주입해 과탐색·장문 보고를 억제한다. 브리프는 기본형(구현·탐색)과 **리뷰 변형**(`agent_type` 이 review/audit/detector/scorer/critic/analyzer 매칭) 두 종류이고, 리뷰 변형은 탐색 규율만 유지하고 **findings 개수는 압박하지 않는다**. ponytail 이 `off` 면 주입하지 않고, `HARNESS_SUBAGENT_BUDGET=off` 로 개별 차단한다.
+- `scripts/install/merge-hooks.js` — the underlying merger. **머지는 선언적이다**: 실행 후 settings.json 의 하네스 소유분은 머지한 집합과 정확히 일치하고, 그 밖의 하네스 훅은 전부 걷힌다 — hooks.json 에서 은퇴한 id, 그리고 **옛 설치가 남긴 `id` 없는 그룹**까지(`isLegacyHarnessGroup`: command 에 하네스 스크립트 경로 마커가 있으면 하네스 소유로 판정). 서드파티 훅(예: `~/.orca/agent-hooks/claude-hook.sh` 를 부르는 Orca 훅 11개)은 마커가 없어 보존된다. `--dry-run` 으로 sweep 목록을 먼저 확인할 것. Tests: `tests/scripts/install/merge-hooks.test.js`.
 - `hooks/prompt-pack.json` — two reference-only prompts (`ref:pre-write-guard`, `ref:review-on-stop`). Not runnable; see `hooks/README-prompt-pack.md` for what they overlap with and how to wire them up if needed.
+
+## Loop Control (에이전트 루프)
+
+자율 루프(관찰→계획→도구실행→결과확인→재계획)를 돌릴 때 필요한 제어는 **상시 훅이 아니라 루프를 돌릴 때 켠다.** 코어 훅이 되돌리기 어려운 행위만 막는 것과 같은 이유다 — 루프 계측은 루프를 돌리는 동안에만 값을 하고, 평시에는 매 툴 호출에 끼어드는 노이즈다.
+
+```bash
+node scripts/install/merge-hooks.js --optional   # 루프 시작 전: 계측 켜기
+node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기기(선언적이라 자동 정리)
+```
+
+네 가지 실패 모드와 담당:
+
+| 실패 모드 | 담당 |
+|-----------|------|
+| **무한 루프** | `post:harness-context-monitor`(optional) 의 `detectLoop` — 동일 서명 3회면 경고. 서명은 `hashToolCall` = **도구명 + 입력 전체**의 해시다(일부 필드만 고르면 빠뜨린 필드가 곧 오탐이 된다 — 한 파일 연속 편집, offset 페이징, `replace_all` 토글이 모두 "같은 호출"로 뭉쳤던 전례). 여기에 `/loop-start` 의 max_turns·명시적 종료 조건. |
+| **컨텍스트 폭증** | `pre:compact`·`pre:edit-write:suggest-compact`(optional), `session:start` 주입 캡(`HARNESS_SESSION_START_MAX_CHARS`, 기본 8000자), `subagent:budget`(서브에이전트의 과탐색·장문 보고 억제). 잔량 **경고**는 없다 — 컨텍스트 퍼센트는 statusLine 훅만 볼 수 있고 그 슬롯은 claude-dashboard 가 쓴다(대신 사용자가 눈으로 본다). |
+| **동일 실수 반복** | `stop:capture-lessons`(optional) 가 반복 교정 신호를 감지 → `/lessons add` → `skills/lessons-learned`. 안정된 교훈은 `/lessons promote`. 단 rules 는 상시 로드 예산이므로 불변 제약만 올린다. |
+| **비용 폭증** | `stop:cost-tracker`(코어) + `/cost-report`. 그리고 파이프라인을 단계별로 태깅한다 — detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. |
+
+**경계**: 한 세션 안의 read-edit-test 반복은 Claude Code + 위 optional 스택이 담당한다. 여러 워크트리·에이전트에 걸친 coordinator 루프(블로킹 ask/reply, task DAG, worker_done 대기)는 Orca `orchestration` 이 담당한다 — 둘을 겹쳐 돌리지 않는다.
+
+**계측이 틀리면 없는 것보다 나쁘다.** 오탐이 잦은 경고는 읽는 사람을 길들여 무시하게 만들고, 그러면 진짜 루프도 함께 묻힌다. 루프 감지 로직을 바꿀 때는 `tests/hooks/loop-detection.test.js` 의 "정상 진행은 루프가 아니다" 케이스를 먼저 통과시킨다.
+
+## Orca Integration
+
+이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅(`~/.orca/agent-hooks/claude-hook.sh`)을 `~/.claude/settings.json` 의 **11개 이벤트**에 이미 붙여 두었다(SessionStart · UserPromptSubmit · PreToolUse · PostToolUse · PostToolUseFailure · Stop · StopFailure · SubagentStart · SubagentStop · TeammateIdle · PermissionRequest). 하네스와 Orca 가 같은 파일을 공유하므로 규칙이 필요하다.
+
+- **settings.json 의 hooks 를 손으로 편집하지 않는다.** `scripts/install/merge-hooks.js` 를 쓴다. 머저는 하네스 소유분만 걷어내고 Orca 훅은 보존한다(Orca 명령에는 하네스 스크립트 경로 마커가 없다). 이 보존은 `merge-hooks.test.js` 가 검증한다.
+- **역할 분리** — 겹치는 기능은 한쪽만 쓴다:
+  | 관심사 | 담당 |
+  |--------|------|
+  | 컨텍스트 내 팬아웃(같은 세션에서 병렬 에이전트) | `Workflow` 도구 / `Agent` 도구 + `subagent:budget` |
+  | 워크트리 격리 실행·소유권 핸드오프·터미널 제어 | Orca (`orca-cli` 스킬) |
+  | 여러 에이전트의 DAG·블로킹 ask/reply·coordinator 루프 | Orca (`orchestration` 스킬) |
+  | statusLine | claude-dashboard 플러그인 (하네스 `harness-statusline.js` 는 2026-08 제거 — 등록되지 않은 죽은 경로였다) |
+  | 세션 재개 | Claude Code 네이티브 `/resume` 또는 Orca 워크트리가 1순위. 하네스 `/save-session`·`/resume-session` 은 *요약된* 컨텍스트를 남기고 싶을 때만 |
+- 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 7개)**. 오케스트레이션·세션 상태·핸드오프는 Orca 에 맡긴다.
 
 ## Self-evolution (학습 메커니즘)
 
@@ -146,7 +149,9 @@ node tests/hooks/hooks.test.js
 
 ## README Conventions
 
-@rules/common/readme-rule.md
+README.md 를 새로 쓰거나 배지를 손볼 때는 프로젝트 파일(`package.json`·`pyproject.toml`·`Dockerfile`·`LICENSE` 등)을 먼저 읽어 **실제 사용 중인 기술만** 배지로 올린다. 배지 줄 아래에 빈 줄 하나를 두고 Buy Me A Coffee 배지를 붙이며, 링크는 항상 `https://buymeacoffee.com/teinam` 이다(변경 불가).
+
+감지 조건 → 배지 매핑 표와 배치 규칙 전문은 `docs/rules-reference/readme-rule.md` 에 있다 — README 작업을 할 때 그 파일을 읽고 따른다.
 
 ## Code Style (Node parts)
 

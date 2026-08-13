@@ -26,6 +26,7 @@ const path = require('path');
 const os = require('os');
 
 const { selectAssets } = require('./select-assets');
+const { runsHarnessScript } = require('./merge-hooks');
 
 function parseArgs(argv) {
   const flags = { workload: null, skipWorkload: null, json: false, root: null, claudeHome: null };
@@ -91,6 +92,86 @@ function classifyLink(absSource, absTarget) {
   return 'ok';
 }
 
+/**
+ * Every link under the asset folders that points into this repo, relative to
+ * $CLAUDE_HOME. Needed because the selection-driven check above can only see
+ * assets the repo still declares: a link left behind after an asset is deleted,
+ * renamed, or moved out of an installed folder is invisible to it. Those
+ * leftovers matter — a stale rule link that still resolves keeps getting loaded
+ * into every session.
+ *
+ * Ownership is decided by where the link points, not by the folder it sits in:
+ * skills install as `skills/<name>` rather than under `_harness/`, and links
+ * pointing outside the repo belong to other plugins or the user.
+ */
+function listInstalledLinks(claudeHome, root) {
+  const found = [];
+  const insideRepo = target => {
+    const abs = path.resolve(root);
+    const resolved = path.resolve(target);
+    return resolved === abs || resolved.startsWith(abs + path.sep);
+  };
+
+  // Scope matters: only the two shapes the installer creates are ours. Recursing
+  // everywhere would also collect links a user placed *inside* their own skill,
+  // and uninstall would then delete them.
+  //   1. <kind>/_harness/**        — agents, commands, rules (nested)
+  //   2. skills/<name>             — skills, linked as a direct child
+  // Only skills install as a direct child, so the other folders' top level is
+  // user territory and is left unscanned.
+  const walk = (dir, recurse) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (e) {
+      // A missing folder just means nothing of that kind is installed. Any
+      // other error (permissions, I/O) must not read as "no orphans".
+      if (e.code === 'ENOENT') return;
+      throw e;
+    }
+    for (const entry of entries) {
+      const abs = path.join(dir, entry.name);
+      if (entry.isSymbolicLink()) {
+        let target;
+        try {
+          target = fs.readlinkSync(abs);
+        } catch {
+          continue;
+        }
+        const resolved = path.isAbsolute(target) ? target : path.resolve(path.dirname(abs), target);
+        // targetRel values are built with forward slashes, so normalize before
+        // comparing — on Windows path.relative() would otherwise return
+        // backslashes and every healthy link would read as an orphan.
+        if (insideRepo(resolved)) found.push(path.relative(claudeHome, abs).split(path.sep).join('/'));
+        continue;
+      }
+      if (entry.isDirectory() && recurse) walk(abs, true);
+    }
+  };
+
+  for (const kind of ['agents', 'commands', 'skills', 'rules']) {
+    walk(path.join(claudeHome, kind, '_harness'), true);
+  }
+  walk(path.join(claudeHome, 'skills'), false);
+  return found;
+}
+
+/**
+ * Are harness-owned hook groups currently merged into settings.json?
+ *
+ * Uses merge-hooks' ownership test rather than an id-prefix guess: id shape is a
+ * convention a third party can copy, and legacy harness groups have no id at all.
+ * Same predicate the merger uses, so the two never disagree.
+ */
+function hasHarnessHooks(claudeHome) {
+  try {
+    const settings = JSON.parse(fs.readFileSync(path.join(claudeHome, 'settings.json'), 'utf8'));
+    return Object.values(settings.hooks || {}).some(groups => (groups || []).some(g => runsHarnessScript(g)));
+  } catch {
+    return false;
+  }
+}
+
 function main(argv) {
   const flags = parseArgs(argv);
   if (flags.help) {
@@ -129,14 +210,27 @@ function main(argv) {
     skipWorkload: flags.skipWorkload
   });
 
-  const buckets = { ok: [], missing: [], 'wrong-target': [], broken: [], 'not-a-link': [] };
+  const buckets = { ok: [], missing: [], 'wrong-target': [], broken: [], 'not-a-link': [], orphan: [] };
   for (const a of selected) {
     const absSource = path.join(root, a.sourceRel);
     const absTarget = path.join(claudeHome, a.targetRel);
     buckets[classifyLink(absSource, absTarget)].push(a.targetRel);
   }
 
-  const drift = buckets.missing.length + buckets['wrong-target'].length + buckets.broken.length + buckets['not-a-link'].length;
+  // Orphans are judged against everything the repo *could* install, not against
+  // the workload subset being checked — otherwise `--workload=core` would report
+  // every other workload's healthy links as orphans and tell you to uninstall.
+  const declared = new Set(selectAssets({ root }).selected.map(a => a.targetRel));
+  for (const rel of listInstalledLinks(claudeHome, root)) {
+    if (!declared.has(rel)) buckets.orphan.push(rel);
+  }
+
+  const drift =
+    buckets.missing.length +
+    buckets['wrong-target'].length +
+    buckets.broken.length +
+    buckets['not-a-link'].length +
+    buckets.orphan.length;
 
   if (flags.json) {
     console.log(JSON.stringify({ activeGroups, selected: selected.length, drift, buckets }, null, 2));
@@ -145,7 +239,7 @@ function main(argv) {
 
   console.log(`workloads: ${activeGroups.join(', ')}`);
   console.log(`selected assets: ${selected.length}  |  linked ok: ${buckets.ok.length}  |  drift: ${drift}`);
-  for (const kind of ['missing', 'wrong-target', 'broken', 'not-a-link']) {
+  for (const kind of ['missing', 'wrong-target', 'broken', 'not-a-link', 'orphan']) {
     if (!buckets[kind].length) continue;
     console.log(`\n  ${kind} (${buckets[kind].length}):`);
     buckets[kind].slice(0, 30).forEach(t => console.log(`    - ${t}`));
@@ -154,7 +248,37 @@ function main(argv) {
 
   if (drift > 0) {
     const wl = flags.workload && flags.workload.length ? ` --workload=${flags.workload.join(',')}` : '';
-    console.log(`\nDrift detected. Re-sync with:\n  ./install.sh --force${wl}`);
+    // Carry --skip-workload too: dropping it would re-install the very assets the
+    // user excluded, and --force would overwrite whatever sits at those paths.
+    const skip = flags.skipWorkload && flags.skipWorkload.length ? ` --skip-workload=${flags.skipWorkload.join(',')}` : '';
+    // A command that omits CLAUDE_HOME would operate on the default ~/.claude —
+    // i.e. wipe a different install than the one just inspected.
+    // Quote the path: an unquoted CLAUDE_HOME with a space in it produces a
+    // command that silently targets the wrong directory when pasted.
+    const home = claudeHome === path.join(os.homedir(), '.claude') ? '' : `CLAUDE_HOME="${claudeHome}" `;
+    console.log(`\nDrift detected. Re-sync with:\n  ${home}./install.sh --force${wl}${skip}`);
+    if (buckets.orphan.length) {
+      // --uninstall clears everything the harness installed, so the re-install
+      // must name the same workloads (otherwise the menu/--all decides for you)
+      // and re-apply the optional hook stack if it was in use. Spell both out —
+      // an incomplete instruction here costs the user their setup.
+      // activeGroups already has the skips applied, so only re-state --skip-workload
+      // when we are echoing the user's own --workload back at them.
+      const restoreWl = wl || (activeGroups.length ? ` --workload=${activeGroups.join(',')}` : '');
+      const restoreSkip = wl ? skip : '';
+      // --uninstall also strips the hook stack. Without --with-hooks the
+      // re-install would leave the safety/lifecycle hooks off for good in a
+      // non-interactive shell (the prompt defaults to N), so only suggest it to
+      // people who actually have harness hooks installed right now.
+      const restoreHooks = hasHarnessHooks(claudeHome) ? ' --with-hooks' : '';
+      console.log(
+        '\n  orphan links are not removed by --force (it only re-links what the repo declares).' +
+          `\n  Clear them with:\n    ${home}./install.sh --uninstall && ${home}./install.sh${restoreWl}${restoreSkip}${restoreHooks}` +
+          '\n  Note: --uninstall drops every harness link and hook. Re-run with the same' +
+          `\n  workloads (above), and add \`${home}node scripts/install/merge-hooks.js --optional\`` +
+          '\n  afterwards if you were running the optional hook stack.'
+      );
+    }
     return 1;
   }
   console.log('\nNo drift — global install matches the repo selection.');

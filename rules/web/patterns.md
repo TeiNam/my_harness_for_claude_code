@@ -1,4 +1,15 @@
-> This file extends [common/patterns.md](../common/patterns.md) with web-specific patterns.
+---
+paths:
+  - "**/*.tsx"
+  - "**/*.jsx"
+  - "**/*.css"
+  - "**/*.scss"
+  - "**/*.html"
+  - "**/*.vue"
+  - "**/*.svelte"
+workloads: [frontend]
+---
+> This file extends [common/patterns.md](../../docs/rules-reference/patterns.md) with web-specific patterns.
 
 # Web Patterns
 

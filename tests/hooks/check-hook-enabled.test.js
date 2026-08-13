@@ -55,16 +55,17 @@ function runTests() {
     assert.strictEqual(result.stdout, 'yes');
   })) passed++; else failed++;
 
-  console.log('\nDefault profile (standard):');
+  console.log('\nDefault profile (minimal):');
 
-  if (test('returns yes for hook with default profiles', () => {
+  // Default CSV is standard,strict, so an ungated hook is OFF under minimal.
+  if (test('returns no for hook with default profiles', () => {
     const result = runScript(['my-hook']);
-    assert.strictEqual(result.stdout, 'yes');
+    assert.strictEqual(result.stdout, 'no');
   })) passed++; else failed++;
 
-  if (test('returns yes for hook with standard,strict profiles', () => {
+  if (test('returns no for hook with standard,strict profiles', () => {
     const result = runScript(['my-hook', 'standard,strict']);
-    assert.strictEqual(result.stdout, 'yes');
+    assert.strictEqual(result.stdout, 'no');
   })) passed++; else failed++;
 
   if (test('returns no for hook with only strict profile', () => {
@@ -72,20 +73,20 @@ function runTests() {
     assert.strictEqual(result.stdout, 'no');
   })) passed++; else failed++;
 
-  if (test('returns no for hook with only minimal profile', () => {
+  if (test('returns yes for hook with only minimal profile', () => {
     const result = runScript(['my-hook', 'minimal']);
-    assert.strictEqual(result.stdout, 'no');
+    assert.strictEqual(result.stdout, 'yes');
   })) passed++; else failed++;
 
   console.log('\nDisabled hooks:');
 
   if (test('returns no when hook is disabled via env', () => {
-    const result = runScript(['my-hook'], { HARNESS_DISABLED_HOOKS: 'my-hook' });
+    const result = runScript(['my-hook', 'minimal'], { HARNESS_DISABLED_HOOKS: 'my-hook' });
     assert.strictEqual(result.stdout, 'no');
   })) passed++; else failed++;
 
   if (test('returns yes when different hook is disabled', () => {
-    const result = runScript(['my-hook'], { HARNESS_DISABLED_HOOKS: 'other-hook' });
+    const result = runScript(['my-hook', 'minimal'], { HARNESS_DISABLED_HOOKS: 'other-hook' });
     assert.strictEqual(result.stdout, 'yes');
   })) passed++; else failed++;
 

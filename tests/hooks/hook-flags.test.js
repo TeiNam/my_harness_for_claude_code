@@ -115,9 +115,9 @@ function runTests() {
   // getHookProfile tests
   console.log('\ngetHookProfile:');
 
-  if (test('defaults to standard when env var not set', () => {
+  if (test('defaults to minimal when env var not set', () => {
     withEnv({ HARNESS_HOOK_PROFILE: undefined }, () => {
-      assert.strictEqual(getHookProfile(), 'standard');
+      assert.strictEqual(getHookProfile(), 'minimal');
     });
   })) passed++; else failed++;
 
@@ -151,15 +151,15 @@ function runTests() {
     });
   })) passed++; else failed++;
 
-  if (test('defaults to standard for invalid value', () => {
+  if (test('defaults to minimal for invalid value', () => {
     withEnv({ HARNESS_HOOK_PROFILE: 'invalid' }, () => {
-      assert.strictEqual(getHookProfile(), 'standard');
+      assert.strictEqual(getHookProfile(), 'minimal');
     });
   })) passed++; else failed++;
 
-  if (test('defaults to standard for empty string', () => {
+  if (test('defaults to minimal for empty string', () => {
     withEnv({ HARNESS_HOOK_PROFILE: '' }, () => {
-      assert.strictEqual(getHookProfile(), 'standard');
+      assert.strictEqual(getHookProfile(), 'minimal');
     });
   })) passed++; else failed++;
 
@@ -306,9 +306,11 @@ function runTests() {
   // isHookEnabled tests
   console.log('\nisHookEnabled:');
 
-  if (test('returns true by default for a hook (standard profile)', () => {
+  // Default profile is minimal, default CSV is standard,strict → ungated hooks are off.
+  if (test('returns false by default for a hook (minimal profile)', () => {
     withEnv({ HARNESS_HOOK_PROFILE: undefined, HARNESS_DISABLED_HOOKS: undefined }, () => {
-      assert.strictEqual(isHookEnabled('my-hook'), true);
+      assert.strictEqual(isHookEnabled('my-hook'), false);
+      assert.strictEqual(isHookEnabled('my-hook', { profiles: 'minimal' }), true);
     });
   })) passed++; else failed++;
 
@@ -338,7 +340,7 @@ function runTests() {
 
   if (test('returns true when hook is not in disabled list', () => {
     withEnv({ HARNESS_HOOK_PROFILE: undefined, HARNESS_DISABLED_HOOKS: 'other-hook' }, () => {
-      assert.strictEqual(isHookEnabled('my-hook'), true);
+      assert.strictEqual(isHookEnabled('my-hook', { profiles: 'minimal' }), true);
     });
   })) passed++; else failed++;
 

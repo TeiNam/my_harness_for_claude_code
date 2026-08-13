@@ -3,7 +3,8 @@
  * Harness Metrics Bridge — PostToolUse hook
  *
  * Maintains a running session aggregate in /tmp/harness-metrics-{session}.json.
- * This bridge file is read by harness-statusline.js and harness-context-monitor.js,
+ * This bridge file is read by harness-context-monitor.js (statusLine is owned by the
+ * claude-dashboard plugin, so the harness statusline reader was removed in 2026-08),
  * avoiding the need to scan large JSONL logs on every invocation.
  */
 
@@ -19,7 +20,6 @@ const { getClaudeDir } = require('../lib/utils');
 const MAX_STDIN = 1024 * 1024;
 const MAX_FILES_TRACKED = 200;
 const RECENT_TOOLS_SIZE = 5;
-const HASH_INPUT_LIMIT = 2048;
 const WARNING_CACHE_PREFIX = 'harness-metrics-cost-warnings-';
 
 function toNumber(value) {
@@ -28,7 +28,10 @@ function toNumber(value) {
 }
 
 function stableStringify(value, depth = 0) {
-  if (depth > 4) return '[depth-limit]';
+  // Deep enough for nested MCP tool inputs; two calls differing only below the
+  // limit would otherwise share a signature. Tool inputs come from JSON, so the
+  // walk is acyclic and this bound only guards pathological nesting.
+  if (depth > 8) return '[depth-limit]';
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) {
     return `[${value.map(item => stableStringify(item, depth + 1)).join(',')}]`;
@@ -40,19 +43,19 @@ function stableStringify(value, depth = 0) {
 }
 
 /**
- * Hash tool call for loop detection.
- * Uses tool name + a key parameter when available, otherwise a stable input digest.
+ * Signature of a tool call, for loop detection: tool name + the *entire* input.
+ *
+ * The signature is deliberately literal — a loop is the same tool invoked with
+ * identical arguments, which is exactly what the warning claims. Earlier versions
+ * hashed a hand-picked subset (file_path alone, then a payload whitelist) and
+ * every omission turned ordinary progress into a false alarm: three different
+ * edits to one file, a Read paged by offset, an Edit toggling replace_all. A
+ * detector people learn to ignore hides the real loops too, so nothing is
+ * summarized or truncated here — the digest is fixed-width whatever the input.
  */
 function hashToolCall(toolName, toolInput) {
   const name = String(toolName || '');
-  let key = '';
-  if (name === 'Bash') {
-    key = String(toolInput?.command || '').slice(0, 160);
-  } else if (toolInput?.file_path) {
-    key = String(toolInput.file_path);
-  } else {
-    key = stableStringify(toolInput || {}).slice(0, HASH_INPUT_LIMIT);
-  }
+  const key = stableStringify(toolInput || {});
   return crypto.createHash('sha256').update(`${name}:${key}`).digest('hex').slice(0, 8);
 }
 
@@ -205,8 +208,9 @@ function run(rawInput) {
       files_modified: [],
       recent_tools: [],
       first_timestamp: now,
-      last_timestamp: now,
-      context_remaining_pct: null
+      last_timestamp: now
+      // No context_remaining_pct: only a statusLine hook can observe it, and that
+      // slot belongs to the claude-dashboard plugin. See harness-context-monitor.
     };
 
     // Increment tool count

@@ -49,7 +49,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 함정 둘: ① "중요한 파이프라인이니 전부 opus" — 중요도는 추론 깊이가 아닙니다(40패턴 taxonomy 대조는 lookup). ② "수리니까 sonnet" — 원인이 *확정된 뒤에만* 참입니다(원인 찾기는 열린 박스). **파이프라인이 아니라 단계별로 태깅**합니다: detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. 두 축이 충돌하면(닫힌 박스인데 미스 비용이 큼) 평균이 아니라 **틀렸을 때의 최악 비용**이 이깁니다 (머지를 게이팅하는 리뷰어는 대부분 쉬워도 `opus`).
 
-권위 있는 정책(작업 표·에이전트 클래스 맵·오케스트레이션·Codex 핸드오프)은 `rules/common/model-routing.md`에 있고, `/model-route` 커맨드와 `performance.md`가 이를 참조합니다. 다른 모델 패밀리의 독립적 세컨드 오피니언이 필요하면 codex 플러그인(`codex:rescue` 스킬/`codex:codex-rescue` 에이전트)으로 OpenAI Codex CLI를 호출합니다.
+권위 있는 정책(작업 표·에이전트 클래스 맵·오케스트레이션·Codex 핸드오프)은 `docs/rules-reference/model-routing.md`에 있고, `/model-route` 커맨드와 `performance.md`가 이를 참조합니다. 다른 모델 패밀리의 독립적 세컨드 오피니언이 필요하면 codex 플러그인(`codex:rescue` 스킬/`codex:codex-rescue` 에이전트)으로 OpenAI Codex CLI를 호출합니다.
 
 ## 핵심 에이전트
 
