@@ -283,6 +283,10 @@ async function runTests() {
   const scriptsDir = path.join(__dirname, '..', '..', 'scripts', 'hooks');
   const hooksJsonPath = path.join(__dirname, '..', '..', 'hooks', 'hooks.json');
   const hooks = JSON.parse(fs.readFileSync(hooksJsonPath, 'utf8'));
+  // The opt-in stack ships separately; integration tests exercise both files.
+  const optionalHooks = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json'), 'utf8')
+  );
 
   // ==========================================
   // Input Format Tests
@@ -560,7 +564,7 @@ async function runTests() {
 
   if (await asyncTest('MCP health hook blocks unhealthy MCP tool calls through hooks.json', async () => {
     const hookCommand = getHookCommandByDescription(
-      hooks,
+      optionalHooks,
       'PreToolUse',
       'Check MCP server health before MCP tool execution'
     );
@@ -588,6 +592,9 @@ async function runTests() {
         hookCommand,
         { tool_name: 'mcp__broken__search', tool_input: {} },
         {
+          // Optional-stack hook gated to standard,strict — pin it so the
+          // ambient HARNESS_HOOK_PROFILE cannot decide the outcome.
+          HARNESS_HOOK_PROFILE: 'standard',
           CLAUDE_HOOK_EVENT_NAME: 'PreToolUse',
           HARNESS_MCP_CONFIG_PATH: configPath,
           HARNESS_MCP_HEALTH_STATE_PATH: statePath,
@@ -676,10 +683,15 @@ async function runTests() {
 
   if (await asyncTest('PostToolUse PR hook extracts PR URL', async () => {
     const hookCommand = getHookCommandById(hooks, 'PostToolUse', 'post:bash:dispatcher');
-    const result = await runHookCommand(hookCommand, {
-      tool_input: { command: 'gh pr create --title "Test"' },
-      tool_output: { output: 'Creating pull request...\nhttps://github.com/owner/repo/pull/123' }
-    });
+    // post:bash:pr-created is a standard/strict subhook; minimal (the default) skips it.
+    const result = await runHookCommand(
+      hookCommand,
+      {
+        tool_input: { command: 'gh pr create --title "Test"' },
+        tool_output: { output: 'Creating pull request...\nhttps://github.com/owner/repo/pull/123' }
+      },
+      { HARNESS_HOOK_PROFILE: 'standard' }
+    );
 
     assert.ok(
       result.stderr.includes('PR created') || result.stderr.includes('github.com'),

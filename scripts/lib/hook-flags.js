@@ -3,7 +3,7 @@
  * Shared hook enable/disable controls.
  *
  * Controls:
- * - HARNESS_HOOK_PROFILE=minimal|standard|strict (default: standard)
+ * - HARNESS_HOOK_PROFILE=minimal|standard|strict (default: minimal)
  * - HARNESS_DISABLED_HOOKS=comma,separated,hook,ids
  */
 
@@ -17,9 +17,9 @@ function normalizeId(value) {
 
 function getHookProfile() {
   const raw = String(
-    process.env.HARNESS_HOOK_PROFILE || 'standard'
+    process.env.HARNESS_HOOK_PROFILE || 'minimal'
   ).trim().toLowerCase();
-  return VALID_PROFILES.has(raw) ? raw : 'standard';
+  return VALID_PROFILES.has(raw) ? raw : 'minimal';
 }
 
 function getDisabledHookIds() {

@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-04
 
+- refactor(agents): 모델 티어를 "박스가 열려 있는가" 기준으로 재정렬 (#17) (5803867)
 - chore(tests): subagent-budget 테스트 포맷 정리 (#16) (c89fd0e)
 
 ## 2026-08-03

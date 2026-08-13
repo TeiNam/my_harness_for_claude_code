@@ -15,9 +15,11 @@ const REAL_HOOKS = path.join(__dirname, '..', '..', '..', 'hooks', 'hooks.json')
 
 const {
   collectHarnessIds,
+  loadHooksDocs,
   planMerge,
   planUninstall,
   isHarnessId,
+  isLegacyHarnessGroup,
 } = require('../../../scripts/install/merge-hooks');
 
 function tmp(prefix) {
@@ -138,11 +140,62 @@ function runTests() {
       },
     };
     const { next, summary } = planUninstall(settings, SAMPLE_HOOKS);
-    assert.deepStrictEqual(summary.removed.sort(), ['pre:bash:dispatcher', 'stop:cost-tracker'].sort());
+    assert.deepStrictEqual(
+      summary.removed.sort(),
+      ['PreToolUse:pre:bash:dispatcher', 'Stop:stop:cost-tracker'].sort()
+    );
     assert.ok(summary.preservedUserIds.includes('user-custom'));
     assert.strictEqual(next.hooks.PreToolUse.length, 1);
     assert.strictEqual(next.hooks.PreToolUse[0].id, 'user-custom');
     assert.ok(!('Stop' in next.hooks)); // pruned because it became empty
+  })) passed++; else failed++;
+
+  if (test('planMerge sweeps legacy id-less harness groups but keeps third-party ones', () => {
+    const orcaCommand = "if [ -f '/Users/x/.orca/agent-hooks/claude-hook.sh' ]; then exec sh; fi";
+    const settings = {
+      hooks: {
+        PreToolUse: [
+          { matcher: 'Bash', hooks: [{ type: 'command', command: 'node scripts/hooks/pre-bash-dispatcher.js' }] },
+          { matcher: '*', hooks: [{ type: 'command', command: orcaCommand }] },
+        ],
+        SubagentStart: [
+          // inline bootstrapper spelling the path via path.join()
+          { matcher: '*', hooks: [{ type: 'command', command: "path.join('scripts','hooks','subagent-budget.js')" }] },
+        ],
+      },
+    };
+    const { next, summary } = planMerge(settings, SAMPLE_HOOKS);
+    assert.strictEqual(summary.swept.length, 2, `swept: ${JSON.stringify(summary.swept)}`);
+    assert.strictEqual(next.hooks.PreToolUse.length, 3); // orca kept + 2 harness groups
+    assert.ok(next.hooks.PreToolUse.some(g => g.hooks[0].command === orcaCommand));
+    assert.ok(!('SubagentStart' in next.hooks)); // legacy-only event pruned
+    assert.ok(isLegacyHarnessGroup({ hooks: [{ command: 'x scripts/hooks/y.js' }] }));
+    assert.ok(!isLegacyHarnessGroup({ hooks: [{ command: orcaCommand }] }));
+  })) passed++; else failed++;
+
+  if (test('planMerge removes retired harness ids no longer in hooks.json', () => {
+    const settings = {
+      hooks: {
+        PostToolUse: [
+          { matcher: '*', id: 'post:harness-metrics-bridge', hooks: [{ type: 'command', command: 'echo retired' }] },
+        ],
+      },
+    };
+    const { next, summary } = planMerge(settings, SAMPLE_HOOKS);
+    assert.ok(summary.swept.some(s => s.includes('post:harness-metrics-bridge')));
+    assert.ok(!('PostToolUse' in next.hooks));
+  })) passed++; else failed++;
+
+  if (test('loadHooksDocs merges hooks-optional.json only with --optional', () => {
+    const core = loadHooksDocs(REAL_HOOKS, {});
+    const both = loadHooksDocs(REAL_HOOKS, { optional: true });
+    const count = doc => Object.values(doc.hooks).reduce((a, b) => a + b.length, 0);
+    assert.strictEqual(core.sources.length, 1);
+    assert.strictEqual(both.sources.length, 2);
+    assert.ok(count(both.doc) > count(core.doc), 'optional stack should add groups');
+    // uninstall must see the optional ids too, or they would be orphaned
+    const all = collectHarnessIds(loadHooksDocs(REAL_HOOKS, { uninstall: true }).doc);
+    assert.ok(all.has('post:harness-metrics-bridge'));
   })) passed++; else failed++;
 
   if (test('end-to-end --dry-run does not write settings.json', () => {

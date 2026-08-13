@@ -2407,7 +2407,11 @@ async function runTests() {
       assert.ok(hooks.hooks.SessionStart, 'Should have SessionStart hooks');
       assert.ok(hooks.hooks.SessionEnd, 'Should have SessionEnd hooks');
       assert.ok(hooks.hooks.Stop, 'Should have Stop hooks');
-      assert.ok(hooks.hooks.PreCompact, 'Should have PreCompact hooks');
+      assert.ok(hooks.hooks.SubagentStart, 'Should have SubagentStart hooks');
+      // PreCompact/PostToolUseFailure live in hooks-optional.json (opt-in stack).
+      const optionalPath = path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json');
+      const optional = JSON.parse(fs.readFileSync(optionalPath, 'utf8'));
+      assert.ok(optional.hooks.PreCompact, 'Optional stack should have PreCompact hooks');
     })
   )
     passed++;
