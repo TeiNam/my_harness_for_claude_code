@@ -161,6 +161,39 @@ function runTests() {
     assert.deepStrictEqual(summary.overwrittenUserGroups, []);
   })) passed++; else failed++;
 
+  if (test('a group mixing our command with another one is reported', () => {
+    // Splitting it would need two groups under one id, which the merge key
+    // forbids — so ours wins and the loss is announced instead of silent.
+    const boot = 'node -e "plugin-hook-bootstrap.js"';
+    const settings = {
+      hooks: {
+        Stop: [
+          {
+            matcher: '*',
+            id: 'stop:cost-tracker',
+            hooks: [
+              { type: 'command', command: `${boot} node scripts/hooks/cost-tracker.js` },
+              { type: 'command', command: 'my own extra check' }
+            ]
+          }
+        ]
+      }
+    };
+    const { summary } = planMerge(settings, SAMPLE_HOOKS);
+    assert.deepStrictEqual(summary.mixedGroups, ['Stop:stop:cost-tracker']);
+    assert.deepStrictEqual(summary.overwrittenUserGroups, [], 'it is our group, just contaminated');
+
+    // A clean harness group must not be flagged.
+    const clean = {
+      hooks: {
+        Stop: [
+          { matcher: '*', id: 'stop:cost-tracker', hooks: [{ type: 'command', command: `${boot} node scripts/hooks/cost-tracker.js` }] }
+        ]
+      }
+    };
+    assert.deepStrictEqual(planMerge(clean, SAMPLE_HOOKS).summary.mixedGroups, []);
+  })) passed++; else failed++;
+
   if (test('third-party hooks survive even with a harness-shaped id', () => {
     const settings = {
       hooks: {

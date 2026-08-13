@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- fix(install): 심볼릭 링크된 skills 디렉토리에서도 orphan 을 찾는다 (2b4532b)
 - fix(check-drift): 복구 안내에 --skip-workload 를 실어 보낸다 (d479da1)
 - fix(check-drift): hasHarnessHooks 도 merge-hooks 의 소유권 판정을 재사용 (dd729ad)
 - fix(check-drift): 복구 안내의 재설치에 --with-hooks 를 붙인다 (f297972)

@@ -188,6 +188,19 @@ function runsHarnessScript(group) {
 }
 
 /**
+ * A group that runs our script AND something else. Replacing it loses the other
+ * command; splitting it would leave two groups with the same id, which the merge
+ * key forbids. So we keep the group whole (ours wins) and report it — the harness
+ * documents that settings.json hooks are edited through this script, not by hand.
+ */
+function hasForeignCommandAlongsideOurs(group) {
+  if (!runsHarnessScript(group)) return false;
+  return (Array.isArray(group.hooks) ? group.hooks : []).some(
+    h => h && commandText(h.command).trim() && !referencesHarnessScript(h.command)
+  );
+}
+
+/**
  * Ownership *for an event we are merging into*. Here an id match also counts:
  * the id is the merge key, so a foreign group holding one of our ids cannot
  * coexist with ours regardless of what it runs. planMerge reports those
@@ -255,7 +268,7 @@ function planMerge(settings, hooksDoc) {
   const next = JSON.parse(JSON.stringify(settings || {}));
   next.hooks = next.hooks || {};
 
-  const summary = { added: [], replaced: [], swept: [], overwrittenUserGroups: [], preservedUserIds: [] };
+  const summary = { added: [], replaced: [], swept: [], overwrittenUserGroups: [], mixedGroups: [], preservedUserIds: [] };
 
   for (const event of Object.keys(hooksDoc.hooks)) {
     const existing = next.hooks[event] || [];
@@ -272,7 +285,10 @@ function planMerge(settings, hooksDoc) {
     // timestamped settings.json backup is the way back.
     for (const group of existing) {
       if (!group || typeof group.id !== 'string' || !eventIds.has(group.id)) continue;
-      if (runsHarnessScript(group)) continue;
+      if (runsHarnessScript(group)) {
+        if (hasForeignCommandAlongsideOurs(group)) summary.mixedGroups.push(`${event}:${group.id}`);
+        continue;
+      }
       summary.overwrittenUserGroups.push(`${event}:${group.id}`);
     }
 
@@ -376,6 +392,15 @@ function main(argv = process.argv) {
   console.log(`hooks files:   ${sources.join(', ')}`);
   console.log(`settings file: ${settingsPath}`);
   printPlan(flags.uninstall ? 'uninstall' : 'merge', summary);
+
+  if (summary.mixedGroups && summary.mixedGroups.length) {
+    console.log(
+      `\n  WARNING: ${summary.mixedGroups.length} group(s) mix a harness command with another one:` +
+        `\n    ${summary.mixedGroups.join(', ')}` +
+        '\n  Replacing the group drops the other command (one id cannot hold two groups).' +
+        '\n  Move it to its own group with a distinct id, then re-run. Backup is written below.'
+    );
+  }
 
   if (summary.overwrittenUserGroups && summary.overwrittenUserGroups.length) {
     console.log(
