@@ -142,6 +142,22 @@ function runTests() {
     assert.deepStrictEqual(summary.overwrittenUserGroups, []);
   })) passed++; else failed++;
 
+  if (test('a harness id used under a different event is not a collision', () => {
+    // Ids are scoped per event. Our sample only declares stop:cost-tracker under
+    // Stop, so a PreToolUse group of that name contends with nothing.
+    const settings = {
+      hooks: {
+        PreToolUse: [
+          { matcher: 'Bash', id: 'stop:cost-tracker', hooks: [{ type: 'command', command: 'node /opt/vendor/x.js' }] },
+        ],
+      },
+    };
+    const { next, summary } = planMerge(settings, SAMPLE_HOOKS);
+    assert.ok(next.hooks.PreToolUse.some(g => g.id === 'stop:cost-tracker'), 'must survive');
+    assert.deepStrictEqual(summary.swept, []);
+    assert.deepStrictEqual(summary.overwrittenUserGroups, []);
+  })) passed++; else failed++;
+
   if (test('third-party hooks survive even with a harness-shaped id', () => {
     const settings = {
       hooks: {

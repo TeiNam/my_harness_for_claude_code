@@ -214,8 +214,9 @@ unlink_orphans() {
     # *안에* 만든 링크까지 orphan 으로 보고 지워버린다.
     #   1. <kind>/_harness/**  — agents·commands·rules (중첩)
     #   2. <kind>/<name>       — skills (직계 자식 하나)
-    for kind in agents/_harness commands/_harness skills/_harness rules/_harness \
-                agents commands skills rules; do
+    # 직계 링크는 skills 뿐이다 — agents·commands·rules 는 _harness/ 아래에만 깔린다.
+    # 그 폴더 최상위의 사용자 링크는 우리 것이 아니므로 훑지 않는다.
+    for kind in agents/_harness commands/_harness skills/_harness rules/_harness skills; do
         base="$CLAUDE_DIR/$kind"
         [ -d "$base" ] || continue
         case "$kind" in

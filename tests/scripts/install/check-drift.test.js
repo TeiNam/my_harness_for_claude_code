@@ -114,6 +114,18 @@ function runTests() {
     fs.rmSync(home, { recursive: true, force: true });
   })) passed++; else failed++;
 
+  if (test('ignores a user link at the top of agents/ (only skills install there)', () => {
+    // agents, commands and rules install exclusively under _harness/, so their
+    // top level is user territory.
+    const home = tmp('user-top');
+    installLinks(home, ['core']);
+    fs.symlinkSync(path.join(REPO_ROOT, 'CLAUDE.md'), path.join(home, 'agents', 'my-manual-agent.md'));
+
+    const out = JSON.parse(run([`--claude-home=${home}`, '--workload=core', '--json']).stdout);
+    assert.deepStrictEqual(out.buckets.orphan, []);
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
   if (test('leaves links that point outside the repo alone', () => {
     const home = tmp('foreign');
     installLinks(home, ['core']);

@@ -115,7 +115,9 @@ function listInstalledLinks(claudeHome, root) {
   // everywhere would also collect links a user placed *inside* their own skill,
   // and uninstall would then delete them.
   //   1. <kind>/_harness/**        — agents, commands, rules (nested)
-  //   2. <kind>/<name>             — skills, linked as a direct child
+  //   2. skills/<name>             — skills, linked as a direct child
+  // Only skills install as a direct child, so the other folders' top level is
+  // user territory and is left unscanned.
   const walk = (dir, recurse) => {
     let entries;
     try {
@@ -145,8 +147,8 @@ function listInstalledLinks(claudeHome, root) {
 
   for (const kind of ['agents', 'commands', 'skills', 'rules']) {
     walk(path.join(claudeHome, kind, '_harness'), true);
-    walk(path.join(claudeHome, kind), false);
   }
+  walk(path.join(claudeHome, 'skills'), false);
   return found;
 }
 

@@ -243,7 +243,6 @@ function describeGroup(group) {
 }
 
 function planMerge(settings, hooksDoc) {
-  const ownedIds = collectHarnessIds(hooksDoc);
   const next = JSON.parse(JSON.stringify(settings || {}));
   next.hooks = next.hooks || {};
 
@@ -253,13 +252,18 @@ function planMerge(settings, hooksDoc) {
     const existing = next.hooks[event] || [];
     const existingIds = new Set(existing.filter(g => g && g.id).map(g => g.id));
 
+    // Ids collide per event, not globally: hooks live under an event key, so a
+    // foreign PreToolUse group named `stop:cost-tracker` never contends with our
+    // Stop group of that name.
+    const eventIds = new Set(hooksDoc.hooks[event].filter(g => g && typeof g.id === 'string').map(g => g.id));
+
     // A group that claims one of our ids but runs someone else's script is a
     // collision, not our hook. The id is the merge key so it cannot survive
     // alongside ours — but it must not disappear silently. Report it; the
     // timestamped settings.json backup is the way back.
     for (const group of existing) {
-      if (!group || typeof group.id !== 'string' || !ownedIds.has(group.id)) continue;
-      if ((group.hooks || []).some(h => h && referencesHarnessScript(h.command))) continue;
+      if (!group || typeof group.id !== 'string' || !eventIds.has(group.id)) continue;
+      if (runsHarnessScript(group)) continue;
       summary.overwrittenUserGroups.push(`${event}:${group.id}`);
     }
 
@@ -270,16 +274,16 @@ function planMerge(settings, hooksDoc) {
     }
 
     for (const group of existing) {
-      if (!isHarnessGroup(group, ownedIds)) {
+      if (!isHarnessGroup(group, eventIds)) {
         if (group && typeof group.id === 'string' && group.id) summary.preservedUserIds.push(group.id);
         continue;
       }
-      if (!(group && typeof group.id === 'string' && ownedIds.has(group.id))) {
+      if (!(group && typeof group.id === 'string' && eventIds.has(group.id))) {
         summary.swept.push(`${event}:${describeGroup(group)}`);
       }
     }
 
-    next.hooks[event] = mergeEvent(existing, hooksDoc.hooks[event], ownedIds);
+    next.hooks[event] = mergeEvent(existing, hooksDoc.hooks[event], eventIds);
   }
 
   // Events not present in the merged doc can still hold retired harness groups.
