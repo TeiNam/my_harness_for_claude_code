@@ -40,19 +40,33 @@ function stableStringify(value, depth = 0) {
     .join(',')}}`;
 }
 
+/** Fields that carry *what* an edit does, as opposed to which file it targets. */
+const EDIT_PAYLOAD_KEYS = ['old_string', 'new_string', 'content', 'edits', 'command'];
+
 /**
  * Hash tool call for loop detection.
  * Uses tool name + a key parameter when available, otherwise a stable input digest.
+ *
+ * For file tools the payload matters, not just the path: editing one file three
+ * times in a row is ordinary progress, while re-applying the *same* edit is the
+ * actual stuck loop. Hashing file_path alone flagged every multi-step edit of a
+ * single file and made the warning noise — which is worse than no warning, since
+ * a signal people learn to ignore hides the real loops too.
  */
 function hashToolCall(toolName, toolInput) {
   const name = String(toolName || '');
+  const input = toolInput || {};
   let key = '';
   if (name === 'Bash') {
-    key = String(toolInput?.command || '').slice(0, 160);
-  } else if (toolInput?.file_path) {
-    key = String(toolInput.file_path);
+    key = String(input.command || '').slice(0, 160);
+  } else if (input.file_path) {
+    const payload = EDIT_PAYLOAD_KEYS.filter(k => k in input)
+      .map(k => stableStringify(input[k]))
+      .join('|');
+    // Read/Glob have no payload — path alone is the right signature there.
+    key = `${input.file_path}|${payload}`.slice(0, HASH_INPUT_LIMIT);
   } else {
-    key = stableStringify(toolInput || {}).slice(0, HASH_INPUT_LIMIT);
+    key = stableStringify(input).slice(0, HASH_INPUT_LIMIT);
   }
   return crypto.createHash('sha256').update(`${name}:${key}`).digest('hex').slice(0, 8);
 }

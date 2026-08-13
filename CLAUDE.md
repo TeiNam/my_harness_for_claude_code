@@ -79,6 +79,28 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `scripts/install/merge-hooks.js` — the underlying merger. **머지는 선언적이다**: 실행 후 settings.json 의 하네스 소유분은 머지한 집합과 정확히 일치하고, 그 밖의 하네스 훅은 전부 걷힌다 — hooks.json 에서 은퇴한 id, 그리고 **옛 설치가 남긴 `id` 없는 그룹**까지(`isLegacyHarnessGroup`: command 에 하네스 스크립트 경로 마커가 있으면 하네스 소유로 판정). 서드파티 훅(예: `~/.orca/agent-hooks/claude-hook.sh` 를 부르는 Orca 훅 11개)은 마커가 없어 보존된다. `--dry-run` 으로 sweep 목록을 먼저 확인할 것. Tests: `tests/scripts/install/merge-hooks.test.js`.
 - `hooks/prompt-pack.json` — two reference-only prompts (`ref:pre-write-guard`, `ref:review-on-stop`). Not runnable; see `hooks/README-prompt-pack.md` for what they overlap with and how to wire them up if needed.
 
+## Loop Control (에이전트 루프)
+
+자율 루프(관찰→계획→도구실행→결과확인→재계획)를 돌릴 때 필요한 제어는 **상시 훅이 아니라 루프를 돌릴 때 켠다.** 코어 훅이 되돌리기 어려운 행위만 막는 것과 같은 이유다 — 루프 계측은 루프를 돌리는 동안에만 값을 하고, 평시에는 매 툴 호출에 끼어드는 노이즈다.
+
+```bash
+node scripts/install/merge-hooks.js --optional   # 루프 시작 전: 계측 켜기
+node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기기(선언적이라 자동 정리)
+```
+
+네 가지 실패 모드와 담당:
+
+| 실패 모드 | 담당 |
+|-----------|------|
+| **무한 루프** | `post:harness-context-monitor`(optional) 의 `detectLoop` — 동일 서명 3회면 경고. 서명은 파일 경로가 아니라 **편집 내용까지** 포함한다(`hashToolCall`): 한 파일을 연속으로 다르게 고치는 건 진행이고, *같은* 편집을 다시 적용하는 게 루프다. 여기에 `/loop-start` 의 max_turns·명시적 종료 조건. |
+| **컨텍스트 폭증** | `pre:compact`·`pre:edit-write:suggest-compact`(optional), `session:start` 주입 캡(`HARNESS_SESSION_START_MAX_CHARS`, 기본 8000자), `subagent:budget`(서브에이전트의 과탐색·장문 보고 억제). |
+| **동일 실수 반복** | `stop:capture-lessons`(optional) 가 반복 교정 신호를 감지 → `/lessons add` → `skills/lessons-learned`. 안정된 교훈은 `/lessons promote`. 단 rules 는 상시 로드 예산이므로 불변 제약만 올린다. |
+| **비용 폭증** | `stop:cost-tracker`(코어) + `/cost-report`. 그리고 파이프라인을 단계별로 태깅한다 — detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. |
+
+**경계**: 한 세션 안의 read-edit-test 반복은 Claude Code + 위 optional 스택이 담당한다. 여러 워크트리·에이전트에 걸친 coordinator 루프(블로킹 ask/reply, task DAG, worker_done 대기)는 Orca `orchestration` 이 담당한다 — 둘을 겹쳐 돌리지 않는다.
+
+**계측이 틀리면 없는 것보다 나쁘다.** 오탐이 잦은 경고는 읽는 사람을 길들여 무시하게 만들고, 그러면 진짜 루프도 함께 묻힌다. 루프 감지 로직을 바꿀 때는 `tests/hooks/loop-detection.test.js` 의 "정상 진행은 루프가 아니다" 케이스를 먼저 통과시킨다.
+
 ## Orca Integration
 
 이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅(`~/.orca/agent-hooks/claude-hook.sh`)을 `~/.claude/settings.json` 의 **11개 이벤트**에 이미 붙여 두었다(SessionStart · UserPromptSubmit · PreToolUse · PostToolUse · PostToolUseFailure · Stop · StopFailure · SubagentStart · SubagentStop · TeammateIdle · PermissionRequest). 하네스와 Orca 가 같은 파일을 공유하므로 규칙이 필요하다.

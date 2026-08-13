@@ -24,9 +24,19 @@ Start a managed autonomous loop pattern with safety defaults.
 
 1. Confirm repository state and branch strategy.
 2. Select loop pattern and model tier strategy.
-3. Enable required hooks/profile for the chosen mode.
+3. Enable loop instrumentation — the core hook stack deliberately excludes it:
+   ```bash
+   node scripts/install/merge-hooks.js --optional   # loop detection, compaction, lesson capture
+   ```
+   `--mode safe` additionally wants `HARNESS_HOOK_PROFILE=strict` (blocking gates + Stop-time tests).
+   When the loop is done, re-merge without `--optional` to drop back to the core 7.
 4. Create loop plan and write runbook under `.claude/plans/`.
 5. Print commands to start and monitor the loop.
+
+> Termination is the design, not an afterthought: state `max_turns`, the "no
+> progress" signal (diff unchanged / same error twice), and the cost ceiling
+> before starting. See the Loop Control table in CLAUDE.md for which asset covers
+> which failure mode.
 
 ## Required Safety Checks
 
