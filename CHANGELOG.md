@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- chore(plugins): motion-creative·scroll-world·rust-analyzer-lsp 제거 (#20) (92c097e)
 - feat(install): 메뉴 baseline 에 글쓰기·기술문서 포함 (#19) (c83a2e6)
 - refactor: 하네스 최소화 — 훅 30→7, 상시 rule 15.4k→1.8k tok, Orca 역할 분리, 루프 제어 (#18) (4be1e39)
 
