@@ -114,6 +114,34 @@ function runTests() {
     }
   })) passed++; else failed++;
 
+  if (test('a foreign group claiming a harness id is reported, not silently dropped', () => {
+    const settings = {
+      hooks: {
+        Stop: [
+          { matcher: '*', id: 'stop:cost-tracker', hooks: [{ type: 'command', command: 'node /opt/vendor/tracker.js' }] },
+        ],
+      },
+    };
+    const { next, summary } = planMerge(settings, SAMPLE_HOOKS);
+    assert.deepStrictEqual(summary.overwrittenUserGroups, ['Stop:stop:cost-tracker']);
+    // The id is the merge key, so only ours remains — but the user was told.
+    assert.strictEqual(next.hooks.Stop.length, 1);
+    assert.strictEqual(next.hooks.Stop[0].hooks[0].command, 'echo c');
+  })) passed++; else failed++;
+
+  if (test('our own hooks are not reported as overwritten user groups', () => {
+    const boot = 'node -e "process.env.CLAUDE_PLUGIN_ROOT"';
+    const settings = {
+      hooks: {
+        Stop: [
+          { matcher: '*', id: 'stop:cost-tracker', hooks: [{ type: 'command', command: `${boot} node scripts/hooks/cost-tracker.js` }] },
+        ],
+      },
+    };
+    const { summary } = planMerge(settings, SAMPLE_HOOKS);
+    assert.deepStrictEqual(summary.overwrittenUserGroups, []);
+  })) passed++; else failed++;
+
   if (test('third-party hooks survive even with a harness-shaped id', () => {
     const settings = {
       hooks: {

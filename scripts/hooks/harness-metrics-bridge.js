@@ -208,8 +208,9 @@ function run(rawInput) {
       files_modified: [],
       recent_tools: [],
       first_timestamp: now,
-      last_timestamp: now,
-      context_remaining_pct: null
+      last_timestamp: now
+      // No context_remaining_pct: only a statusLine hook can observe it, and that
+      // slot belongs to the claude-dashboard plugin. See harness-context-monitor.
     };
 
     // Increment tool count

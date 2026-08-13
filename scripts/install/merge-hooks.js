@@ -234,11 +234,21 @@ function planMerge(settings, hooksDoc) {
   const next = JSON.parse(JSON.stringify(settings || {}));
   next.hooks = next.hooks || {};
 
-  const summary = { added: [], replaced: [], swept: [], preservedUserIds: [] };
+  const summary = { added: [], replaced: [], swept: [], overwrittenUserGroups: [], preservedUserIds: [] };
 
   for (const event of Object.keys(hooksDoc.hooks)) {
     const existing = next.hooks[event] || [];
     const existingIds = new Set(existing.filter(g => g && g.id).map(g => g.id));
+
+    // A group that claims one of our ids but runs someone else's script is a
+    // collision, not our hook. The id is the merge key so it cannot survive
+    // alongside ours — but it must not disappear silently. Report it; the
+    // timestamped settings.json backup is the way back.
+    for (const group of existing) {
+      if (!group || typeof group.id !== 'string' || !ownedIds.has(group.id)) continue;
+      if ((group.hooks || []).some(h => h && referencesHarnessScript(h.command))) continue;
+      summary.overwrittenUserGroups.push(`${event}:${group.id}`);
+    }
 
     for (const group of hooksDoc.hooks[event]) {
       if (!group || typeof group.id !== 'string') continue;
@@ -339,6 +349,13 @@ function main(argv = process.argv) {
   console.log(`hooks files:   ${sources.join(', ')}`);
   console.log(`settings file: ${settingsPath}`);
   printPlan(flags.uninstall ? 'uninstall' : 'merge', summary);
+
+  if (summary.overwrittenUserGroups && summary.overwrittenUserGroups.length) {
+    console.log(
+      `\n  WARNING: ${summary.overwrittenUserGroups.length} non-harness group(s) claim a harness hook id ` +
+        'and will be replaced.\n  The id is the merge key, so they cannot coexist. Restore from the backup if unintended.'
+    );
+  }
 
   if (flags.dryRun) {
     console.log('\n[dry-run] settings.json not written.');

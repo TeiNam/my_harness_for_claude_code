@@ -93,7 +93,7 @@ node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기�
 | 실패 모드 | 담당 |
 |-----------|------|
 | **무한 루프** | `post:harness-context-monitor`(optional) 의 `detectLoop` — 동일 서명 3회면 경고. 서명은 파일 경로가 아니라 **편집 내용까지** 포함한다(`hashToolCall`): 한 파일을 연속으로 다르게 고치는 건 진행이고, *같은* 편집을 다시 적용하는 게 루프다. 여기에 `/loop-start` 의 max_turns·명시적 종료 조건. |
-| **컨텍스트 폭증** | `pre:compact`·`pre:edit-write:suggest-compact`(optional), `session:start` 주입 캡(`HARNESS_SESSION_START_MAX_CHARS`, 기본 8000자), `subagent:budget`(서브에이전트의 과탐색·장문 보고 억제). |
+| **컨텍스트 폭증** | `pre:compact`·`pre:edit-write:suggest-compact`(optional), `session:start` 주입 캡(`HARNESS_SESSION_START_MAX_CHARS`, 기본 8000자), `subagent:budget`(서브에이전트의 과탐색·장문 보고 억제). 잔량 **경고**는 없다 — 컨텍스트 퍼센트는 statusLine 훅만 볼 수 있고 그 슬롯은 claude-dashboard 가 쓴다(대신 사용자가 눈으로 본다). |
 | **동일 실수 반복** | `stop:capture-lessons`(optional) 가 반복 교정 신호를 감지 → `/lessons add` → `skills/lessons-learned`. 안정된 교훈은 `/lessons promote`. 단 rules 는 상시 로드 예산이므로 불변 제약만 올린다. |
 | **비용 폭증** | `stop:cost-tracker`(코어) + `/cost-report`. 그리고 파이프라인을 단계별로 태깅한다 — detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. |
 
