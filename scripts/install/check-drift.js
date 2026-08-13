@@ -248,18 +248,24 @@ function main(argv) {
 
   if (drift > 0) {
     const wl = flags.workload && flags.workload.length ? ` --workload=${flags.workload.join(',')}` : '';
+    // Carry --skip-workload too: dropping it would re-install the very assets the
+    // user excluded, and --force would overwrite whatever sits at those paths.
+    const skip = flags.skipWorkload && flags.skipWorkload.length ? ` --skip-workload=${flags.skipWorkload.join(',')}` : '';
     // A command that omits CLAUDE_HOME would operate on the default ~/.claude —
     // i.e. wipe a different install than the one just inspected.
     // Quote the path: an unquoted CLAUDE_HOME with a space in it produces a
     // command that silently targets the wrong directory when pasted.
     const home = claudeHome === path.join(os.homedir(), '.claude') ? '' : `CLAUDE_HOME="${claudeHome}" `;
-    console.log(`\nDrift detected. Re-sync with:\n  ${home}./install.sh --force${wl}`);
+    console.log(`\nDrift detected. Re-sync with:\n  ${home}./install.sh --force${wl}${skip}`);
     if (buckets.orphan.length) {
       // --uninstall clears everything the harness installed, so the re-install
       // must name the same workloads (otherwise the menu/--all decides for you)
       // and re-apply the optional hook stack if it was in use. Spell both out —
       // an incomplete instruction here costs the user their setup.
+      // activeGroups already has the skips applied, so only re-state --skip-workload
+      // when we are echoing the user's own --workload back at them.
       const restoreWl = wl || (activeGroups.length ? ` --workload=${activeGroups.join(',')}` : '');
+      const restoreSkip = wl ? skip : '';
       // --uninstall also strips the hook stack. Without --with-hooks the
       // re-install would leave the safety/lifecycle hooks off for good in a
       // non-interactive shell (the prompt defaults to N), so only suggest it to
@@ -267,7 +273,7 @@ function main(argv) {
       const restoreHooks = hasHarnessHooks(claudeHome) ? ' --with-hooks' : '';
       console.log(
         '\n  orphan links are not removed by --force (it only re-links what the repo declares).' +
-          `\n  Clear them with:\n    ${home}./install.sh --uninstall && ${home}./install.sh${restoreWl}${restoreHooks}` +
+          `\n  Clear them with:\n    ${home}./install.sh --uninstall && ${home}./install.sh${restoreWl}${restoreSkip}${restoreHooks}` +
           '\n  Note: --uninstall drops every harness link and hook. Re-run with the same' +
           `\n  workloads (above), and add \`${home}node scripts/install/merge-hooks.js --optional\`` +
           '\n  afterwards if you were running the optional hook stack.'

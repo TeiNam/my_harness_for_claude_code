@@ -202,6 +202,22 @@ function runTests() {
     fs.rmSync(noHooks, { recursive: true, force: true });
   })) passed++; else failed++;
 
+  if (test('recovery commands carry --skip-workload', () => {
+    // Dropping it would re-install the excluded assets, and --force would
+    // overwrite whatever the user has at those paths.
+    const home = tmp('skip-wl');
+    installLinks(home, ['core']);
+    fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'gone'), path.join(home, 'skills', 'stale'));
+
+    const out = run([`--claude-home=${home}`, '--workload=core,rust', '--skip-workload=rust']).stdout;
+    const lines = out.split('\n').filter(l => l.includes('./install.sh'));
+    assert.ok(lines.length >= 2, out);
+    for (const line of lines) {
+      assert.ok(line.includes('--skip-workload=rust'), `missing --skip-workload in: ${line}`);
+    }
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
   if (test('orphan report tells the user --force will not clear it', () => {
     const home = tmp('orphan-msg');
     installLinks(home, ['core']);
