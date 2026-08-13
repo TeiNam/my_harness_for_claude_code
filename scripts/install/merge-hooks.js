@@ -167,18 +167,31 @@ function isLegacyHarnessGroup(group) {
 }
 
 /**
- * True for any group the harness owns. Two ways to qualify:
- *   1. its id is in the set being merged, or
- *   2. it invokes a script this repo ships (covers retired ids and legacy
- *      id-less groups alike).
- * A third-party group with a `pre:`-shaped id but no harness script is NOT ours.
+ * The only reliable ownership signal: the group runs a script this repo ships,
+ * through our launcher. Covers retired ids and legacy id-less groups alike, and
+ * never claims a third-party hook that merely uses a `pre:`-shaped id.
+ */
+function runsHarnessScript(group) {
+  if (!group || typeof group !== 'object') return false;
+  return (Array.isArray(group.hooks) ? group.hooks : []).some(
+    h => h && referencesHarnessScript(h.command)
+  );
+}
+
+/**
+ * Ownership *for an event we are merging into*. Here an id match also counts:
+ * the id is the merge key, so a foreign group holding one of our ids cannot
+ * coexist with ours regardless of what it runs. planMerge reports those
+ * separately (summary.overwrittenUserGroups) so the replacement is never silent.
+ *
+ * Everywhere else — events we are not merging into, and --uninstall — use
+ * runsHarnessScript() alone: there is no key collision to resolve, so a foreign
+ * group that borrowed our id must survive.
  */
 function isHarnessGroup(group, ownedIds) {
   if (!group || typeof group !== 'object') return false;
   if (typeof group.id === 'string' && ownedIds.has(group.id)) return true;
-  return (Array.isArray(group.hooks) ? group.hooks : []).some(
-    h => h && referencesHarnessScript(h.command)
-  );
+  return runsHarnessScript(group);
 }
 
 function mergeEvent(existingGroups, harnessGroups, ownedIds) {
@@ -188,8 +201,8 @@ function mergeEvent(existingGroups, harnessGroups, ownedIds) {
   return [...kept, ...harnessGroups];
 }
 
-function uninstallEvent(existingGroups, ownedIds) {
-  return (existingGroups || []).filter(group => !isHarnessGroup(group, ownedIds));
+function uninstallEvent(existingGroups) {
+  return (existingGroups || []).filter(group => !runsHarnessScript(group));
 }
 
 /**
@@ -274,9 +287,9 @@ function planMerge(settings, hooksDoc) {
     if (hooksDoc.hooks[event]) continue;
     const existing = next.hooks[event] || [];
     for (const group of existing) {
-      if (isHarnessGroup(group, ownedIds)) summary.swept.push(`${event}:${describeGroup(group)}`);
+      if (runsHarnessScript(group)) summary.swept.push(`${event}:${describeGroup(group)}`);
     }
-    const filtered = uninstallEvent(existing, ownedIds);
+    const filtered = uninstallEvent(existing);
     if (filtered.length === 0) delete next.hooks[event];
     else next.hooks[event] = filtered;
   }
@@ -284,8 +297,9 @@ function planMerge(settings, hooksDoc) {
   return { next, summary };
 }
 
-function planUninstall(settings, hooksDoc) {
-  const ownedIds = collectHarnessIds(hooksDoc);
+function planUninstall(settings, _hooksDoc) {
+  // No id set needed: ownership here is decided purely by the script a group runs,
+  // so a foreign hook that borrowed a harness id is left alone.
   const next = JSON.parse(JSON.stringify(settings || {}));
   next.hooks = next.hooks || {};
 
@@ -294,10 +308,10 @@ function planUninstall(settings, hooksDoc) {
   for (const event of Object.keys(next.hooks)) {
     const existing = next.hooks[event] || [];
     for (const group of existing) {
-      if (isHarnessGroup(group, ownedIds)) summary.removed.push(`${event}:${describeGroup(group)}`);
+      if (runsHarnessScript(group)) summary.removed.push(`${event}:${describeGroup(group)}`);
       else if (group && typeof group.id === 'string' && group.id) summary.preservedUserIds.push(group.id);
     }
-    const filtered = uninstallEvent(existing, ownedIds);
+    const filtered = uninstallEvent(existing);
     if (filtered.length === 0) delete next.hooks[event];
     else next.hooks[event] = filtered;
   }
@@ -386,6 +400,7 @@ module.exports = {
   planUninstall,
   looksLikeHarnessId,
   isHarnessGroup,
+  runsHarnessScript,
   isLegacyHarnessGroup,
   referencesHarnessScript,
 };

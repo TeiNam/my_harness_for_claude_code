@@ -211,15 +211,18 @@ function runTests() {
     assert.strictEqual(next.otherSetting, 42);
   })) passed++; else failed++;
 
-  if (test('planUninstall removes only harness ids and prunes empty events', () => {
+  if (test('planUninstall removes groups running our scripts and prunes empty events', () => {
+    // Ownership on the uninstall path is decided by the script, not the id —
+    // there is no merge key to resolve, so a borrowed id must survive.
+    const boot = 'node -e "process.env.CLAUDE_PLUGIN_ROOT"';
     const settings = {
       hooks: {
         PreToolUse: [
-          { matcher: 'Bash', id: 'pre:bash:dispatcher', hooks: [{ type: 'command', command: 'echo' }] },
+          { matcher: 'Bash', id: 'pre:bash:dispatcher', hooks: [{ type: 'command', command: `${boot} node scripts/hooks/pre-bash-dispatcher.js` }] },
           { matcher: 'Bash', id: 'user-custom', hooks: [{ type: 'command', command: 'mine' }] },
         ],
         Stop: [
-          { matcher: '*', id: 'stop:cost-tracker', hooks: [{ type: 'command', command: 'echo' }] },
+          { matcher: '*', id: 'stop:cost-tracker', hooks: [{ type: 'command', command: `${boot} node scripts/hooks/cost-tracker.js` }] },
         ],
       },
     };
@@ -232,6 +235,19 @@ function runTests() {
     assert.strictEqual(next.hooks.PreToolUse.length, 1);
     assert.strictEqual(next.hooks.PreToolUse[0].id, 'user-custom');
     assert.ok(!('Stop' in next.hooks)); // pruned because it became empty
+  })) passed++; else failed++;
+
+  if (test('uninstall keeps a foreign group that borrowed a harness id', () => {
+    const settings = {
+      hooks: {
+        Stop: [
+          { matcher: '*', id: 'stop:cost-tracker', hooks: [{ type: 'command', command: 'node /opt/vendor/tracker.js' }] },
+        ],
+      },
+    };
+    const { next, summary } = planUninstall(settings, SAMPLE_HOOKS);
+    assert.deepStrictEqual(summary.removed, [], 'nothing of ours is present');
+    assert.strictEqual(next.hooks.Stop.length, 1, 'the vendor hook must survive uninstall');
   })) passed++; else failed++;
 
   if (test('planMerge sweeps legacy id-less harness groups but keeps third-party ones', () => {

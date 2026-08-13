@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- docs: Loop Control 표의 루프 서명 설명을 실제 구현(입력 전체 해시)에 맞춤 (8481960)
 - fix: 6차 리뷰 반영 — 동작 불가한 컨텍스트 경고 제거, id 충돌 경고 추가 (ca01805)
 - fix: 5차 리뷰 반영 — 루프 서명은 입력 전체, orphan 스캔은 설치 형태로 제한 (a9c2295)
 - fix(loop): 해시 절단을 전부 제거 — MultiEdit·긴 Bash 명령까지 구분 (888f9cc)
