@@ -111,34 +111,41 @@ function listInstalledLinks(claudeHome, root) {
     return resolved === abs || resolved.startsWith(abs + path.sep);
   };
 
-  for (const kind of ['agents', 'commands', 'skills', 'rules']) {
-    const walk = dir => {
-      let entries;
-      try {
-        entries = fs.readdirSync(dir, { withFileTypes: true });
-      } catch (e) {
-        // A missing folder just means nothing of that kind is installed. Any
-        // other error (permissions, I/O) must not read as "no orphans".
-        if (e.code === 'ENOENT') return;
-        throw e;
-      }
-      for (const entry of entries) {
-        const abs = path.join(dir, entry.name);
-        if (entry.isSymbolicLink()) {
-          let target;
-          try {
-            target = fs.readlinkSync(abs);
-          } catch {
-            continue;
-          }
-          const resolved = path.isAbsolute(target) ? target : path.resolve(path.dirname(abs), target);
-          if (insideRepo(resolved)) found.push(path.relative(claudeHome, abs));
+  // Scope matters: only the two shapes the installer creates are ours. Recursing
+  // everywhere would also collect links a user placed *inside* their own skill,
+  // and uninstall would then delete them.
+  //   1. <kind>/_harness/**        — agents, commands, rules (nested)
+  //   2. <kind>/<name>             — skills, linked as a direct child
+  const walk = (dir, recurse) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (e) {
+      // A missing folder just means nothing of that kind is installed. Any
+      // other error (permissions, I/O) must not read as "no orphans".
+      if (e.code === 'ENOENT') return;
+      throw e;
+    }
+    for (const entry of entries) {
+      const abs = path.join(dir, entry.name);
+      if (entry.isSymbolicLink()) {
+        let target;
+        try {
+          target = fs.readlinkSync(abs);
+        } catch {
           continue;
         }
-        if (entry.isDirectory()) walk(abs);
+        const resolved = path.isAbsolute(target) ? target : path.resolve(path.dirname(abs), target);
+        if (insideRepo(resolved)) found.push(path.relative(claudeHome, abs));
+        continue;
       }
-    };
-    walk(path.join(claudeHome, kind));
+      if (entry.isDirectory() && recurse) walk(abs, true);
+    }
+  };
+
+  for (const kind of ['agents', 'commands', 'skills', 'rules']) {
+    walk(path.join(claudeHome, kind, '_harness'), true);
+    walk(path.join(claudeHome, kind), false);
   }
   return found;
 }

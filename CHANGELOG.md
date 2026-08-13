@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-14
 
+- fix(loop): 해시 절단을 전부 제거 — MultiEdit·긴 Bash 명령까지 구분 (888f9cc)
 - fix: 3차 리뷰 반영 — 경로 정규화·해시 절단·dry-run 부작용 (3a10328)
 - feat(loop): 루프 제어를 명문화하고 루프 감지 오탐을 고친다 (c3b801b)
 - fix(install): 2차 리뷰 반영 — 소유권 판정을 링크 타깃·런처 기준으로 (c23a9f4)

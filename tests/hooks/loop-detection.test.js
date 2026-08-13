@@ -58,6 +58,26 @@ function runTests() {
     }
   })) passed++; else failed++;
 
+  if (test('paging one file by offset is not a loop', () => {
+    // A whitelist-based signature ignored offset/limit and flagged sequential
+    // reads of a large file as a stuck loop.
+    const file = '/repo/huge.log';
+    assert.notStrictEqual(
+      hashToolCall('Read', { file_path: file, offset: 0, limit: 200 }),
+      hashToolCall('Read', { file_path: file, offset: 200, limit: 200 })
+    );
+    // Same for a flag that changes what the edit does.
+    assert.notStrictEqual(
+      hashToolCall('Edit', { file_path: file, old_string: 'a', new_string: 'b' }),
+      hashToolCall('Edit', { file_path: file, old_string: 'a', new_string: 'b', replace_all: true })
+    );
+  })) passed++; else failed++;
+
+  if (test('deeply nested inputs differing below the old depth cap still differ', () => {
+    const nest = leaf => ({ a: { b: { c: { d: { e: { f: leaf } } } } } });
+    assert.notStrictEqual(hashToolCall('mcp__x__y', nest('one')), hashToolCall('mcp__x__y', nest('two')));
+  })) passed++; else failed++;
+
   if (test('reading the same file repeatedly still hashes identically', () => {
     // Read has no payload, so path alone remains the signature — repeated reads
     // of one file are a genuine loop signal.

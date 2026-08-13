@@ -209,10 +209,19 @@ unlink_one() {
 # 온 것이라 이름에 `$(...)` 가 섞이면 eval 이 그걸 실행해버린다. find 는 -print0,
 # rm 은 `--` 로 받아 개행·하이픈이 든 이름도 안전하게 넘긴다.
 unlink_orphans() {
-    local kind base link target removed=0
-    for kind in agents commands skills rules; do
+    local kind base depth link target removed=0
+    # 설치가 만드는 두 형태만 훑는다. 전 디렉토리를 재귀하면 사용자가 자기 skill
+    # *안에* 만든 링크까지 orphan 으로 보고 지워버린다.
+    #   1. <kind>/_harness/**  — agents·commands·rules (중첩)
+    #   2. <kind>/<name>       — skills (직계 자식 하나)
+    for kind in agents/_harness commands/_harness skills/_harness rules/_harness \
+                agents commands skills rules; do
         base="$CLAUDE_DIR/$kind"
         [ -d "$base" ] || continue
+        case "$kind" in
+            */_harness) depth=() ;;              # 중첩 전부
+            *)          depth=(-maxdepth 1) ;;   # 직계만
+        esac
         while IFS= read -r -d '' link; do
             target="$(readlink "$link" 2>/dev/null || true)"
             case "$target" in
@@ -232,11 +241,15 @@ unlink_orphans() {
             fi
             echo "unlink(orphan): $link"
             removed=$((removed + 1))
-        done < <(find "$base" -type l -print0 2>/dev/null)
+        done < <(find "$base" "${depth[@]}" -type l -print0 2>/dev/null)
         # 비게 된 하네스 서브디렉토리 정리 (dry-run 에서는 건드리지 않는다)
-        if [ "$DRY_RUN" -eq 0 ] && [ -d "$base/_harness" ]; then
-            find "$base/_harness" -depth -type d -empty -exec rmdir {} + 2>/dev/null || true
-        fi
+        case "$kind" in
+            */_harness)
+                if [ "$DRY_RUN" -eq 0 ]; then
+                    find "$base" -depth -type d -empty -exec rmdir {} + 2>/dev/null || true
+                fi
+                ;;
+        esac
     done
     [ "$removed" -gt 0 ] && echo "orphan links removed: $removed"
     return 0

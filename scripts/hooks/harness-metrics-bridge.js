@@ -28,7 +28,10 @@ function toNumber(value) {
 }
 
 function stableStringify(value, depth = 0) {
-  if (depth > 4) return '[depth-limit]';
+  // Deep enough for nested MCP tool inputs; two calls differing only below the
+  // limit would otherwise share a signature. Tool inputs come from JSON, so the
+  // walk is acyclic and this bound only guards pathological nesting.
+  if (depth > 8) return '[depth-limit]';
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) {
     return `[${value.map(item => stableStringify(item, depth + 1)).join(',')}]`;
@@ -39,40 +42,20 @@ function stableStringify(value, depth = 0) {
     .join(',')}}`;
 }
 
-/** Fields that carry *what* an edit does, as opposed to which file it targets. */
-const EDIT_PAYLOAD_KEYS = ['old_string', 'new_string', 'content', 'edits', 'command'];
-
 /**
- * Hash tool call for loop detection.
- * Uses tool name + a key parameter when available, otherwise a stable input digest.
+ * Signature of a tool call, for loop detection: tool name + the *entire* input.
  *
- * For file tools the payload matters, not just the path: editing one file three
- * times in a row is ordinary progress, while re-applying the *same* edit is the
- * actual stuck loop. Hashing file_path alone flagged every multi-step edit of a
- * single file and made the warning noise — which is worse than no warning, since
- * a signal people learn to ignore hides the real loops too.
+ * The signature is deliberately literal — a loop is the same tool invoked with
+ * identical arguments, which is exactly what the warning claims. Earlier versions
+ * hashed a hand-picked subset (file_path alone, then a payload whitelist) and
+ * every omission turned ordinary progress into a false alarm: three different
+ * edits to one file, a Read paged by offset, an Edit toggling replace_all. A
+ * detector people learn to ignore hides the real loops too, so nothing is
+ * summarized or truncated here — the digest is fixed-width whatever the input.
  */
 function hashToolCall(toolName, toolInput) {
   const name = String(toolName || '');
-  const input = toolInput || {};
-  let key = '';
-  if (name === 'Bash') {
-    key = String(input.command || '');
-  } else if (input.file_path) {
-    // Read/Glob have no payload — path alone is the right signature there.
-    key = `${input.file_path}|${EDIT_PAYLOAD_KEYS.filter(k => k in input)
-      .map(k => stableStringify(input[k]))
-      .join('|')}`;
-  } else {
-    // MultiEdit-style input carries no top-level file_path; each entry in
-    // edits[] has its own. Stringifying the whole input covers that shape.
-    key = stableStringify(input);
-  }
-  // Nothing is truncated before hashing: two calls that differ only past a
-  // length cutoff (a long old_string followed by a short new_string, the tail of
-  // a long content, a long command) must not collapse into one signature. The
-  // digest is fixed-width regardless of input size, and stableStringify's depth
-  // limit keeps the walk bounded.
+  const key = stableStringify(toolInput || {});
   return crypto.createHash('sha256').update(`${name}:${key}`).digest('hex').slice(0, 8);
 }
 

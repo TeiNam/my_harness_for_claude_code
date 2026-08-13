@@ -99,6 +99,21 @@ function runTests() {
     fs.rmSync(home, { recursive: true, force: true });
   })) passed++; else failed++;
 
+  if (test('ignores links a user placed inside their own skill', () => {
+    // Only the shapes the installer creates are ours: <kind>/_harness/** and a
+    // direct <kind>/<name>. Recursing into user skills would make uninstall
+    // delete their links.
+    const home = tmp('user-inner');
+    installLinks(home, ['core']);
+    const inner = path.join(home, 'skills', 'my-own-skill', 'refs');
+    fs.mkdirSync(inner, { recursive: true });
+    fs.symlinkSync(path.join(REPO_ROOT, 'CLAUDE.md'), path.join(inner, 'harness-notes.md'));
+
+    const out = JSON.parse(run([`--claude-home=${home}`, '--workload=core', '--json']).stdout);
+    assert.deepStrictEqual(out.buckets.orphan, [], 'a link nested in a user skill is not ours');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
   if (test('leaves links that point outside the repo alone', () => {
     const home = tmp('foreign');
     installLinks(home, ['core']);
