@@ -20,7 +20,6 @@ const { getClaudeDir } = require('../lib/utils');
 const MAX_STDIN = 1024 * 1024;
 const MAX_FILES_TRACKED = 200;
 const RECENT_TOOLS_SIZE = 5;
-const HASH_INPUT_LIMIT = 2048;
 const WARNING_CACHE_PREFIX = 'harness-metrics-cost-warnings-';
 
 function toNumber(value) {
@@ -58,20 +57,22 @@ function hashToolCall(toolName, toolInput) {
   const input = toolInput || {};
   let key = '';
   if (name === 'Bash') {
-    key = String(input.command || '').slice(0, 160);
+    key = String(input.command || '');
   } else if (input.file_path) {
-    const payload = EDIT_PAYLOAD_KEYS.filter(k => k in input)
-      .map(k => stableStringify(input[k]))
-      .join('|');
-    // Digest the payload instead of truncating it: two edits that differ only
-    // past a length cutoff (long file content, a long old_string followed by a
-    // short new_string) must not collapse into one signature.
-    const payloadDigest = payload ? crypto.createHash('sha256').update(payload).digest('hex').slice(0, 16) : '';
     // Read/Glob have no payload — path alone is the right signature there.
-    key = `${input.file_path}|${payloadDigest}`;
+    key = `${input.file_path}|${EDIT_PAYLOAD_KEYS.filter(k => k in input)
+      .map(k => stableStringify(input[k]))
+      .join('|')}`;
   } else {
-    key = stableStringify(input).slice(0, HASH_INPUT_LIMIT);
+    // MultiEdit-style input carries no top-level file_path; each entry in
+    // edits[] has its own. Stringifying the whole input covers that shape.
+    key = stableStringify(input);
   }
+  // Nothing is truncated before hashing: two calls that differ only past a
+  // length cutoff (a long old_string followed by a short new_string, the tail of
+  // a long content, a long command) must not collapse into one signature. The
+  // digest is fixed-width regardless of input size, and stableStringify's depth
+  // limit keeps the walk bounded.
   return crypto.createHash('sha256').update(`${name}:${key}`).digest('hex').slice(0, 8);
 }
 

@@ -88,6 +88,25 @@ function runTests() {
     assert.notStrictEqual(long1, long2);
   })) passed++; else failed++;
 
+  if (test('MultiEdit-shaped input (no top-level file_path) still discriminates', () => {
+    // Each entry carries its own file_path, so the file_path branch is skipped —
+    // the whole-input path must not truncate either.
+    const filler = 'y'.repeat(4000);
+    const mk = tail => ({
+      edits: [{ file_path: '/repo/a.js', old_string: filler, new_string: tail }],
+    });
+    assert.notStrictEqual(hashToolCall('MultiEdit', mk('one')), hashToolCall('MultiEdit', mk('two')));
+    assert.strictEqual(hashToolCall('MultiEdit', mk('one')), hashToolCall('MultiEdit', mk('one')));
+  })) passed++; else failed++;
+
+  if (test('long Bash commands differing only at the tail stay distinct', () => {
+    const prefix = `echo ${'z'.repeat(400)}`;
+    assert.notStrictEqual(
+      hashToolCall('Bash', { command: `${prefix} && npm test` }),
+      hashToolCall('Bash', { command: `${prefix} && npm run build` })
+    );
+  })) passed++; else failed++;
+
   if (test('distinct Bash commands stay distinct, identical ones collapse', () => {
     assert.notStrictEqual(
       hashToolCall('Bash', { command: 'npm test' }),
