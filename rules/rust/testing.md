@@ -5,7 +5,7 @@ workloads: [rust]
 ---
 # Rust Testing
 
-> This file extends [common/testing.md](../common/testing.md) with Rust-specific content.
+> This file extends [common/testing.md](../../docs/rules-reference/testing.md) with Rust-specific content.
 
 ## Test Framework
 

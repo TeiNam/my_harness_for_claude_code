@@ -1,32 +1,38 @@
 # Rules
-## Structure
 
-Rules are organized into a **common** layer plus **language-specific** directories:
+## The one rule about rules
+
+**An installed rule without `paths:` frontmatter is loaded into every session of every
+project.** `rules/` is therefore a context budget, not a documentation folder. Anything
+that is only true *sometimes* — a procedure, a checklist, a policy you consult when the
+topic comes up — belongs in `docs/rules-reference/` (this folder) and gets read on demand.
+
+## Structure
 
 ```
 rules/
-├── common/          # Language-agnostic principles (always install)
-│   ├── coding-style.md
-│   ├── git-workflow.md
-│   ├── testing.md
-│   ├── performance.md
-│   ├── patterns.md
-│   ├── hooks.md
-│   ├── agents.md
-│   └── security.md
-├── typescript/      # TypeScript/JavaScript specific
-├── angular/         # Angular specific
-├── python/          # Python specific
-├── golang/          # Go specific
-├── web/             # Web and frontend specific
-├── swift/           # Swift specific
-├── php/             # PHP specific
-├── ruby/            # Ruby / Rails specific
-└── arkts/           # HarmonyOS / ArkTS specific
+├── common/          # ALWAYS loaded, every session. Invariants only, <12KB total.
+│   ├── coding-style.md      # immutability, file size, naming
+│   ├── git-workflow.md      # branch → commit → push → PR → merge
+│   ├── korean-language.md   # output language
+│   └── security.md          # secrets, input validation
+├── typescript/      # gated on **/*.ts, **/*.tsx, **/*.js, **/*.jsx
+├── python/          # gated on **/*.py
+├── rust/            # gated on **/*.rs
+└── web/             # gated on **/*.tsx, **/*.css, **/*.html, …
+
+docs/rules-reference/   # NOT installed → costs no context. Read when relevant.
+├── testing.md · patterns.md · performance.md · hooks.md
+├── code-review.md · development-workflow.md · agents.md
+├── model-routing.md · readme-rule.md
+└── README.md (this file)
 ```
 
-- **common/** contains universal principles — no language-specific code examples.
-- **Language directories** extend the common rules with framework-specific patterns, tools, and code examples. Each file references its common counterpart.
+- **common/** contains universal principles — no language-specific code examples. Two tests
+  in `tests/scripts/install/workloads.test.js` enforce the whitelist and the size budget,
+  and require every non-common rule file to declare `paths:`.
+- **Language directories** extend the reference docs with framework-specific patterns and
+  code examples. Each file links to its counterpart under `../../docs/rules-reference/`.
 
 ## Installation
 

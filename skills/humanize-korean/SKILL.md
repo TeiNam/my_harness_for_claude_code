@@ -150,7 +150,7 @@ v1.1 5인 파이프라인 그대로. 검증 분리·재윤문 루프가 의미 �
 
 ## 에이전트 호출 규칙
 
-**모델:** 단계별로 나눠 태깅한다 (`rules/common/model-routing.md` 의 closed/open box 기준).
+**모델:** 단계별로 나눠 태깅한다 (`docs/rules-reference/model-routing.md` 의 closed/open box 기준).
 
 - `sonnet` — 박스가 닫힌 단계: `ai-tell-detector`(taxonomy 대조 스캔), `korean-style-rewriter`(탐지 리포트대로 윤문), `humanize-monolith`(fast path 일괄 실행).
 - `opus` — 박스가 열린 단계: `content-fidelity-auditor`(임의 내용의 의미 동등성 판정), `naturalness-reviewer`(미분류 패턴 발견 + 과윤문 판정), `korean-ai-tell-taxonomist`(분류 체계 설계).

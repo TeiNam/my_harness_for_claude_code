@@ -5,6 +5,8 @@
 'use strict';
 
 const assert = require('assert');
+const fs = require('fs');
+const path = require('path');
 
 const { GROUPS, classify, classifyIdentifier, classifyRulePath, identifierOf, isKnownGroup, validateGroups, expandAliases } = require('../../../scripts/install/workloads');
 
@@ -136,8 +138,48 @@ function runTests() {
       assert.deepStrictEqual(classifyRulePath('rules/rust/coding-style.md'), ['rust']);
       assert.deepStrictEqual(classifyRulePath('rules/typescript/patterns.md'), ['frontend']);
       assert.deepStrictEqual(classifyRulePath('rules/web/performance.md'), ['frontend']);
-      assert.deepStrictEqual(classifyRulePath('rules/common/agents.md'), ['core']);
+      assert.deepStrictEqual(classifyRulePath('rules/common/coding-style.md'), ['core']);
       assert.deepStrictEqual(classifyRulePath('rules/unknown/foo.md'), ['core']);
+    })
+  )
+    passed++;
+  else failed++;
+
+  // rules/common has no `paths:` filter, so every file here is loaded in EVERY
+  // session of EVERY project. It is a context budget, not a doc folder:
+  // reference material belongs in docs/rules-reference/.
+  if (
+    test('rules/common stays a small always-loaded set (context budget)', () => {
+      const dir = path.join(__dirname, '..', '..', '..', 'rules', 'common');
+      const files = fs.readdirSync(dir).filter(f => f.endsWith('.md')).sort();
+      assert.deepStrictEqual(
+        files,
+        ['coding-style.md', 'git-workflow.md', 'korean-language.md', 'security.md'],
+        'new rules/common files load in every session — put reference docs in docs/rules-reference/ instead'
+      );
+      const bytes = files.reduce((sum, f) => sum + fs.statSync(path.join(dir, f)).size, 0);
+      assert.ok(bytes < 12000, `rules/common is always loaded; keep it under 12KB (now ${bytes}B)`);
+    })
+  )
+    passed++;
+  else failed++;
+
+  // Language/domain rule folders must gate on `paths:` or they become always-on too.
+  if (
+    test('language and domain rule files declare paths: frontmatter', () => {
+      const rulesDir = path.join(__dirname, '..', '..', '..', 'rules');
+      const missing = [];
+      for (const folder of fs.readdirSync(rulesDir)) {
+        if (folder === 'common') continue;
+        const folderPath = path.join(rulesDir, folder);
+        if (!fs.statSync(folderPath).isDirectory()) continue;
+        for (const file of fs.readdirSync(folderPath)) {
+          if (!file.endsWith('.md')) continue;
+          const head = fs.readFileSync(path.join(folderPath, file), 'utf8').slice(0, 400);
+          if (!/^---\r?\n[\s\S]*?\bpaths:/.test(head)) missing.push(`${folder}/${file}`);
+        }
+      }
+      assert.deepStrictEqual(missing, [], `missing paths: frontmatter → always loaded: ${missing.join(', ')}`);
     })
   )
     passed++;

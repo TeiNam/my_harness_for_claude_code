@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-08-13
+
+- refactor(hooks): 코어 스택 7그룹으로 축소, 기본 프로파일 minimal (af5209a)
+
 ## 2026-08-04
 
 - refactor(agents): 모델 티어를 "박스가 열려 있는가" 기준으로 재정렬 (#17) (5803867)

@@ -5,7 +5,7 @@ workloads: [rust]
 ---
 # Rust Patterns
 
-> This file extends [common/patterns.md](../common/patterns.md) with Rust-specific content.
+> This file extends [common/patterns.md](../../docs/rules-reference/patterns.md) with Rust-specific content.
 
 ## Repository Pattern with Traits
 

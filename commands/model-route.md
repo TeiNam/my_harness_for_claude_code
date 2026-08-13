@@ -37,7 +37,7 @@ Opus reasoning at lower latency — prefer it over downgrading when you need
 Opus-level judgment fast. For a cross-family second opinion, route to Codex
 (codex plugin — `codex:rescue`).
 
-Full policy: `rules/common/model-routing.md`.
+Full policy: `docs/rules-reference/model-routing.md`.
 
 ## Required Output
 
