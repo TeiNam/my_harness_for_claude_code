@@ -79,6 +79,8 @@ marketing/
 .dmux-hooks/
 .claude/worktrees/
 .claude/scheduled_tasks.lock
+# codex CLI 가 만드는 로컬 MCP 설정 — localhost 프록시 주소라 머신별 상태다
+.codex/
 
 # Temporary files
 tmp/
