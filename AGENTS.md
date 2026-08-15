@@ -1,10 +1,10 @@
-# CLAUDE.md
+# AGENTS.md
 
-Guidance for Claude Code working in this repository.
+Guidance for Codex working in this repository.
 
 ## Project Overview
 
-Personal Claude Code harness — a curated set of agents, skills, commands, hooks, rules, and MCP configs tailored to the owner's workloads.
+Personal Codex harness — a curated set of agents, skills, commands, hooks, rules, and MCP configs tailored to the owner's workloads.
 
 This is **not** a published plugin. It is a working, standalone harness: trim, edit, and rewrite freely.
 
@@ -34,8 +34,8 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `scripts/` — Node.js utilities for hooks, install/uninstall, audits
 - `tests/` — test suite for `scripts/`
 - `docs/rules-reference/` — 옛 `rules/common/` 중 상시 로드가 필요 없는 9개(`testing`·`patterns`·`performance`·`hooks`·`code-review`·`development-workflow`·`agents`·`model-routing`·`readme-rule`)와 rules 설치 안내 `README.md`. 설치되지 않으므로 컨텍스트를 먹지 않는다. 언어별 rule 의 `> This file extends …` 링크가 여기를 가리킨다.
-- `docs/orca-dependencies.md` — Orca 와 `~/.claude` 를 공유하는 지점 전체(훅 11개·스킬 5종·역할 분리·점검 명령·Orca 없이 쓸 때).
-- `docs/harness-assets.md` · `docs/install-menu.md` — CLAUDE.md 에서 옮겨온 스킬·에이전트 카탈로그와 설치 메뉴 상세. CLAUDE.md 는 매 세션 100% 로드되므로 "작업할 때만 필요한 목록"은 여기 둔다.
+- `docs/orca-dependencies.md` — Orca 와 `~/.Codex` 를 공유하는 지점 전체(훅 11개·스킬 5종·역할 분리·점검 명령·Orca 없이 쓸 때).
+- `docs/harness-assets.md` · `docs/install-menu.md` — AGENTS.md 에서 옮겨온 스킬·에이전트 카탈로그와 설치 메뉴 상세. AGENTS.md 는 매 세션 100% 로드되므로 "작업할 때만 필요한 목록"은 여기 둔다.
 - `docs/` — long-form reference (writing guides, security guide, steering rules). `docs/plugin.md` 는 하네스와 함께 설치하는 동반 플러그인 목록(superpowers·codex·ui-ux-pro-max 등) — 이 플러그인들과 겹치는 하네스 자체 스킬(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`)은 2026-07-26 제거됨. 새 스킬 추가 시 플러그인과의 중복 여부를 먼저 확인할 것.
 
 ## High-value Agents
@@ -64,7 +64,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - **메뉴 baseline 은 `core` + `writing` + `report`** (`menu.js` 의 `ALWAYS_INCLUDED`). 글·문서 작업 비중이 높아 매번 고르는 것이 의미가 없으므로 고르지 않아도 따라온다(합계 상시 비용 ~1.7k tok — 스킬은 description 만 로드되고 본문은 호출 시 읽힌다). 소셜 콘텐츠(`social-*`)는 별도 축이라 옵트인으로 남긴다. 이 baseline 은 **메뉴 경로에만** 적용된다 — `--workload=` 저수준 플래그는 "정확히 이것만"이라는 뜻이므로 그대로이고, 프로젝트 로컬 설치에서 글쓰기를 빼려면 그 경로를 쓴다.
 - 워크로드 흐름에 들어오는 kind 는 **agent·command·skill·rule** 4종. hooks·mcp 는 분류 밖이라 설치 후 별도로 묻는다(`--with-hooks` / `--with-mcp` / `--no-extras`).
 - 드리프트 점검: `npm run check-drift` — 레포가 깔아야 할 자산 vs 실제 심볼릭을 대조한다. 읽기 전용.
-- **컨텍스트 절감 목적으로 워크로드를 줄이는 건 헛수고다**(2026-08 실측): 안 쓰는 워크로드 6개를 다 빼도 상시 비용은 13 tok 만 줄었다. `aws-rds`·`devops`·`integration`·`data-analysis` 는 MCP 분류용 키라 스킬·에이전트 자산이 아예 없다. 컨텍스트를 줄이려면 rules(`rules/` 항목 참조)와 CLAUDE.md 를 손대야 한다.
+- **컨텍스트 절감 목적으로 워크로드를 줄이는 건 헛수고다**(2026-08 실측): 안 쓰는 워크로드 6개를 다 빼도 상시 비용은 13 tok 만 줄었다. `aws-rds`·`devops`·`integration`·`data-analysis` 는 MCP 분류용 키라 스킬·에이전트 자산이 아예 없다. 컨텍스트를 줄이려면 rules(`rules/` 항목 참조)와 AGENTS.md 를 손대야 한다.
 
 메뉴 구조·플래그·워크로드 키 전체 목록은 **`docs/install-menu.md`**.
 
@@ -77,11 +77,11 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
   전 프로파일에서 동일하게 6그룹이다(**minimal (6훅)** / **standard (6훅)** / **strict (6훅)**) — 프로파일은 이제 그룹 수가 아니라 **dispatcher 내부 서브훅의 강도**만 바꾼다.
   - `post:bash:dispatcher` 는 2026-08-15 옵트인으로 내려갔다. 서브훅 4개(`command-log-audit`·`command-log-cost`·`pr-created`·`build-complete`)가 전부 standard 이상이라 — 앞의 둘은 `profiles` 미지정이어서 기본값 `standard,strict` 로 떨어진다 — **기본 프로파일 minimal 에서는 Bash 호출마다 node 를 띄워 아무 일도 하지 않았다.** 게다가 그 유일한 산출물 `bash-commands.log` 는 하네스 안에 읽는 코드가 없다. 프로파일 기본값이 minimal 인데 서브훅 전원이 standard 이상이면 그 그룹은 코어가 아니다.
 - `hooks/hooks-optional.json` — **옵트인 24그룹.** 품질 게이트·차단형·관찰 훅 전부(quality-gate, design-quality-check, console-warn, governance-capture, mcp-health-check, context-monitor, metrics-bridge, activity-tracker, format-typecheck, run-tests, command-registry, gateguard-fact-force, config-protection, doc-file-warning, suggest-compact, pre-compact, evaluate-session, capture-lessons, desktop-notify 등). 필요한 프로젝트에서만 `node scripts/install/merge-hooks.js --optional` 로 추가한다. 머지는 **선언적**이라 `--optional` 없이 재실행하면 이 스택은 다시 걷힌다.
-- **글로벌 기본은 `HARNESS_HOOK_PROFILE=minimal`** (`~/.claude/settings.json` 의 `env`, `hook-flags.js` 의 코드 기본값도 동일). `run-with-flags.js <id> <script> <profilesCsv>` 게이팅과 `HARNESS_DISABLED_HOOKS` CSV 는 그대로다.
+- **글로벌 기본은 `HARNESS_HOOK_PROFILE=minimal`** (`~/.Codex/settings.json` 의 `env`, `hook-flags.js` 의 코드 기본값도 동일). `run-with-flags.js <id> <script> <profilesCsv>` 게이팅과 `HARNESS_DISABLED_HOOKS` CSV 는 그대로다.
   - `pre:bash:dispatcher` 서브훅: **minimal 부터** `block-no-verify`·`git-push-reminder`(기본 브랜치 직행 — minimal/standard 경고, strict 차단) / **standard** 부터 `auto-tmux-dev` / **strict 전용** `tmux-reminder`·`commit-quality`·`gateguard-fact-force`.
   - `gateguard-fact-force` 는 **strict 전용이다.** 과거 dispatcher 쪽 사본만 `standard,strict` 로 새어 있어서 standard 프로파일에서 매 세션 첫 Bash 가 차단됐다 — 문서가 strict 라고 적어둔 것과 코드가 어긋난 사례이므로, 프로파일 CSV 를 바꿀 때는 hooks.json 과 dispatcher 양쪽을 함께 본다.
   - `subagent:budget` 은 SubagentStart 훅으로, 서브에이전트가 SessionStart 컨텍스트(= ponytail 규율)를 상속하지 않는 구멍을 메운다 — Agent 호출마다 예산 브리프를 주입해 과탐색·장문 보고를 억제한다. 브리프는 기본형(구현·탐색)과 **리뷰 변형**(`agent_type` 이 review/audit/detector/scorer/critic/analyzer 매칭) 두 종류이고, 리뷰 변형은 탐색 규율만 유지하고 **findings 개수는 압박하지 않는다**. ponytail 이 `off` 면 주입하지 않고, `HARNESS_SUBAGENT_BUDGET=off` 로 개별 차단한다.
-- `scripts/install/merge-hooks.js` — the underlying merger. **머지는 선언적이다**: 실행 후 settings.json 의 하네스 소유분은 머지한 집합과 정확히 일치하고, 그 밖의 하네스 훅은 전부 걷힌다 — hooks.json 에서 은퇴한 id, 그리고 **옛 설치가 남긴 `id` 없는 그룹**까지(`isLegacyHarnessGroup`: command 에 하네스 스크립트 경로 마커가 있으면 하네스 소유로 판정). 서드파티 훅(예: `~/.orca/agent-hooks/claude-hook.sh` 를 부르는 Orca 훅 11개)은 마커가 없어 보존된다. `--dry-run` 으로 sweep 목록을 먼저 확인할 것. Tests: `tests/scripts/install/merge-hooks.test.js`.
+- `scripts/install/merge-hooks.js` — the underlying merger. **머지는 선언적이다**: 실행 후 settings.json 의 하네스 소유분은 머지한 집합과 정확히 일치하고, 그 밖의 하네스 훅은 전부 걷힌다 — hooks.json 에서 은퇴한 id, 그리고 **옛 설치가 남긴 `id` 없는 그룹**까지(`isLegacyHarnessGroup`: command 에 하네스 스크립트 경로 마커가 있으면 하네스 소유로 판정). 서드파티 훅(예: `~/.orca/agent-hooks/Codex-hook.sh` 를 부르는 Orca 훅 11개)은 마커가 없어 보존된다. `--dry-run` 으로 sweep 목록을 먼저 확인할 것. Tests: `tests/scripts/install/merge-hooks.test.js`.
 - `hooks/prompt-pack.json` — two reference-only prompts (`ref:pre-write-guard`, `ref:review-on-stop`). Not runnable; see `hooks/README-prompt-pack.md` for what they overlap with and how to wire them up if needed.
 
 ## Loop Control (에이전트 루프)
@@ -98,22 +98,22 @@ node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기�
 | 실패 모드 | 담당 |
 |-----------|------|
 | **무한 루프** | `post:harness-context-monitor`(optional) 의 `detectLoop` — 동일 서명 3회면 경고. 서명은 `hashToolCall` = **도구명 + 입력 전체**의 해시다(일부 필드만 고르면 빠뜨린 필드가 곧 오탐이 된다 — 한 파일 연속 편집, offset 페이징, `replace_all` 토글이 모두 "같은 호출"로 뭉쳤던 전례). 여기에 `/loop-start` 의 max_turns·명시적 종료 조건. |
-| **컨텍스트 폭증** | `pre:compact`·`pre:edit-write:suggest-compact`(optional), `session:start` 주입 캡(`HARNESS_SESSION_START_MAX_CHARS`, 기본 8000자), `subagent:budget`(서브에이전트의 과탐색·장문 보고 억제). 잔량 **경고**는 없다 — 컨텍스트 퍼센트는 statusLine 훅만 볼 수 있고 그 슬롯은 claude-dashboard 가 쓴다(대신 사용자가 눈으로 본다). |
+| **컨텍스트 폭증** | `pre:compact`·`pre:edit-write:suggest-compact`(optional), `session:start` 주입 캡(`HARNESS_SESSION_START_MAX_CHARS`, 기본 8000자), `subagent:budget`(서브에이전트의 과탐색·장문 보고 억제). 잔량 **경고**는 없다 — 컨텍스트 퍼센트는 statusLine 훅만 볼 수 있고 그 슬롯은 Codex-dashboard 가 쓴다(대신 사용자가 눈으로 본다). |
 | **동일 실수 반복** | `stop:capture-lessons`(optional) 가 반복 교정 신호를 감지 → `/lessons add` → `skills/lessons-learned`. 안정된 교훈은 `/lessons promote`. 단 rules 는 상시 로드 예산이므로 불변 제약만 올린다. |
 | **비용 폭증** | `stop:cost-tracker`(코어) + `/cost-report`. 그리고 파이프라인을 단계별로 태깅한다 — detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. |
 
-**경계**: 한 세션 안의 read-edit-test 반복은 Claude Code + 위 optional 스택이 담당한다. 여러 워크트리·에이전트에 걸친 coordinator 루프(블로킹 ask/reply, task DAG, worker_done 대기)는 Orca `orchestration` 이 담당한다 — 둘을 겹쳐 돌리지 않는다.
+**경계**: 한 세션 안의 read-edit-test 반복은 Codex + 위 optional 스택이 담당한다. 여러 워크트리·에이전트에 걸친 coordinator 루프(블로킹 ask/reply, task DAG, worker_done 대기)는 Orca `orchestration` 이 담당한다 — 둘을 겹쳐 돌리지 않는다.
 
 **계측이 틀리면 없는 것보다 나쁘다.** 오탐이 잦은 경고는 읽는 사람을 길들여 무시하게 만들고, 그러면 진짜 루프도 함께 묻힌다. 루프 감지 로직을 바꿀 때는 `tests/hooks/loop-detection.test.js` 의 "정상 진행은 루프가 아니다" 케이스를 먼저 통과시킨다.
 
 ## Orca Integration
 
-이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅(`~/.orca/agent-hooks/claude-hook.sh`)을 `~/.claude/settings.json` 의 **11개 이벤트**에 심고(전부 `matcher: "*"`; Orca 밖에서는 환경변수가 없어 즉시 exit 하는 no-op), 자체 스킬 5종을 `~/.agents/skills/` 에서 링크한다(상시 ~878 tok).
+이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅(`~/.orca/agent-hooks/Codex-hook.sh`)을 `~/.Codex/settings.json` 의 **11개 이벤트**에 심고(전부 `matcher: "*"`; Orca 밖에서는 환경변수가 없어 즉시 exit 하는 no-op), 자체 스킬 5종을 `~/.agents/skills/` 에서 링크한다(상시 ~878 tok).
 
 지켜야 할 것 둘:
 
 - **`settings.json` 의 `hooks` 를 손으로 편집하지 않는다.** `scripts/install/merge-hooks.js` 를 쓴다. 머저의 소유권 판정은 "우리가 배포하는 스크립트를 우리 런처로 부르는가" 하나이므로 Orca 훅은 자동 보존된다 — 머저는 Orca 를 알지 못하고 알 필요도 없다.
-- **겹치는 기능은 한쪽만 쓴다.** 컨텍스트 내 팬아웃 = `Workflow`/`Agent`, 워크트리 격리·핸드오프 = `orca-cli`, 에이전트 DAG·coordinator 루프 = `orchestration`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`.
+- **겹치는 기능은 한쪽만 쓴다.** 컨텍스트 내 팬아웃 = `Workflow`/`Agent`, 워크트리 격리·핸드오프 = `orca-cli`, 에이전트 DAG·coordinator 루프 = `orchestration`, statusLine = Codex-dashboard, 세션 재개 = 네이티브 `/resume`.
 
 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 6개)**.
 
