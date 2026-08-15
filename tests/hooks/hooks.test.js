@@ -2403,15 +2403,15 @@ async function runTests() {
       const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
 
       assert.ok(hooks.hooks.PreToolUse, 'Should have PreToolUse hooks');
-      assert.ok(hooks.hooks.PostToolUse, 'Should have PostToolUse hooks');
       assert.ok(hooks.hooks.SessionStart, 'Should have SessionStart hooks');
       assert.ok(hooks.hooks.SessionEnd, 'Should have SessionEnd hooks');
       assert.ok(hooks.hooks.Stop, 'Should have Stop hooks');
       assert.ok(hooks.hooks.SubagentStart, 'Should have SubagentStart hooks');
-      // PreCompact/PostToolUseFailure live in hooks-optional.json (opt-in stack).
+      // PostToolUse/PreCompact/PostToolUseFailure live in hooks-optional.json (opt-in stack).
       const optionalPath = path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json');
       const optional = JSON.parse(fs.readFileSync(optionalPath, 'utf8'));
       assert.ok(optional.hooks.PreCompact, 'Optional stack should have PreCompact hooks');
+      assert.ok(optional.hooks.PostToolUse, 'Optional stack should have PostToolUse hooks');
     })
   )
     passed++;
@@ -2421,9 +2421,18 @@ async function runTests() {
     test('hooks.json consolidates Bash hooks into one pre and one post dispatcher', () => {
       const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks.json');
       const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
+      // post:bash:dispatcher 는 옵트인이다 — 서브훅 전원이 standard 이상이라 코어(minimal)에서
+      // 빈손으로 끝났다. 통합 자체는 여전히 "pre 1개 + post 1개" 여야 한다.
+      const optionalPath = path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json');
+      const optional = JSON.parse(fs.readFileSync(optionalPath, 'utf8'));
+
+      assert.ok(
+        !(hooks.hooks.PostToolUse || []).some(entry => entry.matcher === 'Bash'),
+        'Core hooks.json should not register a Bash PostToolUse hook'
+      );
 
       const preBash = hooks.hooks.PreToolUse.filter(entry => entry.matcher === 'Bash');
-      const postBash = hooks.hooks.PostToolUse.filter(entry => entry.matcher === 'Bash');
+      const postBash = optional.hooks.PostToolUse.filter(entry => entry.matcher === 'Bash');
 
       assert.strictEqual(preBash.length, 1, 'Should have exactly one PreToolUse Bash dispatcher');
       assert.strictEqual(postBash.length, 1, 'Should have exactly one PostToolUse Bash dispatcher');

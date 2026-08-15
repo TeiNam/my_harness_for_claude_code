@@ -682,7 +682,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('PostToolUse PR hook extracts PR URL', async () => {
-    const hookCommand = getHookCommandById(hooks, 'PostToolUse', 'post:bash:dispatcher');
+    const hookCommand = getHookCommandById(optionalHooks, 'PostToolUse', 'post:bash:dispatcher');
     // post:bash:pr-created is a standard/strict subhook; minimal (the default) skips it.
     const result = await runHookCommand(
       hookCommand,
@@ -952,9 +952,11 @@ async function runTests() {
   console.log('\nRound 51: hooks.json Schema Validation:');
 
   if (await asyncTest('hooks.json async hook has valid timeout field', async () => {
-    const asyncHook = hooks.hooks.PostToolUse.find(h =>
-      h.hooks && h.hooks[0] && h.hooks[0].async === true
-    );
+    // 이벤트를 못 박지 않는다 — 코어에서 그룹이 옵트인으로 내려가면(post:bash:dispatcher,
+    // 2026-08-15) 하드코딩한 이벤트 키가 undefined 가 되어 테스트가 무관한 이유로 깨진다.
+    const asyncHook = Object.values(hooks.hooks)
+      .flat()
+      .find(h => h.hooks && h.hooks[0] && h.hooks[0].async === true);
 
     assert.ok(asyncHook, 'Should have at least one async hook defined');
     assert.strictEqual(asyncHook.hooks[0].async, true, 'async field should be true');
