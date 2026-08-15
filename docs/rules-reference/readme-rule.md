@@ -13,7 +13,11 @@
 ## 개요
 
 README.md 생성 시 프로젝트 소스 코드를 분석하여 **상단 배지(badge) 배너**를 자동으로 구성한다.
-배지는 프로젝트에서 실제 사용 중인 기술 스택만 포함하며, 항상 **Buy Me A Coffee** 링크를 포함한다.
+배지는 프로젝트에서 실제 사용 중인 기술 스택만 포함한다.
+
+**후원 배지(Buy Me A Coffee 등)는 이 규칙에 넣지 않는다.** 개인 계정 링크를 모든
+프로젝트 README 에 자동으로 박으면 클라이언트·회사·오픈소스 레포에까지 새어 나간다.
+자기 프로젝트에 붙이고 싶으면 그때 직접 붙인다 — 규칙이 대신 결정하지 않는다.
 
 ---
 
@@ -23,17 +27,7 @@ README.md 생성 시 프로젝트 소스 코드를 분석하여 **상단 배지(
 
 ```
 [언어 배지] [프레임워크 배지] [DB 배지] [인프라 배지] [라이선스 배지]
-
-[Buy Me A Coffee 배지]
 ```
-
-### 고정 배지 (항상 포함)
-
-```markdown
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/teinam)
-```
-
-> **이 링크는 절대 변경하지 않는다. 항상 `https://buymeacoffee.com/teinam` 을 사용한다.**
 
 ---
 
@@ -144,8 +138,6 @@ README 생성 시 반드시 프로젝트 파일을 분석하여 배지를 결정
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/teinam)
-
 ## 개요
 ...
 ```
@@ -153,9 +145,8 @@ README 생성 시 반드시 프로젝트 파일을 분석하여 배지를 결정
 ### 배치 규칙
 
 1. 기술 배지들은 한 줄에 나열 (빈 줄 없이 연속)
-2. 기술 배지와 Buy Me A Coffee 배지 사이에 **빈 줄 1개**
-3. Buy Me A Coffee 배지 아래 **빈 줄 1개** 후 본문 시작
-4. 배지가 너무 많으면 (6개 초과) 카테고리별로 줄바꿈 가능
+2. 배지 줄 아래 **빈 줄 1개** 후 본문 시작
+3. 배지가 너무 많으면 (6개 초과) 카테고리별로 줄바꿈 가능
 
 ---
 
@@ -163,6 +154,6 @@ README 생성 시 반드시 프로젝트 파일을 분석하여 배지를 결정
 
 - **실제 사용 기술만 표시**: 프로젝트에서 감지되지 않는 기술의 배지는 포함하지 않는다.
 - **버전은 가능한 한 구체적으로**: major.minor 수준까지 표기 (예: `3.13`, `0.115`).
-- **Buy Me A Coffee 링크 고정**: `https://buymeacoffee.com/teinam` 변경 불가.
+- **후원·개인 계정 배지는 자동으로 넣지 않는다**: 사용자가 명시적으로 요청할 때만 추가한다.
 - **shields.io 형식 준수**: 모든 배지는 `https://img.shields.io/badge/` 기반.
 - **색상 일관성**: 각 기술의 공식 브랜드 컬러 사용 (위 매핑 테이블 참고).
