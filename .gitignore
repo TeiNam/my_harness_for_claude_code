@@ -77,8 +77,12 @@ examples/sessions/*.tmp
 marketing/
 .dmux/
 .dmux-hooks/
-.claude/worktrees/
-.claude/scheduled_tasks.lock
+# 프로젝트 로컬 Claude Code 상태 — settings.local.json·worktrees·todos·스냅샷 전부
+# 머신별이고 추적 이력이 0이다. 팀 공유 설정을 커밋할 일이 생기면 !.claude/settings.json 로 뚫는다.
+.claude/
+# tech-writer·humanize-korean 스킬이 cwd 에 만드는 작업 디렉터리
+# (01_input.txt·02_detection.json·final.md 등 run_id 별 중간 산출물)
+_workspace/
 # codex CLI 가 만드는 로컬 MCP 설정 — localhost 프록시 주소라 머신별 상태다
 .codex/
 # 도구가 CLAUDE.md 를 기계 치환해 만드는 사본. 치환이 깨지고(`~/.Codex/settings.json`)
