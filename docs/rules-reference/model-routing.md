@@ -115,6 +115,13 @@ gates a merge is `opus` even if most reviews are easy.
 
 ## Multi-Agent Orchestration
 
+**Where orchestration runs** (see CLAUDE.md → Orca Integration): inside Orca, it
+runs in **Orca `orchestration`** — Orca owns the worktrees, terminals, and
+blocking waits, and two coordinators over one work set is the failure mode to
+avoid. Outside Orca (`ORCA_AGENT_HOOK_PORT`/`_TOKEN`/`ORCA_PANE_KEY` unset),
+`ultracode` + the `Workflow` tool are the only path, limited to in-context
+fan-out. Either way the tiering rules below apply to the spawned agents.
+
 - Orchestrate on `sonnet` (or `opus` if the plan itself is the hard part) —
   subagents inherit the session model unless overridden.
 - Fan-out workers on the cheapest model sufficient for their leaf task —
