@@ -102,7 +102,7 @@ node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기�
 | **동일 실수 반복** | `stop:capture-lessons`(optional) 가 반복 교정 신호를 감지 → `/lessons add` → `skills/lessons-learned`. 안정된 교훈은 `/lessons promote`. 단 rules 는 상시 로드 예산이므로 불변 제약만 올린다. |
 | **비용 폭증** | `stop:cost-tracker`(코어) + `/cost-report`. 그리고 파이프라인을 단계별로 태깅한다 — detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. |
 
-**경계**: 한 세션 안의 read-edit-test 반복은 Claude Code + 위 optional 스택이 담당한다. 여러 워크트리·에이전트에 걸친 coordinator 루프(블로킹 ask/reply, task DAG, worker_done 대기)는 Orca `orchestration` 이 담당한다 — 둘을 겹쳐 돌리지 않는다.
+**경계**: 한 세션 안의 read-edit-test 반복은 Claude Code + 위 optional 스택이 담당한다. 그 밖의 다중 에이전트 실행(팬아웃, 블로킹 ask/reply, task DAG, worker_done 대기, 워크트리 격리)은 전부 Orca `orchestration` 이 담당한다 — 둘을 겹쳐 돌리지 않는다.
 
 **계측이 틀리면 없는 것보다 나쁘다.** 오탐이 잦은 경고는 읽는 사람을 길들여 무시하게 만들고, 그러면 진짜 루프도 함께 묻힌다. 루프 감지 로직을 바꿀 때는 `tests/hooks/loop-detection.test.js` 의 "정상 진행은 루프가 아니다" 케이스를 먼저 통과시킨다.
 
@@ -113,7 +113,9 @@ node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기�
 지켜야 할 것 둘:
 
 - **`settings.json` 의 `hooks` 를 손으로 편집하지 않는다.** `scripts/install/merge-hooks.js` 를 쓴다. 머저의 소유권 판정은 "우리가 배포하는 스크립트를 우리 런처로 부르는가" 하나이므로 Orca 훅은 자동 보존된다 — 머저는 Orca 를 알지 못하고 알 필요도 없다.
-- **겹치는 기능은 한쪽만 쓴다.** 컨텍스트 내 팬아웃 = `Workflow`/`Agent`, 워크트리 격리·핸드오프 = `orca-cli`, 에이전트 DAG·coordinator 루프 = `orchestration`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`.
+- **겹치는 기능은 한쪽만 쓴다.** 다중 에이전트 오케스트레이션(팬아웃·task DAG·coordinator 루프)은 **Orca `orchestration` 에 일임한다 — `Workflow` 툴은 쓰지 않는다.** 한 번에 한 서브에이전트를 부르는 `Agent` 호출은 오케스트레이션이 아니라 그냥 도구 호출이라 그대로 쓴다. 워크트리 격리·핸드오프 = `orca-cli`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`.
+  - 이유는 능력이 아니라 **상태의 소유자**다. 여러 에이전트가 도는 동안 워크트리·터미널·블로킹 ask/reply·worker_done 대기를 실제로 들고 있는 쪽이 Orca 다. `Workflow` 로 같은 것을 세션 컨텍스트 안에서 다시 조율하면 두 조율자가 같은 작업 집합을 놓고 경쟁한다.
+  - Claude Code 쪽 `ultracode`(매 작업마다 Workflow 저작)는 켜지 않는다. 키워드 트리거라 쓰지 않으면 켜지지 않는다. 추론을 더 원할 때는 팬아웃이 아니라 effort 를 올린다(`--effort max` / `/effort`) — `Model Routing` 항목의 "위가 아니라 옆" 원칙과 같은 방향이다.
 
 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 6개)**.
 

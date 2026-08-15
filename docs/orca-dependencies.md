@@ -67,9 +67,9 @@ Orca 는 자기 스킬을 `~/.agents/skills/<name>` 에 두고 `~/.claude/skills
 
 | 관심사 | 담당 |
 |--------|------|
-| 컨텍스트 내 팬아웃(같은 세션에서 병렬 에이전트) | `Workflow` 도구 / `Agent` 도구 + `subagent:budget` 훅 |
+| 다중 에이전트 오케스트레이션(팬아웃 · DAG · 블로킹 ask/reply · coordinator 루프) | **Orca** (`orchestration`) — 일임. `Workflow` 도구는 쓰지 않는다 |
+| 서브에이전트 1회 호출(오케스트레이션 아님, 그냥 도구 호출) | `Agent` 도구 + `subagent:budget` 훅 |
 | 워크트리 격리 실행 · 소유권 핸드오프 · 터미널 제어 | **Orca** (`orca-cli`) |
-| 여러 에이전트의 DAG · 블로킹 ask/reply · coordinator 루프 | **Orca** (`orchestration`) |
 | 한 세션 안의 read-edit-test 반복 | Claude Code + 하네스 optional 훅 스택 (`CLAUDE.md` 의 Loop Control) |
 | statusLine | **claude-dashboard 플러그인** (하네스 `harness-statusline.js` 는 2026-08 제거) |
 | 세션 재개 | Claude Code 네이티브 `/resume` 또는 Orca 워크트리가 1순위. 하네스 `/save-session`·`/resume-session` 은 *요약된* 컨텍스트를 남기고 싶을 때만 |
@@ -85,7 +85,7 @@ Orca 는 자기 스킬을 `~/.agents/skills/<name>` 에 두고 `~/.claude/skills
 | 잃는 것 | 결과 |
 |---|---|
 | Orca 훅 11개 | 이미 no-op 이었으므로 변화 없음. `merge-hooks.js --uninstall` 로도 지워지지 않으니(우리 것이 아니다) 손으로 지우려면 `settings.json` 에서 직접 |
-| Orca 스킬 5종 | 878 tok 절약. 워크트리 격리 팬아웃과 coordinator 루프는 `Workflow` 도구로 대체(컨텍스트 내 팬아웃만 가능) |
+| Orca 스킬 5종 | 878 tok 절약. **오케스트레이션을 잃는다** — 워크트리 격리 팬아웃과 coordinator 루프를 대신할 것이 없다. Orca 없이 굳이 하려면 `Workflow` 도구로 컨텍스트 내 팬아웃까지만 가능하고, 그때는 CLAUDE.md 의 "일임" 규칙을 그 환경에 한해 뒤집는 것이다 |
 | 워크트리 기반 세션 보존 | Claude Code 네이티브 `/resume`, 또는 하네스 `/save-session`·`/resume-session` |
 
 즉 하네스 자체 기능은 하나도 잃지 않는다. 반대로 **Orca 만 쓰고 하네스를 빼도** Orca 는

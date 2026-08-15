@@ -115,6 +115,11 @@ gates a merge is `opus` even if most reviews are easy.
 
 ## Multi-Agent Orchestration
 
+Orchestration itself runs in **Orca `orchestration`**, not in the Claude Code
+session (see CLAUDE.md → Orca Integration): Orca owns the worktrees, terminals,
+and blocking waits, so two coordinators over one work set is the failure mode to
+avoid. The tiering rules below apply to the agents Orca spawns.
+
 - Orchestrate on `sonnet` (or `opus` if the plan itself is the hard part) —
   subagents inherit the session model unless overridden.
 - Fan-out workers on the cheapest model sufficient for their leaf task —
