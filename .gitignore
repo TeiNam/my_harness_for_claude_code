@@ -81,6 +81,9 @@ marketing/
 .claude/scheduled_tasks.lock
 # codex CLI 가 만드는 로컬 MCP 설정 — localhost 프록시 주소라 머신별 상태다
 .codex/
+# 도구가 CLAUDE.md 를 기계 치환해 만드는 사본. 치환이 깨지고(`~/.Codex/settings.json`)
+# 원본과 드리프트하므로 추적하지 않는다 — Codex 도 CLAUDE.md 를 읽는다.
+AGENTS.md
 
 # Temporary files
 tmp/
