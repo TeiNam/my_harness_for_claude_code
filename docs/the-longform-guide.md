@@ -329,7 +329,7 @@ alias q='cd ~/Desktop/projects'
 
 **Self-Improving Memory:**
 
-- See `skills/continuous-learning/` in this repo
+- See `skills/lessons-learned/` and `/learn` in this repo. The heavier `continuous-learning-v2` stack (always-on observation accumulating "instincts", promoted via `/promote` and `/evolve`) was removed in `627dd9f` — it produced nothing in practice. If you rebuild automatic observation, start from the path where the output actually gets consumed (`/lessons` → `rules/`), not from the observer.
 - rlancemartin.github.io/2025/12/01/claude_diary/ - Session reflection pattern
 
 **System Prompts Reference:**

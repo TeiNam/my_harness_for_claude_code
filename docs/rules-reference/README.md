@@ -38,21 +38,19 @@ docs/rules-reference/   # NOT installed → costs no context. Read when relevant
 
 ### Option 1: Install Script (Recommended)
 
-```bash
-# Install common + one or more language-specific rule sets
-./install.sh typescript
-./install.sh angular
-./install.sh python
-./install.sh golang
-./install.sh web
-./install.sh swift
-./install.sh php
-./install.sh ruby
-./install.sh arkts
+There is no rules-only flag. A rule directory is tagged with `workloads:` like any other asset,
+so it arrives with the workload that owns it:
 
-# Install multiple languages at once
-./install.sh typescript python
+```bash
+./install.sh --dev=frontend           # rules/typescript/ + rules/web/  (workload: frontend)
+./install.sh --dev=python             # rules/python/                   (workload: python-backend)
+./install.sh --dev=rust               # rules/rust/                     (workload: rust)
+./install.sh --dev=frontend,python    # both
+./install.sh --data=python-data       # the python-data-tagged rule file
 ```
+
+`rules/common/` carries no `workloads:` tag — it is baseline and installs regardless of what you
+select. The four language directories are the only ones that exist; see the Structure block above.
 
 ### Option 2: Manual Installation
 
@@ -73,18 +71,14 @@ mkdir -p ~/.claude/rules/_harness
 # Install common rules (required for all projects)
 cp -r rules/common ~/.claude/rules/_harness/
 
-# Install language-specific rules based on your project's tech stack
+# Install language-specific rules based on your project's tech stack.
+# These four are the only language directories in this harness.
 cp -r rules/typescript ~/.claude/rules/_harness/
-cp -r rules/angular ~/.claude/rules/_harness/
 cp -r rules/python ~/.claude/rules/_harness/
-cp -r rules/golang ~/.claude/rules/_harness/
+cp -r rules/rust ~/.claude/rules/_harness/
 cp -r rules/web ~/.claude/rules/_harness/
-cp -r rules/swift ~/.claude/rules/_harness/
-cp -r rules/php ~/.claude/rules/_harness/
-cp -r rules/ruby ~/.claude/rules/_harness/
-cp -r rules/arkts ~/.claude/rules/_harness/
 
-# Attention ! ! ! Configure according to your actual project requirements; the configuration here is for reference only.
+# Copy only what your project actually uses — every installed rule costs context.
 ```
 
 For project-local rules, use the same namespace under the project root:
@@ -98,15 +92,15 @@ cp -r rules/typescript .claude/rules/_harness/
 ## Rules vs Skills
 
 - **Rules** define standards, conventions, and checklists that apply broadly (e.g., "80% test coverage", "no hardcoded secrets").
-- **Skills** (`skills/` directory) provide deep, actionable reference material for specific tasks (e.g., `python-patterns`, `golang-testing`).
+- **Skills** (`skills/` directory) provide deep, actionable reference material for specific tasks (e.g., `python-patterns`, `rust-testing`).
 
 Language-specific rule files reference relevant skills where appropriate. Rules tell you *what* to do; skills tell you *how* to do it.
 
 ## Adding a New Language
 
-To add support for a new language (e.g., `rust/`):
+To add support for a new language (e.g., `go/`):
 
-1. Create a `rules/rust/` directory
+1. Create a `rules/go/` directory
 2. Add files that extend the common rules:
    - `coding-style.md` — formatting tools, idioms, error handling patterns
    - `testing.md` — test framework, coverage tools, test organization
@@ -118,16 +112,17 @@ To add support for a new language (e.g., `rust/`):
    ```
    ---
    paths:
-     - "**/*.rs"
-   workloads: [rust]
+     - "**/*.go"
+   workloads: [go]
    ---
    ```
    - `paths:` is a list of globs. Claude Code loads the rule automatically when
      an edited file matches. Use the language's file extensions.
-   - Omit `paths:` only when no file glob applies — e.g. `common/` (language-agnostic)
-     and `web/` (a frontend *domain*, not a single extension; loaded via its
-     `workloads: [frontend]` install rather than glob auto-load). If you want a
-     web rule to auto-load, add the relevant globs (`**/*.tsx`, `**/*.css`).
+   - **Every non-common rule file must declare `paths:`** — all four language
+     directories do (typescript 5/5, python 6/6, rust 5/5, web 7/7), and
+     `tests/scripts/install/workloads.test.js` enforces it. `common/` is the only
+     exception: it is language-agnostic and always loaded, which is exactly why it
+     is capped at four files.
 4. After the frontmatter, each file should start with:
    ```
    > This file extends [common/xxx.md](../common/xxx.md) with <Language> specific content.
@@ -141,13 +136,13 @@ For non-language domains like `web/`, follow the same layered pattern when there
 When language-specific rules and common rules conflict, **language-specific rules take precedence** (specific overrides general). This follows the standard layered configuration pattern (similar to CSS specificity or `.gitignore` precedence).
 
 - `rules/common/` defines universal defaults applicable to all projects.
-- `rules/golang/`, `rules/python/`, `rules/swift/`, `rules/php/`, `rules/typescript/`, etc. override those defaults where language idioms differ.
+- `rules/python/`, `rules/rust/`, `rules/typescript/`, `rules/web/` override those defaults where language idioms differ.
 
 ### Example
 
-`common/coding-style.md` recommends immutability as a default principle. A language-specific `golang/coding-style.md` can override this:
+`common/coding-style.md` recommends immutability as a default principle. A language-specific `python/coding-style.md` can override this:
 
-> Idiomatic Go uses pointer receivers for struct mutation — see [common/coding-style.md](../common/coding-style.md) for the general principle, but Go-idiomatic mutation is preferred here.
+> pandas and numpy expose in-place operations (`df.drop(..., inplace=True)`, `arr += 1`) that are idiomatic in analysis code — see [common/coding-style.md](../common/coding-style.md) for the general principle, but in-place mutation is acceptable on a locally-owned frame.
 
 ### Common rules with override notes
 

@@ -40,7 +40,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ## High-value Agents
 
-`agents/` 41종. 대표: `rdbms-data-modeler`(대상 DB 확인 후 mysql/postgres 가이드라인 스킬로 라우팅) · `article-writer` · `content-creator` · `devops`(mutation 전 항상 plan/dry-run) · `translator-docs` · `deep-researcher`. 전체 목록과 선정 이유는 **`docs/harness-assets.md`**.
+`agents/` 48종. 대표: `rdbms-data-modeler`(대상 DB 확인 후 mysql/postgres 가이드라인 스킬로 라우팅) · `article-writer` · `content-creator` · `devops`(mutation 전 항상 plan/dry-run) · `translator-docs` · `deep-researcher`. 전체 목록과 선정 이유는 **`docs/harness-assets.md`**.
 
 ### Model Routing (per-agent model tiers)
 
@@ -52,7 +52,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ## High-value Skills for Owner's Workloads
 
-`skills/` 128종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
+`skills/` 121종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
 
 새 스킬을 추가할 때 확인할 것 두 가지: ① 동반 플러그인(`docs/plugin.md`)과 겹치지 않는지 — 겹쳐서 제거된 전례가 있다(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`) ② 기존 스킬의 부분집합이 아닌지(`seo` 가 `seo-geo-aeo` 에 흡수된 전례).
 
