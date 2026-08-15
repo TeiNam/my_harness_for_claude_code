@@ -16,12 +16,31 @@ User request → Claude picks a tool → PreToolUse hook runs → Tool executes 
 
 ## Hooks in This Harness
 
+The hook stack is split in two, and **only the first half is installed by default**:
+
+| File | Groups | Scope |
+|---|---:|---|
+| `hooks/hooks.json` | 6 | **Core.** Hard-to-undo action blocking + lifecycle only: `pre:bash:dispatcher`, `session:start`, `stop:session-end`, `stop:cost-tracker`, `session:end:marker`, `subagent:budget` |
+| `hooks/hooks-optional.json` | 24 | **Opt-in.** Every quality gate, blocking check, and observer hook (`post:quality-gate`, `stop:run-tests`, `pre:write:doc-file-warning`, `post:harness-context-monitor`, `stop:capture-lessons`, `stop:desktop-notify`, …) |
+
+The design rule: hooks own hard-to-undo action blocking and lifecycle; quality, observation,
+and governance run as commands (`/quality-gate`, `/code-review`, `/cost-report`) when a human
+asks for them. The reason is interference, not cost — a warn/block hook firing on every `Edit`
+is the biggest source of instructions that contradict each other. **No core hook binds to
+`Edit` or `Write`.**
+
+Add the opt-in stack per project with `node scripts/install/merge-hooks.js --optional`. The
+merge is *declarative*: re-running it without `--optional` sweeps that stack back out.
+
+The tables in the sections below cover **both** stacks. Anything not in the six core ids
+above requires `--optional`.
+
 Memory persistence lifecycle definitions live in `hooks/memory-persistence/`.
 The executable hook graph remains `hooks/hooks.json`; the memory persistence directory is the stable contract for SessionStart, PreCompact, observation, activity tracking, and SessionEnd behavior.
 
 ## Installing These Hooks
 
-The recommended path is `install.sh --with-hooks` (or `install.ps1 -WithHooks` on Windows). It symlinks the harness into `~/.claude/` *and* merges every hook from `hooks/hooks.json` into `~/.claude/settings.json`.
+The recommended path is `install.sh --with-hooks` (or `install.ps1 -WithHooks` on Windows). It symlinks the harness into `~/.claude/` *and* merges the six core groups from `hooks/hooks.json` into `~/.claude/settings.json`. The opt-in stack is a separate step (`merge-hooks.js --optional`, see above).
 
 ```bash
 ./install.sh --with-hooks              # install + merge
@@ -34,13 +53,19 @@ What the merge guarantees:
 - A timestamped backup is written next to `settings.json` (`settings.json.bak.<ISO>`) before any change.
 - Hooks are keyed by `id` (e.g. `pre:bash:dispatcher`, `stop:cost-tracker`). Re-running the install replaces same-`id` entries; it never duplicates them.
 - Any hook entry the user added with a non-harness `id` is preserved as-is.
-- `--uninstall` removes only entries whose `id` starts with `pre:`, `post:`, `session:`, or `stop:` — user-added entries stay.
+- **The merge is declarative.** After it runs, the harness-owned hooks in `settings.json` match
+  exactly the set that was merged — every other harness hook is swept out, including ids retired
+  from `hooks.json` and id-less groups left by older installs. Ownership is decided by one test:
+  does the command invoke a script we ship through our own launcher? Third-party hooks (Orca's
+  `~/.orca/agent-hooks/claude-hook.sh`, for one) carry no such marker and survive untouched.
+- Because of that sweep, run `--dry-run` first when you are unsure what will be removed.
 
 If you prefer to merge manually, you can call the merger directly:
 
 ```bash
-node scripts/install/merge-hooks.js --dry-run
-node scripts/install/merge-hooks.js
+node scripts/install/merge-hooks.js --dry-run    # preview, including the sweep list
+node scripts/install/merge-hooks.js              # core stack only
+node scripts/install/merge-hooks.js --optional   # core + the 24 opt-in groups
 node scripts/install/merge-hooks.js --uninstall
 ```
 
@@ -116,8 +141,8 @@ Remove or comment out the hook entry in `hooks.json`. If installed as a plugin, 
 Use environment variables to control hook behavior without editing `hooks.json`:
 
 ```bash
-# minimal | standard | strict (default: standard)
-export HARNESS_HOOK_PROFILE=standard
+# minimal | standard | strict (default: minimal)
+export HARNESS_HOOK_PROFILE=minimal
 
 # Disable specific hook IDs (comma-separated)
 export HARNESS_DISABLED_HOOKS="pre:bash:tmux-reminder,post:edit:typecheck"
@@ -141,10 +166,16 @@ Windows PowerShell:
 [Environment]::SetEnvironmentVariable('HARNESS_CONTEXT_MONITOR_COST_WARNINGS', 'off', 'User')
 ```
 
-Profiles:
-- `minimal` — keep essential lifecycle and safety hooks only.
-- `standard` — default; balanced quality + safety checks.
-- `strict` — enables additional reminders and stricter guardrails.
+Profiles. All three install the same six core groups — the profile no longer changes *how many*
+groups run, only how strict the sub-hooks inside `pre:bash:dispatcher` are:
+
+- `minimal` — **default.** `block-no-verify` and `git-push-reminder` (default-branch push: warns here, blocks under `strict`).
+- `standard` — adds `auto-tmux-dev`.
+- `strict` — adds `tmux-reminder`, `commit-quality`, `gateguard-fact-force`.
+
+`gateguard-fact-force` is `strict`-only. When you change a profile CSV, edit both `hooks.json`
+and the dispatcher copy — a past drift where only the dispatcher said `standard,strict` blocked
+the first `Bash` call of every `standard` session.
 
 ### Writing Your Own Hook
 
