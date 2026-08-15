@@ -271,7 +271,7 @@ export BRAVE_API_KEY="BSA_..."   # api.search.brave.com/app/keys
 - 리뷰: `/code-review`, `/cross-review`(codex·kiro-cli 교차 모델), `/python-review`, `/rust-review`, `/fastapi-review`
 - 빌드 / 테스트: `/build-fix`, `/rust-build`, `/test-coverage`
 - 정리 / 게이트: `/refactor-clean`, `/security-scan`, `/quality-gate`
-- 학습 / 스킬: `/skill-create`, `/skill-health`, `/learn`
+- 학습 / 스킬: `/skill-create`, `/learn`, `/lessons`
 - 세션: `/save-session`, `/resume-session`, `/checkpoint`
 
 전체 목록과 각 커맨드가 참조하는 에이전트·스킬은 `docs/COMMAND-REGISTRY.json`에서 확인할 수 있습니다.

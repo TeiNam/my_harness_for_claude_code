@@ -120,11 +120,15 @@ node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기�
 
 ## Self-evolution (학습 메커니즘)
 
-세 층위로 무게가 다르다. 가벼운 것부터 무거운 것 순:
+두 층위로 무게가 다르다. 가벼운 것부터 무거운 것 순:
 
 - **lessons-learned** (경량, 한 줄 교훈 로그) — `skills/lessons-learned/SKILL.md` (manual inclusion) 에 반복 교정 교훈을 한 줄씩 누적. `scripts/hooks/capture-lessons.js` (Stop hook, id `stop:capture-lessons`) 가 transcript 에서 반복 교정 신호(사용자 정정 / 빌드·테스트 실패 / 리뷰 지적)를 휴리스틱 감지하면 `systemMessage` 로 "`/lessons add` 권장" 한 줄 알림을 띄운다 — 파일은 사용자 확인 후 `/lessons` 로만 기록(자동 편집 안 함). Stop 이벤트는 `additionalContext` 를 허용하지 않으므로 systemMessage 로만 알린다. kiro-with-harness 의 Kiro `askAgent` hook 을 재해석한 것. 테스트: `tests/hooks/capture-lessons.test.js`.
 - **`/learn`** (중간, 패턴→skill) — 비자명한 문제 해결을 재사용 skill 파일 1개로 추출. 추출 후 품질 게이트(체크리스트 + Save/Improve/Absorb/Drop 판정)와 저장 위치(Global vs Project) 결정을 거친다. (구 `/learn-eval` 흡수됨 — 2026-06 통합.)
-- **continuous-learning-v2** (자동, instinct) — 상시 관찰(`observe-runner.js`) → instinct 누적 → `/promote`·`/evolve` 로 command/skill/agent 승격.
+
+**자동 층위(instinct)는 없다.** 상시 관찰로 instinct 를 누적하고 `/promote`·`/evolve` 로
+승격하던 continuous-learning-v2 스택은 산출물이 0이라 `627dd9f` 에서 제거됐다(-13,062줄).
+자동 관찰을 다시 붙이려면 그 커밋을 되살리는 것이 아니라, 관찰 결과가 실제로 쓰이는
+경로(`/lessons` → `rules/`)부터 확인하고 시작한다.
 
 안정적으로 반복되는 lesson 은 `/lessons promote` 로 `rules/` steering 규칙으로 올린다.
 
@@ -142,7 +146,7 @@ node tests/hooks/hooks.test.js
 - `/code-review` / `/python-review` / `/rust-review` / `/fastapi-review`
 - `/build-fix` / `/rust-build` / `/test-coverage`
 - `/refactor-clean` / `/security-scan` / `/quality-gate`
-- `/skill-create` / `/skill-health` / `/learn` / `/lessons` / `/evolve` / `/promote`
+- `/skill-create` / `/learn` / `/lessons`
 - `/save-session` / `/resume-session` / `/checkpoint`
 
 ## Language
