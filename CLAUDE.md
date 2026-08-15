@@ -113,9 +113,29 @@ node scripts/install/merge-hooks.js              # 끝난 뒤: 코어만 남기�
 지켜야 할 것 둘:
 
 - **`settings.json` 의 `hooks` 를 손으로 편집하지 않는다.** `scripts/install/merge-hooks.js` 를 쓴다. 머저의 소유권 판정은 "우리가 배포하는 스크립트를 우리 런처로 부르는가" 하나이므로 Orca 훅은 자동 보존된다 — 머저는 Orca 를 알지 못하고 알 필요도 없다.
-- **겹치는 기능은 한쪽만 쓴다.** 다중 에이전트 오케스트레이션(팬아웃·task DAG·coordinator 루프)은 **Orca `orchestration` 에 일임한다 — `Workflow` 툴은 쓰지 않는다.** 한 번에 한 서브에이전트를 부르는 `Agent` 호출은 오케스트레이션이 아니라 그냥 도구 호출이라 그대로 쓴다. 워크트리 격리·핸드오프 = `orca-cli`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`.
-  - 이유는 능력이 아니라 **상태의 소유자**다. 여러 에이전트가 도는 동안 워크트리·터미널·블로킹 ask/reply·worker_done 대기를 실제로 들고 있는 쪽이 Orca 다. `Workflow` 로 같은 것을 세션 컨텍스트 안에서 다시 조율하면 두 조율자가 같은 작업 집합을 놓고 경쟁한다.
-  - Claude Code 쪽 `ultracode`(매 작업마다 Workflow 저작)는 켜지 않는다. 키워드 트리거라 쓰지 않으면 켜지지 않는다. 추론을 더 원할 때는 팬아웃이 아니라 effort 를 올린다(`--effort max` / `/effort`) — `Model Routing` 항목의 "위가 아니라 옆" 원칙과 같은 방향이다.
+- **겹치는 기능은 한쪽만 쓴다.** 워크트리 격리·핸드오프 = `orca-cli`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`. 다중 에이전트 오케스트레이션은 아래 2분기다.
+
+### 오케스트레이션은 Orca 우선, 없으면 ultracode
+
+| 환경 | 팬아웃·task DAG·coordinator 루프 |
+|---|---|
+| **Orca 안** (기본) | **Orca `orchestration` 에 일임.** `Workflow` 툴·`ultracode` 는 쓰지 않는다 |
+| **Orca 밖** | **`ultracode` + `Workflow` 가 유일한 경로** — 그때는 쓴다 |
+
+판정은 환경변수로 한다: `ORCA_AGENT_HOOK_PORT`·`ORCA_AGENT_HOOK_TOKEN`·`ORCA_PANE_KEY`
+중 하나라도 비어 있으면 Orca 밖이다(Orca 훅이 no-op 으로 빠지는 것과 같은 조건).
+`orchestration` 스킬이 스킬 목록에 없는 것도 같은 신호다.
+
+Orca 안에서 `Workflow` 를 쓰지 않는 이유는 능력이 아니라 **상태의 소유자**다. 여러
+에이전트가 도는 동안 워크트리·터미널·블로킹 ask/reply·worker_done 대기를 실제로 들고
+있는 쪽이 Orca 이고, 같은 작업 집합에 조율자가 둘이면 경쟁한다. Orca 밖에서는 그 상태를
+아무도 안 들고 있으므로 경쟁 상대가 없다 — 금지의 근거가 사라지니 규칙도 뒤집힌다.
+단 `Workflow` 는 **컨텍스트 내 팬아웃까지만** 가능하다(워크트리 격리·블로킹 ask/reply는
+못 한다). 대체가 아니라 축소된 대안이다.
+
+한 번에 한 서브에이전트를 부르는 `Agent` 호출은 어느 쪽에서든 오케스트레이션이 아니라
+그냥 도구 호출이라 그대로 쓴다. 그리고 **추론을 더 원하는 것**과 **일을 쪼개는 것**은
+다른 축이다 — 전자는 팬아웃이 아니라 effort 를 올린다(`--effort max` / `/effort`).
 
 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 6개)**.
 
