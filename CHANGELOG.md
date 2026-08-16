@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-08-16
+
+- refactor(hooks): 코어 스택을 2그룹으로 줄이고 죽은 스크립트 7개 제거 (#28) (00a9dc6)
+
 ## 2026-08-15
 
 - docs: 낡은 문서 4개 갱신 — rules-reference 유령 언어, hooks 코어/옵트인, 자산 카운트 (#27) (a525462)

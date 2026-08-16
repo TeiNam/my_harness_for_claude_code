@@ -29,6 +29,13 @@ const os = require('os');
 const HARNESS_ID_PREFIXES = ['pre:', 'post:', 'session:', 'stop:', 'subagent:'];
 
 /**
+ * 설치가 심는 프로파일. `hook-flags.js` 의 코드 기본값과 같은 값이어야 한다 —
+ * 두 곳이 어긋나면 "설치본은 minimal 인데 런타임은 다른 것" 이 된다.
+ */
+const DEFAULT_HOOK_PROFILE = 'minimal';
+const VALID_HOOK_PROFILES = ['minimal', 'standard', 'strict'];
+
+/**
  * Ownership is decided by the script a group actually invokes, never by its id.
  * An id prefix like `pre:` is a harness convention, not a fact — a third-party
  * hook may use the same shape, and deleting it would silently disable it.
@@ -388,6 +395,43 @@ function warnOptionalNeedsProfile(settings) {
   );
 }
 
+/**
+ * 설치는 프로파일을 **명시한다.** 코드 기본값도 minimal 이지만 암묵적 기본값은
+ * 사용자가 볼 수도 바꿀 수도 없다 — settings.json 에 적혀 있어야 편집 대상이 된다.
+ *
+ * 이미 값이 있으면 건드리지 않는다: `standard`/`strict` 는 사용자의 결정이다.
+ * 값이 유효하지 않으면 고치지 않고 알린다 — 남의 데이터를 조용히 덮어쓰는 것보다
+ * 런타임이 minimal 로 떨어진다는 사실을 알리는 편이 낫다.
+ *
+ * @param {object} next 쓰기 직전의 settings 객체 (제자리 수정)
+ * @returns {string|null} 보고할 한 줄, 없으면 null
+ */
+function applyDefaultHookProfile(next) {
+  const current = next.env && next.env.HARNESS_HOOK_PROFILE;
+  if (typeof current === 'string' && current.trim()) {
+    const normalized = current.trim().toLowerCase();
+    if (VALID_HOOK_PROFILES.includes(normalized)) return null;
+    return `HARNESS_HOOK_PROFILE="${current}" 은 유효하지 않습니다 — 런타임은 ${DEFAULT_HOOK_PROFILE} 로 떨어집니다 (${VALID_HOOK_PROFILES.join('|')})`;
+  }
+  next.env = next.env || {};
+  next.env.HARNESS_HOOK_PROFILE = DEFAULT_HOOK_PROFILE;
+  return `env.HARNESS_HOOK_PROFILE="${DEFAULT_HOOK_PROFILE}" 기록 (없어서 설치 기본값)`;
+}
+
+/**
+ * 우리가 심은 기본값만 걷는다. `standard`/`strict` 로 올려둔 값은 사용자 의도이므로
+ * 훅을 지워도 남긴다 — 나중에 다시 설치할 때 그 선택이 살아 있어야 한다.
+ *
+ * @param {object} next
+ * @returns {string|null}
+ */
+function removeDefaultHookProfile(next) {
+  if (!next.env || next.env.HARNESS_HOOK_PROFILE !== DEFAULT_HOOK_PROFILE) return null;
+  delete next.env.HARNESS_HOOK_PROFILE;
+  if (Object.keys(next.env).length === 0) delete next.env;
+  return `env.HARNESS_HOOK_PROFILE 제거 (설치 기본값이라 하네스 소유)`;
+}
+
 function main(argv = process.argv) {
   const flags = parseArgs(argv);
   if (flags.help) {
@@ -415,10 +459,12 @@ function main(argv = process.argv) {
   const settings = readJson(settingsPath) || {};
 
   const { next, summary } = flags.uninstall ? planUninstall(settings, hooksDoc) : planMerge(settings, hooksDoc);
+  const profileNote = flags.uninstall ? removeDefaultHookProfile(next) : applyDefaultHookProfile(next);
 
   console.log(`hooks files:   ${sources.join(', ')}`);
   console.log(`settings file: ${settingsPath}`);
   printPlan(flags.uninstall ? 'uninstall' : 'merge', summary);
+  if (profileNote) console.log(`\n[env] ${profileNote}`);
 
   if (flags.optional && !flags.uninstall) warnOptionalNeedsProfile(settings);
 
@@ -469,5 +515,9 @@ module.exports = {
   isHarnessGroup,
   runsHarnessScript,
   isLegacyHarnessGroup,
-  referencesHarnessScript
+  referencesHarnessScript,
+  applyDefaultHookProfile,
+  removeDefaultHookProfile,
+  DEFAULT_HOOK_PROFILE,
+  VALID_HOOK_PROFILES
 };
