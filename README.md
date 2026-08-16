@@ -22,10 +22,10 @@
 | `commands/` | 37 | 슬래시 커맨드 (frontmatter 기반 markdown) |
 | `skills/` | 115 | 도메인 지식·워크플로 정의 (NoSQL / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
 | `rules/` | 27 | common 4개(상시 로드되는 불변 제약) + 언어별 23개(typescript / python / rust / web) — 절차·참고 문서는 `docs/rules-reference/` |
-| `hooks/` | 6 + 24 | 코어 훅 6그룹(기본 설치) + 옵트인 24그룹 (실행 스크립트 45종) |
+| `hooks/` | 2 + 28 | 코어 훅 2그룹(기본 설치 — 되돌리기 어려운 행위 차단만) + 옵트인 28그룹 (실행 스크립트 40종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
 | `scripts/` | — | 훅 핸들러 / 설치 / CI 검증 / 세션 관리 도구 |
-| `tests/` | — | 1554개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
+| `tests/` | — | 1491개 테스트 (검증기 + 라이브러리 + 훅 + 통합) |
 | `docs/` | — | 장문 가이드(글쓰기 / 보안)와 steering 규칙 |
 
 상세 인덱스는 `docs/COMMAND-REGISTRY.json`에 자동 생성되어 있습니다.
@@ -113,7 +113,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 ./install.sh --dev=frontend,python              # 프론트 + 파이썬 백엔드
 ./install.sh --cloud=infra,finops               # AWS 인프라·컨테이너 + 비용
 ./install.sh --data=duckdb,python-data          # DuckDB + 파이썬 분석
-./install.sh --data=mysql                       # MySQL 가이드라인만 (Postgres 제외)
+./install.sh --data=mongodb                     # MongoDB 가이드라인만 (DynamoDB 제외)
 ./install.sh --dev=obsidian                     # Obsidian 플러그인 + 프론트
 ./install.sh --research=websearch               # 웹 검색·자료조사 (exa·brave·deep-researcher)
 ./install.sh --research=report                  # 기술 리포트 작성·검증 (tech-writer)
@@ -127,7 +127,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 | `dev` | `frontend`, `python`(→ `python-backend`), `rust`, `nodejs`, `obsidian`(→ `obsidian`+`frontend`), `chrome`·`claude`(예약) | — |
 | `cloud` | `infra`(→ `cloud`+`devops`), `finops`, `integration` | — |
 | `ai` | `llm`(→ `ai`) | — |
-| `data` | `duckdb`, `python-data`, `aws-analytics`, `mysql`, `postgres`, `mongodb`, `dynamodb`, `aws-rds` | — |
+| `data` | `duckdb`, `python-data`, `aws-analytics`, `mongodb`, `dynamodb`, `aws-rds` | — |
 | `research` | `websearch`(→ `research`), `report` | — |
 | `writing` | `general`(→ `writing`), `social` | `social`: `voice` / `content` / `visual` (`--writing-social=`) |
 
@@ -152,7 +152,7 @@ hooks·mcp 는 설치 후 대화형 터미널(TTY)일 때 추가 설치할지 �
 바로 기동합니다(둘 다 비대화형에서도 동작). `--no-extras` 또는 비대화형(CI·파이프)
 이면 프롬프트 없이 워크로드만 설치합니다.
 
-저수준 워크로드 키를 직접 다루고 싶으면 `--workload=python-backend,mysql` / `--skip-workload=ai,nodejs` 도 그대로 씁니다 (메뉴 플래그보다 우선).
+저수준 워크로드 키를 직접 다루고 싶으면 `--workload=python-backend,mongodb` / `--skip-workload=ai,nodejs` 도 그대로 씁니다 (메뉴 플래그보다 우선).
 
 ### Windows
 
@@ -160,7 +160,7 @@ hooks·mcp 는 설치 후 대화형 터미널(TTY)일 때 추가 설치할지 �
 .\install.ps1                                                         # 대화형 (Windows Terminal)
 .\install.ps1 -All
 .\install.ps1 -Dev frontend,python
-.\install.ps1 -Data mysql,postgres -WithHooks
+.\install.ps1 -Data mongodb,dynamodb -WithHooks
 .\install.ps1 -Cloud infra,finops                                     # AWS 인프라·컨테이너 + 비용
 .\install.ps1 -WithMcp                                                # 묻지 않고 MCP proxy 기동 (docker compose up -d)
 .\install.ps1 -WritingSocial voice,content                            # 소셜 상세 — 보이스 + 콘텐츠
@@ -172,9 +172,9 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 
 각 자산의 그룹은 frontmatter 의 `workloads:` 키가 결정합니다 (`workloads: [python-backend]`, `workloads: [obsidian, frontend]` 등). 키가 없거나 frontmatter 자체가 없는 파일은 `scripts/install/workloads.js` 의 휴리스틱이 폴백으로 분류합니다 (rules/ 는 부모 폴더 기준). 일괄 재태깅은 `node scripts/install/tag-assets.js --dry-run` 으로 미리보고 `--apply` 로 적용합니다.
 
-전체 워크로드 키 목록: `core, python-backend, python-data, rust, nodejs, cloud, ai, frontend, obsidian, plugin-chrome, plugin-claude, mysql, postgres, mongodb, dynamodb, writing, social-voice, social-content, social-visual` (그 외 메뉴 비노출·수동 전용 키 `lab`).
+전체 워크로드 키 목록: `ai, aws-rds, cloud, core, data-analysis, devops, dynamodb, finops, frontend, integration, mongodb, nodejs, obsidian, plugin-chrome, plugin-claude, python-backend, python-data, report, research, rust, social-content, social-visual, social-voice, writing` (그 외 메뉴 비노출·수동 전용 키 `lab`).
 
-훅 병합은 `id`(`pre:bash:dispatcher`, `stop:cost-tracker` 등) 기준으로 멱등하게 동작하며, 변경 전 `settings.json.bak.<ISO>` 백업을 남깁니다. 사용자가 수동으로 추가한 훅 항목은 건드리지 않습니다.
+훅 병합은 **선언적**입니다 — 실행 후 하네스 소유분은 머지한 집합과 정확히 일치하고, 은퇴한 훅은 자동으로 걷힙니다. 소유권은 `id` 가 아니라 **어떤 스크립트를 부르는가**로 판정하므로(Claude Code 가 `settings.json` 을 재작성할 때 `id` 를 떨어뜨립니다) 사용자·서드파티 훅은 보존됩니다. 변경 전 `settings.json.bak.<ISO>` 백업을 남깁니다. 판정 기준과 은퇴 이력은 `docs/hooks-policy.md`.
 
 `hooks/prompt-pack.json`은 실행용이 아닌 참고용 프롬프트 모음으로, `hooks/README-prompt-pack.md`를 참고해 세션이나 `CLAUDE.md`에 직접 붙여 사용합니다.
 

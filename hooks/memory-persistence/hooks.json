@@ -1,33 +1,41 @@
 {
-  "description": "Reference lifecycle hook definitions for harness memory persistence. The production hook graph is hooks/hooks.json.",
+  "description": "Reference lifecycle hook definitions for harness memory persistence. Every entry lives in hooks/hooks-optional.json (opt-in, standard+); the core graph is hooks/hooks.json (2 groups). Nothing executes this file.",
   "events": [
     {
       "event": "SessionStart",
       "id": "session:start",
       "script": "scripts/hooks/session-start-bootstrap.js",
       "purpose": "Load bounded prior context and detect project state at session start.",
-      "blocking": false
+      "blocking": false,
+      "stack": "optional",
+      "requires": "merge-hooks.js --optional + HARNESS_HOOK_PROFILE=standard|strict"
     },
     {
       "event": "PreCompact",
       "id": "pre:compact",
       "script": "scripts/hooks/pre-compact.js",
       "purpose": "Persist session state before context compaction.",
-      "blocking": false
+      "blocking": false,
+      "stack": "optional",
+      "requires": "merge-hooks.js --optional + HARNESS_HOOK_PROFILE=standard|strict"
     },
     {
       "event": "PostToolUse",
       "id": "post:session-activity-tracker",
       "script": "scripts/hooks/session-activity-tracker.js",
       "purpose": "Record per-session tool calls and file activity for harness metrics.",
-      "blocking": false
+      "blocking": false,
+      "stack": "optional",
+      "requires": "merge-hooks.js --optional + HARNESS_HOOK_PROFILE=standard|strict"
     },
     {
       "event": "SessionEnd",
-      "id": "session:end",
+      "id": "session:end:marker",
       "script": "scripts/hooks/session-end.js",
       "purpose": "Persist session-end summaries when transcript metadata is available.",
-      "blocking": false
+      "blocking": false,
+      "stack": "optional",
+      "requires": "merge-hooks.js --optional + HARNESS_HOOK_PROFILE=standard|strict"
     }
   ]
 }

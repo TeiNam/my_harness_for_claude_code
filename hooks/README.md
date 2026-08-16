@@ -20,27 +20,30 @@ The hook stack is split in two, and **only the first half is installed by defaul
 
 | File | Groups | Scope |
 |---|---:|---|
-| `hooks/hooks.json` | 6 | **Core.** Hard-to-undo action blocking + lifecycle only: `pre:bash:dispatcher`, `session:start`, `stop:session-end`, `stop:cost-tracker`, `session:end:marker`, `subagent:budget` |
-| `hooks/hooks-optional.json` | 24 | **Opt-in.** Every quality gate, blocking check, and observer hook (`post:quality-gate`, `stop:run-tests`, `pre:write:doc-file-warning`, `post:harness-context-monitor`, `stop:capture-lessons`, `stop:desktop-notify`, …) |
+| `hooks/hooks.json` | 2 | **Core.** Hard-to-undo action blocking only: `pre:bash:dispatcher` (Bash preflight), `subagent:budget` (subagent budget brief) |
+| `hooks/hooks-optional.json` | 28 | **Opt-in.** Every quality gate, blocking check, and observer hook (`post:quality-gate`, `stop:run-tests`, `pre:write:doc-file-warning`, `post:harness-context-monitor`, `stop:capture-lessons`, `stop:desktop-notify`, …) |
 
-The design rule: hooks own hard-to-undo action blocking and lifecycle; quality, observation,
+The design rule: hooks own hard-to-undo action blocking, nothing else; quality, observation,
 and governance run as commands (`/quality-gate`, `/code-review`, `/cost-report`) when a human
 asks for them. The reason is interference, not cost — a warn/block hook firing on every `Edit`
 is the biggest source of instructions that contradict each other. **No core hook binds to
-`Edit` or `Write`.**
+`Edit`, `Write` or `Stop`.** The four lifecycle groups (`session:start`, `stop:session-end`,
+`stop:cost-tracker`, `session:end:marker`) were demoted to the opt-in stack on 2026-08-16 —
+each wrote a file with no reader under `minimal`, or was already covered by a command.
+See `docs/hooks-policy.md` for the per-hook rationale.
 
 Add the opt-in stack per project with `node scripts/install/merge-hooks.js --optional`. The
 merge is *declarative*: re-running it without `--optional` sweeps that stack back out.
 
-The tables in the sections below cover **both** stacks. Anything not in the six core ids
-above requires `--optional`.
+The tables in the sections below cover **both** stacks. Anything but the two core ids above
+requires `--optional`.
 
 Memory persistence lifecycle definitions live in `hooks/memory-persistence/`.
 The executable hook graph remains `hooks/hooks.json`; the memory persistence directory is the stable contract for SessionStart, PreCompact, observation, activity tracking, and SessionEnd behavior.
 
 ## Installing These Hooks
 
-The recommended path is `install.sh --with-hooks` (or `install.ps1 -WithHooks` on Windows). It symlinks the harness into `~/.claude/` *and* merges the six core groups from `hooks/hooks.json` into `~/.claude/settings.json`. The opt-in stack is a separate step (`merge-hooks.js --optional`, see above).
+The recommended path is `install.sh --with-hooks` (or `install.ps1 -WithHooks` on Windows). It symlinks the harness into `~/.claude/` *and* merges the two core groups from `hooks/hooks.json` into `~/.claude/settings.json`. The opt-in stack is a separate step (`merge-hooks.js --optional`, see above).
 
 ```bash
 ./install.sh --with-hooks              # install + merge
@@ -51,8 +54,10 @@ The recommended path is `install.sh --with-hooks` (or `install.ps1 -WithHooks` o
 What the merge guarantees:
 
 - A timestamped backup is written next to `settings.json` (`settings.json.bak.<ISO>`) before any change.
-- Hooks are keyed by `id` (e.g. `pre:bash:dispatcher`, `stop:cost-tracker`). Re-running the install replaces same-`id` entries; it never duplicates them.
-- Any hook entry the user added with a non-harness `id` is preserved as-is.
+- Re-running the install replaces the harness-owned entries; it never duplicates them. Note that
+  `id` is a report-only field — Claude Code drops keys outside its schema when it rewrites
+  `settings.json`, so ownership is decided by the script a group invokes (see below).
+- Any hook entry the user added is preserved as-is.
 - **The merge is declarative.** After it runs, the harness-owned hooks in `settings.json` match
   exactly the set that was merged — every other harness hook is swept out, including ids retired
   from `hooks.json` and id-less groups left by older installs. Ownership is decided by one test:
@@ -142,7 +147,7 @@ Use environment variables to control hook behavior without editing `hooks.json`:
 
 ```bash
 # minimal | standard | strict (default: minimal)
-export HARNESS_HOOK_PROFILE=minimal
+export HARNESS_HOOK_PROFILE=minimal   # install writes this into settings.json env
 
 # Disable specific hook IDs (comma-separated)
 export HARNESS_DISABLED_HOOKS="pre:bash:tmux-reminder,post:edit:typecheck"
