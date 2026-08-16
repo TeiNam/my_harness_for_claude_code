@@ -33,19 +33,14 @@ function fromBashPath(filePath) {
   }
 
   try {
-    return execFileSync(
-      'bash',
-      ['-lc', 'cygpath -w -- "$1"', 'bash', rawPath],
-      { stdio: ['ignore', 'pipe', 'ignore'] }
-    )
+    return execFileSync('bash', ['-lc', 'cygpath -w -- "$1"', 'bash', rawPath], { stdio: ['ignore', 'pipe', 'ignore'] })
       .toString()
       .trim();
   } catch {
     // Fall back to common Git Bash path shapes when cygpath is unavailable.
   }
 
-  const match = rawPath.match(/^\/(?:cygdrive\/)?([A-Za-z])\/(.*)$/)
-    || rawPath.match(/^\/\/([A-Za-z])\/(.*)$/);
+  const match = rawPath.match(/^\/(?:cygdrive\/)?([A-Za-z])\/(.*)$/) || rawPath.match(/^\/\/([A-Za-z])\/(.*)$/);
   if (match) {
     return `${match[1].toUpperCase()}:\\${match[2].replace(/\//g, '\\')}`;
   }
@@ -282,7 +277,6 @@ function assertNoProjectDetectionSideEffects(homeDir, testName) {
   assert.strictEqual(projectEntries.length, 0, `${testName} should not create project directories`);
 }
 
-
 function runPatchedRunAll(tempRoot) {
   const wrapperPath = path.join(tempRoot, 'run-all-wrapper.js');
   const tempTestsDir = path.join(tempRoot, 'tests');
@@ -400,10 +394,7 @@ async function runTests() {
 
       // Create a real session file
       const sessionFile = path.join(sessionsDir, '2026-02-11-efgh5678-session.tmp');
-      fs.writeFileSync(
-        sessionFile,
-        buildSessionStartFixture('I worked on authentication refactor.', { title: '# Real Session' })
-      );
+      fs.writeFileSync(sessionFile, buildSessionStartFixture('I worked on authentication refactor.', { title: '# Real Session' }));
 
       try {
         const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
@@ -412,22 +403,10 @@ async function runTests() {
         });
         assert.strictEqual(result.code, 0);
         const additionalContext = getSessionStartAdditionalContext(result.stdout);
-        assert.ok(
-          additionalContext.includes('HISTORICAL REFERENCE ONLY'),
-          'Should wrap injected session with the stale-replay guard preamble'
-        );
-        assert.ok(
-          additionalContext.includes('STALE-BY-DEFAULT'),
-          'Should spell out the stale-by-default contract so the model does not re-execute prior ARGUMENTS'
-        );
-        assert.ok(
-          additionalContext.includes('--- BEGIN PRIOR-SESSION SUMMARY ---'),
-          'Should delimit the prior-session summary with an explicit begin marker'
-        );
-        assert.ok(
-          additionalContext.includes('--- END PRIOR-SESSION SUMMARY ---'),
-          'Should delimit the prior-session summary with an explicit end marker'
-        );
+        assert.ok(additionalContext.includes('HISTORICAL REFERENCE ONLY'), 'Should wrap injected session with the stale-replay guard preamble');
+        assert.ok(additionalContext.includes('STALE-BY-DEFAULT'), 'Should spell out the stale-by-default contract so the model does not re-execute prior ARGUMENTS');
+        assert.ok(additionalContext.includes('--- BEGIN PRIOR-SESSION SUMMARY ---'), 'Should delimit the prior-session summary with an explicit begin marker');
+        assert.ok(additionalContext.includes('--- END PRIOR-SESSION SUMMARY ---'), 'Should delimit the prior-session summary with an explicit end marker');
         assert.ok(additionalContext.includes('authentication refactor'), 'Should include session content text');
       } finally {
         fs.rmSync(isoHome, { recursive: true, force: true });
@@ -445,10 +424,7 @@ async function runTests() {
       fs.mkdirSync(path.join(isoHome, '.claude', 'skills', 'learned'), { recursive: true });
 
       const sessionFile = path.join(sessionsDir, '2026-02-11-large000-session.tmp');
-      fs.writeFileSync(
-        sessionFile,
-        buildSessionStartFixture(`START_MARKER\n${'A'.repeat(20000)}\nEND_MARKER`, { title: '# Large Session' })
-      );
+      fs.writeFileSync(sessionFile, buildSessionStartFixture(`START_MARKER\n${'A'.repeat(20000)}\nEND_MARKER`, { title: '# Large Session' }));
 
       try {
         const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
@@ -477,10 +453,7 @@ async function runTests() {
       fs.mkdirSync(path.join(isoHome, '.claude', 'skills', 'learned'), { recursive: true });
 
       const sessionFile = path.join(sessionsDir, '2026-02-11-max0000-session.tmp');
-      fs.writeFileSync(
-        sessionFile,
-        buildSessionStartFixture('B'.repeat(1200), { title: '# Sized Session' })
-      );
+      fs.writeFileSync(sessionFile, buildSessionStartFixture('B'.repeat(1200), { title: '# Sized Session' }));
 
       try {
         const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
@@ -544,14 +517,8 @@ async function runTests() {
       fs.mkdirSync(legacyDir, { recursive: true });
       fs.mkdirSync(path.join(isoHome, '.claude', 'skills', 'learned'), { recursive: true });
 
-      fs.writeFileSync(
-        canonicalFile,
-        buildSessionStartFixture('Use the canonical session-data copy.', { title: '# Canonical Session' })
-      );
-      fs.writeFileSync(
-        legacyFile,
-        buildSessionStartFixture('Do not prefer the legacy duplicate.', { title: '# Legacy Session' })
-      );
+      fs.writeFileSync(canonicalFile, buildSessionStartFixture('Use the canonical session-data copy.', { title: '# Canonical Session' }));
+      fs.writeFileSync(legacyFile, buildSessionStartFixture('Do not prefer the legacy duplicate.', { title: '# Legacy Session' }));
       fs.utimesSync(canonicalFile, canonicalTime, canonicalTime);
       fs.utimesSync(legacyFile, legacyTime, legacyTime);
 
@@ -580,13 +547,7 @@ async function runTests() {
       fs.mkdirSync(path.join(isoHome, '.claude', 'skills', 'learned'), { recursive: true });
 
       const sessionFile = path.join(sessionsDir, '2026-02-11-winansi00-session.tmp');
-      fs.writeFileSync(
-        sessionFile,
-        buildSessionStartFixture(
-          'I worked on \x1b[1;36mWindows terminal handling\x1b[0m.\x1b[K',
-          { title: '\x1b[H\x1b[2J\x1b[3J# Real Session' }
-        )
-      );
+      fs.writeFileSync(sessionFile, buildSessionStartFixture('I worked on \x1b[1;36mWindows terminal handling\x1b[0m.\x1b[K', { title: '\x1b[H\x1b[2J\x1b[3J# Real Session' }));
 
       try {
         const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
@@ -595,10 +556,7 @@ async function runTests() {
         });
         assert.strictEqual(result.code, 0);
         const additionalContext = getSessionStartAdditionalContext(result.stdout);
-        assert.ok(
-          additionalContext.includes('HISTORICAL REFERENCE ONLY'),
-          'Should wrap injected session with the stale-replay guard preamble'
-        );
+        assert.ok(additionalContext.includes('HISTORICAL REFERENCE ONLY'), 'Should wrap injected session with the stale-replay guard preamble');
         assert.ok(additionalContext.includes('Windows terminal handling'), 'Should preserve sanitized session text');
         assert.ok(!additionalContext.includes('\x1b['), 'Should not emit ANSI escape codes');
       } finally {
@@ -620,11 +578,7 @@ async function runTests() {
       fs.writeFileSync(sessionFile, buildSessionStartFixture(RESUME_SESSION_SENTINEL));
 
       try {
-        const result = await runScript(
-          path.join(scriptsDir, 'session-start.js'),
-          JSON.stringify({ hookName: 'SessionStart:resume' }),
-          { HOME: isoHome, USERPROFILE: isoHome }
-        );
+        const result = await runScript(path.join(scriptsDir, 'session-start.js'), JSON.stringify({ hookName: 'SessionStart:resume' }), { HOME: isoHome, USERPROFILE: isoHome });
         assert.strictEqual(result.code, 0);
         const additionalContext = getSessionStartAdditionalContext(result.stdout);
         assert.ok(!additionalContext.includes('HISTORICAL REFERENCE ONLY'), 'Should not inject a previous summary on resume');
@@ -649,11 +603,7 @@ async function runTests() {
       fs.writeFileSync(sessionFile, buildSessionStartFixture(CLI_RESUME_SESSION_SENTINEL));
 
       try {
-        const result = await runScript(
-          path.join(scriptsDir, 'session-start.js'),
-          JSON.stringify({ hook_event_name: 'SessionStart', source: 'resume' }),
-          { HOME: isoHome, USERPROFILE: isoHome }
-        );
+        const result = await runScript(path.join(scriptsDir, 'session-start.js'), JSON.stringify({ hook_event_name: 'SessionStart', source: 'resume' }), { HOME: isoHome, USERPROFILE: isoHome });
         assert.strictEqual(result.code, 0);
         const additionalContext = getSessionStartAdditionalContext(result.stdout);
         assert.ok(!additionalContext.includes(CLI_RESUME_SESSION_SENTINEL), 'Should not inject CLI resume session content');
@@ -677,20 +627,12 @@ async function runTests() {
       fs.writeFileSync(desktopFile, buildSessionStartFixture(`${DESKTOP_CLEAR_SESSION_SENTINEL}\n${CLI_CLEAR_SESSION_SENTINEL}`));
 
       try {
-        const desktopResult = await runScript(
-          path.join(scriptsDir, 'session-start.js'),
-          JSON.stringify({ hookName: 'SessionStart:clear' }),
-          { HOME: isoHome, USERPROFILE: isoHome }
-        );
+        const desktopResult = await runScript(path.join(scriptsDir, 'session-start.js'), JSON.stringify({ hookName: 'SessionStart:clear' }), { HOME: isoHome, USERPROFILE: isoHome });
         assert.strictEqual(desktopResult.code, 0);
         const desktopContext = getSessionStartAdditionalContext(desktopResult.stdout);
         assert.ok(!desktopContext.includes(DESKTOP_CLEAR_SESSION_SENTINEL), 'Should not inject Desktop clear session content');
 
-        const cliResult = await runScript(
-          path.join(scriptsDir, 'session-start.js'),
-          JSON.stringify({ hook_event_name: 'SessionStart', source: 'clear' }),
-          { HOME: isoHome, USERPROFILE: isoHome }
-        );
+        const cliResult = await runScript(path.join(scriptsDir, 'session-start.js'), JSON.stringify({ hook_event_name: 'SessionStart', source: 'clear' }), { HOME: isoHome, USERPROFILE: isoHome });
         assert.strictEqual(cliResult.code, 0);
         const cliContext = getSessionStartAdditionalContext(cliResult.stdout);
         assert.ok(!cliContext.includes(CLI_CLEAR_SESSION_SENTINEL), 'Should not inject CLI clear session content');
@@ -741,10 +683,13 @@ async function runTests() {
       fs.mkdirSync(path.join(isoHome, '.claude', 'skills', 'learned'), { recursive: true });
 
       const sessionFile = path.join(sessionsDir, '2026-02-11-crossproj-session.tmp');
-      fs.writeFileSync(sessionFile, buildSessionStartFixture(CROSS_PROJECT_SESSION_SENTINEL, {
-        project: 'different-project',
-        worktree: path.join(os.tmpdir(), 'different-project')
-      }));
+      fs.writeFileSync(
+        sessionFile,
+        buildSessionStartFixture(CROSS_PROJECT_SESSION_SENTINEL, {
+          project: 'different-project',
+          worktree: path.join(os.tmpdir(), 'different-project')
+        })
+      );
 
       try {
         const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
@@ -771,9 +716,12 @@ async function runTests() {
       fs.mkdirSync(path.join(isoHome, '.claude', 'skills', 'learned'), { recursive: true });
 
       const sessionFile = path.join(sessionsDir, '2026-02-11-crosswt-session.tmp');
-      fs.writeFileSync(sessionFile, buildSessionStartFixture(CROSS_WORKTREE_PROJECT_SENTINEL, {
-        worktree: path.join(os.tmpdir(), 'same-project-different-worktree')
-      }));
+      fs.writeFileSync(
+        sessionFile,
+        buildSessionStartFixture(CROSS_WORKTREE_PROJECT_SENTINEL, {
+          worktree: path.join(os.tmpdir(), 'same-project-different-worktree')
+        })
+      );
 
       try {
         const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
@@ -860,19 +808,11 @@ async function runTests() {
           'Use for recurring flaky integration tests that need deterministic setup checks.',
           '',
           '## Solution',
-          'Verify service readiness before running the test body.',
-        ].join('\n'),
+          'Verify service readiness before running the test body.'
+        ].join('\n')
       );
       fs.mkdirSync(path.join(learnedDir, 'debugging-pattern'), { recursive: true });
-      fs.writeFileSync(
-        path.join(learnedDir, 'debugging-pattern', 'SKILL.md'),
-        [
-          '# Debugging Pattern',
-          '',
-          '## Trigger',
-          'Use when a CLI tool silently exits without a result payload.',
-        ].join('\n'),
-      );
+      fs.writeFileSync(path.join(learnedDir, 'debugging-pattern', 'SKILL.md'), ['# Debugging Pattern', '', '## Trigger', 'Use when a CLI tool silently exits without a result payload.'].join('\n'));
 
       try {
         const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
@@ -881,20 +821,11 @@ async function runTests() {
         });
         assert.strictEqual(result.code, 0);
         const additionalContext = getSessionStartAdditionalContext(result.stdout);
-        assert.ok(
-          additionalContext.includes('Available learned skills'),
-          `Should inject learned skills into additionalContext, got: ${additionalContext}`
-        );
+        assert.ok(additionalContext.includes('Available learned skills'), `Should inject learned skills into additionalContext, got: ${additionalContext}`);
         assert.ok(additionalContext.includes('testing-patterns'), 'Should include the learned skill slug');
-        assert.ok(
-          additionalContext.includes('Use for recurring flaky integration tests'),
-          'Should include the learned skill trigger text'
-        );
+        assert.ok(additionalContext.includes('Use for recurring flaky integration tests'), 'Should include the learned skill trigger text');
         assert.ok(additionalContext.includes('debugging-pattern'), 'Should include directory-style learned skills');
-        assert.ok(
-          additionalContext.includes('CLI tool silently exits'),
-          'Should summarize directory-style learned skill trigger text'
-        );
+        assert.ok(additionalContext.includes('CLI tool silently exits'), 'Should summarize directory-style learned skill trigger text');
       } finally {
         fs.rmSync(isoHome, { recursive: true, force: true });
       }
@@ -1650,315 +1581,6 @@ async function runTests() {
     passed++;
   else failed++;
 
-  // post-edit-format.js tests
-  console.log('\npost-edit-format.js:');
-
-  if (
-    await asyncTest('runs without error on empty stdin', async () => {
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'));
-      assert.strictEqual(result.code, 0, 'Should exit 0 on empty stdin');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('skips non-JS/TS files', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/test.py' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 for non-JS files');
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through stdin data');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('passes through data for invalid JSON', async () => {
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), 'not json');
-      assert.strictEqual(result.code, 0, 'Should exit 0 for invalid JSON');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('handles null tool_input gracefully', async () => {
-      const stdinJson = JSON.stringify({ tool_input: null });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 for null tool_input');
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through data');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('handles missing file_path in tool_input', async () => {
-      const stdinJson = JSON.stringify({ tool_input: {} });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 for missing file_path');
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through data');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('exits 0 and passes data when prettier is unavailable', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/nonexistent/path/file.ts' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 even when prettier fails');
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through original data');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('finds formatter config in parent dirs without package.json', async () => {
-      const testDir = createTestDir();
-      const rootDir = path.join(testDir, 'config-only-repo');
-      const nestedDir = path.join(rootDir, 'src', 'nested');
-      const filePath = path.join(nestedDir, 'component.ts');
-      const binDir = path.join(testDir, 'bin');
-      const logFile = path.join(testDir, 'formatter.log');
-
-      fs.mkdirSync(nestedDir, { recursive: true });
-      fs.writeFileSync(path.join(rootDir, '.prettierrc'), '{}');
-      fs.writeFileSync(filePath, 'export const value = 1;\n');
-      createCommandShim(binDir, 'npx', logFile);
-      const isolatedHome = path.join(testDir, 'isolated-home');
-      fs.mkdirSync(path.join(isolatedHome, '.claude'), { recursive: true });
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: filePath } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson, withPrependedPath(binDir, {
-        HOME: isolatedHome,
-        USERPROFILE: isolatedHome
-      }));
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 for config-only repo');
-      const logEntries = readCommandLog(logFile);
-      assert.strictEqual(logEntries.length, 1, 'Should invoke formatter once');
-      assert.strictEqual(fs.realpathSync(logEntries[0].cwd), fs.realpathSync(rootDir), 'Should run formatter from config root');
-      assert.deepStrictEqual(logEntries[0].args, ['prettier', '--write', filePath], 'Should use the formatter on the nested file');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('respects CLAUDE_PACKAGE_MANAGER for formatter fallback runner', async () => {
-      const testDir = createTestDir();
-      const rootDir = path.join(testDir, 'pnpm-repo');
-      const filePath = path.join(rootDir, 'index.ts');
-      const binDir = path.join(testDir, 'bin');
-      const logFile = path.join(testDir, 'pnpm.log');
-
-      fs.mkdirSync(rootDir, { recursive: true });
-      fs.writeFileSync(path.join(rootDir, '.prettierrc'), '{}');
-      fs.writeFileSync(filePath, 'export const value = 1;\n');
-      createCommandShim(binDir, 'pnpm', logFile);
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: filePath } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson, withPrependedPath(binDir, { CLAUDE_PACKAGE_MANAGER: 'pnpm' }));
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 when pnpm fallback is used');
-      const logEntries = readCommandLog(logFile);
-      assert.strictEqual(logEntries.length, 1, 'Should invoke pnpm fallback runner once');
-      assert.strictEqual(logEntries[0].bin, 'pnpm', 'Should use pnpm runner');
-      assert.deepStrictEqual(logEntries[0].args, ['dlx', 'prettier', '--write', filePath], 'Should use pnpm dlx for fallback formatter execution');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('respects project package-manager config for formatter fallback runner', async () => {
-      const testDir = createTestDir();
-      const rootDir = path.join(testDir, 'bun-repo');
-      const filePath = path.join(rootDir, 'index.ts');
-      const binDir = path.join(testDir, 'bin');
-      const logFile = path.join(testDir, 'bun.log');
-
-      fs.mkdirSync(path.join(rootDir, '.claude'), { recursive: true });
-      fs.writeFileSync(path.join(rootDir, '.claude', 'package-manager.json'), JSON.stringify({ packageManager: 'bun' }));
-      fs.writeFileSync(path.join(rootDir, '.prettierrc'), '{}');
-      fs.writeFileSync(filePath, 'export const value = 1;\n');
-      createCommandShim(binDir, 'bunx', logFile);
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: filePath } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson, withPrependedPath(binDir));
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 when project config selects bun');
-      const logEntries = readCommandLog(logFile);
-      assert.strictEqual(logEntries.length, 1, 'Should invoke bunx fallback runner once');
-      assert.strictEqual(logEntries[0].bin, 'bunx', 'Should use bunx runner');
-      assert.deepStrictEqual(logEntries[0].args, ['prettier', '--write', filePath], 'Should use bunx for fallback formatter execution');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
-  console.log('\npre-bash-dev-server-block.js:');
-
-  if (
-    await asyncTest('allows non-dev commands whose heredoc text mentions npm run dev', async () => {
-      const command = ['gh pr create --title "fix: docs" --body "$(cat <<\'EOF\'', '## Test plan', '- run npm run dev to verify the site starts', 'EOF', ')"'].join('\n');
-      const stdinJson = JSON.stringify({ tool_input: { command } });
-      const result = await runScript(path.join(scriptsDir, 'pre-bash-dev-server-block.js'), stdinJson);
-
-      assert.strictEqual(result.code, 0, 'Non-dev commands should pass through');
-      assert.strictEqual(result.stdout, stdinJson, 'Should preserve original input');
-      assert.ok(!result.stderr.includes('BLOCKED'), 'Should not emit a block message');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('blocks bare npm run dev outside tmux on non-Windows platforms', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { command: 'npm run dev' } });
-      const result = await runScript(path.join(scriptsDir, 'pre-bash-dev-server-block.js'), stdinJson);
-
-      if (process.platform === 'win32') {
-        assert.strictEqual(result.code, 0, 'Windows path should pass through');
-        assert.strictEqual(result.stdout, stdinJson, 'Windows path should preserve original input');
-      } else {
-        assert.strictEqual(result.code, 2, 'Unix path should block bare dev servers');
-        assert.ok(result.stderr.includes('BLOCKED'), 'Should explain why the command was blocked');
-      }
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('blocks env-wrapped npm run dev outside tmux on non-Windows platforms', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { command: '/usr/bin/env npm run dev' } });
-      const result = await runScript(path.join(scriptsDir, 'pre-bash-dev-server-block.js'), stdinJson);
-
-      if (process.platform === 'win32') {
-        assert.strictEqual(result.code, 0, 'Windows path should pass through');
-        assert.strictEqual(result.stdout, stdinJson, 'Windows path should preserve original input');
-      } else {
-        assert.strictEqual(result.code, 2, 'Unix path should block wrapped dev servers');
-        assert.ok(result.stderr.includes('BLOCKED'), 'Should explain why the command was blocked');
-      }
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('blocks nohup-wrapped npm run dev outside tmux on non-Windows platforms', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { command: 'nohup npm run dev >/tmp/dev.log 2>&1 &' } });
-      const result = await runScript(path.join(scriptsDir, 'pre-bash-dev-server-block.js'), stdinJson);
-
-      if (process.platform === 'win32') {
-        assert.strictEqual(result.code, 0, 'Windows path should pass through');
-        assert.strictEqual(result.stdout, stdinJson, 'Windows path should preserve original input');
-      } else {
-        assert.strictEqual(result.code, 2, 'Unix path should block wrapped dev servers');
-        assert.ok(result.stderr.includes('BLOCKED'), 'Should explain why the command was blocked');
-      }
-    })
-  )
-    passed++;
-  else failed++;
-
-  // post-edit-typecheck.js tests
-  console.log('\npost-edit-typecheck.js:');
-
-  if (
-    await asyncTest('runs without error on empty stdin', async () => {
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'));
-      assert.strictEqual(result.code, 0, 'Should exit 0 on empty stdin');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('skips non-TypeScript files', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/test.js' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 for non-TS files');
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through stdin data');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('handles nonexistent TS file gracefully', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/nonexistent/file.ts' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 for missing file');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('handles TS file with no tsconfig gracefully', async () => {
-      const testDir = createTestDir();
-      const testFile = path.join(testDir, 'test.ts');
-      fs.writeFileSync(testFile, 'const x: number = 1;');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 when no tsconfig found');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('stops tsconfig walk at max depth (20)', async () => {
-      // Create a deeply nested directory (>20 levels) with no tsconfig anywhere
-      const testDir = createTestDir();
-      let deepDir = testDir;
-      for (let i = 0; i < 25; i++) {
-        deepDir = path.join(deepDir, `d${i}`);
-      }
-      fs.mkdirSync(deepDir, { recursive: true });
-      const testFile = path.join(deepDir, 'deep.ts');
-      fs.writeFileSync(testFile, 'const x: number = 1;');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const startTime = Date.now();
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      const elapsed = Date.now() - startTime;
-
-      assert.strictEqual(result.code, 0, 'Should not hang at depth limit');
-      assert.ok(elapsed < 5000, `Should complete quickly at depth limit, took ${elapsed}ms`);
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('passes through stdin data on stdout (post-edit-typecheck)', async () => {
-      const testDir = createTestDir();
-      const testFile = path.join(testDir, 'test.ts');
-      fs.writeFileSync(testFile, 'const x: number = 1;');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through stdin data on stdout');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
   // session-end.js extractSessionSummary tests
   console.log('\nsession-end.js (extractSessionSummary):');
 
@@ -2402,16 +2024,14 @@ async function runTests() {
       const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks.json');
       const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
 
-      assert.ok(hooks.hooks.PreToolUse, 'Should have PreToolUse hooks');
-      assert.ok(hooks.hooks.SessionStart, 'Should have SessionStart hooks');
-      assert.ok(hooks.hooks.SessionEnd, 'Should have SessionEnd hooks');
-      assert.ok(hooks.hooks.Stop, 'Should have Stop hooks');
-      assert.ok(hooks.hooks.SubagentStart, 'Should have SubagentStart hooks');
-      // PostToolUse/PreCompact/PostToolUseFailure live in hooks-optional.json (opt-in stack).
+      // 코어는 되돌리기 어려운 행위를 막는 것만 남긴다: Bash 프리플라이트와 서브에이전트 예산.
+      // 그 밖의 라이프사이클·계측 훅은 독자가 옵트인 스택에만 있으므로 함께 내려갔다.
+      assert.deepStrictEqual(Object.keys(hooks.hooks).sort(), ['PreToolUse', 'SubagentStart'], 'core hooks.json is the minimum-guardrail set — new events belong in hooks-optional.json');
       const optionalPath = path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json');
       const optional = JSON.parse(fs.readFileSync(optionalPath, 'utf8'));
-      assert.ok(optional.hooks.PreCompact, 'Optional stack should have PreCompact hooks');
-      assert.ok(optional.hooks.PostToolUse, 'Optional stack should have PostToolUse hooks');
+      for (const event of ['PreCompact', 'PostToolUse', 'SessionStart', 'SessionEnd', 'Stop']) {
+        assert.ok(optional.hooks[event], `Optional stack should have ${event} hooks`);
+      }
     })
   )
     passed++;
@@ -2426,10 +2046,7 @@ async function runTests() {
       const optionalPath = path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json');
       const optional = JSON.parse(fs.readFileSync(optionalPath, 'utf8'));
 
-      assert.ok(
-        !(hooks.hooks.PostToolUse || []).some(entry => entry.matcher === 'Bash'),
-        'Core hooks.json should not register a Bash PostToolUse hook'
-      );
+      assert.ok(!(hooks.hooks.PostToolUse || []).some(entry => entry.matcher === 'Bash'), 'Core hooks.json should not register a Bash PostToolUse hook');
 
       const preBash = hooks.hooks.PreToolUse.filter(entry => entry.matcher === 'Bash');
       const postBash = optional.hooks.PostToolUse.filter(entry => entry.matcher === 'Bash');
@@ -2439,12 +2056,8 @@ async function runTests() {
       assert.strictEqual(preBash[0].id, 'pre:bash:dispatcher');
       assert.strictEqual(postBash[0].id, 'post:bash:dispatcher');
 
-      const preCommand = Array.isArray(preBash[0].hooks[0].command)
-        ? preBash[0].hooks[0].command.join(' ')
-        : preBash[0].hooks[0].command;
-      const postCommand = Array.isArray(postBash[0].hooks[0].command)
-        ? postBash[0].hooks[0].command.join(' ')
-        : postBash[0].hooks[0].command;
+      const preCommand = Array.isArray(preBash[0].hooks[0].command) ? preBash[0].hooks[0].command.join(' ') : preBash[0].hooks[0].command;
+      const postCommand = Array.isArray(postBash[0].hooks[0].command) ? postBash[0].hooks[0].command.join(' ') : postBash[0].hooks[0].command;
 
       assert.ok(preCommand.includes('pre-bash-dispatcher.js'), 'PreToolUse Bash hook should use the pre dispatcher');
       assert.ok(postCommand.includes('post-bash-dispatcher.js'), 'PostToolUse Bash hook should use the post dispatcher');
@@ -2455,7 +2068,8 @@ async function runTests() {
 
   if (
     test('SessionEnd marker hook is async and cleanup-safe', () => {
-      const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks.json');
+      // observer lease 정리 전용이라 옵트인 스택에 있다 — 비동기·타임아웃 계약은 그대로여야 한다.
+      const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json');
       const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
       const sessionEndHooks = hooks.hooks.SessionEnd.flatMap(entry => entry.hooks);
       const markerHook = sessionEndHooks.find(hook => hook.command.includes('session-end-marker.js'));
@@ -2476,11 +2090,7 @@ async function runTests() {
       for (const [eventName, hookArray] of Object.entries(hooks.hooks)) {
         for (const entry of hookArray) {
           for (const hook of entry.hooks) {
-            assert.strictEqual(
-              typeof hook.command,
-              'string',
-              `${eventName}/${entry.id || entry.matcher || 'hook'} should use string command form`,
-            );
+            assert.strictEqual(typeof hook.command, 'string', `${eventName}/${entry.id || entry.matcher || 'hook'} should use string command form`);
           }
         }
       }
@@ -2499,10 +2109,7 @@ async function runTests() {
           for (const hook of entry.hooks) {
             const commandText = Array.isArray(hook.command) ? hook.command.join(' ') : hook.command;
             if (typeof commandText === 'string' && commandText.startsWith('node -e ')) {
-              assert.ok(
-                !commandText.includes('\\"'),
-                `${eventName}/${entry.id || entry.matcher || 'hook'} should not ship escaped double quotes in node -e payload`,
-              );
+              assert.ok(!commandText.includes('\\"'), `${eventName}/${entry.id || entry.matcher || 'hook'} should not ship escaped double quotes in node -e payload`);
             }
           }
         }
@@ -2526,10 +2133,7 @@ async function runTests() {
               const isNode = commandStart === 'node' || (typeof commandStart === 'string' && commandStart.startsWith('node'));
               const isNpx = commandStart === 'npx' || (typeof commandStart === 'string' && commandStart.startsWith('npx '));
               const isSkillScript = commandText.includes('/skills/') && (/^(bash|sh)\s/.test(commandText) || commandText.includes('/skills/'));
-              assert.ok(
-                isNode || isNpx || isSkillScript,
-                `Hook command should use node or approved shell wrapper: ${commandText.substring(0, 100)}...`
-              );
+              assert.ok(isNode || isNpx || isSkillScript, `Hook command should use node or approved shell wrapper: ${commandText.substring(0, 100)}...`);
             }
           }
         }
@@ -2545,17 +2149,14 @@ async function runTests() {
 
   if (
     test('SessionStart hook uses safe inline resolver without plugin-tree scanning', () => {
-      const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks.json');
+      const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json');
       const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
       const sessionStartHook = hooks.hooks.SessionStart?.[0]?.hooks?.[0];
 
       assert.ok(sessionStartHook, 'Should define a SessionStart hook');
       const commandText = sessionStartHook.command;
       assert.strictEqual(typeof sessionStartHook.command, 'string', 'SessionStart should use string command form for Claude Code compatibility');
-      assert.ok(
-        commandText.includes('session-start-bootstrap.js'),
-        'SessionStart should delegate to the extracted bootstrap script'
-      );
+      assert.ok(commandText.includes('session-start-bootstrap.js'), 'SessionStart should delegate to the extracted bootstrap script');
       assert.ok(commandText.includes('CLAUDE_PLUGIN_ROOT'), 'SessionStart should use CLAUDE_PLUGIN_ROOT');
       assert.ok(!commandText.includes('${CLAUDE_PLUGIN_ROOT}'), 'SessionStart should not depend on raw shell placeholder expansion');
       assert.ok(!commandText.includes('find '), 'Should not scan arbitrary plugin paths with find');
@@ -2575,16 +2176,19 @@ async function runTests() {
   else failed++;
   if (
     test('Stop and SessionEnd hooks use the safe inline resolver when plugin root may be unset', () => {
-      const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks.json');
+      // 라이프사이클 훅은 전부 옵트인 스택으로 내려갔다. `|| []` 로 비어도 통과하던
+      // 구조였으므로 비어 있음 자체를 실패로 잡는다 — 조용히 무의미해지는 것을 막는다.
+      const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json');
       const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
       const stopHooks = (hooks.hooks.Stop || []).flatMap(entry => entry.hooks || []);
       const sessionEndHooks = (hooks.hooks.SessionEnd || []).flatMap(entry => entry.hooks || []);
+      assert.ok(stopHooks.length > 0, 'Stop lifecycle hooks should exist to assert against');
+      assert.ok(sessionEndHooks.length > 0, 'SessionEnd lifecycle hooks should exist to assert against');
 
       for (const hook of [...stopHooks, ...sessionEndHooks]) {
         const commandText = Array.isArray(hook.command) ? hook.command.join(' ') : hook.command;
         assert.ok(
-          (Array.isArray(hook.command) && hook.command[0] === 'node' && hook.command[1] === '-e') ||
-          (typeof hook.command === 'string' && hook.command.startsWith('node -e "')),
+          (Array.isArray(hook.command) && hook.command[0] === 'node' && hook.command[1] === '-e') || (typeof hook.command === 'string' && hook.command.startsWith('node -e "')),
           'Lifecycle hook should use inline node resolver'
         );
         assert.ok(commandText.includes('run-with-flags.js'), 'Lifecycle hook should resolve the runner script');
@@ -2612,10 +2216,7 @@ async function runTests() {
               const usesInlineResolver = commandStart.startsWith('node -e') && commandText.includes('run-with-flags.js');
               const usesPluginBootstrap = commandStart.startsWith('node -e') && commandText.includes('plugin-hook-bootstrap.js');
               assert.ok(!commandText.includes('${CLAUDE_PLUGIN_ROOT}'), `Script paths should not depend on raw shell placeholder expansion: ${commandText.substring(0, 80)}...`);
-              assert.ok(
-                usesInlineResolver || usesPluginBootstrap,
-                `Script paths should use the inline resolver or plugin bootstrap: ${commandText.substring(0, 80)}...`
-              );
+              assert.ok(usesInlineResolver || usesPluginBootstrap, `Script paths should use the inline resolver or plugin bootstrap: ${commandText.substring(0, 80)}...`);
             }
           }
         }
@@ -2628,7 +2229,6 @@ async function runTests() {
   )
     passed++;
   else failed++;
-
 
   // ─── evaluate-session.js tests ───
   console.log('\nevaluate-session.js:');
@@ -2946,160 +2546,7 @@ async function runTests() {
     passed++;
   else failed++;
 
-  console.log('\npost-edit-format.js (security & extension tests):');
-
-  if (
-    await asyncTest('source code does not pass shell option to execFileSync (security)', async () => {
-      const formatSource = fs.readFileSync(path.join(scriptsDir, 'post-edit-format.js'), 'utf8');
-      // Strip comments to avoid matching "shell: true" in comment text
-      const codeOnly = formatSource.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
-      assert.ok(!/execFileSync\([^)]*shell\s*:/.test(codeOnly), 'post-edit-format.js should not pass shell option to execFileSync');
-      assert.ok(codeOnly.includes("process.platform === 'win32' && resolved.bin.endsWith('.cmd')"), 'Windows shell execution must stay gated to .cmd shims');
-      assert.ok(codeOnly.includes('UNSAFE_PATH_CHARS'), 'Must guard against shell metacharacters before using shell: true');
-      // npx.cmd handling in shared resolve-formatter.js
-      const resolverSource = fs.readFileSync(path.join(scriptsDir, '..', 'lib', 'resolve-formatter.js'), 'utf8');
-      assert.ok(resolverSource.includes('npx.cmd'), 'resolve-formatter.js should use npx.cmd for Windows cross-platform safety');
-      assert.ok(formatSource.includes('resolveFormatterBin'), 'post-edit-format.js should use shared resolveFormatterBin');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('blocks Windows shell metacharacters before shell:true formatter execution', async () => {
-      const hookPath = path.join(scriptsDir, 'post-edit-format.js');
-      const resolverPath = path.join(scriptsDir, '..', 'lib', 'resolve-formatter.js');
-      const childProcess = require('child_process');
-      const originalPlatform = Object.getOwnPropertyDescriptor(process, 'platform');
-      const originalSpawnSync = childProcess.spawnSync;
-      const originalExecFileSync = childProcess.execFileSync;
-      const resolvedResolverPath = require.resolve(resolverPath);
-      const resolvedHookPath = require.resolve(hookPath);
-      const originalResolverCache = require.cache[resolvedResolverPath];
-      const originalHookCache = require.cache[resolvedHookPath];
-      const blockedPaths = ['semicolon;test.js', 'backtick`test.js', 'subshell$(test).js', 'group(test).js'];
-
-      try {
-        Object.defineProperty(process, 'platform', { value: 'win32', configurable: true });
-
-        let spawnCalls = [];
-        childProcess.spawnSync = (...args) => {
-          spawnCalls.push(args);
-          return { status: 0, stderr: Buffer.from('') };
-        };
-        childProcess.execFileSync = () => {
-          throw new Error('execFileSync should not run for Windows .cmd formatter shims');
-        };
-
-        require.cache[resolvedResolverPath] = {
-          id: resolvedResolverPath,
-          filename: resolvedResolverPath,
-          loaded: true,
-          exports: {
-            findProjectRoot: () => process.cwd(),
-            detectFormatter: () => 'prettier',
-            resolveFormatterBin: () => ({ bin: 'formatter.cmd', prefix: [] })
-          }
-        };
-        delete require.cache[resolvedHookPath];
-
-        const { run } = require(hookPath);
-
-        for (const filePath of blockedPaths) {
-          spawnCalls = [];
-          const stdinJson = JSON.stringify({ tool_input: { file_path: filePath } });
-          assert.strictEqual(run(stdinJson), stdinJson, 'Should pass through original stdin JSON');
-          assert.strictEqual(spawnCalls.length, 0, `Should reject ${filePath} before spawnSync`);
-        }
-      } finally {
-        if (originalPlatform) {
-          Object.defineProperty(process, 'platform', originalPlatform);
-        }
-        childProcess.spawnSync = originalSpawnSync;
-        childProcess.execFileSync = originalExecFileSync;
-        if (originalResolverCache) require.cache[resolvedResolverPath] = originalResolverCache;
-        else delete require.cache[resolvedResolverPath];
-        if (originalHookCache) require.cache[resolvedHookPath] = originalHookCache;
-        else delete require.cache[resolvedHookPath];
-      }
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('matches .tsx extension for formatting', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/nonexistent/component.tsx' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      // Should attempt to format (will fail silently since file doesn't exist, but should pass through)
-      assert.ok(result.stdout.includes('component.tsx'), 'Should pass through data for .tsx files');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('matches .jsx extension for formatting', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/nonexistent/component.jsx' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      assert.ok(result.stdout.includes('component.jsx'), 'Should pass through data for .jsx files');
-    })
-  )
-    passed++;
-  else failed++;
-
-  console.log('\npost-edit-typecheck.js (security & extension tests):');
-
-  if (
-    await asyncTest('source code does not pass shell option to execFileSync (security)', async () => {
-      const typecheckSource = fs.readFileSync(path.join(scriptsDir, 'post-edit-typecheck.js'), 'utf8');
-      // Strip comments to avoid matching "shell: true" in comment text
-      const codeOnly = typecheckSource.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
-      assert.ok(!codeOnly.includes('shell:'), 'post-edit-typecheck.js should not pass shell option in code');
-      assert.ok(typecheckSource.includes('npx.cmd'), 'Should use npx.cmd for Windows cross-platform safety');
-    })
-  )
-    passed++;
-  else failed++;
-
   console.log('\nShell wrapper portability:');
-
-  if (
-    test('run-with-flags-shell resolves plugin root when CLAUDE_PLUGIN_ROOT is unset', () => {
-      const wrapperSource = fs.readFileSync(path.join(scriptsDir, 'run-with-flags-shell.sh'), 'utf8');
-      assert.ok(wrapperSource.includes('PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-'), 'Shell wrapper should derive PLUGIN_ROOT from its own script path');
-    })
-  )
-    passed++;
-  else failed++;
-
-
-
-
-
-
-
-
-
-
-
-  if (
-    await asyncTest('matches .tsx extension for type checking', async () => {
-      const testDir = createTestDir();
-      const testFile = path.join(testDir, 'component.tsx');
-      fs.writeFileSync(testFile, 'const x: number = 1;');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through data for .tsx files');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
 
   // ─── Round 23: Bug fixes & high-priority gap coverage ───
 
@@ -3629,55 +3076,6 @@ async function runTests() {
     passed++;
   else failed++;
 
-  console.log('\nRound 24: post-edit-format.js (edge cases):');
-
-  if (
-    await asyncTest('passes through malformed JSON unchanged', async () => {
-      const malformedJson = '{"tool_input": {"file_path": "/test.ts"';
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), malformedJson);
-      assert.strictEqual(result.code, 0);
-      // Should pass through the malformed data unchanged
-      assert.ok(result.stdout.includes(malformedJson), 'Should pass through malformed JSON');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('passes through data for non-JS/TS file extensions', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/path/to/file.py' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      assert.ok(result.stdout.includes('file.py'), 'Should pass through for .py files');
-    })
-  )
-    passed++;
-  else failed++;
-
-  console.log('\nRound 24: post-edit-typecheck.js (edge cases):');
-
-  if (
-    await asyncTest('skips typecheck for non-existent file and still passes through', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/nonexistent/deep/file.ts' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      assert.ok(result.stdout.includes('file.ts'), 'Should pass through for non-existent .ts file');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('passes through for non-TS extensions without running tsc', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/path/to/file.js' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      assert.ok(result.stdout.includes('file.js'), 'Should pass through for .js file without running tsc');
-    })
-  )
-    passed++;
-  else failed++;
-
   console.log('\nRound 24: session-start.js (edge cases):');
 
   if (
@@ -3821,87 +3219,6 @@ async function runTests() {
     await asyncTest('exits 0 even when no stdin is provided', async () => {
       const result = await runScript(path.join(scriptsDir, 'check-console-log.js'), '');
       assert.strictEqual(result.code, 0, 'Should exit 0 with empty stdin');
-    })
-  )
-    passed++;
-  else failed++;
-
-  // ── Round 29: post-edit-format.js cwd fix and process.exit(0) consistency ──
-  console.log('\nRound 29: post-edit-format.js (cwd and exit):');
-
-  if (
-    await asyncTest('source uses cwd based on file directory for npx', async () => {
-      const formatSource = fs.readFileSync(path.join(scriptsDir, 'post-edit-format.js'), 'utf8');
-      assert.ok(formatSource.includes('cwd:'), 'Should set cwd option for execFileSync');
-      assert.ok(formatSource.includes('path.dirname'), 'cwd should use path.dirname of the file');
-      assert.ok(formatSource.includes('path.resolve'), 'cwd should resolve the file path first');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('source calls process.exit(0) after writing output', async () => {
-      const formatSource = fs.readFileSync(path.join(scriptsDir, 'post-edit-format.js'), 'utf8');
-      assert.ok(formatSource.includes('process.exit(0)'), 'Should call process.exit(0) for clean termination');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('uses process.stdout.write instead of console.log for pass-through', async () => {
-      const formatSource = fs.readFileSync(path.join(scriptsDir, 'post-edit-format.js'), 'utf8');
-      assert.ok(formatSource.includes('process.stdout.write(data)'), 'Should use process.stdout.write to avoid trailing newline');
-      // Verify no console.log(data) for pass-through (console.error for warnings is OK)
-      const lines = formatSource.split('\n');
-      const passThrough = lines.filter(l => /console\.log\(data\)/.test(l));
-      assert.strictEqual(passThrough.length, 0, 'Should not use console.log(data) for pass-through');
-    })
-  )
-    passed++;
-  else failed++;
-
-  console.log('\nRound 29: post-edit-typecheck.js (exit and pass-through):');
-
-  if (
-    await asyncTest('source calls process.exit(0) after writing output', async () => {
-      const tcSource = fs.readFileSync(path.join(scriptsDir, 'post-edit-typecheck.js'), 'utf8');
-      assert.ok(tcSource.includes('process.exit(0)'), 'Should call process.exit(0) for clean termination');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('uses process.stdout.write instead of console.log for pass-through', async () => {
-      const tcSource = fs.readFileSync(path.join(scriptsDir, 'post-edit-typecheck.js'), 'utf8');
-      assert.ok(tcSource.includes('process.stdout.write(data)'), 'Should use process.stdout.write');
-      const lines = tcSource.split('\n');
-      const passThrough = lines.filter(l => /console\.log\(data\)/.test(l));
-      assert.strictEqual(passThrough.length, 0, 'Should not use console.log(data) for pass-through');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('exact stdout pass-through without trailing newline (typecheck)', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/nonexistent/file.py' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      assert.strictEqual(result.stdout, stdinJson, 'stdout should exactly match stdin (no trailing newline)');
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('exact stdout pass-through without trailing newline (format)', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/nonexistent/file.py' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-      assert.strictEqual(result.code, 0);
-      assert.strictEqual(result.stdout, stdinJson, 'stdout should exactly match stdin (no trailing newline)');
     })
   )
     passed++;
@@ -4068,59 +3385,7 @@ async function runTests() {
     passed++;
   else failed++;
 
-  // ── Round 32: post-edit-typecheck special characters & check-console-log ──
-  console.log('\nRound 32: post-edit-typecheck (special character paths):');
-
-  if (
-    await asyncTest('handles file path with spaces gracefully', async () => {
-      const testDir = createTestDir();
-      const testFile = path.join(testDir, 'my file.ts');
-      fs.writeFileSync(testFile, 'const x: number = 1;');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should handle spaces in path');
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through data');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('handles file path with shell metacharacters safely', async () => {
-      const testDir = createTestDir();
-      // File name with characters that could be dangerous in shell contexts
-      const testFile = path.join(testDir, 'test$(echo).ts');
-      fs.writeFileSync(testFile, 'const x: number = 1;');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should not crash on shell metacharacters');
-      // execFileSync prevents shell injection — just verify no crash
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through data safely');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('handles .tsx file extension', async () => {
-      const testDir = createTestDir();
-      const testFile = path.join(testDir, 'component.tsx');
-      fs.writeFileSync(testFile, 'const App = () => <div>Hello</div>;');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should handle .tsx files');
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through data');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
+  // ── Round 32: check-console-log ──
   console.log('\nRound 32: check-console-log (edge cases):');
 
   if (
@@ -4423,35 +3688,6 @@ async function runTests() {
   else failed++;
 
   // ── Round 49: typecheck extension matching and session-end conditional sections ──
-  console.log('\nRound 49: post-edit-typecheck.js (extension edge cases):');
-
-  if (
-    await asyncTest('.d.ts files match the TS regex and trigger typecheck path', async () => {
-      const testDir = createTestDir();
-      const testFile = path.join(testDir, 'types.d.ts');
-      fs.writeFileSync(testFile, 'declare const x: number;');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 for .d.ts file');
-      assert.ok(result.stdout.includes('tool_input'), 'Should pass through stdin data');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
-  if (
-    await asyncTest('.mts extension does not trigger typecheck', async () => {
-      const stdinJson = JSON.stringify({ tool_input: { file_path: '/project/utils.mts' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-      assert.strictEqual(result.code, 0, 'Should exit 0 for .mts file');
-      assert.strictEqual(result.stdout, stdinJson, 'Should pass through .mts unchanged');
-    })
-  )
-    passed++;
-  else failed++;
-
   console.log('\nRound 49: session-end.js (conditional summary sections):');
 
   if (
@@ -4608,22 +3844,6 @@ async function runTests() {
     passed++;
   else failed++;
 
-  console.log('\nRound 53: post-edit-format.js (non-existent file):');
-
-  if (
-    await asyncTest('passes through data for non-existent .tsx file path', async () => {
-      const stdinJson = JSON.stringify({
-        tool_input: { file_path: '/nonexistent/path/file.tsx' }
-      });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 for non-existent file');
-      assert.strictEqual(result.stdout, stdinJson, 'Should pass through stdin data unchanged');
-    })
-  )
-    passed++;
-  else failed++;
-
   // ── Round 55: maxAge boundary, multi-session injection, stdin overflow ──
   console.log('\nRound 55: session-start.js (maxAge 7-day boundary):');
 
@@ -4636,19 +3856,13 @@ async function runTests() {
 
       // Create session file 6.9 days old (should be INCLUDED by maxAge:7)
       const recentFile = path.join(sessionsDir, '2026-02-06-recent69-session.tmp');
-      fs.writeFileSync(
-        recentFile,
-        buildSessionStartFixture('RECENT CONTENT HERE', { title: '# Recent Session' })
-      );
+      fs.writeFileSync(recentFile, buildSessionStartFixture('RECENT CONTENT HERE', { title: '# Recent Session' }));
       const sixPointNineDaysAgo = new Date(Date.now() - 6.9 * 24 * 60 * 60 * 1000);
       fs.utimesSync(recentFile, sixPointNineDaysAgo, sixPointNineDaysAgo);
 
       // Create session file 8 days old (should be EXCLUDED by maxAge:7)
       const oldFile = path.join(sessionsDir, '2026-02-05-old8day-session.tmp');
-      fs.writeFileSync(
-        oldFile,
-        buildSessionStartFixture('OLD CONTENT SHOULD NOT APPEAR', { title: '# Old Session' })
-      );
+      fs.writeFileSync(oldFile, buildSessionStartFixture('OLD CONTENT SHOULD NOT APPEAR', { title: '# Old Session' }));
       const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000);
       fs.utimesSync(oldFile, eightDaysAgo, eightDaysAgo);
 
@@ -4691,7 +3905,7 @@ async function runTests() {
         const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
           HOME: isoHome,
           USERPROFILE: isoHome,
-          HARNESS_SESSION_RETENTION_DAYS: '30',
+          HARNESS_SESSION_RETENTION_DAYS: '30'
         });
 
         assert.strictEqual(result.code, 0);
@@ -4719,18 +3933,12 @@ async function runTests() {
 
       // Create older session (2 days ago)
       const olderSession = path.join(sessionsDir, '2026-02-11-olderabc-session.tmp');
-      fs.writeFileSync(
-        olderSession,
-        buildSessionStartFixture('OLDER_CONTEXT_MARKER', { title: '# Older Session' })
-      );
+      fs.writeFileSync(olderSession, buildSessionStartFixture('OLDER_CONTEXT_MARKER', { title: '# Older Session' }));
       fs.utimesSync(olderSession, new Date(now - 2 * 86400000), new Date(now - 2 * 86400000));
 
       // Create newer session (1 day ago)
       const newerSession = path.join(sessionsDir, '2026-02-12-newerdef-session.tmp');
-      fs.writeFileSync(
-        newerSession,
-        buildSessionStartFixture('NEWER_CONTEXT_MARKER', { title: '# Newer Session' })
-      );
+      fs.writeFileSync(newerSession, buildSessionStartFixture('NEWER_CONTEXT_MARKER', { title: '# Newer Session' }));
       fs.utimesSync(newerSession, new Date(now - 1 * 86400000), new Date(now - 1 * 86400000));
 
       try {
@@ -4781,36 +3989,6 @@ async function runTests() {
   else failed++;
 
   // ── Round 56: typecheck tsconfig walk-up, suggest-compact fallback path ──
-  console.log('\nRound 56: post-edit-typecheck.js (tsconfig in parent directory):');
-
-  if (
-    await asyncTest('walks up directory tree to find tsconfig.json in grandparent', async () => {
-      const testDir = createTestDir();
-      // Place tsconfig at the TOP level, file is nested 2 levels deep
-      fs.writeFileSync(
-        path.join(testDir, 'tsconfig.json'),
-        JSON.stringify({
-          compilerOptions: { strict: false, noEmit: true }
-        })
-      );
-      const deepDir = path.join(testDir, 'src', 'components');
-      fs.mkdirSync(deepDir, { recursive: true });
-      const testFile = path.join(deepDir, 'widget.ts');
-      fs.writeFileSync(testFile, 'export const value: number = 42;\n');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 after walking up to find tsconfig');
-      // Core assertion: stdin must pass through regardless of whether tsc ran
-      const parsed = JSON.parse(result.stdout);
-      assert.strictEqual(parsed.tool_input.file_path, testFile, 'Should pass through original stdin data with file_path intact');
-      cleanupTestDir(testDir);
-    })
-  )
-    passed++;
-  else failed++;
-
   console.log('\nRound 56: suggest-compact.js (counter file as directory — fallback path):');
 
   if (
@@ -5001,37 +4179,6 @@ async function runTests() {
       // Should be approximately 1MB (last accepted chunk may push slightly over)
       assert.ok(result.stdout.length <= 1024 * 1024 + 65536, `stdout (${result.stdout.length}) should be near 1MB, not unbounded`);
       assert.ok(result.stdout.length > 0, 'Should still pass through truncated data');
-    })
-  )
-    passed++;
-  else failed++;
-
-  console.log('\nRound 60: post-edit-format.js (valid JSON without tool_input key):');
-
-  if (
-    await asyncTest('skips formatting when JSON has no tool_input field', async () => {
-      const stdinJson = JSON.stringify({ result: 'ok', output: 'some data' });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), stdinJson);
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 for JSON without tool_input');
-      // input.tool_input?.file_path is undefined → skips formatting → passes through
-      assert.strictEqual(result.stdout, stdinJson, 'Should pass through data unchanged when tool_input is absent');
-    })
-  )
-    passed++;
-  else failed++;
-
-  // ── Round 64: post-edit-typecheck.js valid JSON without tool_input ──
-  console.log('\nRound 64: post-edit-typecheck.js (valid JSON without tool_input):');
-
-  if (
-    await asyncTest('skips typecheck when JSON has no tool_input field', async () => {
-      const stdinJson = JSON.stringify({ result: 'ok', metadata: { action: 'test' } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 for JSON without tool_input');
-      // input.tool_input?.file_path is undefined → skips TS check → passes through
-      assert.strictEqual(result.stdout, stdinJson, 'Should pass through data unchanged when tool_input is absent');
     })
   )
     passed++;
@@ -5506,84 +4653,6 @@ Some random content without the expected ### Context to Load section
       } finally {
         fs.rmSync(isoHome, { recursive: true, force: true });
       }
-    })
-  )
-    passed++;
-  else failed++;
-
-  // ── Round 87: post-edit-format.js and post-edit-typecheck.js stdin overflow (1MB) ──
-  console.log('\nRound 87: post-edit-format.js (stdin exceeding 1MB — truncation):');
-
-  if (
-    await asyncTest('truncates stdin at 1MB limit and still passes through data (post-edit-format)', async () => {
-      // Send 1.2MB of data — exceeds the 1MB MAX_STDIN limit (lines 14-22)
-      const payload = 'x'.repeat(1024 * 1024 + 200000);
-      const result = await runScript(path.join(scriptsDir, 'post-edit-format.js'), payload);
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 even with oversized stdin');
-      // Output should be truncated — significantly less than input
-      assert.ok(result.stdout.length < payload.length, `stdout (${result.stdout.length}) should be shorter than input (${payload.length})`);
-      // Output should be approximately 1MB (last accepted chunk may push slightly over)
-      assert.ok(result.stdout.length <= 1024 * 1024 + 65536, `stdout (${result.stdout.length}) should be near 1MB, not unbounded`);
-      assert.ok(result.stdout.length > 0, 'Should still pass through truncated data');
-    })
-  )
-    passed++;
-  else failed++;
-
-  console.log('\nRound 87: post-edit-typecheck.js (stdin exceeding 1MB — truncation):');
-
-  if (
-    await asyncTest('truncates stdin at 1MB limit and still passes through data (post-edit-typecheck)', async () => {
-      // Send 1.2MB of data — exceeds the 1MB MAX_STDIN limit (lines 16-24)
-      const payload = 'x'.repeat(1024 * 1024 + 200000);
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), payload);
-
-      assert.strictEqual(result.code, 0, 'Should exit 0 even with oversized stdin');
-      // Output should be truncated — significantly less than input
-      assert.ok(result.stdout.length < payload.length, `stdout (${result.stdout.length}) should be shorter than input (${payload.length})`);
-      // Output should be approximately 1MB (last accepted chunk may push slightly over)
-      assert.ok(result.stdout.length <= 1024 * 1024 + 65536, `stdout (${result.stdout.length}) should be near 1MB, not unbounded`);
-      assert.ok(result.stdout.length > 0, 'Should still pass through truncated data');
-    })
-  )
-    passed++;
-  else failed++;
-
-  // ── Round 89: post-edit-typecheck.js error detection path (relevantLines) ──
-  console.log('\nRound 89: post-edit-typecheck.js (TypeScript error detection path):');
-
-  if (
-    await asyncTest('filters TypeScript errors to edited file when tsc reports errors', async () => {
-      // post-edit-typecheck.js lines 60-85: when execFileSync('npx', ['tsc', ...]) throws,
-      // the catch block filters error output by file path candidates and logs relevant lines.
-      // All existing tests either have no tsconfig (tsc never runs) or valid TS (tsc succeeds).
-      // This test creates a .ts file with a type error and a tsconfig.json.
-      const testDir = createTestDir();
-      fs.writeFileSync(
-        path.join(testDir, 'tsconfig.json'),
-        JSON.stringify({
-          compilerOptions: { strict: true, noEmit: true }
-        })
-      );
-      const testFile = path.join(testDir, 'broken.ts');
-      // Intentional type error: assigning string to number
-      fs.writeFileSync(testFile, 'const x: number = "not a number";\n');
-
-      const stdinJson = JSON.stringify({ tool_input: { file_path: testFile } });
-      const result = await runScript(path.join(scriptsDir, 'post-edit-typecheck.js'), stdinJson);
-
-      // Core: script must exit 0 and pass through stdin data regardless
-      assert.strictEqual(result.code, 0, 'Should exit 0 even when tsc finds errors');
-      const parsed = JSON.parse(result.stdout);
-      assert.strictEqual(parsed.tool_input.file_path, testFile, 'Should pass through original stdin data with file_path intact');
-
-      // If tsc is available and ran, check that error output is filtered to this file
-      if (result.stderr.includes('TypeScript errors in')) {
-        assert.ok(result.stderr.includes('broken.ts'), `Should reference the edited file basename. Got: ${result.stderr}`);
-      }
-      // Either way, no crash and data passes through (verified above)
-      cleanupTestDir(testDir);
     })
   )
     passed++;

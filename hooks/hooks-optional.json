@@ -181,7 +181,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"const p=require('path');const r=(()=>{var e=process.env.CLAUDE_PLUGIN_ROOT;if(e&&e.trim())return e.trim();var p=require('path'),f=require('fs'),q=p.join('scripts','lib','utils.js'),c=[];if(process.env.CLAUDE_PROJECT_DIR){var j=p.join(process.env.CLAUDE_PROJECT_DIR,'.claude');c.push(p.join(j,'_harness'),j)}var h=require('os').homedir(),d=p.join(h,'.claude');c.push(d,p.join(d,'_harness'),p.join(d,'plugins','_harness'));for(var l of c){if(f.existsSync(p.join(l,q)))return l}return d})();const s=p.join(r,'scripts/hooks/plugin-hook-bootstrap.js');process.env.CLAUDE_PLUGIN_ROOT=r;process.argv.splice(1,0,s);require(s)\" node scripts/hooks/run-with-flags.js post:harness-metrics-bridge scripts/hooks/harness-metrics-bridge.js minimal,standard,strict",
+            "command": "node -e \"const p=require('path');const r=(()=>{var e=process.env.CLAUDE_PLUGIN_ROOT;if(e&&e.trim())return e.trim();var p=require('path'),f=require('fs'),q=p.join('scripts','lib','utils.js'),c=[];if(process.env.CLAUDE_PROJECT_DIR){var j=p.join(process.env.CLAUDE_PROJECT_DIR,'.claude');c.push(p.join(j,'_harness'),j)}var h=require('os').homedir(),d=p.join(h,'.claude');c.push(d,p.join(d,'_harness'),p.join(d,'plugins','_harness'));for(var l of c){if(f.existsSync(p.join(l,q)))return l}return d})();const s=p.join(r,'scripts/hooks/plugin-hook-bootstrap.js');process.env.CLAUDE_PLUGIN_ROOT=r;process.argv.splice(1,0,s);require(s)\" node scripts/hooks/run-with-flags.js post:harness-metrics-bridge scripts/hooks/harness-metrics-bridge.js standard,strict",
             "timeout": 10
           }
         ],
@@ -269,7 +269,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const raw=fs.readFileSync(0,'utf8');const rel=path.join('scripts','hooks','run-with-flags.js');const hasRunnerRoot=candidate=>{const value=typeof candidate==='string'?candidate.trim():'';return value.length>0&&fs.existsSync(path.join(path.resolve(value),rel));};const root=(()=>{const envRoot=process.env.CLAUDE_PLUGIN_ROOT||'';if(hasRunnerRoot(envRoot))return path.resolve(envRoot.trim());const candidates=[];if(process.env.CLAUDE_PROJECT_DIR){const projectClaude=path.join(process.env.CLAUDE_PROJECT_DIR,'.claude');candidates.push(path.join(projectClaude,'_harness'),projectClaude);}const home=require('os').homedir();const claudeDir=path.join(home,'.claude');candidates.push(claudeDir,path.join(claudeDir,'_harness'),path.join(claudeDir,'plugins','_harness'));for(const candidate of candidates){if(hasRunnerRoot(candidate))return candidate;}return claudeDir;})();const script=path.join(root,rel);if(fs.existsSync(script)){const result=spawnSync(process.execPath,[script,'stop:evaluate-session','scripts/hooks/evaluate-session.js','minimal,standard,strict'],{input:raw,encoding:'utf8',env:process.env,cwd:process.cwd(),timeout:30000});const stdout=typeof result.stdout==='string'?result.stdout:'';if(stdout)process.stdout.write(stdout);else process.stdout.write(raw);if(result.stderr)process.stderr.write(result.stderr);if(result.error||result.status===null||result.signal){const reason=result.error?result.error.message:(result.signal?'signal '+result.signal:'missing exit status');process.stderr.write('[Stop] ERROR: hook runner failed: '+reason+String.fromCharCode(10));process.exit(1);}process.exit(Number.isInteger(result.status)?result.status:0);}process.stderr.write('[Stop] WARNING: could not resolve harness root; skipping hook'+String.fromCharCode(10));process.stdout.write(raw);\"",
+            "command": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const raw=fs.readFileSync(0,'utf8');const rel=path.join('scripts','hooks','run-with-flags.js');const hasRunnerRoot=candidate=>{const value=typeof candidate==='string'?candidate.trim():'';return value.length>0&&fs.existsSync(path.join(path.resolve(value),rel));};const root=(()=>{const envRoot=process.env.CLAUDE_PLUGIN_ROOT||'';if(hasRunnerRoot(envRoot))return path.resolve(envRoot.trim());const candidates=[];if(process.env.CLAUDE_PROJECT_DIR){const projectClaude=path.join(process.env.CLAUDE_PROJECT_DIR,'.claude');candidates.push(path.join(projectClaude,'_harness'),projectClaude);}const home=require('os').homedir();const claudeDir=path.join(home,'.claude');candidates.push(claudeDir,path.join(claudeDir,'_harness'),path.join(claudeDir,'plugins','_harness'));for(const candidate of candidates){if(hasRunnerRoot(candidate))return candidate;}return claudeDir;})();const script=path.join(root,rel);if(fs.existsSync(script)){const result=spawnSync(process.execPath,[script,'stop:evaluate-session','scripts/hooks/evaluate-session.js','standard,strict'],{input:raw,encoding:'utf8',env:process.env,cwd:process.cwd(),timeout:30000});const stdout=typeof result.stdout==='string'?result.stdout:'';if(stdout)process.stdout.write(stdout);else process.stdout.write(raw);if(result.stderr)process.stderr.write(result.stderr);if(result.error||result.status===null||result.signal){const reason=result.error?result.error.message:(result.signal?'signal '+result.signal:'missing exit status');process.stderr.write('[Stop] ERROR: hook runner failed: '+reason+String.fromCharCode(10));process.exit(1);}process.exit(Number.isInteger(result.status)?result.status:0);}process.stderr.write('[Stop] WARNING: could not resolve harness root; skipping hook'+String.fromCharCode(10));process.stdout.write(raw);\"",
             "async": true,
             "timeout": 10
           }
@@ -282,7 +282,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const raw=fs.readFileSync(0,'utf8');const rel=path.join('scripts','hooks','run-with-flags.js');const hasRunnerRoot=candidate=>{const value=typeof candidate==='string'?candidate.trim():'';return value.length>0&&fs.existsSync(path.join(path.resolve(value),rel));};const root=(()=>{const envRoot=process.env.CLAUDE_PLUGIN_ROOT||'';if(hasRunnerRoot(envRoot))return path.resolve(envRoot.trim());const candidates=[];if(process.env.CLAUDE_PROJECT_DIR){const projectClaude=path.join(process.env.CLAUDE_PROJECT_DIR,'.claude');candidates.push(path.join(projectClaude,'_harness'),projectClaude);}const home=require('os').homedir();const claudeDir=path.join(home,'.claude');candidates.push(claudeDir,path.join(claudeDir,'_harness'),path.join(claudeDir,'plugins','_harness'));for(const candidate of candidates){if(hasRunnerRoot(candidate))return candidate;}return claudeDir;})();const script=path.join(root,rel);if(fs.existsSync(script)){const result=spawnSync(process.execPath,[script,'stop:capture-lessons','scripts/hooks/capture-lessons.js','minimal,standard,strict'],{input:raw,encoding:'utf8',env:process.env,cwd:process.cwd(),timeout:30000});const stdout=typeof result.stdout==='string'?result.stdout:'';if(stdout)process.stdout.write(stdout);else process.stdout.write(raw);if(result.stderr)process.stderr.write(result.stderr);if(result.error||result.status===null||result.signal){const reason=result.error?result.error.message:(result.signal?'signal '+result.signal:'missing exit status');process.stderr.write('[Stop] ERROR: hook runner failed: '+reason+String.fromCharCode(10));process.exit(1);}process.exit(Number.isInteger(result.status)?result.status:0);}process.stderr.write('[Stop] WARNING: could not resolve harness root; skipping hook'+String.fromCharCode(10));process.stdout.write(raw);\"",
+            "command": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const raw=fs.readFileSync(0,'utf8');const rel=path.join('scripts','hooks','run-with-flags.js');const hasRunnerRoot=candidate=>{const value=typeof candidate==='string'?candidate.trim():'';return value.length>0&&fs.existsSync(path.join(path.resolve(value),rel));};const root=(()=>{const envRoot=process.env.CLAUDE_PLUGIN_ROOT||'';if(hasRunnerRoot(envRoot))return path.resolve(envRoot.trim());const candidates=[];if(process.env.CLAUDE_PROJECT_DIR){const projectClaude=path.join(process.env.CLAUDE_PROJECT_DIR,'.claude');candidates.push(path.join(projectClaude,'_harness'),projectClaude);}const home=require('os').homedir();const claudeDir=path.join(home,'.claude');candidates.push(claudeDir,path.join(claudeDir,'_harness'),path.join(claudeDir,'plugins','_harness'));for(const candidate of candidates){if(hasRunnerRoot(candidate))return candidate;}return claudeDir;})();const script=path.join(root,rel);if(fs.existsSync(script)){const result=spawnSync(process.execPath,[script,'stop:capture-lessons','scripts/hooks/capture-lessons.js','standard,strict'],{input:raw,encoding:'utf8',env:process.env,cwd:process.cwd(),timeout:30000});const stdout=typeof result.stdout==='string'?result.stdout:'';if(stdout)process.stdout.write(stdout);else process.stdout.write(raw);if(result.stderr)process.stderr.write(result.stderr);if(result.error||result.status===null||result.signal){const reason=result.error?result.error.message:(result.signal?'signal '+result.signal:'missing exit status');process.stderr.write('[Stop] ERROR: hook runner failed: '+reason+String.fromCharCode(10));process.exit(1);}process.exit(Number.isInteger(result.status)?result.status:0);}process.stderr.write('[Stop] WARNING: could not resolve harness root; skipping hook'+String.fromCharCode(10));process.stdout.write(raw);\"",
             "timeout": 15
           }
         ],
@@ -301,6 +301,61 @@
         ],
         "description": "Send desktop notification (macOS/WSL) with task summary when Claude responds",
         "id": "stop:desktop-notify"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const raw=fs.readFileSync(0,'utf8');const rel=path.join('scripts','hooks','run-with-flags.js');const hasRunnerRoot=candidate=>{const value=typeof candidate==='string'?candidate.trim():'';return value.length>0&&fs.existsSync(path.join(path.resolve(value),rel));};const root=(()=>{const envRoot=process.env.CLAUDE_PLUGIN_ROOT||'';if(hasRunnerRoot(envRoot))return path.resolve(envRoot.trim());const candidates=[];if(process.env.CLAUDE_PROJECT_DIR){const projectClaude=path.join(process.env.CLAUDE_PROJECT_DIR,'.claude');candidates.push(path.join(projectClaude,'_harness'),projectClaude);}const home=require('os').homedir();const claudeDir=path.join(home,'.claude');candidates.push(claudeDir,path.join(claudeDir,'_harness'),path.join(claudeDir,'plugins','_harness'));for(const candidate of candidates){if(hasRunnerRoot(candidate))return candidate;}return claudeDir;})();const script=path.join(root,rel);if(fs.existsSync(script)){const result=spawnSync(process.execPath,[script,'stop:session-end','scripts/hooks/session-end.js','standard,strict'],{input:raw,encoding:'utf8',env:process.env,cwd:process.cwd(),timeout:30000});const stdout=typeof result.stdout==='string'?result.stdout:'';if(stdout)process.stdout.write(stdout);else process.stdout.write(raw);if(result.stderr)process.stderr.write(result.stderr);if(result.error||result.status===null||result.signal){const reason=result.error?result.error.message:(result.signal?'signal '+result.signal:'missing exit status');process.stderr.write('[Stop] ERROR: hook runner failed: '+reason+String.fromCharCode(10));process.exit(1);}process.exit(Number.isInteger(result.status)?result.status:0);}process.stderr.write('[Stop] WARNING: could not resolve harness root; skipping hook'+String.fromCharCode(10));process.stdout.write(raw);\"",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Persist session state after each response (Stop carries transcript_path)",
+        "id": "stop:session-end"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const raw=fs.readFileSync(0,'utf8');const rel=path.join('scripts','hooks','run-with-flags.js');const hasRunnerRoot=candidate=>{const value=typeof candidate==='string'?candidate.trim():'';return value.length>0&&fs.existsSync(path.join(path.resolve(value),rel));};const root=(()=>{const envRoot=process.env.CLAUDE_PLUGIN_ROOT||'';if(hasRunnerRoot(envRoot))return path.resolve(envRoot.trim());const candidates=[];if(process.env.CLAUDE_PROJECT_DIR){const projectClaude=path.join(process.env.CLAUDE_PROJECT_DIR,'.claude');candidates.push(path.join(projectClaude,'_harness'),projectClaude);}const home=require('os').homedir();const claudeDir=path.join(home,'.claude');candidates.push(claudeDir,path.join(claudeDir,'_harness'),path.join(claudeDir,'plugins','_harness'));for(const candidate of candidates){if(hasRunnerRoot(candidate))return candidate;}return claudeDir;})();const script=path.join(root,rel);if(fs.existsSync(script)){const result=spawnSync(process.execPath,[script,'stop:cost-tracker','scripts/hooks/cost-tracker.js','standard,strict'],{input:raw,encoding:'utf8',env:process.env,cwd:process.cwd(),timeout:30000});const stdout=typeof result.stdout==='string'?result.stdout:'';if(stdout)process.stdout.write(stdout);else process.stdout.write(raw);if(result.stderr)process.stderr.write(result.stderr);if(result.error||result.status===null||result.signal){const reason=result.error?result.error.message:(result.signal?'signal '+result.signal:'missing exit status');process.stderr.write('[Stop] ERROR: hook runner failed: '+reason+String.fromCharCode(10));process.exit(1);}process.exit(Number.isInteger(result.status)?result.status:0);}process.stderr.write('[Stop] WARNING: could not resolve harness root; skipping hook'+String.fromCharCode(10));process.stdout.write(raw);\"",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Track token and cost metrics per session",
+        "id": "stop:cost-tracker"
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const p=require('path');const r=(()=>{var e=process.env.CLAUDE_PLUGIN_ROOT;if(e&&e.trim())return e.trim();var p=require('path'),f=require('fs'),q=p.join('scripts','lib','utils.js'),c=[];if(process.env.CLAUDE_PROJECT_DIR){var j=p.join(process.env.CLAUDE_PROJECT_DIR,'.claude');c.push(p.join(j,'_harness'),j)}var h=require('os').homedir(),d=p.join(h,'.claude');c.push(d,p.join(d,'_harness'),p.join(d,'plugins','_harness'));for(var l of c){if(f.existsSync(p.join(l,q)))return l}return d})();const s=p.join(r,'scripts/hooks/plugin-hook-bootstrap.js');process.env.CLAUDE_PLUGIN_ROOT=r;process.argv.splice(1,0,s);require(s)\" node scripts/hooks/session-start-bootstrap.js",
+            "timeout": 30
+          }
+        ],
+        "description": "Load previous context and detect package manager on new session",
+        "id": "session:start"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"const fs=require('fs');const path=require('path');const {spawnSync}=require('child_process');const raw=fs.readFileSync(0,'utf8');const rel=path.join('scripts','hooks','run-with-flags.js');const hasRunnerRoot=candidate=>{const value=typeof candidate==='string'?candidate.trim():'';return value.length>0&&fs.existsSync(path.join(path.resolve(value),rel));};const root=(()=>{const envRoot=process.env.CLAUDE_PLUGIN_ROOT||'';if(hasRunnerRoot(envRoot))return path.resolve(envRoot.trim());const candidates=[];if(process.env.CLAUDE_PROJECT_DIR){const projectClaude=path.join(process.env.CLAUDE_PROJECT_DIR,'.claude');candidates.push(path.join(projectClaude,'_harness'),projectClaude);}const home=require('os').homedir();const claudeDir=path.join(home,'.claude');candidates.push(claudeDir,path.join(claudeDir,'_harness'),path.join(claudeDir,'plugins','_harness'));for(const candidate of candidates){if(hasRunnerRoot(candidate))return candidate;}return claudeDir;})();const script=path.join(root,rel);if(fs.existsSync(script)){const result=spawnSync(process.execPath,[script,'session:end:marker','scripts/hooks/session-end-marker.js','standard,strict'],{input:raw,encoding:'utf8',env:process.env,cwd:process.cwd(),timeout:30000});const stdout=typeof result.stdout==='string'?result.stdout:'';if(stdout)process.stdout.write(stdout);else process.stdout.write(raw);if(result.stderr)process.stderr.write(result.stderr);if(result.error||result.status===null||result.signal){const reason=result.error?result.error.message:(result.signal?'signal '+result.signal:'missing exit status');process.stderr.write('[SessionEnd] ERROR: hook runner failed: '+reason+String.fromCharCode(10));process.exit(1);}process.exit(Number.isInteger(result.status)?result.status:0);}process.stderr.write('[SessionEnd] WARNING: could not resolve harness root; skipping hook'+String.fromCharCode(10));process.stdout.write(raw);\"",
+            "async": true,
+            "timeout": 10
+          }
+        ],
+        "description": "Session end lifecycle marker (non-blocking)",
+        "id": "session:end:marker"
       }
     ]
   }

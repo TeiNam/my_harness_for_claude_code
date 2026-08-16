@@ -97,7 +97,9 @@ function main() {
   if (fs.existsSync(script)) {
     const result = spawnSync(
       process.execPath,
-      [script, 'session:start', 'scripts/hooks/session-start.js', 'minimal,standard,strict'],
+      // standard+ 전용: minimal 에서 이 훅이 주입하던 것은 "Project type" 한 줄과
+      // observer instinct 요약뿐이고, 후자는 observer 가 돌 때만 존재한다.
+      [script, 'session:start', 'scripts/hooks/session-start.js', 'standard,strict'],
       {
         input: raw,
         encoding: 'utf8',

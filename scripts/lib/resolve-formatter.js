@@ -2,7 +2,7 @@
  * Shared formatter resolution utilities with caching.
  *
  * Extracts project-root discovery, formatter detection, and binary
- * resolution into a single module so that post-edit-format.js and
+ * resolution into a single module so that stop-format-typecheck.js and
  * quality-gate.js avoid duplicating work and filesystem lookups.
  */
 

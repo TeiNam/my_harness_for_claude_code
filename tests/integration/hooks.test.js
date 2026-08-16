@@ -952,9 +952,13 @@ async function runTests() {
   console.log('\nRound 51: hooks.json Schema Validation:');
 
   if (await asyncTest('hooks.json async hook has valid timeout field', async () => {
-    // 이벤트를 못 박지 않는다 — 코어에서 그룹이 옵트인으로 내려가면(post:bash:dispatcher,
-    // 2026-08-15) 하드코딩한 이벤트 키가 undefined 가 되어 테스트가 무관한 이유로 깨진다.
-    const asyncHook = Object.values(hooks.hooks)
+    // 이벤트도 파일도 못 박지 않는다 — 그룹이 옵트인으로 내려가면(post:bash:dispatcher
+    // 2026-08-15, 라이프사이클 4종 2026-08-16) 하드코딩한 위치가 비어 테스트가 무관한
+    // 이유로 깨진다. async 계약은 두 스택 어디에 있든 같아야 한다.
+    const optionalHooks = JSON.parse(
+      fs.readFileSync(path.join(__dirname, '..', '..', 'hooks', 'hooks-optional.json'), 'utf8')
+    );
+    const asyncHook = [...Object.values(hooks.hooks), ...Object.values(optionalHooks.hooks)]
       .flat()
       .find(h => h.hooks && h.hooks[0] && h.hooks[0].async === true);
 

@@ -76,7 +76,7 @@ Orca 는 자기 스킬을 `~/.agents/skills/<name>` 에 두고 `~/.claude/skills
 | 데스크톱 UI 조작 | Orca 임베디드 브라우저는 `orca-cli`, 그 밖의 앱·웹뷰는 `computer-use` |
 
 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`)
-③ 되돌리기 어려운 행위 차단(코어 훅 7개)**. 오케스트레이션·세션 상태·핸드오프는 Orca 에 맡긴다.
+③ 되돌리기 어려운 행위 차단(코어 훅 2개 — `pre:bash:dispatcher`·`subagent:budget`)**. 오케스트레이션·세션 상태·핸드오프는 Orca 에 맡긴다.
 
 ---
 
