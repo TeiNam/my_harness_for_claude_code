@@ -42,12 +42,10 @@ function runTests() {
         'integration',
         'lab',
         'mongodb',
-        'mysql',
         'nodejs',
         'obsidian',
         'plugin-chrome',
         'plugin-claude',
-        'postgres',
         'python-backend',
         'python-data',
         'report',
@@ -66,7 +64,7 @@ function runTests() {
   if (
     test('identifierOf strips path and .md extension', () => {
       assert.strictEqual(identifierOf('agents/python-reviewer.md'), 'python-reviewer');
-      assert.strictEqual(identifierOf('postgres-guideline'), 'postgres-guideline');
+      assert.strictEqual(identifierOf('mongodb-guideline'), 'mongodb-guideline');
     })
   )
     passed++;
@@ -98,11 +96,11 @@ function runTests() {
   else failed++;
 
   if (
-    test('classifyIdentifier splits RDBMS / NoSQL into engine-specific keys', () => {
-      assert.deepStrictEqual(classifyIdentifier('mysql-guideline', 'skill'), ['mysql']);
-      assert.deepStrictEqual(classifyIdentifier('postgres-guideline', 'skill'), ['postgres']);
+    test('classifyIdentifier splits NoSQL into engine-specific keys', () => {
+      // RDBMS(MySQL·PostgreSQL) 설계 자산은 하네스에서 제거됐다 — 분류기도 그 키를 모른다.
       assert.deepStrictEqual(classifyIdentifier('mongodb-guideline', 'skill'), ['mongodb']);
       assert.deepStrictEqual(classifyIdentifier('dynamodb-guideline', 'skill'), ['dynamodb']);
+      assert.deepStrictEqual(classifyIdentifier('mysql-guideline', 'skill'), ['core'], 'RDBMS 자산은 더 이상 전용 키가 없다');
     })
   )
     passed++;
@@ -197,8 +195,10 @@ function runTests() {
   if (
     test('isKnownGroup distinguishes valid vs unknown', () => {
       assert.strictEqual(isKnownGroup('python-backend'), true);
-      assert.strictEqual(isKnownGroup('mysql'), true);
+      assert.strictEqual(isKnownGroup('mongodb'), true);
       assert.strictEqual(isKnownGroup('python'), false); // 옛 키는 더 이상 유효하지 않음
+      assert.strictEqual(isKnownGroup('mysql'), false); // RDBMS 는 하네스에서 제거됨
+      assert.strictEqual(isKnownGroup('postgres'), false);
       assert.strictEqual(isKnownGroup('bogus'), false);
     })
   )
@@ -207,7 +207,8 @@ function runTests() {
 
   if (
     test('validateGroups throws on unknown ids', () => {
-      assert.doesNotThrow(() => validateGroups(['python-backend', 'rust', 'mysql']));
+      assert.doesNotThrow(() => validateGroups(['python-backend', 'rust', 'mongodb']));
+      assert.throws(() => validateGroups(['mysql']), /Unknown groups: mysql/);
       assert.throws(() => validateGroups(['python-backend', 'made-up']), /Unknown groups: made-up/);
       // 옛 'python' 키도 이제 unknown
       assert.throws(() => validateGroups(['python']), /Unknown groups: python/);
@@ -245,7 +246,7 @@ function runTests() {
   // expandAliases 는 여전히 select-assets 경로에 있으므로 통과 동작을 고정해 둔다.
   if (
     test('expandAliases passes non-alias keys through untouched', () => {
-      assert.deepStrictEqual(expandAliases(['mysql', 'rust']), ['mysql', 'rust']);
+      assert.deepStrictEqual(expandAliases(['mongodb', 'rust']), ['mongodb', 'rust']);
       assert.deepStrictEqual(expandAliases(['core']), ['core']);
       assert.deepStrictEqual(expandAliases([]), []);
     })

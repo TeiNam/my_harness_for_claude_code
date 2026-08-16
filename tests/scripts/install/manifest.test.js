@@ -61,10 +61,10 @@ function runTests() {
 
   if (test('writeManifest → readManifest round-trips and sorts workloads', () => {
     const dir = tmpDir();
-    writeManifest(dir, { version: '0.1.0', workloads: ['mysql', 'core'], installedAt: '2026-07-11T00:00:00Z' });
+    writeManifest(dir, { version: '0.1.0', workloads: ['mongodb', 'core'], installedAt: '2026-07-11T00:00:00Z' });
     const back = readManifest(dir);
     assert.strictEqual(back.version, '0.1.0');
-    assert.deepStrictEqual(back.workloads, ['core', 'mysql']); // 정렬됨
+    assert.deepStrictEqual(back.workloads, ['core', 'mongodb']); // 정렬됨
     assert.strictEqual(back.installedAt, '2026-07-11T00:00:00Z');
   })) passed++; else failed++;
 

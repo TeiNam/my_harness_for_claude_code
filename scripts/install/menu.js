@@ -83,8 +83,6 @@ const CATEGORIES = [
       { id: 'duckdb', label: '분석 · DuckDB 세팅 / 쿼리', workloads: ['python-data'] },
       { id: 'python-data', label: '분석 · Python (pandas/polars/pytorch/MLE)', workloads: ['python-data', 'ai'] },
       { id: 'aws-analytics', label: '분석 · AWS (Glue·Athena·EMR·Redshift)', workloads: ['data-analysis'] },
-      { id: 'mysql', label: '설계 · MySQL / Aurora MySQL', workloads: ['mysql'] },
-      { id: 'postgres', label: '설계 · PostgreSQL / Aurora Postgres', workloads: ['postgres'] },
       { id: 'mongodb', label: '설계 · MongoDB', workloads: ['mongodb'] },
       { id: 'dynamodb', label: '설계 · DynamoDB', workloads: ['dynamodb'] },
       { id: 'aws-rds', label: '설계 · AWS 관리형 DB (Aurora·RDS·DSQL·Keyspaces)', workloads: ['aws-rds'] }
@@ -238,7 +236,7 @@ function resolveSelection({ categories = [], subSelections = {}, detailSelection
  *
  *   --category=dev,cloud              톱레벨 카테고리
  *   --dev=frontend,python             sub-옵션
- *   --data=mysql,aws-analytics        sub-옵션
+ *   --data=mongodb,aws-analytics      sub-옵션
  *   --writing-social=voice,content    sub 레벨 상세 (writing.social)
  *   --writing=general,social          sub-옵션
  *   --writing-social=voice,content    sub 레벨 상세 (writing.social)

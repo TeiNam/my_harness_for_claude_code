@@ -33,7 +33,7 @@ Read the current project root and detect stack signals from:
 ## Planning Flow
 
 1. Detect stacks from project files and show the evidence for each match.
-2. Map detected stacks to the relevant harness rules and skills (e.g. `rules/python/`, `rules/typescript/`, `skills/postgres-guideline/`).
+2. Map detected stacks to the relevant harness rules and skills (e.g. `rules/python/`, `rules/typescript/`).
 3. Run the harness install in dry-run mode:
 
 ```bash

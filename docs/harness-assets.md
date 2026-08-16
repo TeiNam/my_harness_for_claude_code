@@ -6,7 +6,6 @@
 
 ## High-value Agents
 
-- `rdbms-data-modeler` — forces target-DB confirmation (Aurora MySQL / MySQL / Aurora PG / PG), then routes to `mysql-guideline` or `postgres-guideline` skill before writing DDL.
 - `article-writer` — long-form articles, guides, blog posts, newsletters in distinctive voice
 - `content-creator` — platform-native social content (X, LinkedIn, newsletter, video scripts)
 - `devops` — AWS / Docker / Terraform / K8s; always plans/dry-runs before mutations
@@ -23,7 +22,7 @@ Agents declare `model:` as an **alias** (`opus` / `sonnet` / `haiku`), never a p
 
 Filled-in (real content, not placeholder):
 
-- **DB**: `skills/postgres-guideline/`, `skills/mysql-guideline/`, `skills/mongodb-guideline/`, `skills/dynamodb-guideline/` — schema / index / partitioning / sharding / connection
+- **DB (NoSQL)**: `skills/mongodb-guideline/`, `skills/dynamodb-guideline/` — schema / index / sharding / connection
 - **Frontend**: `skills/obsidian-plugin-develop/` (TypeScript + i18n + Chromium + release checklist), `skills/vite-patterns/`, `skills/frontend-patterns/`, `skills/frontend-design/` (origin: anthropics/skills — aesthetic direction, typography, anti-template judgment)
 - **Supanova (한글 랜딩페이지 디자인 엔진)**: `skills/taste-skill/`, `skills/redesign-skill/`, `skills/soft-skill/`, `skills/output-skill/` — origin: supanova-design-skill-main (based on Leonxlnx/taste-skill). Standalone HTML + Tailwind CDN 랜딩페이지를 한글 우선(Pretendard, `word-break: keep-all`, 자연스러운 한국어 카피)으로 생성/리디자인. `taste-skill` 상단에 `DESIGN_VARIANCE`/`MOTION_INTENSITY`/`VISUAL_DENSITY`/`LANDING_PURPOSE` 4개 설정값. 새 랜딩페이지는 `taste-skill`+`output-skill`, 기존 페이지 개선은 `redesign-skill`, 최고 퀄리티는 세 개 다 + `soft-skill`. `frontend` 워크로드로 통합.
 - **SEO/GEO/AEO**: `skills/seo-geo-aeo/` (origin: SNLabat/SEO-GEO-AEO-Skill) — URL 하나로 SEO·GEO(생성형 검색엔진)·AEO(답변엔진) 3축 감사, Word/PDF 리포트 산출. `frontend` 워크로드. (harness 자체 `skills/seo/` 는 이 스킬의 부분집합이라 2026-07-31 제거됨 — SEO 작업은 이 스킬 하나로 통합.)

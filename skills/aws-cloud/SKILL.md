@@ -190,5 +190,4 @@ Fargate task definition essentials:
 ## Related
 
 - `[skills/aws-bedrock]` — Bedrock LLM calls + agents
-- `[skills/postgres-guideline]` / `[skills/mysql-guideline]` — DB-side schema patterns
 - `[skills/cost-aware-llm-pipeline]` — cost discipline applies to LLM workloads too

@@ -301,4 +301,3 @@ await db.close();
 ## Related
 
 - `[skills/python-data-analysis]` — when to pick DuckDB vs pandas vs polars
-- `[skills/postgres-guideline]` — for the OLTP side of a hybrid pipeline

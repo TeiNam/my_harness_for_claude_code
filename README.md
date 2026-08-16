@@ -18,9 +18,9 @@
 
 | 디렉터리 | 항목 수 | 설명 |
 |---|---:|---|
-| `agents/` | 48 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
+| `agents/` | 46 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
 | `commands/` | 37 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 121 | 도메인 지식·워크플로 정의 (DB / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
+| `skills/` | 115 | 도메인 지식·워크플로 정의 (NoSQL / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
 | `rules/` | 27 | common 4개(상시 로드되는 불변 제약) + 언어별 23개(typescript / python / rust / web) — 절차·참고 문서는 `docs/rules-reference/` |
 | `hooks/` | 6 + 24 | 코어 훅 6그룹(기본 설치) + 옵트인 24그룹 (실행 스크립트 45종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
@@ -53,7 +53,6 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 ## 핵심 에이전트
 
-- `rdbms-data-modeler` — 대상 DB(MySQL / Aurora MySQL / Postgres / Aurora Postgres) 확정 → 매칭 가이드라인 스킬 라우팅 → DDL 작성 순서를 강제
 - `article-writer`, `content-creator` — 장문 글 / 플랫폼별 소셜 콘텐츠 워크플로
 - `devops` — AWS / Docker / Terraform / K8s, 변경 전 plan·dry-run 우선
 - `translator-docs` — 한국어 / 영어 양방향 번역 + README·API 문서
@@ -62,7 +61,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 ## 핵심 스킬
 
-- **DB**: `postgres-guideline`, `mysql-guideline`, `mongodb-guideline`, `dynamodb-guideline` — 스키마 / 인덱스 / 파티셔닝 / 샤딩 / 커넥션
+- **DB (NoSQL)**: `mongodb-guideline`, `dynamodb-guideline` — 스키마 / 인덱스 / 샤딩 / 커넥션
 - **백엔드**: `fastapi-backend-best-practices`(7개 하위 영역), `python-patterns`, `rust-patterns`
 - **프론트엔드**: `obsidian-plugin-develop`(TypeScript + i18n + Chromium + 릴리스 체크리스트), `vite-patterns`, `frontend-patterns`, `frontend-design`(anthropics/skills — 심미적 방향성·타이포그래피)
 - **랜딩페이지 디자인 (Supanova)**: `taste-skill`, `redesign-skill`, `soft-skill`, `output-skill` — 한글 우선 Standalone HTML + Tailwind CDN 랜딩페이지 생성/리디자인 엔진(origin: supanova-design-skill-main, based on Leonxlnx/taste-skill). `frontend` 워크로드.
