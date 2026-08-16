@@ -8,9 +8,13 @@ const path = require('path');
 const vm = require('vm');
 const Ajv = require('ajv');
 
+// 테스트는 아래 HOOKS_FILE 선언만 임시 경로로 치환한다. 문서 대조(프로파일별 훅 수)는
+// 합성 입력에는 의미가 없으므로, 치환되지 않는 사본을 따로 두고 둘이 같을 때만 대조한다.
+const REPO_HOOKS_FILE = path.join(__dirname, '../../hooks/hooks.json');
 const HOOKS_FILE = path.join(__dirname, '../../hooks/hooks.json');
 const HOOKS_SCHEMA_PATH = path.join(__dirname, '../../schemas/hooks.schema.json');
 const CLAUDE_MD = path.join(__dirname, '../../CLAUDE.md');
+const HOOKS_POLICY_MD = path.join(__dirname, '../../docs/hooks-policy.md');
 const PROFILES = ['minimal', 'standard', 'strict'];
 const VALID_EVENTS = [
   'SessionStart',
@@ -279,27 +283,49 @@ function countHooksByProfile(hooks) {
 }
 
 /**
- * CLAUDE.md 가 문서화한 프로파일별 훅 수(`**minimal (9훅)**`)를 hooks.json 실측과 대조한다.
+ * 문서가 적어둔 프로파일별 훅 수(`**minimal (2훅)**`)를 hooks.json 실측과 대조한다.
  *
  * 서브훅(dispatcher 내부)을 그룹으로 착각해 카운트를 틀리는 실수를 막는다 —
  * hooks.json 의 그룹만 세는 것이 정답이고, 이 값은 기계가 정확히 계산할 수 있다.
+ *
+ * 카운트 문장은 CLAUDE.md 또는 `docs/hooks-policy.md` 어디에 있어도 된다(상세는 후자로
+ * 옮겼다). 단 **어느 쪽에도 없으면 실패한다** — 예전에는 문서에서 문장이 사라지면
+ * `continue` 로 조용히 건너뛰어, 가드가 있는 채로 아무것도 검사하지 않았다.
  */
 function validateProfileCounts(hooks) {
-  if (!fs.existsSync(CLAUDE_MD)) return false;
+  // 합성 hooks 파일을 검사할 때는 문서와 대조하지 않는다 — 문서는 레포의 실제 스택을 적는다.
+  if (path.resolve(HOOKS_FILE) !== path.resolve(REPO_HOOKS_FILE)) return false;
 
-  const doc = fs.readFileSync(CLAUDE_MD, 'utf8');
+  const docs = [CLAUDE_MD, HOOKS_POLICY_MD].filter(f => fs.existsSync(f));
+  if (docs.length === 0) {
+    console.error('ERROR: 훅 카운트를 적어둔 문서가 없습니다 (CLAUDE.md / docs/hooks-policy.md)');
+    return true;
+  }
+
   const actual = countHooksByProfile(hooks);
   let hasErrors = false;
+  let checked = 0;
 
-  for (const profile of PROFILES) {
-    const match = doc.match(new RegExp(`\\*\\*${profile} \\((\\d+)훅\\)\\*\\*`));
-    if (!match) continue; // 문서가 그 프로파일을 언급하지 않으면 검사 대상 아님
+  for (const file of docs) {
+    const doc = fs.readFileSync(file, 'utf8');
+    const label = path.relative(path.join(__dirname, '../..'), file);
+    for (const profile of PROFILES) {
+      const match = doc.match(new RegExp(`\\*\\*${profile} \\((\\d+)훅\\)\\*\\*`));
+      if (!match) continue;
+      checked++;
 
-    const documented = Number(match[1]);
-    if (documented !== actual[profile]) {
-      console.error(`ERROR: CLAUDE.md says ${profile} has ${documented} hooks, but hooks.json has ${actual[profile]}`);
-      hasErrors = true;
+      const documented = Number(match[1]);
+      if (documented !== actual[profile]) {
+        console.error(`ERROR: ${label} says ${profile} has ${documented} hooks, but hooks.json has ${actual[profile]}`);
+        hasErrors = true;
+      }
     }
+  }
+
+  if (checked === 0) {
+    console.error('ERROR: 어떤 문서도 `**<profile> (N훅)**` 형식으로 훅 수를 적지 않았습니다 —');
+    console.error('       문장이 사라지면 이 대조는 아무것도 검사하지 않으므로 실패로 처리합니다.');
+    return true;
   }
 
   if (hasErrors) {

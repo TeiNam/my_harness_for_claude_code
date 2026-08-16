@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-16
 
+- feat(install): 설치가 minimal 프로파일을 명시하고 settings.json 점검 도구 추가 (#29) (784dbc3)
 - refactor(hooks): 코어 스택을 2그룹으로 줄이고 죽은 스크립트 7개 제거 (#28) (00a9dc6)
 
 ## 2026-08-15
