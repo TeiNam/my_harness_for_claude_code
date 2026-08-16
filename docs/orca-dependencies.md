@@ -107,7 +107,13 @@ node scripts/install/merge-hooks.js --dry-run
 
 # Orca 스킬 링크가 orphan 으로 잡히지 않는지
 npm run check-drift
+
+# settings.json 이 하네스 기준에 맞는지 (프로파일·죽은 env·평문 비밀값 사본)
+npm run optimize-settings
 ```
+
+`optimize-settings` 는 `env` 와 `settings.json.bak.*` 만 본다 — `hooks` 는 손대지 않으므로
+Orca 훅과 마주치지 않는다. Orca 가 쓰는 `ORCA_*` env 는 `HARNESS_*` 가 아니라서 판정 대상 밖이다.
 
 ---
 

@@ -21,6 +21,9 @@ const {
   looksLikeHarnessId,
   isLegacyHarnessGroup,
   referencesHarnessScript,
+  applyDefaultHookProfile,
+  removeDefaultHookProfile,
+  DEFAULT_HOOK_PROFILE,
 } = require('../../../scripts/install/merge-hooks');
 
 function tmp(prefix) {
@@ -479,6 +482,65 @@ function runTests() {
     }
 
     fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  // ── 설치 기본 프로파일 ───────────────────────────────────────────────
+  // 코드 기본값(hook-flags.js)이 minimal 이어도 settings.json 에 적혀 있지 않으면
+  // 사용자는 그 값을 볼 수도 바꿀 수도 없다. 설치가 명시하는 것이 요점이다.
+
+  if (test('merge writes the default profile when env has none', () => {
+    const home = tmp('profile-write');
+    const settings = path.join(home, 'settings.json');
+    writeJson(settings, { model: 'keep-me' });
+
+    const out = run(['--hooks', REAL_HOOKS, '--settings', settings]).stdout;
+    assert.ok(out.includes('[env]'), `expected an [env] note:\n${out}`);
+    const after = readJson(settings);
+    assert.strictEqual(after.env.HARNESS_HOOK_PROFILE, DEFAULT_HOOK_PROFILE);
+    assert.strictEqual(after.model, 'keep-me', 'unrelated settings must survive');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('merge never overwrites a profile the user chose', () => {
+    for (const chosen of ['standard', 'strict']) {
+      const home = tmp(`profile-keep-${chosen}`);
+      const settings = path.join(home, 'settings.json');
+      writeJson(settings, { env: { HARNESS_HOOK_PROFILE: chosen } });
+      run(['--hooks', REAL_HOOKS, '--settings', settings]);
+      assert.strictEqual(readJson(settings).env.HARNESS_HOOK_PROFILE, chosen);
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  })) passed++; else failed++;
+
+  if (test('--dry-run reports the profile write without writing it', () => {
+    const home = tmp('profile-dry');
+    const settings = path.join(home, 'settings.json');
+    writeJson(settings, {});
+    const out = run(['--hooks', REAL_HOOKS, '--settings', settings, '--dry-run']).stdout;
+    assert.ok(out.includes('HARNESS_HOOK_PROFILE'), out);
+    assert.deepStrictEqual(readJson(settings), {}, 'dry-run must not write');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('an invalid profile is reported, not corrected', () => {
+    const next = { env: { HARNESS_HOOK_PROFILE: 'paranoid' } };
+    const note = applyDefaultHookProfile(next);
+    assert.ok(note && note.includes('유효하지 않'), note);
+    assert.strictEqual(next.env.HARNESS_HOOK_PROFILE, 'paranoid', 'user data is not overwritten');
+  })) passed++; else failed++;
+
+  if (test('uninstall drops only the default profile, keeping a raised one', () => {
+    const ours = { env: { HARNESS_HOOK_PROFILE: DEFAULT_HOOK_PROFILE } };
+    assert.ok(removeDefaultHookProfile(ours));
+    assert.ok(!('env' in ours), 'env should go when it held nothing else');
+
+    const theirs = { env: { HARNESS_HOOK_PROFILE: 'strict', AWS_REGION: 'ap-northeast-2' } };
+    assert.strictEqual(removeDefaultHookProfile(theirs), null);
+    assert.strictEqual(theirs.env.HARNESS_HOOK_PROFILE, 'strict');
+
+    const mixed = { env: { HARNESS_HOOK_PROFILE: DEFAULT_HOOK_PROFILE, AWS_REGION: 'ap-northeast-2' } };
+    assert.ok(removeDefaultHookProfile(mixed));
+    assert.deepStrictEqual(mixed.env, { AWS_REGION: 'ap-northeast-2' }, 'other env keys stay');
   })) passed++; else failed++;
 
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);

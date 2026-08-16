@@ -441,8 +441,12 @@ if (-not $Uninstall) {
     Write-Host ''
     if ($hooksDone) {
         Write-Host "Done. Symlinks installed and hooks merged into `$ClaudeDir\settings.json."
+        Write-Host "Hook profile: minimal. Raise it via env.HARNESS_HOOK_PROFILE in settings.json."
     } else {
         Write-Host "Done. Symlinks installed. Hooks NOT merged - re-run with -WithHooks"
         Write-Host "(or answer yes to the hooks prompt) to enable them."
     }
+    Write-Host ''
+    Write-Host "Check settings.json:  npm run optimize-settings   (add -- --apply to fix)"
+    Write-Host "Check symlinks:       npm run check-drift"
 }

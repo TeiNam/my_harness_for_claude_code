@@ -535,10 +535,15 @@ main() {
         echo
         if [ "$hooks_done" -eq 1 ]; then
             echo "Done. Symlinks installed and hooks merged into \$CLAUDE_DIR/settings.json."
+            echo "Hook profile: minimal (되돌리기 어려운 행위 차단만). 올리려면 settings.json 의"
+            echo "env.HARNESS_HOOK_PROFILE 을 standard 또는 strict 로 바꾼다."
         else
             echo "Done. Symlinks installed. Hooks NOT merged — re-run with --with-hooks"
             echo "(or answer yes to the hooks prompt) to enable them."
         fi
+        echo
+        echo "settings.json 점검:  npm run optimize-settings        (고치려면 -- --apply)"
+        echo "심볼릭 링크 점검:    npm run check-drift"
     fi
 }
 
