@@ -301,5 +301,4 @@ A p-value without an effect size and a CI is a half-finished claim.
 ## Related
 
 - `[skills/duckdb-patterns]` — engine-side detail when SQL is the right tool
-- `[skills/postgres-guideline]` — when the source data lives in Postgres
 - `[skills/markdown-writing]` — for reports that ship the analysis as prose

@@ -10,7 +10,6 @@ workloads: [mongodb]
 Runtime query and operations reference. Schema design, naming rules, field
 types, and shard-key *selection* live in `mongodb-guideline` — this skill
 covers how to **query, aggregate, index, transact, and connect** at runtime.
-For deep review use the `database-reviewer` agent.
 
 ## Activation
 
@@ -212,8 +211,6 @@ COLLSCAN). Flag any unbounded result set.
 ## Related
 
 - `mongodb-guideline` — schema design, naming, field types, shard-key selection, index strategy.
-- `database-reviewer` agent — deep query/schema review.
-- `database-migrations` — schema/version migration patterns.
 
 ## Sources
 

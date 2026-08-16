@@ -30,7 +30,7 @@ const GROUPS = [
   'devops', // AWS IaC·컨테이너(EKS/ECS)·서버리스·Lambda·관측성(CloudWatch/Prometheus)
   'finops', // AWS 비용·요금 (Billing and Cost Management / Pricing)
   'integration', // AWS 통합·메시징 (SNS·SQS/MQ/OpenAPI/Step Functions/AppSync)
-  'aws-rds', // AWS 관리형 DB MCP (Aurora PG/MySQL·DSQL·RDS Oracle/SQL Server·Keyspaces·Timestream) — 로컬 DB 설계(mysql/postgres/mongodb)와 별개
+  'aws-rds', // AWS 관리형 DB MCP (Aurora PG/MySQL·DSQL·RDS Oracle/SQL Server·Keyspaces·Timestream) — MCP 분류 전용 키이고 설치 자산은 없다
   'data-analysis', // AWS 분석 엔진 (Glue/Athena/EMR/Redshift/Neptune) — 로컬 pandas/duckdb 는 python-data
   'ai', // Claude SDK / Bedrock / LLM 파이프라인 / HF STT
 
@@ -46,8 +46,6 @@ const GROUPS = [
   'python-data', // duckdb / pandas / polars / pytorch / mle / recsys
 
   // 데이터 설계 카테고리 sub-옵션
-  'mysql',
-  'postgres',
   'mongodb',
   'dynamodb',
 
@@ -119,17 +117,10 @@ const RULES = [
   // -- Obsidian -----------------------------------------------------------
   { pattern: /^obsidian([-_]|$)/i, groups: ['obsidian', 'frontend'] },
 
-  // -- 데이터 설계: 개별 RDBMS / NoSQL ----------------------------------
-  { pattern: /^(postgres|aurora[-_]?postgres|aurora[-_]?pg)([-_]|$)/i, groups: ['postgres'] },
-  { pattern: /^(mysql|aurora[-_]?mysql)([-_]|$)/i, groups: ['mysql'] },
+  // -- 데이터 설계: NoSQL --------------------------------------------------
+  // RDBMS(MySQL·PostgreSQL) 설계 자산은 하네스에서 제거됐다 — 남은 것은 NoSQL 뿐이다.
   { pattern: /^mongodb([-_]|$)/i, groups: ['mongodb'] },
   { pattern: /^dynamodb([-_]|$)/i, groups: ['dynamodb'] },
-
-  // RDBMS 양쪽에 적용되는 자산 (마이그레이션 / 모델러 / DB 리뷰어)
-  { pattern: /^rdbms[-_]/i, groups: ['mysql', 'postgres'] },
-  { pattern: /^rdbms[-_]data[-_]modeler$/i, groups: ['mysql', 'postgres'], kind: 'agent' },
-  { pattern: /^database[-_]migrations$/i, groups: ['mysql', 'postgres'] },
-  { pattern: /^database[-_]reviewer$/i, groups: ['mysql', 'postgres', 'mongodb', 'dynamodb'], kind: 'agent' },
 
   // -- Cloud / Infra ------------------------------------------------------
   { pattern: /^aws[-_]bedrock$/i, groups: ['ai', 'cloud'] },

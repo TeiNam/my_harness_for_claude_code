@@ -36,7 +36,6 @@ MLE review should compose existing SWE review surfaces instead of replacing them
 
 - Use `python-reviewer` for Python style, typing, error handling, dependency hygiene, and unsafe deserialization.
 - Use `pytorch-build-resolver` when tensor shape, device placement, gradient, CUDA, DataLoader, or AMP failures block training/inference.
-- Use `database-reviewer` for feature tables, label stores, prediction logs, experiment metrics, and point-in-time query performance.
 - Use `security-reviewer` for secrets, PII, prompt/data leakage, artifact integrity, unsafe pickle/joblib loading, and supply-chain risk.
 - Use `performance-optimizer` for latency, memory, batching, GPU utilization, cold start, and cost per prediction.
 - Use `build-error-resolver` for CI, dependency, native extension, CUDA, and environment-specific failures outside PyTorch itself.

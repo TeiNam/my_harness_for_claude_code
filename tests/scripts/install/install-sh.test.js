@@ -34,6 +34,15 @@ function runInstall(args, claudeHome) {
   });
 }
 
+/** lstat 기반: dangling 심볼릭도 "링크로 존재"로 본다 (fs.existsSync 는 false 를 준다). */
+function isLink(p) {
+  try {
+    return fs.lstatSync(p).isSymbolicLink();
+  } catch {
+    return false;
+  }
+}
+
 function test(name, fn) {
   try {
     fn();
@@ -80,6 +89,42 @@ function runTests() {
     assert.strictEqual(r.status, 0, r.stderr || r.stdout);
     assert.ok(r.stdout.includes('retired.md'), `orphan scan did not reach the link:\n${r.stdout}`);
     assert.ok(fs.lstatSync(orphan).isSymbolicLink(), 'dry-run must not delete anything');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  // 자산을 은퇴시키면 링크가 남아 스킬 목록에 죽은 이름이 계속 뜬다. 예전에는 그 정리에
+  // `--uninstall && 재설치` 한 바퀴가 필요했다 — install 경로에서 dangling 만 걷는다.
+  if (test('install prunes links whose repo target is gone, and only those', () => {
+    const home = tmp('prune');
+    runInstall(['--workload=core', '--no-extras'], home);
+
+    const live = fs.readdirSync(path.join(home, 'skills'));
+    assert.ok(live.length > 0, 'core should link at least one skill');
+
+    const retired = path.join(home, 'skills', 'retired-asset');
+    fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'retired-asset'), retired); // 레포 안, 대상 없음
+    const foreign = path.join(home, 'skills', 'someone-elses');
+    fs.symlinkSync('/tmp/harness-test-not-here', foreign);                    // 레포 밖, 대상 없음
+
+    const r = runInstall(['--workload=core', '--no-extras'], home);
+    assert.strictEqual(r.status, 0, r.stderr || r.stdout);
+    assert.ok(!fs.existsSync(retired) && !isLink(retired), `은퇴 링크가 남았다:\n${r.stdout}`);
+    assert.ok(isLink(foreign), '레포 밖 dangling 은 우리 것이 아니므로 보존해야 한다');
+    for (const name of live) {
+      assert.ok(isLink(path.join(home, 'skills', name)), `살아있는 링크를 지웠다: ${name}`);
+    }
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('--dry-run reports dangling links without deleting them', () => {
+    const home = tmp('prune-dry');
+    runInstall(['--workload=core', '--no-extras'], home);
+    const retired = path.join(home, 'skills', 'retired-asset');
+    fs.symlinkSync(path.join(REPO_ROOT, 'skills', 'retired-asset'), retired);
+
+    const r = runInstall(['--workload=core', '--no-extras', '--dry-run'], home);
+    assert.ok(r.stdout.includes('retired-asset'), `dry-run 이 보고하지 않았다:\n${r.stdout}`);
+    assert.ok(isLink(retired), 'dry-run 은 아무것도 지우지 않아야 한다');
     fs.rmSync(home, { recursive: true, force: true });
   })) passed++; else failed++;
 

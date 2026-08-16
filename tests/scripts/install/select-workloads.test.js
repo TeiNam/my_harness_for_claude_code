@@ -45,7 +45,7 @@ function runTests() {
       const groups = out.split(',');
       assert.ok(groups.includes('core'));
       assert.ok(groups.includes('python-backend'));
-      assert.ok(groups.includes('mysql'));
+      assert.ok(groups.includes('mongodb'));
       assert.ok(groups.includes('writing'));
       // sorted output
       assert.deepStrictEqual(groups.slice().sort(), groups);
@@ -76,9 +76,9 @@ function runTests() {
   else failed++;
 
   if (
-    test('--non-interactive --data=mysql excludes other DB engines', () => {
-      const out = run(['--non-interactive', '--data=mysql']);
-      assert.strictEqual(out, baseCsv('mysql'));
+    test('--non-interactive --data=mongodb excludes other DB engines', () => {
+      const out = run(['--non-interactive', '--data=mongodb']);
+      assert.strictEqual(out, baseCsv('mongodb'));
     })
   )
     passed++;
@@ -100,7 +100,7 @@ function runTests() {
     test('--non-interactive without flags falls back to --all', () => {
       const out = run(['--non-interactive']);
       const groups = out.split(',');
-      assert.ok(groups.includes('mysql'));
+      assert.ok(groups.includes('mongodb'));
       assert.ok(groups.includes('writing'));
       assert.ok(groups.includes('python-backend'));
     })

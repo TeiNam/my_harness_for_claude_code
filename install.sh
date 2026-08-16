@@ -266,6 +266,51 @@ unlink_orphans() {
     return 0
 }
 
+# 대상이 사라진 링크(dangling)만 걷는다. `unlink_orphans` 와 달리 설치 경로에서도
+# 안전하다 — 선택 집합을 보지 않고 "레포 안을 가리키는데 그 파일이 없다"만 판정하므로,
+# 좁은 워크로드로 설치해도 넓게 깔린 *살아있는* 링크는 건드리지 않는다.
+#
+# 자산을 은퇴시키면(RDBMS 자산 제거, 2026-08-16) 링크가 남아 스킬 목록에 죽은 이름이
+# 계속 뜬다. 예전에는 그 정리에 `--uninstall && 재설치` 한 바퀴가 필요했다.
+prune_dangling_links() {
+    local kind base link target removed=0
+    for kind in agents/_harness commands/_harness skills/_harness rules/_harness skills; do
+        base="$CLAUDE_DIR/$kind"
+        [ -d "$base" ] || continue
+        find_dangling() {
+            case "$1" in
+                */_harness) find -H "$1" -type l -print0 2>/dev/null ;;
+                *)          find -H "$1" -maxdepth 1 -type l -print0 2>/dev/null ;;
+            esac
+        }
+        while IFS= read -r -d '' link; do
+            [ -e "$link" ] && continue          # 대상이 살아있으면 우리 관심 밖이다
+            target="$(readlink "$link" 2>/dev/null || true)"
+            case "$target" in
+                *..*) continue ;;               # 정규화 없이는 레포 안팎을 못 가린다
+                "$HARNESS_DIR"|"$HARNESS_DIR"/*) ;;
+                *) continue ;;                  # 레포 밖을 가리키면 우리 것이 아니다
+            esac
+            if [ "$DRY_RUN" -eq 1 ]; then
+                echo "[dry-run] rm -- $link"
+            else
+                rm -- "$link"
+            fi
+            echo "unlink(dangling): $link"
+            removed=$((removed + 1))
+        done < <(find_dangling "$base")
+        case "$kind" in
+            */_harness)
+                if [ "$DRY_RUN" -eq 0 ]; then
+                    find "$base" -depth -type d -empty -exec rmdir {} + 2>/dev/null || true
+                fi
+                ;;
+        esac
+    done
+    [ "$removed" -gt 0 ] && echo "dangling links removed: $removed"
+    return 0
+}
+
 merge_hooks() {
     local merge_args=()
     if [ "$DRY_RUN" -eq 1 ]; then merge_args+=("--dry-run"); fi
@@ -476,8 +521,11 @@ main() {
     done < <(build_selection)
 
     # uninstall 은 선언에 없는 잔여 링크까지 쓸어야 완결된다.
+    # install 은 그럴 수 없다(방금 만든 링크까지 지운다) — 대상이 사라진 것만 걷는다.
     if [ "$UNINSTALL" -eq 1 ]; then
         unlink_orphans
+    else
+        prune_dangling_links
     fi
 
     # ── 워크로드 외 자산(hooks·mcp) ───────────────────────────────────────

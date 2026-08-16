@@ -127,12 +127,12 @@ function runTests() {
   else failed++;
 
   if (
-    test('resolveSelection: data=mysql excludes other engines', () => {
+    test('resolveSelection: data=mongodb excludes other engines', () => {
       const r = resolveSelection({
         categories: ['data'],
-        subSelections: { data: ['mysql'] }
+        subSelections: { data: ['mongodb'] }
       });
-      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('mysql'));
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('mongodb'));
     })
   )
     passed++;
@@ -144,8 +144,8 @@ function runTests() {
         categories: ['data'],
         subSelections: { data: [] }
       });
-      // data 대분류 전체 = 분석(python-data·ai·data-analysis) + 설계(mysql·postgres·mongodb·dynamodb·aws-rds)
-      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('ai', 'aws-rds', 'data-analysis', 'dynamodb', 'mongodb', 'mysql', 'postgres', 'python-data'));
+      // data 대분류 전체 = 분석(python-data·ai·data-analysis) + 설계(mongodb·postgres·mongodb·dynamodb·aws-rds)
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('ai', 'aws-rds', 'data-analysis', 'dynamodb', 'mongodb', 'python-data'));
     })
   )
     passed++;
@@ -238,12 +238,12 @@ function runTests() {
   else failed++;
 
   if (
-    test('resolveSelection: non-detail leaves (mysql/rust) unchanged — 회귀', () => {
+    test('resolveSelection: non-detail leaves (mongodb/rust) unchanged — 회귀', () => {
       const r = resolveSelection({
         categories: ['data', 'dev'],
-        subSelections: { data: ['mysql'], dev: ['rust'] }
+        subSelections: { data: ['mongodb'], dev: ['rust'] }
       });
-      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('mysql', 'rust'));
+      assert.deepStrictEqual(r.workloads.slice().sort(), withBase('mongodb', 'rust'));
     })
   )
     passed++;

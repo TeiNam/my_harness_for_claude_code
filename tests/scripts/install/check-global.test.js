@@ -67,12 +67,12 @@ function runTests() {
     const home = tmpDir();
     const root = fakeRoot('0.2.0');
     linkHarness(home, root);
-    writeManifest(home, { version: '0.1.0', workloads: ['core', 'mysql'], installedAt: 'x' });
+    writeManifest(home, { version: '0.1.0', workloads: ['core', 'mongodb'], installedAt: 'x' });
     const r = evaluate({ claudeHome: home, root });
     assert.strictEqual(r.state, 'outdated');
     assert.strictEqual(r.installedVersion, '0.1.0');
     assert.strictEqual(r.repoVersion, '0.2.0');
-    assert.deepStrictEqual(r.workloads, ['core', 'mysql']);
+    assert.deepStrictEqual(r.workloads, ['core', 'mongodb']);
   })) passed++; else failed++;
 
   if (test('current when versions match and link present', () => {

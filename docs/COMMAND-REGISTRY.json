@@ -198,9 +198,7 @@
       "type": "testing",
       "primaryAgents": [],
       "allAgents": [],
-      "skills": [
-        "postgres-guideline"
-      ],
+      "skills": [],
       "path": "commands/project-init.md"
     },
     {
@@ -423,10 +421,6 @@
       },
       {
         "skill": "lessons-learned",
-        "count": 1
-      },
-      {
-        "skill": "postgres-guideline",
         "count": 1
       },
       {

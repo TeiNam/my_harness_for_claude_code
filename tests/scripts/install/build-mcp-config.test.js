@@ -85,7 +85,7 @@ function runTests() {
 
   if (
     test('로컬 DB 설계 워크로드엔 AWS DB MCP 가 안 붙는다', () => {
-      for (const wl of ['mysql', 'postgres', 'mongodb', 'dynamodb']) {
+      for (const wl of ['mongodb', 'dynamodb']) {
         const r = build([wl]);
         const awsDb = r.keys.filter(k => k.startsWith('aws-'));
         assert.deepStrictEqual(awsDb, [], `${wl} 에 AWS DB 서버가 붙음: ${awsDb}`);

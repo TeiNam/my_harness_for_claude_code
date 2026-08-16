@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-16
 
+- docs: CLAUDE.md 를 결론만 남기고 41% 줄임 (근거·이력은 docs/ 로) (#30) (6d7d0ed)
 - feat(install): 설치가 minimal 프로파일을 명시하고 settings.json 점검 도구 추가 (#29) (784dbc3)
 - refactor(hooks): 코어 스택을 2그룹으로 줄이고 죽은 스크립트 7개 제거 (#28) (00a9dc6)
 
