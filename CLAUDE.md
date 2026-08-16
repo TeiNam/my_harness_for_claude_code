@@ -70,17 +70,26 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ## Hooks (status)
 
-**설계 기준: 훅은 "되돌리기 어려운 행위 차단 + 라이프사이클"만 담당한다.** 품질·관찰·거버넌스는 훅이 아니라 커맨드(`/quality-gate`, `/code-review`, `/cost-report`)로 사람이 부를 때 돈다. 이유는 비용이 아니라 **간섭**이다 — Opus 5 는 지시가 많을 때보다 *서로 반대되는 지시*가 있을 때 판단이 무너지고, 매 Edit 마다 끼어드는 경고·차단 훅이 그 충돌의 최대 공급원이었다. `Edit`·`Write` 에 붙는 코어 훅은 **0개**다.
+**설계 기준: 훅은 "되돌리기 어려운 행위 차단 + 라이프사이클"만 담당한다.** 모델이 좋아질수록 훅을 늘리면 답변 품질이 *내려간다* — 스스로 판단해서 하려던 일을 매번 끼어들어 되돌리기 때문이다. 그래서 훅 수는 늘릴 대상이 아니라 줄일 대상이다. 품질·관찰·거버넌스는 훅이 아니라 커맨드(`/quality-gate`, `/code-review`, `/cost-report`)로 사람이 부를 때 돈다. 이유는 비용이 아니라 **간섭**이다 — Opus 5 는 지시가 많을 때보다 *서로 반대되는 지시*가 있을 때 판단이 무너지고, 매 Edit 마다 끼어드는 경고·차단 훅이 그 충돌의 최대 공급원이었다. `Edit`·`Write` 에 붙는 코어 훅은 **0개**다.
 
-- `hooks/hooks.json` — **코어 스택 6그룹.** Install via `./install.sh --with-hooks` (or `install.ps1 -WithHooks`).
-  `pre:bash:dispatcher` · `session:start` · `stop:session-end` · `stop:cost-tracker` · `session:end:marker` · `subagent:budget`.
-  전 프로파일에서 동일하게 6그룹이다(**minimal (6훅)** / **standard (6훅)** / **strict (6훅)**) — 프로파일은 이제 그룹 수가 아니라 **dispatcher 내부 서브훅의 강도**만 바꾼다.
-  - `post:bash:dispatcher` 는 2026-08-15 옵트인으로 내려갔다. 서브훅 4개(`command-log-audit`·`command-log-cost`·`pr-created`·`build-complete`)가 전부 standard 이상이라 — 앞의 둘은 `profiles` 미지정이어서 기본값 `standard,strict` 로 떨어진다 — **기본 프로파일 minimal 에서는 Bash 호출마다 node 를 띄워 아무 일도 하지 않았다.** 게다가 그 유일한 산출물 `bash-commands.log` 는 하네스 안에 읽는 코드가 없다. 프로파일 기본값이 minimal 인데 서브훅 전원이 standard 이상이면 그 그룹은 코어가 아니다.
-- `hooks/hooks-optional.json` — **옵트인 24그룹.** 품질 게이트·차단형·관찰 훅 전부(quality-gate, design-quality-check, console-warn, governance-capture, mcp-health-check, context-monitor, metrics-bridge, activity-tracker, format-typecheck, run-tests, command-registry, gateguard-fact-force, config-protection, doc-file-warning, suggest-compact, pre-compact, evaluate-session, capture-lessons, desktop-notify 등). 필요한 프로젝트에서만 `node scripts/install/merge-hooks.js --optional` 로 추가한다. 머지는 **선언적**이라 `--optional` 없이 재실행하면 이 스택은 다시 걷힌다.
+- `hooks/hooks.json` — **코어 스택 2그룹.** Install via `./install.sh --with-hooks` (or `install.ps1 -WithHooks`).
+  `pre:bash:dispatcher`(Bash 프리플라이트) · `subagent:budget`(서브에이전트 예산 브리프). 둘 다 **되돌리기 어려운 행위**에 붙고, `Edit`·`Write`·`Stop` 에는 코어 훅이 없다.
+  전 프로파일에서 동일하게 2그룹이다(**minimal (2훅)** / **standard (2훅)** / **strict (2훅)**) — 프로파일은 그룹 수가 아니라 **dispatcher 내부 서브훅의 강도**만 바꾼다.
+  - **판정 기준: 산출물에 독자가 있는가, 그리고 커맨드·rule 로 커버되지 않는가.** 이 둘을 못 넘기면 코어가 아니다.
+  - `post:bash:dispatcher` 는 2026-08-15 내려갔다. 서브훅 4개(`command-log-audit`·`command-log-cost`·`pr-created`·`build-complete`)가 전부 standard 이상이라 — 앞의 둘은 `profiles` 미지정이어서 기본값 `standard,strict` 로 떨어진다 — **minimal 에서는 Bash 호출마다 node 를 띄워 아무 일도 하지 않았다.** 산출물 `bash-commands.log` 도 읽는 코드가 없다.
+  - **라이프사이클 4종은 2026-08-16 내려갔다**(`session:start`·`stop:session-end`·`stop:cost-tracker`·`session:end:marker`). 각각의 근거:
+    - `stop:cost-tracker` — `metrics/costs.jsonl` 의 유일한 독자가 `harness-metrics-bridge.js` 인데 같은 날 standard+ 로 내려갔다. minimal 에선 **매 응답마다 아무도 읽지 않는 무한증가(rotation 없음) 파일을 썼다.** `/cost-report` 는 전혀 다른 외부 DB(`~/.claude-cost-tracker/usage.db`)를 본다.
+    - `stop:session-end` — `session-data/*.tmp` 자동 저장. **`/save-session` 커맨드가 같은 파일을 직접 쓴다**(커맨드가 커버). 세션 재개 1순위는 Orca 워크트리 / 네이티브 `/resume` 다.
+    - `session:start` — minimal 주입 실적은 `Project type: {...}` 한 줄(레포 보면 아는 정보)뿐. 나머지 주입분은 observer instinct·learned-skill 요약인데 **observer 를 시작하는 코드가 하네스에 없다.** 게이팅은 `session-start-bootstrap.js` 안의 CSV 로 한다(부트스트랩이 이미 `run-with-flags` 를 부르므로 hooks.json 에서 한 번 더 감싸면 이중 래핑이다).
+    - `session:end:marker` — `session:start` 가 쓴 observer lease 를 지우는 짝. 쌍으로만 의미가 있어 함께 내렸다.
+- `hooks/hooks-optional.json` — **옵트인 28그룹.** 품질 게이트·차단형·관찰 훅 전부(quality-gate, design-quality-check, console-warn, governance-capture, mcp-health-check, context-monitor, metrics-bridge, activity-tracker, format-typecheck, run-tests, command-registry, gateguard-fact-force, config-protection, doc-file-warning, suggest-compact, pre-compact, evaluate-session, capture-lessons, desktop-notify 등). 필요한 프로젝트에서만 `node scripts/install/merge-hooks.js --optional` 로 추가한다. 머지는 **선언적**이라 `--optional` 없이 재실행하면 이 스택은 다시 걷힌다.
 - **글로벌 기본은 `HARNESS_HOOK_PROFILE=minimal`** (`~/.claude/settings.json` 의 `env`, `hook-flags.js` 의 코드 기본값도 동일). `run-with-flags.js <id> <script> <profilesCsv>` 게이팅과 `HARNESS_DISABLED_HOOKS` CSV 는 그대로다.
+  - **프로파일의 뜻**: `minimal` = **최소한의 가드레일만**(되돌리기 어려운 행위 차단 + 라이프사이클) / `standard` = + 품질·관찰·거버넌스 **경고** / `strict` = + **차단형**. 그래서 `minimal` 에 훅을 추가하는 변경은 정의 위반이다 — 판단이 필요하면 커맨드로 부르지, 훅으로 상시 끼워넣지 않는다.
+  - **옵트인 스택은 `standard` 이상 전용이다.** optional 28그룹 중 minimal 에서 켜지는 것은 **0개**여야 한다(2026-08-16 기준: `standard,strict` 24 · `strict` 3 · 게이트 없음 1 = dispatcher 내부 게이팅). 과거 `post:harness-metrics-bridge`·`stop:evaluate-session`·`stop:capture-lessons` 셋이 `minimal` 을 포함해, minimal 인데도 켜졌다 — 특히 metrics-bridge 는 matcher `*` 이고 유일한 소비자(`post:harness-context-monitor`)가 `standard` 이상이라 **매 툴 호출마다 아무도 읽지 않는 파일을 썼다**. `--optional` 을 minimal 에 머지하면 `merge-hooks.js` 가 경고한다.
   - `pre:bash:dispatcher` 서브훅: **minimal 부터** `block-no-verify`·`git-push-reminder`(기본 브랜치 직행 — minimal/standard 경고, strict 차단) / **standard** 부터 `auto-tmux-dev` / **strict 전용** `tmux-reminder`·`commit-quality`·`gateguard-fact-force`.
   - `gateguard-fact-force` 는 **strict 전용이다.** 과거 dispatcher 쪽 사본만 `standard,strict` 로 새어 있어서 standard 프로파일에서 매 세션 첫 Bash 가 차단됐다 — 문서가 strict 라고 적어둔 것과 코드가 어긋난 사례이므로, 프로파일 CSV 를 바꿀 때는 hooks.json 과 dispatcher 양쪽을 함께 본다.
   - `subagent:budget` 은 SubagentStart 훅으로, 서브에이전트가 SessionStart 컨텍스트(= ponytail 규율)를 상속하지 않는 구멍을 메운다 — Agent 호출마다 예산 브리프를 주입해 과탐색·장문 보고를 억제한다. 브리프는 기본형(구현·탐색)과 **리뷰 변형**(`agent_type` 이 review/audit/detector/scorer/critic/analyzer 매칭) 두 종류이고, 리뷰 변형은 탐색 규율만 유지하고 **findings 개수는 압박하지 않는다**. ponytail 이 `off` 면 주입하지 않고, `HARNESS_SUBAGENT_BUDGET=off` 로 개별 차단한다.
+- **`settings.json` 의 `id`·`description` 은 살아남지 못한다.** Claude Code 가 그 파일을 재작성할 때(설정 변경·권한 규칙 추가 등) 스키마에 없는 키를 떨어뜨린다 — 2026-08-16 실측: 머지 직후 있던 `id` 6개가 이후 전부 사라졌고, 그때 `settings.json` 의 mtime 은 머지 시각보다 뒤였으며 top-level 에 `ultracode`·`enableWorkflows` 같은 Claude Code 자체 키가 들어와 있었다. 그래서 소유권 판정을 **실행하는 스크립트**(`runsHarnessScript`) 기준으로 두었고 `id` 는 보고용일 뿐이다. 부작용: `--dry-run` 이 매번 "swept N + added N" 으로 보인다(결과는 정확하다 — 스크립트 대조로 검증).
 - `scripts/install/merge-hooks.js` — the underlying merger. **머지는 선언적이다**: 실행 후 settings.json 의 하네스 소유분은 머지한 집합과 정확히 일치하고, 그 밖의 하네스 훅은 전부 걷힌다 — hooks.json 에서 은퇴한 id, 그리고 **옛 설치가 남긴 `id` 없는 그룹**까지(`isLegacyHarnessGroup`: command 에 하네스 스크립트 경로 마커가 있으면 하네스 소유로 판정). 서드파티 훅(예: `~/.orca/agent-hooks/claude-hook.sh` 를 부르는 Orca 훅 11개)은 마커가 없어 보존된다. `--dry-run` 으로 sweep 목록을 먼저 확인할 것. Tests: `tests/scripts/install/merge-hooks.test.js`.
 - `hooks/prompt-pack.json` — two reference-only prompts (`ref:pre-write-guard`, `ref:review-on-stop`). Not runnable; see `hooks/README-prompt-pack.md` for what they overlap with and how to wire them up if needed.
 
@@ -137,7 +146,7 @@ Orca 안에서 `Workflow` 를 쓰지 않는 이유는 능력이 아니라 **상�
 그냥 도구 호출이라 그대로 쓴다. 그리고 **추론을 더 원하는 것**과 **일을 쪼개는 것**은
 다른 축이다 — 전자는 팬아웃이 아니라 effort 를 올린다(`--effort max` / `/effort`).
 
-하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 6개)**.
+하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 2개)**.
 
 전체 의존 지점·역할 분리 표·점검 명령·Orca 없이 쓸 때 무엇이 달라지는지는 **`docs/orca-dependencies.md`**.
 

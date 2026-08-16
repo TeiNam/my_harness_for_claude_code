@@ -170,9 +170,7 @@ function collectHarnessIds(hooksDoc) {
 function isLegacyHarnessGroup(group) {
   if (!group || typeof group !== 'object') return false;
   if (typeof group.id === 'string' && group.id) return false;
-  return (Array.isArray(group.hooks) ? group.hooks : []).some(
-    h => h && referencesHarnessScript(h.command)
-  );
+  return (Array.isArray(group.hooks) ? group.hooks : []).some(h => h && referencesHarnessScript(h.command));
 }
 
 /**
@@ -182,9 +180,7 @@ function isLegacyHarnessGroup(group) {
  */
 function runsHarnessScript(group) {
   if (!group || typeof group !== 'object') return false;
-  return (Array.isArray(group.hooks) ? group.hooks : []).some(
-    h => h && referencesHarnessScript(h.command)
-  );
+  return (Array.isArray(group.hooks) ? group.hooks : []).some(h => h && referencesHarnessScript(h.command));
 }
 
 /**
@@ -372,6 +368,26 @@ function printPlan(label, summary) {
   }
 }
 
+/**
+ * 옵트인 스택은 `standard` 이상에서만 의미가 있다. `minimal` 은 "최소한의 가드레일만"
+ * 이라는 프로파일이므로 optional 훅 전원이 `standard,strict`(차단형은 `strict`)로
+ * 게이팅돼 있다 — minimal 에 깔면 매 이벤트마다 프로세스만 뜨고 빈손으로 끝난다.
+ * 설치 자체를 막지는 않는다(프로파일은 프로젝트별로 올릴 수 있다). 대신 알린다.
+ */
+function warnOptionalNeedsProfile(settings) {
+  const profile = String((settings && settings.env && settings.env.HARNESS_HOOK_PROFILE) || 'minimal')
+    .trim()
+    .toLowerCase();
+  if (profile !== 'minimal') return;
+  console.log(
+    '\n  WARNING: 옵트인 스택을 머지했지만 HARNESS_HOOK_PROFILE 이 minimal 입니다.' +
+      '\n  minimal 은 최소 가드레일만 두는 프로파일이라 이 훅들은 하나도 켜지지 않습니다' +
+      '\n  (프로세스만 뜨고 빈손으로 끝납니다). 쓰려면 둘 중 하나로:' +
+      '\n    - 프로젝트 .claude/settings.json 에 env.HARNESS_HOOK_PROFILE="standard"' +
+      '\n    - 또는 이 머지를 되돌리기: node scripts/install/merge-hooks.js'
+  );
+}
+
 function main(argv = process.argv) {
   const flags = parseArgs(argv);
   if (flags.help) {
@@ -385,7 +401,7 @@ function main(argv = process.argv) {
         '  --uninstall          Remove all harness-owned hooks (core + optional + legacy)',
         '  --hooks <path>       Path to hooks.json (default: <repo>/hooks/hooks.json)',
         '  --settings <path>    Path to settings.json (default: $CLAUDE_HOME/settings.json)',
-        '  -h, --help           Show this help',
+        '  -h, --help           Show this help'
       ].join('\n')
     );
     return 0;
@@ -398,13 +414,13 @@ function main(argv = process.argv) {
   const { doc: hooksDoc, sources } = loadHooksDocs(hooksPath, flags);
   const settings = readJson(settingsPath) || {};
 
-  const { next, summary } = flags.uninstall
-    ? planUninstall(settings, hooksDoc)
-    : planMerge(settings, hooksDoc);
+  const { next, summary } = flags.uninstall ? planUninstall(settings, hooksDoc) : planMerge(settings, hooksDoc);
 
   console.log(`hooks files:   ${sources.join(', ')}`);
   console.log(`settings file: ${settingsPath}`);
   printPlan(flags.uninstall ? 'uninstall' : 'merge', summary);
+
+  if (flags.optional && !flags.uninstall) warnOptionalNeedsProfile(settings);
 
   if (summary.mixedGroups && summary.mixedGroups.length) {
     console.log(
@@ -453,5 +469,5 @@ module.exports = {
   isHarnessGroup,
   runsHarnessScript,
   isLegacyHarnessGroup,
-  referencesHarnessScript,
+  referencesHarnessScript
 };

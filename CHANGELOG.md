@@ -2,8 +2,18 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-08-15
+
+- docs: 낡은 문서 4개 갱신 — rules-reference 유령 언어, hooks 코어/옵트인, 자산 카운트 (#27) (a525462)
+- docs: README 사실 오류 9건 + 윤문 34건, .gitignore 정리 (#26) (54f9b9e)
+- docs: 오케스트레이션 담당 확정 — Orca 우선, 없으면 ultracode (#25) (cfb6596)
+- chore: 생성된 AGENTS.md 제거 + gitignore (#24) (5041a86)
+- refactor: 코어 훅 7→6그룹 (post:bash 옵트인화) + readme-rule 후원 배지 규칙 제거 (#23) (6322481)
+- docs: 제거된 자기진화 스택 참조 정리 + lock version 동기화 (#22) (f7ad493)
+
 ## 2026-08-14
 
+- chore(install): 0.4.0 재설치 + Orca 의존성 문서 + MCP 통짜 빌드 함정 기록 (#21) (89af6cc)
 - chore(plugins): motion-creative·scroll-world·rust-analyzer-lsp 제거 (#20) (92c097e)
 - feat(install): 메뉴 baseline 에 글쓰기·기술문서 포함 (#19) (c83a2e6)
 - refactor: 하네스 최소화 — 훅 30→7, 상시 rule 15.4k→1.8k tok, Orca 역할 분리, 루프 제어 (#18) (4be1e39)
