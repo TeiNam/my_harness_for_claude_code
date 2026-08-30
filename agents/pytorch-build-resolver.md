@@ -1,8 +1,9 @@
 ---
 name: pytorch-build-resolver
 description: PyTorch runtime, CUDA, and training error resolution specialist. Fixes tensor shape mismatches, device errors, gradient issues, DataLoader problems, and mixed precision failures with minimal changes. Use when PyTorch training or inference crashes.
-tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
+tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Skill"]
 model: sonnet
+skills: [pytorch-patterns]
 workloads: [ai, python-data]
 ---
 

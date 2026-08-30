@@ -2,7 +2,9 @@
 name: content-fidelity-auditor
 description: 원문과 윤문본을 의미 단위로 대조하여 "내용이 보존됐는가"를 검증하는 감사관. 사실·주장·수치·고유명사·인용·인과관계·순서가 한 글자라도 훼손됐는지 탐지해 edit 단위로 롤백 지시를 내린다. 윤문가의 철칙(의미 불변)을 수호하는 최후의 방어선.
 model: opus
-tools: ["Read", "Write", "Glob", "Grep"]
+skills: [humanize-korean]
+effort: xhigh
+tools: ["Read", "Write", "Glob", "Grep", "Skill"]
 workloads: [writing]
 origin: im-not-ai (epoko77-ai/im-not-ai)
 ---

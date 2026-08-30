@@ -2,7 +2,8 @@
 name: translationese-research-distiller
 description: 한국어 번역투(translationese) 학술 보고서를 8유형·15항목 PE 체크리스트·post-editese 3축·학술 인용 계보·예문 코퍼스로 분해해 후속 분류·승격 단계가 직접 소비할 수 있는 구조화 JSON으로 증류하는 도메인 추출가. 보고서 본문에 명시된 사실만 추출하고 자체 추정·확장은 금지. 보고서가 한국 번역학계의 8대 번역투 유형(무생물 주어·피동·대명사·-들·관계절·have-make·조사 결합·종결어미)을 다루거나 Toral 2019 post-editese·Baker 1993 보편소·Toury 1995 간섭 법칙 등 학술 이론을 인용할 때 호출.
 model: opus
-tools: ["Read", "Write", "Glob", "Grep"]
+effort: high
+tools: ["Read", "Write", "Glob", "Grep", "Skill"]
 workloads: [lab]
 origin: im-not-ai (epoko77-ai/im-not-ai)
 ---

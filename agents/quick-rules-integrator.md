@@ -2,7 +2,7 @@
 name: quick-rules-integrator
 description: 신규 분류 체계 v2.0과 metrics·playbook 패치를 quick-rules.md(monolith 전용 슬림 룰북, 126줄 → ≤180줄)에 안착하고 monolith 도구 호출 3회 캡(v1.6.1) 회귀를 검증한 뒤, GitHub PR 초안과 CHANGELOG를 작성하는 통합 엔지니어. 본진 룰북 슬림성·monolith 정의 무수정·v1.x 발행 정책(사용자 명시 승인 후 푸시)을 3대 가드로 삼음. v2.0 변경 묶음을 PR로 발행 직전 단계에서 호출.
 model: sonnet
-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
+tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "Skill"]
 workloads: [lab]
 origin: im-not-ai (epoko77-ai/im-not-ai)
 ---
