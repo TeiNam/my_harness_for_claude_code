@@ -85,7 +85,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ## Orca Integration
 
-이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅을 `settings.json` 의 12개 이벤트에 심고(Orca 밖에서는 no-op) 자체 스킬 5종을 링크한다. **겹치는 기능은 한쪽만 쓴다** — 워크트리 격리·핸드오프 = `orca-cli`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`.
+이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅을 `settings.json` 의 12개 이벤트에 심고(Orca 밖에서는 no-op) 자체 스킬 5종을 링크한다. **겹치는 기능은 한쪽만 쓴다** — 워크트리 격리·핸드오프 = `orca-cli`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`, **브라우저 컨트롤 = Orca 임베디드 브라우저**(`orca tab`·`goto`·`snapshot`·`click`·`eval`·`screenshot` + 세션 프로필). playwright MCP 는 Orca 안에서 **등록하지 않는다** — E2E 테스트 실행(`npx playwright test`)과 영상 녹화(`ui-demo`)만 Playwright 몫이다.
 
 ### 오케스트레이션은 Orca 전담 — 하네스는 이 축의 자산을 두지 않는다
 
