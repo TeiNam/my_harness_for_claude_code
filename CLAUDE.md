@@ -129,6 +129,14 @@ node tests/lib/utils.test.js
 node tests/hooks/hooks.test.js
 ```
 
+## Release — PR 머지 전 필수 3종
+
+머지 직전에 셋을 확인한다. 하나만 빠져도 설치본이나 문서가 레포와 어긋난다.
+
+1. **버전 범프** — `VERSION`(설치가 읽는 정본)과 `package.json`·`package-lock.json`(2곳)을 **함께** 올린다. 한쪽만 올리면 `_harness-manifest.json` 이 낡은 버전을 기록하고 `check-global` 이 "current" 로 오판한다(v0.5.0 에서 실제로 발생). `tests/scripts/install/manifest.test.js` 의 "VERSION and package.json version agree" 가 이 드리프트를 잡는다. 기준: 자산 계약·정책·훅 출력이 바뀌면 **마이너**, 문서·버그 수정만이면 패치.
+2. **CHANGELOG.md** — `.githooks/pre-commit` 이 자동 재생성한다. 단 **스쿼시 머지 뒤에는 병합 전 해시가 남는다**(그 커밋들이 main 에 없다). 머지 후 첫 커밋이 정정하므로 릴리스 커밋을 머지 다음에 두거나, 머지 후 `head CHANGELOG.md` 로 확인한다.
+3. **README.md** — 변경이 README 의 사실을 건드렸는지 본다: 자산 개수(에이전트·커맨드·스킬·훅), 설치 플래그·메뉴, 모델 티어 표, 자주 쓰는 커맨드 목록. 커맨드를 추가하면 `npm run command-registry:write` 도 함께 돌린다.
+
 ## Key Commands (subset)
 
 - `/plan` / `/feature-dev` — start work (TDD는 superpowers 플러그인의 `test-driven-development` 스킬)

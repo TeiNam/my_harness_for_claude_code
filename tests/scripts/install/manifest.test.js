@@ -79,6 +79,14 @@ function runTests() {
     assert.strictEqual(repoVersion(dir), null);
   })) passed++; else failed++;
 
+  // 설치는 VERSION 을 읽고 npm 은 package.json 을 읽는다. 한쪽만 올리면 설치본이
+  // 낡은 버전으로 보고되므로(v0.5.0 범프에서 실제로 발생) 둘을 묶어둔다.
+  if (test('VERSION and package.json version agree', () => {
+    const root = path.resolve(__dirname, '..', '..', '..');
+    const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
+    assert.strictEqual(repoVersion(root), pkg.version);
+  })) passed++; else failed++;
+
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
   process.exit(failed > 0 ? 1 : 0);
 }
