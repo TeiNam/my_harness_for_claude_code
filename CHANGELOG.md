@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-30
 
+- feat(agents): 46종에 rubric preload·effort·Skill 툴을 붙여 하네스를 상속시킨다 (0124311)
 - refactor: 서브에이전트를 "예외"에서 "기본"으로 전환하고 fork 경로를 정형화 (22e4314)
 
 ## 2026-08-16
