@@ -1,8 +1,9 @@
 ---
 name: content-creator
 description: Platform-native content and social media specialist. Creates content for X, LinkedIn, newsletters, and video scripts. Adapts content per platform. Use for social posts, content calendars, and multi-platform campaigns.
-tools: ["Read", "Write", "Edit"]
+tools: ["Read", "Write", "Edit", "Skill"]
 model: sonnet
+skills: [content-engine, brand-voice]
 workloads: [writing]
 ---
 

@@ -2,7 +2,8 @@
 name: doc-quality-detector
 description: "입력된 IT 기술 문서(한국어·영어)에서 tech-doc-taxonomy의 9대분류 × 서브 패턴에 해당하는 구간(span)을 식별해 JSON 리포트로 출력하는 품질 탐지 전문가. 각 span에 category·severity·anchor 인용·reason·suggested_fix를 붙여 작성가와 리뷰어가 근거 기반으로 작업하도록 한다. 번역투·hype 제거 결함과 정확성·실행가능성·구조·전제 보강 결함을 함께 탐지한다."
 model: sonnet
-tools: Read, Write
+skills: [tech-writer]
+tools: ["Read", "Write", "Skill"]
 workloads: [report]
 ---
 # Doc Quality Detector

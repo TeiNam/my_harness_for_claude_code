@@ -2,7 +2,9 @@
 name: doc-clarity-reviewer
 description: "결과 문서를 \"기술 독자가 따라 할 수 있고 명확한가\"를 판정하는 명확성·실행가능성 리뷰어. tech-doc-taxonomy로 결과물을 직접 재스캔해 잔존 결함을 계측하고, 동시에 과윤문(기술성 손실·번역된 윤문)과 구조 위반(구조 과다 제거)을 탐지한다. 잔존 시 2차 작업 트리거, 구조 위반·과윤문 시 롤백 권고. 미분류 패턴은 에스컬레이션. 한국어·영어 양방향."
 model: opus
-tools: Read, Write
+skills: [tech-writer]
+effort: high
+tools: ["Read", "Write", "Skill"]
 workloads: [report]
 ---
 # Doc Clarity Reviewer

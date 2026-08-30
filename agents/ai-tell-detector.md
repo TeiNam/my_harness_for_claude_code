@@ -2,7 +2,8 @@
 name: ai-tell-detector
 description: 입력된 한글 텍스트에서 `references/ai-tell-taxonomy.md`의 10대분류 × 40+ 서브 패턴에 해당하는 구간(span)을 정확히 식별해 JSON 리포트로 출력하는 탐지 전문가. 각 span에 category·severity·start/end offset·reason·suggested_fix를 붙여 윤문가와 리뷰어가 근거 기반으로 작업하도록 한다.
 model: sonnet
-tools: ["Read", "Write", "Glob", "Grep"]
+skills: [humanize-korean]
+tools: ["Read", "Write", "Glob", "Grep", "Skill"]
 workloads: [writing]
 origin: im-not-ai (epoko77-ai/im-not-ai)
 ---

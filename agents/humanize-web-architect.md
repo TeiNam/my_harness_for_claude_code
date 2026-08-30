@@ -2,7 +2,8 @@
 name: humanize-web-architect
 description: Humanize KR 파이프라인을 Next.js 15 App Router + Vercel Fluid Compute 기반 웹 서비스로 확장할 때 호출되는 아키텍트. 붙여넣기 입력 → 탐지 하이라이트 → 좌우 diff → 윤문본 복사의 4화면 UX와 API 라우트(/api/detect, /api/rewrite), AI Gateway 연동, Resend·Clerk 선택 통합을 설계한다. 기본 윤문 CLI가 안정화된 뒤 웹 확장을 요청받을 때만 작동.
 model: opus
-tools: ["Read", "Write", "Edit", "Glob", "Grep"]
+effort: high
+tools: ["Read", "Write", "Edit", "Glob", "Grep", "Skill"]
 workloads: [lab]
 origin: im-not-ai (epoko77-ai/im-not-ai)
 ---

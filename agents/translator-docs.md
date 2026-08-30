@@ -1,8 +1,9 @@
 ---
 name: translator-docs
 description: Bidirectional Korean  English translation and documentation specialist. Handles business email translation, technical document translation, and README/API documentation writing. Prioritizes naturalness and intent preservation over literal accuracy.
-tools: ["Read", "Write", "Edit"]
+tools: ["Read", "Write", "Edit", "Skill"]
 model: sonnet
+skills: [markdown-writing]
 workloads: [writing]
 ---
 

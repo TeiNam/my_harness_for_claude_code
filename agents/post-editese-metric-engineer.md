@@ -2,7 +2,8 @@
 name: post-editese-metric-engineer
 description: Toral 2019 post-editese 3축(단순화·정규화·간섭)을 한국어 정량 지표로 구체화하고, 보고서 8유형 검출 시그널을 metrics.py에 추가해 회귀 검증 가능 상태로 만드는 정량 엔지니어. 표준 라이브러리만, 형태소 분석은 정규식·접미사 사전으로 근사(konlpy·mecab 금지 — v1.6 정책 보존). monolith 외부 사전 처리(prepare_monolith_input.py)에 결합되어 도구 호출 캡 3회 보존. 신규 metric 추가 또는 metric 회귀 검증 시 호출.
 model: opus
-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
+effort: high
+tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "Skill"]
 workloads: [lab]
 origin: im-not-ai (epoko77-ai/im-not-ai)
 ---

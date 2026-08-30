@@ -11,11 +11,9 @@ Start a managed autonomous loop pattern with safety defaults.
 
 `/loop-start [pattern] [--mode safe|fast]`
 
-- `pattern` — 선택 기준은 아래 한 줄이면 충분하다:
+- `pattern` — **단일 세션 루프만 다룬다**(병렬 패턴은 Orca 담당, 아래 주석 참고):
   - `sequential` (기본): 한 번에 한 작업, 게이트 통과 후 다음으로
   - `continuous-pr`: 엄격한 CI/PR 통제가 필요할 때
-  - `rfc-dag`: RFC 를 의존성 DAG 로 분해해 병렬 진행할 때
-  - `infinite`: 탐색적 병렬 생성 (반드시 종료 조건을 명시)
 - `--mode`:
   - `safe` (default): strict quality gates and checkpoints
   - `fast`: reduced gates for speed
@@ -29,14 +27,17 @@ Start a managed autonomous loop pattern with safety defaults.
    node scripts/install/merge-hooks.js --optional   # loop detection, compaction, lesson capture
    ```
    `--mode safe` additionally wants `HARNESS_HOOK_PROFILE=strict` (blocking gates + Stop-time tests).
-   When the loop is done, re-merge without `--optional` to drop back to the core 7.
+   When the loop is done, re-merge without `--optional` to drop back to the core 2 groups.
 4. Create loop plan and write runbook under `.claude/plans/`.
 5. Print commands to start and monitor the loop.
 
 > Termination is the design, not an afterthought: state `max_turns`, the "no
 > progress" signal (diff unchanged / same error twice), and the cost ceiling
-> before starting. See the Loop Control table in CLAUDE.md for which asset covers
-> which failure mode.
+> before starting. See the 루프 제어 table in `docs/hooks-policy.md` for which
+> asset covers which failure mode.
+
+> 여러 워크트리·에이전트로 쪼개 돌리려면 이 커맨드가 아니라 Orca 쪽 다중 에이전트
+> 조율(task DAG · dispatch · worker-start)을 쓴다 — `docs/orca-dependencies.md` §3.
 
 ## Required Safety Checks
 
@@ -47,5 +48,5 @@ Start a managed autonomous loop pattern with safety defaults.
 ## Arguments
 
 $ARGUMENTS:
-- `<pattern>` optional (`sequential|continuous-pr|rfc-dag|infinite`)
+- `<pattern>` optional (`sequential|continuous-pr`)
 - `--mode safe|fast` optional
