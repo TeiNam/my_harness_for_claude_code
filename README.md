@@ -181,21 +181,24 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 ## 동반 플러그인 (하네스와 같이 설치)
 
 설치 스크립트는 플러그인을 건드리지 않습니다 — 아래는 손으로 설치하며, 명령 전체는 `docs/plugin.md`.
-6종 합계 상시 컨텍스트 비용은 스킬 `description` 기준 약 3.4k tok 입니다.
+6종 합계 상시 컨텍스트 비용은 스킬 `description` 기준 약 4.0k tok 입니다.
 
-| 플러그인 | 마켓플레이스 | 역할 (하네스와의 관계) |
-|---|---|---|
-| `superpowers` | anthropics/claude-plugins-official | TDD·검증·디버깅·플랜 스킬 — 하네스 자체 `tdd-workflow`·`verification-loop` 스킬은 중복이라 제거됨 |
-| `ponytail` | DietrichGebert/ponytail | 최소주의 코딩 모드 |
-| `codex` | openai/codex-plugin-cc | 교차 모델 세컨드 오피니언 — 하네스 자체 `codex-cli` 스킬은 중복이라 제거됨 |
-| `ui-ux-pro-max` | nextlevelbuilder/ui-ux-pro-max-skill | 디자인 시스템·UI 스타일링 — 하네스 자체 `design-system` 스킬은 중복이라 제거됨 |
-| `claude-dashboard` | uppinote20/claude-dashboard | **statusLine 담당** — 하네스 `harness-statusline.js`는 등록 대상이 아닌 죽은 경로라 2026-08 제거. 비용 DB(`cost-tracking`)는 SQLite 기반이라 별개 유지 |
-| `obsidian` | kepano/obsidian-skills | Obsidian 문서 포맷 (project scope 설치) |
+| 플러그인 | 마켓플레이스 | 상시 | 역할 (하네스와의 관계) |
+|---|---|---|---|
+| `superpowers` | anthropics/claude-plugins-official | ~584 tok | TDD·검증·디버깅·플랜 스킬 — 하네스 자체 `tdd-workflow`·`verification-loop` 스킬은 중복이라 제거됨 |
+| `ponytail` | DietrichGebert/ponytail | ~676 tok | 최소주의 코딩 모드 |
+| `codex` | openai/codex-plugin-cc | ~327 tok | 교차 모델 세컨드 오피니언 — 하네스 자체 `codex-cli` 스킬은 중복이라 제거됨 |
+| `ui-ux-pro-max` | nextlevelbuilder/ui-ux-pro-max-skill | ~720 tok | 디자인 시스템·UI 스타일링 — 하네스 자체 `design-system` 스킬은 중복이라 제거됨 |
+| `claude-dashboard` | uppinote20/claude-dashboard | ~89 tok | **statusLine 담당** — 하네스 `harness-statusline.js`는 등록 대상이 아닌 죽은 경로라 2026-08 제거. 비용 DB(`cost-tracking`)는 SQLite 기반이라 별개 유지 |
+| `easy-rdbms` | TeiNam/easy-rdbms | ~1,603 tok | MySQL·PostgreSQL·SQLite 모델링·리뷰 — `bcb4bcb` 에서 하네스 밖으로 뺀 RDBMS 자산의 도착지. 6종 중 상시 비용이 가장 커서 RDBMS 작업을 하지 않는 기간에는 빼도 됩니다 |
+
+전부 user scope 입니다. 로드 실패(`cache-miss`) 복구 절차는 `docs/plugin.md` 의 트러블슈팅 절을 봅니다.
 
 **설치하지 말 것**
 
 - 하네스 스킬과 이중 노출 (2026-07-26 제거, 하네스 쪽이 SSOT): `humanize-korean@im-not-ai`(하네스 `skills/humanize-korean`이 v1.6.1로 더 최신), `frontend-design@claude-plugins-official`(하네스 `skills/frontend-design`과 동일 출처 중복).
 - 워크로드와 무관 (2026-08-14 제거 — 마켓플레이스 등록·캐시까지 정리): `motion-creative@motion-mcp`(광고 크리에이티브 분석, 17스킬 395 tok — 2026-07-26에 뺐다가 재설치돼 있던 것), `scroll-world@scroll-world`(스크롤 시네마틱 랜딩 — 랜딩페이지는 하네스 `taste`/`redesign`/`soft`/`output-skill`이 담당), `rust-analyzer-lsp@claude-plugins-official`(LSP 서버, 스킬 0개라 컨텍스트 비용은 없었으나 Rust 작업에서 쓰지 않음).
+- 2026-08-30 제거 (마켓플레이스 등록·캐시까지 정리): `obsidian@obsidian-skills`(user·project 이중 scope 드리프트를 걷어내면서 플러그인 자체를 내렸습니다 — Obsidian 작업은 MCP 서버 `obsidian` 이 담당하고 플러그인과 무관하게 유지됩니다), `andrej-karpathy-skills@karpathy-skills`(스킬 1개짜리 행동 지침인데 `ponytail` 과 역할이 겹침 — 설치 후 줄곧 disabled 였음).
 
 ## 필수 도구 버전
 
