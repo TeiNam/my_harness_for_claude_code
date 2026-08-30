@@ -58,4 +58,8 @@ node scripts/install/build-mcp-config.js --servers=a,b,c
    `.env` 위치는 **compose 와 같은 디렉터리**(`mcp-configs/proxy/.env`, `.gitignore` 대상)다.
 4. **`playwright` 는 프록시에 넣지 않는다** — 카탈로그에서 `route: "local"` 이다. 컨테이너 안에
    브라우저가 없으므로 호스트 stdio 로 등록한다: `claude mcp add -s user playwright -- npx -y
-   @playwright/mcp --headless`.
+   @playwright/mcp --headless --browser chromium`.
+   **`--browser chromium` 을 빼면 도구 호출이 실패한다** — 기본값이 채널 `chrome`(실제
+   Google Chrome.app)이라서 `Chromium distribution 'chrome' is not found` 가 난다. 서버는
+   정상 연결되므로(`/mcp` 는 초록) 첫 `browser_*` 호출에서야 드러난다. 번들 브라우저는
+   `npx playwright install chromium` 로 한 번 받는다(~95MB → `~/Library/Caches/ms-playwright`).
