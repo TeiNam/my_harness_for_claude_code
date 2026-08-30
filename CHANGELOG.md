@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-30
 
+- chore(release): VERSION 파일도 0.5.0 으로 + 릴리스 필수 3종을 CLAUDE.md 에 명기 (#35) (99c63fb)
 - chore(release): v0.5.0 — 서브에이전트 위임 전환 반영 (#34) (0894563)
 - feat: 서브에이전트를 적극 위임으로 전환하고 하네스·플러그인을 상속시킨다 (#33) (13f0438)
 
