@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-16
 
+- docs: RDBMS 제거·훅 축소 이후의 문서 동기화 + 깨진 링크 5건 복구 (#32) (e717a9c)
 - refactor: RDBMS 자산을 하네스에서 제거 (별도 플러그인으로 분리) (#31) (bcb4bcb)
 - docs: CLAUDE.md 를 결론만 남기고 41% 줄임 (근거·이력은 docs/ 로) (#30) (6d7d0ed)
 - feat(install): 설치가 minimal 프로파일을 명시하고 settings.json 점검 도구 추가 (#29) (784dbc3)

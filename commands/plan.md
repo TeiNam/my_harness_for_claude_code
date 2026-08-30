@@ -8,7 +8,7 @@ workloads: [core]
 
 This command creates a comprehensive implementation plan before writing any code. It accepts either free-form requirements or a PRD markdown file.
 
-Run inline by default. Do not call the Task tool or any subagent by default. This keeps `/plan` usable from plugin installs that ship commands without agent files.
+**요구사항이 `$ARGUMENTS` 나 PRD 파일에 다 들어 있으면 `planner` 에이전트에 위임한다**(cold 로 충분하다 — 입력이 자족적이다). 요구사항이 지금까지의 대화에 흩어져 있으면 cold 는 그걸 못 받으므로 `/fork-as planner` 로 fork 하거나 인라인으로 진행한다. `planner` 가 없는 런타임(에이전트 파일 없이 커맨드만 배포된 플러그인)에서는 인라인이 폴백이다.
 
 ## What This Command Does
 
@@ -43,8 +43,8 @@ The assistant will:
 | Input | Mode | Behavior |
 |---|---|---|
 | `path/to/name.prd.md` | PRD artifact mode | Read the PRD, pick the next pending delivery milestone or implementation phase, and write `.claude/plans/{name}.plan.md` |
-| Any other markdown path | Reference mode | Read the file as context and produce an inline plan |
-| Free-form text | Conversational mode | Produce an inline plan |
+| Any other markdown path | Reference mode | Read the file as context and return the plan in the response (no plan file) |
+| Free-form text | Conversational mode | Return the plan in the response (no plan file) |
 | Empty input | Clarification mode | Ask what should be planned |
 
 In PRD artifact mode, create `.claude/plans/` if needed. If the PRD contains a `Delivery Milestones` table, update only the selected row from `pending` to `in-progress` and set its `Plan` cell to the generated plan path. If the PRD uses the legacy `.claude/PRPs/prds/` format with `Implementation Phases`, read it without migrating paths.
@@ -190,11 +190,11 @@ After planning:
 > **Need requirements first?** Use `/plan-prd` for a lean PRD at `.claude/prds/{name}.prd.md`.
 >
 
-## Optional Planner Agent
+## Planner Agent
 
-The harness also provides a `planner` agent. Use it only when the local runtime already exposes that subagent and the user explicitly asks you to delegate planning.
+The harness ships a `planner` agent (`model: opus`, `effort: high`, `skills: [search-first]`). **자족적인 입력이면 여기에 위임하는 것이 기본이다** — 계획은 열린 박스 작업이라 티어·effort 를 박아둔 쪽이 인라인보다 유리하고, 탐색 전사(轉寫)가 메인 컨텍스트에 쌓이지 않는다.
 
-If the `planner` subagent is unavailable, continue planning inline instead of surfacing an "Agent type 'planner' not found" error.
+위임하지 않는 경우는 둘이다: ① 판단에 필요한 맥락이 이 대화에만 있다(→ `/fork-as planner`) ② `planner` 가 이 런타임에 없다. 후자면 "Agent type 'planner' not found" 를 내지 말고 조용히 인라인으로 계속한다.
 
 For manual installs, the source file lives at:
 `agents/planner.md`

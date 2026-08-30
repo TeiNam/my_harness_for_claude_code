@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalCommands": 37,
+  "totalCommands": 38,
   "commands": [
     {
       "command": "aside",
@@ -82,6 +82,15 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/feature-dev.md"
+    },
+    {
+      "command": "fork-as",
+      "description": "지정한 에이전트의 rubric 을 지키면서 현재 대화 맥락을 상속하는 fork 를 띄운다 — cold 에이전트로는 맥락이 넘어가지 않을 때.",
+      "type": "review",
+      "primaryAgents": [],
+      "allAgents": [],
+      "skills": [],
+      "path": "commands/fork-as.md"
     },
     {
       "command": "harness-audit",
@@ -381,7 +390,7 @@
       "general": 4,
       "planning": 1,
       "refactoring": 1,
-      "review": 5,
+      "review": 6,
       "testing": 25
     },
     "topAgents": [

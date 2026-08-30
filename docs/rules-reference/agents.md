@@ -1,34 +1,85 @@
 # Agent Orchestration
 
-## Subagent Gate (overrides "PROACTIVELY" / "MUST BE USED" phrasing everywhere)
+## Subagent Routing (overrides "PROACTIVELY" / "MUST BE USED" phrasing everywhere)
 
-**Default is inline work in the main loop. A subagent is the exception, not the reflex.**
-Any "use PROACTIVELY", "MUST BE USED", or "immediately" wording in other rules or in
-agent descriptions marks a *candidate*, not a command — this gate decides.
+**Delegation is the default whenever the work has a shape.** Any "use PROACTIVELY",
+"MUST BE USED", or "immediately" wording elsewhere marks a *candidate*; this section
+decides which vehicle carries it.
 
-Spawn a subagent ONLY when at least one of these holds:
+This **reverses** the previous rule — "default is inline work, a subagent is the
+exception" (dropped 2026-08-30). That rule was right for its time: cold agents ran
+with no harness context, no rubric, no skills, so inline work was simply better
+work. The premise is gone. CLAUDE.md and `rules/` reach every non-fork subagent
+automatically, 38 of 46 agents preload their rubric through `skills:`, and `fork`
+carries the entire conversation. Delegating no longer costs quality, so the only
+open question is *which vehicle*.
 
-1. **User asked** — named an agent, a review, or multi-agent work explicitly.
-2. **Context protection** — the task needs reading across many files or produces large
-   output where only the conclusion matters (broad search, repo-wide audit).
-3. **True parallelism** — 2+ genuinely independent tasks that would otherwise run serially.
-4. **A command/skill pipeline requires that agent** (e.g. /humanize strict stages).
+| The work is… | Vehicle |
+|---|---|
+| a role with a standing rubric (review, audit, translate, resolve build errors) | the matching `agents/` entry — **delegate, don't deliberate** |
+| dependent on what just happened in this conversation | **`fork`** (`/subtask`; `/fork-as <agent>` when a rubric also applies) |
+| broad reading where only the conclusion matters (repo-wide search, audit) | `Explore` or a cold agent — keeps the transcript out of the main context |
+| 2+ genuinely independent tasks | parallel `Agent` calls in a single message |
+| answerable by one tool call (a grep, a file read, a test run) | inline — delegation has a floor cost and a one-liner is below it |
+| fan-out, a task DAG, a coordinator loop | Orca `orchestration`, not this session |
 
-Hard limits:
+Hard limits remain, but they cap **concurrency and recursion** — not frequency:
 
-- **Max 3 concurrent subagents** unless the user explicitly asks for more scale
-  (workflow / ultracode opt-in).
-- **No speculative reviewers** — do not auto-spawn code-reviewer / security-reviewer /
-  tdd-guide after every edit. Spawn them when the change is security-sensitive, spans
-  5+ files, or the user asks.
-- **No agent for what one command answers** — a single grep, test run, or file read
-  is done inline.
-- **No chains** — never spawn an agent whose main job is to spawn more agents.
-- **Smell test** — if writing the agent prompt takes longer than doing the task,
-  do the task.
+- **Max 3 concurrent** unless the user asks for more scale. Beyond that it is Orca's.
+- **No chains** — never spawn an agent whose main job is to spawn more. The
+  `subagent:budget` hook pins every subagent as a leaf, and a fork cannot fork.
+- **No reviewer after every edit.** Delegate review when there is something to review
+  — a finished change, a non-trivial diff, security-sensitive code — not per keystroke.
+- **Smell test** — if writing the agent prompt takes longer than doing the task, do
+  the task.
 
-Rationale: Opus 5-class models delegate eagerly by default; uncapped, this multiplies
-latency and token cost with no quality gain on small tasks.
+Rationale for the shape of the cap: concurrency and recursion multiply cost
+super-linearly, so they stay bounded. A single delegation is cheap and now carries
+the harness with it, so it is no longer rationed.
+
+## Frontmatter Conventions
+
+Beyond `name` / `description` / `tools` / `model`, two fields carry harness policy.
+
+**`skills:` — preload the agent's rubric.** The field injects each skill's *full*
+SKILL.md body at startup, not its description, so a cold agent stops guessing at
+domain rules it cannot see. Rules:
+
+1. **Workload alignment.** Preload only a skill whose `workloads:` intersects the
+   agent's, or a `core` skill (those are always installed). Otherwise a user who
+   installed just that agent's workload gets a broken preload.
+2. **Rubric only.** Preload what *is* the agent's standard of judgment, not what
+   might help — the body is paid on every invocation (currently ~10KB ≈ 2.7k
+   tokens on average; `mle-reviewer` at 22KB is the ceiling). Everything else
+   stays reachable through the Skill tool.
+3. **Cap at 2**, and 3 only when one is tiny (`devops` + `safety-guard`).
+4. **Skip `lab` agents** — they are `--workload=...,lab` manual-only, so their
+   companion skills may not be installed.
+
+**`tools:` — always keep `Skill` in the allowlist.** An explicit `tools:` list *is* the
+entire pool; only omitting the field inherits everything. A list without `Skill`
+therefore locks the agent out of every skill — harness and plugin alike — and
+`skills:` only covers what you named up front. All 46 agents now carry `Skill`
+(2026-08-30), which is what makes plugin skills (ponytail, superpowers,
+ui-ux-pro-max, easy-rdbms) reachable from inside a subagent: `skills:` guarantees the
+rubric, `Skill` covers the rest on demand. The cost is the skill listing in the
+subagent's context — throttle with `skillListingMaxDescChars` /
+`skillListingBudgetFraction` in `settings.json` if it grows.
+
+**`effort:` — pin depth only at the extremes.** It *overrides* session effort, so
+pinning the middle would fight the user's `/effort`.
+
+| Class | Setting |
+|---|---|
+| `opus`, open box (design, unknown-cause diagnosis, multi-source synthesis) | `effort: high` |
+| `opus`, unrecoverable miss (security, fidelity audit, taxonomy discovery) | `effort: xhigh` |
+| `haiku`, mechanical high-frequency | `effort: low` |
+| `sonnet`, closed box (30 agents) | **unset** — inherits the session |
+
+This is the frontmatter form of the tiering rule in `model-routing.md`: reach for
+effort before reaching for a higher tier. Deliberately still unused: `memory:`,
+`isolation:`, `maxTurns:`, `permissionMode:`, `experimental.cacheTtl` — adopt
+them per agent when there is a reason, not as a sweep.
 
 ## Available Agents
 

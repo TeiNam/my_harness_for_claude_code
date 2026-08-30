@@ -28,28 +28,31 @@ function readPlanCommand() {
 
 console.log('\n=== Testing /plan command prompt ===\n');
 
-test('/plan runs inline by default without requiring planner agent installation', () => {
+// 2026-08-30: "인라인 기본" 규칙을 뒤집었다(하네스 전역 정책 — docs/rules-reference/agents.md
+// → Subagent Routing). 지켜야 할 불변식은 "위임을 피한다"가 아니라 **planner 가 없는 런타임에서도
+// /plan 이 동작한다**는 것 하나다. 에이전트 파일 없이 커맨드만 배포되는 설치가 존재하기 때문이다.
+test('/plan delegates to planner but degrades gracefully when it is missing', () => {
   const source = readPlanCommand();
 
   assert.ok(
-    source.includes('Do not call the Task tool or any subagent by default'),
-    'Expected /plan to avoid default subagent delegation',
+    source.includes('`planner` 에이전트에 위임한다'),
+    'Expected /plan to make planner delegation the default for self-contained input',
   );
   assert.ok(
-    source.includes('If the `planner` subagent is unavailable'),
+    /planner` 가 (이 런타임에 )?없/.test(source),
     'Expected /plan to define a planner-unavailable fallback',
   );
   assert.ok(
-    !source.includes('This command invokes the **planner** agent'),
-    'Expected /plan not to claim unconditional planner invocation',
+    source.includes('인라인'),
+    'Expected the fallback to be inline planning',
   );
   assert.ok(
-    !source.includes('The planner agent will:'),
-    'Expected /plan to describe inline behavior, not mandatory agent behavior',
+    source.includes("Agent type 'planner' not found"),
+    'Expected /plan to suppress the missing-agent error instead of surfacing it',
   );
   assert.ok(
-    !source.includes('Agent (planner):'),
-    'Expected /plan examples not to imply the planner agent is required',
+    source.includes('/fork-as planner'),
+    'Expected /plan to route conversation-dependent planning through a fork',
   );
 });
 

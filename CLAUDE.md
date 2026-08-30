@@ -85,18 +85,30 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ## Orca Integration
 
-이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅을 `settings.json` 의 11개 이벤트에 심고(Orca 밖에서는 no-op) 자체 스킬 5종을 링크한다. **겹치는 기능은 한쪽만 쓴다** — 워크트리 격리·핸드오프 = `orca-cli`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`.
+이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅을 `settings.json` 의 12개 이벤트에 심고(Orca 밖에서는 no-op) 자체 스킬 5종을 링크한다. **겹치는 기능은 한쪽만 쓴다** — 워크트리 격리·핸드오프 = `orca-cli`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`.
 
-### 오케스트레이션은 Orca 우선, 없으면 ultracode
+### 오케스트레이션은 Orca 전담 — 하네스는 이 축의 자산을 두지 않는다
 
-| 환경 | 팬아웃·task DAG·coordinator 루프 |
+팬아웃·task DAG·coordinator 루프·블로킹 ask/reply 는 전부 **Orca `orchestration`** 이다. 이유는 능력이 아니라 **상태의 소유자**다 — 워크트리·worker_done 대기를 들고 있는 쪽이 Orca 이고, 같은 작업 집합에 조율자가 둘이면 경쟁한다.
+
+그래서 `Workflow` 툴은 **전역에서 내렸다**(`~/.claude/settings.json` 의 `enableWorkflows: false` · `ultracode: false`). 안 쓰기로 한 툴의 설명이 매 세션 시스템 프롬프트에 실리던 비용까지 함께 사라진다. Orca 밖에서 팬아웃이 필요해지면 문서에 분기를 남겨두는 대신 **그 키를 켠다**.
+
+### 서브에이전트는 적극 위임 — 이 문단이 상시 승인이다
+
+**일에 형태가 있으면 위임이 기본이다.** 예전의 "서브에이전트는 예외이지 반사가 아니다" 규칙은 2026-08-30 폐기했다 — cold 에이전트가 하네스 맥락 없이(스킬도 rubric 도 없이) 돌던 시절엔 인라인이 실제로 더 나았지만, 지금은 CLAUDE.md·`rules/` 가 모든 서브에이전트에 자동 상속되고 46종 중 38종이 rubric 을 preload 한다. **인라인은 한 번의 도구 호출로 끝나는 일에만 남는다.**
+
+Opus 5 기본 프롬프트에는 "사용자가 요청하지 않으면 Agent 툴을 부르지 말라"가 들어 있다(모델 프롬프트 번들 소속이라 설정으로 못 끈다). **이 문단이 그 요청이다** — 1회 호출은 오케스트레이션이 아니라 그냥 도구 호출이므로 따로 묻지 않는다.
+
+| 필요한 것 | 수단 |
 |---|---|
-| **Orca 안** (기본) | **Orca `orchestration` 에 일임.** `Workflow` 툴·`ultracode` 는 쓰지 않는다 |
-| **Orca 밖** | **`ultracode` + `Workflow` 가 유일한 경로** — 그때는 쓴다 |
+| 지금 컨텍스트가 그대로 필요한 곁가지(조사·초안·교차검증) | **`fork`** — `Agent(subagent_type:"fork")` 또는 `/subtask`. 시스템 프롬프트·툴·모델·히스토리를 상속하고 프롬프트 캐시를 공유해 cold 보다 싸다. 단 fork 는 fork 를 못 만든다(1단) |
+| rubric 이 이미 정해진 역할(리뷰·감사·번역) | `agents/` 의 cold 에이전트 — 모델 티어를 내리고 툴을 좁힐 수 있다. rubric 스킬은 `skills:` frontmatter 로 preload 되어 있고(38/46), 판단 깊이는 `effort:` 로 박아뒀다 |
+| 워크트리 격리·소유권 이전 | Orca (`orca-cli`) |
+| 추론 깊이 | 팬아웃이 아니라 effort 를 올린다(`/effort`) |
 
-판정은 환경변수로 한다: `ORCA_AGENT_HOOK_PORT`·`ORCA_AGENT_HOOK_TOKEN`·`ORCA_PANE_KEY` 중 하나라도 비어 있으면 Orca 밖이다. 이유는 능력이 아니라 **상태의 소유자**다 — 워크트리·블로킹 ask/reply·worker_done 대기를 들고 있는 쪽이 Orca 이고, 같은 작업 집합에 조율자가 둘이면 경쟁한다.
+cold 에이전트도 **CLAUDE.md 계층과 `rules/` 는 자동으로 상속한다** — 내장 `Explore`·`Plan` 둘만 예외이고 그건 바꿀 수 없다. 상속되지 않는 것(대화 히스토리·스킬 본문·SessionStart 컨텍스트)과 그 보완 레버는 **`docs/orca-dependencies.md`**.
 
-한 번에 한 서브에이전트를 부르는 `Agent` 호출은 어느 쪽에서든 오케스트레이션이 아니라 그냥 도구 호출이라 그대로 쓴다. **추론을 더 원하는 것**과 **일을 쪼개는 것**은 다른 축이다 — 전자는 팬아웃이 아니라 effort 를 올린다(`/effort`).
+상한은 **빈도가 아니라 동시성·재귀**에 있다 — 동시 3개까지, 서브에이전트는 leaf(`subagent:budget` 이 못박고 fork 는 애초에 중첩 불가), 그 이상은 Orca 다. 라우팅 표 전문은 `docs/rules-reference/agents.md` → Subagent Routing.
 
 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`) ③ 되돌리기 어려운 행위 차단(코어 훅 2개)**. 전체 의존 지점·역할 분리 표·점검 명령은 **`docs/orca-dependencies.md`**.
 
