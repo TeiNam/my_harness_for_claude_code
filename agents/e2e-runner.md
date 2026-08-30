@@ -33,6 +33,12 @@ You are an expert end-to-end testing specialist. Your mission is to ensure criti
 
 **Prefer Agent Browser over raw Playwright** — Semantic selectors, AI-optimized, auto-waiting, built on Playwright.
 
+> **테스트 실행과 페이지 확인을 구분한다.** 테스트 코드를 *돌리는* 것은 러너 몫이다
+> (Agent Browser → `npx playwright test`). 반면 "지금 이 페이지가 어떻게 보이나"를
+> 눈으로 확인·탐색하는 일은 Orca 안에서는 **Orca 임베디드 브라우저**(`orca-cli`:
+> `tab create` → `snapshot` → `click`/`eval` → `screenshot`)가 담당한다. 그 용도로
+> playwright MCP 를 등록하지 않는다 — `docs/orca-dependencies.md` §3.
+
 ```bash
 # Setup
 npm install -g agent-browser && agent-browser install

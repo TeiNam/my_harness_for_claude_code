@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-30
 
+- docs(mcp): Orca 안에서는 임베디드 브라우저가 playwright MCP 를 대체한다 (#39) (93bca8d)
 - fix(mcp): playwright 를 번들 chromium 으로 고정 (v0.5.2) (#38) (ae2a200)
 - fix(mcp): mcp-proxy v2 스키마 대응 + 재구축 절차 기록 (v0.5.1) (#37) (31b0476)
 - docs: 동반 플러그인 6종 재편(obsidian·karpathy 제거, easy-rdbms 추가) + 범프 적용 범위 명확화 (#36) (c004b70)
