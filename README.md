@@ -19,7 +19,7 @@
 | 디렉터리 | 항목 수 | 설명 |
 |---|---:|---|
 | `agents/` | 46 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
-| `commands/` | 37 | 슬래시 커맨드 (frontmatter 기반 markdown) |
+| `commands/` | 38 | 슬래시 커맨드 (frontmatter 기반 markdown) |
 | `skills/` | 115 | 도메인 지식·워크플로 정의 (NoSQL / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
 | `rules/` | 27 | common 4개(상시 로드되는 불변 제약) + 언어별 23개(typescript / python / rust / web) — 절차·참고 문서는 `docs/rules-reference/` |
 | `hooks/` | 2 + 28 | 코어 훅 2그룹(기본 설치 — 되돌리기 어려운 행위 차단만) + 옵트인 28그룹 (실행 스크립트 40종) |
