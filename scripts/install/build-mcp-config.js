@@ -154,6 +154,9 @@ function build(selected, serverAllowlist = null) {
       baseURL: 'http://localhost:9090',
       addr: ':9090',
       name: 'Harness MCP Proxy',
+      // mcp-proxy v2 스키마부터 필수 — 없으면 컨테이너가 "mcpProxy.version is required"
+      // 로 부팅 루프에 빠진다(2026-08-30, `:latest` 가 v1→v2 로 올라가며 발생).
+      version: '1.0.0',
       type: 'streamable-http'
     },
     mcpServers: servers
