@@ -56,9 +56,15 @@ node scripts/install/build-mcp-config.js --servers=a,b,c
 3. **키가 필요한 2개는 따로** — 9개 중 `brave-search`·`obsidian` 만 `.env` 값을 요구하고,
    비어 있으면 그 둘만 `transport closed` 로 죽고 나머지 7개는 정상 연결된다.
    `.env` 위치는 **compose 와 같은 디렉터리**(`mcp-configs/proxy/.env`, `.gitignore` 대상)다.
-4. **`playwright` 는 프록시에 넣지 않는다** — 카탈로그에서 `route: "local"` 이다. 컨테이너 안에
-   브라우저가 없으므로 호스트 stdio 로 등록한다: `claude mcp add -s user playwright -- npx -y
-   @playwright/mcp --headless --browser chromium`.
+4. **`playwright` 는 Orca 안에서 등록하지 않는다** — Orca 임베디드 브라우저가 같은 일을 한다:
+   `orca tab create/switch/close` · `goto` · `snapshot`(element ref `@e1`) · `click`/`fill`/`type` ·
+   `eval` · `screenshot` · `wait`, 게다가 **세션 프로필**로 로그인 상태를 유지한다(헤드리스
+   Chromium 에는 없는 이점). E2E *테스트*는 MCP 가 아니라 러너(`npx playwright test`) 몫이라
+   이 결정과 무관하다. 하네스 자산 중 playwright MCP 를 참조하는 것은 **0개**다.
+
+   **Orca 밖**에서 헤드리스 자동화가 필요할 때만 호스트 stdio 로 등록한다(프록시 대상 아님 —
+   컨테이너에 브라우저가 없다): `claude mcp add -s user playwright -- npx -y @playwright/mcp
+   --headless --browser chromium`.
    **`--browser chromium` 을 빼면 도구 호출이 실패한다** — 기본값이 채널 `chrome`(실제
    Google Chrome.app)이라서 `Chromium distribution 'chrome' is not found` 가 난다. 서버는
    정상 연결되므로(`/mcp` 는 초록) 첫 `browser_*` 호출에서야 드러난다. 번들 브라우저는
