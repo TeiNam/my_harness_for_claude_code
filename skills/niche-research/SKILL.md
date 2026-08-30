@@ -1,7 +1,7 @@
 ---
 name: niche-research
 description: >
-  Surface the 20 most relevant stories in a niche from the last 7 days using Claude for Chrome. Verified dates, real links, shareable angles. Claude drives the browser to scroll Reddit, X and run Google searches — exactly like a human researcher would. Use this skill whenever the user says "research my niche", "what's trending", "find stories", "this week's news", "content research", or drops a niche and asks what's happening in it. Requires the Claude for Chrome extension to be enabled for live browsing.
+  Surface the 20 most relevant stories in a niche from the last 7 days by driving a live browser. Verified dates, real links, shareable angles. Claude scrolls Reddit, X and runs Google searches — exactly like a human researcher would. Use this skill whenever the user says "research my niche", "what's trending", "find stories", "this week's news", "content research", or drops a niche and asks what's happening in it. Needs live browsing: Orca's embedded browser first, Playwright if that fails.
 origin: charlie947/social-media-skills
 workloads: [social-content]
 ---
@@ -16,11 +16,10 @@ When this skill triggers, go straight to Step 1. Do not summarise the research m
 
 This skill needs live browsing. Use this order of preference:
 
-1. **Claude for Chrome extension** (preferred). Check that the extension is enabled and Claude has permission to browse on the current tab. If not, tell the user:
-   > Enable the Claude for Chrome extension and open a blank tab. I need to drive the browser to scroll Reddit, X, and run Google searches with verified dates.
-2. **Orca 임베디드 브라우저** (`orca-cli`: `tab create` → `goto` → `snapshot` → `scroll` → `eval`) as the
-   fallback inside Orca — feed scrolling works and session profiles keep you logged in. Outside Orca,
-   the playwright MCP fills this slot.
+1. **Orca 임베디드 브라우저** (`orca-cli`) — 1순위. `tab create` → `goto` → `snapshot` → `scroll`
+   → `eval` 로 피드를 훑는다. 세션 프로필로 로그인이 유지되므로 Reddit·X 피드에 특히 유리하다.
+2. **Playwright** — Orca 브라우저가 실패할 때만 넘어간다(Orca 미실행, 임베디드 브라우저가
+   막히는 사이트 등). `npx playwright` 스크립트로 헤드리스 구동한다.
 3. **WebSearch + WebFetch tools** as a last resort (less thorough on feed scrolling).
 
 Pick the best available path and continue.
@@ -125,6 +124,6 @@ After the table, ask:
 - Verify every publish date before including an item. No shortcuts.
 - Table only at the end. No commentary, no summary paragraph.
 - If fewer than 20 themes pass the filter, say so. Do not pad with weak items.
-- If Claude for Chrome is not available and neither the Orca browser (playwright MCP outside Orca) nor WebSearch can cover feed scrolling properly (Reddit and X), tell the user what is missing rather than faking the scan.
+- If neither the Orca browser nor the Playwright fallback nor WebSearch can cover feed scrolling properly (Reddit and X), tell the user what is missing rather than faking the scan.
 - British English throughout. DD/MM/YYYY date format.
 - Never use em dashes.

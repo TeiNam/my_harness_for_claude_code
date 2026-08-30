@@ -359,7 +359,7 @@
         "--browser",
         "chromium"
       ],
-      "description": "Headless browser automation — 호스트 브라우저 필요, 로컬 stdio 유지. **Orca 안에서는 등록하지 않는다** — 임베디드 브라우저(`orca-cli`: tab/goto/snapshot/click/eval/screenshot + 세션 프로필)가 같은 일을 하고 로그인 상태까지 유지한다. Orca 밖에서만 쓴다. 그때 `--browser chromium` 이 필수다: 기본값은 채널 `chrome`(실제 Google Chrome.app)이라 앱이 없으면 도구 호출이 'Chromium distribution chrome is not found' 로 실패한다(연결은 성공해서 /mcp 는 초록이다). 번들 브라우저는 `npx playwright install chromium` 로 한 번 받는다(~95MB)."
+      "description": "Headless browser automation — 호스트 브라우저 필요, 로컬 stdio 유지. **1순위가 아니라 폴백이다** — 브라우저 조작은 Orca 임베디드(`orca-cli`: tab/goto/snapshot/click/eval/screenshot + 세션 프로필)가 1순위이고, 그게 실패할 때(Orca 미실행·임베디드가 막히는 사이트·녹화) 이걸 쓴다. 상시 등록하지 않고 `npx playwright` 스크립트로 시작하며, 폴백이 잦아지면 등록한다. 등록할 때는 `--browser chromium` 이 필수다: 기본값은 채널 `chrome`(실제 Google Chrome.app)이라 앱이 없으면 도구 호출이 'Chromium distribution chrome is not found' 로 실패한다(연결은 성공해서 /mcp 는 초록이다). 번들 브라우저는 `npx playwright install chromium` 로 한 번 받는다(~95MB)."
     },
     "agent-browser": {
       "route": "local",
