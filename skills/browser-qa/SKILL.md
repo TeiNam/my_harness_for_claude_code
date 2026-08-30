@@ -28,7 +28,7 @@ workloads: [frontend]
 | 검증 | `orca eval --expression <JS>` · `orca screenshot` · `orca wait` |
 | 로그인 상태 | `orca tab profile create/set` — 세션 프로필로 유지된다(헤드리스에는 없는 이점) |
 
-Orca 밖에서는 브라우저 자동화 MCP(claude-in-chrome, Playwright, Puppeteer)를 쓴다.
+Orca 브라우저가 실패하면 Playwright 로 넘어간다(아래 Integration 절).
 
 ### Phase 1: Smoke Test
 ```
@@ -91,11 +91,16 @@ Orca 밖에서는 브라우저 자동화 MCP(claude-in-chrome, Playwright, Puppe
 
 ## Integration
 
-순서대로 첫 번째로 가능한 것을 쓴다:
-- **Orca 안: `orca-cli`** — `ORCA_PANE_KEY`·`ORCA_AGENT_HOOK_PORT` 가 있으면 Orca 안이다.
-  임베디드 브라우저가 위 표의 동작을 전부 커버하므로 여기서 멈춘다.
-- `claude-in-chrome` 확장 (실제 Chrome 을 쓴다)
-- playwright MCP — Orca 밖에서만. `--browser chromium` 이 필요하다(`mcp-configs/README.md`)
-- 직접 Puppeteer 스크립트
+경로는 둘이다. 순서를 지킨다:
+
+1. **Orca 임베디드 브라우저** (`orca-cli`) — 1순위. `ORCA_PANE_KEY`·`ORCA_AGENT_HOOK_PORT` 가
+   있으면 Orca 안이다. 위 표의 동작을 전부 커버하므로 여기서 멈춘다.
+2. **Playwright** — 1번이 **실패할 때만**(Orca 미실행, 임베디드 브라우저가 막히는 사이트,
+   영상 녹화가 필요한 경우). `npx playwright` 스크립트로 헤드리스 구동한다. 이 폴백이 잦아지면
+   그때 MCP 로 등록한다: `claude mcp add -s user playwright -- npx -y @playwright/mcp
+   --headless --browser chromium`.
+
+Claude for Chrome 확장·`chrome-cli`·Puppeteer 는 이 경로에 넣지 않는다 — 조작 층(접근성
+스냅샷·element ref·대기)이 없거나 Orca 와 중복이다.
 
 Pair with `/canary-watch` for post-deploy monitoring.
