@@ -75,6 +75,8 @@ Orca 는 자기 스킬을 `~/.agents/skills/<name>` 에 두고 `~/.claude/skills
 | statusLine | **claude-dashboard 플러그인** (하네스 `harness-statusline.js` 는 2026-08 제거) |
 | 세션 재개 | Claude Code 네이티브 `/resume` 또는 Orca 워크트리가 1순위. 하네스 `/save-session`·`/resume-session` 은 *요약된* 컨텍스트를 남기고 싶을 때만 |
 | 데스크톱 UI 조작 | Orca 임베디드 브라우저는 `orca-cli`, 그 밖의 앱·웹뷰는 `computer-use` |
+| 브라우저 자동화(탐색·클릭·스냅샷·JS 평가) | **Orca 안**: `orca-cli` — `tab create/switch/close` · `goto` · `snapshot`(element ref) · `click`/`fill`/`type` · `eval` · `screenshot` · `wait` + **세션 프로필**(로그인 상태 유지). playwright MCP 는 쓰지 않는다(기능 중복). **Orca 밖**에서만 playwright MCP 를 등록한다 |
+| E2E 테스트 작성·실행 | Playwright **테스트 러너**(`npx playwright test`) — MCP 가 아니다. `agents/e2e-runner` 는 Agent Browser 우선, 그다음 이 CLI 다 |
 
 하네스가 담당하는 것은 셋뿐이다: **① 취향·언어 규칙(`rules/`) ② 도메인 스킬(`skills/`)
 ③ 되돌리기 어려운 행위 차단(코어 훅 2개 — `pre:bash:dispatcher`·`subagent:budget`)**. 오케스트레이션·세션 상태·핸드오프는 Orca 에 맡긴다.
