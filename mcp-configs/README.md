@@ -36,3 +36,26 @@ cd mcp-configs/proxy && docker compose --profile terraform up -d
 # 서버 목록을 바꿀 때만 명시 빌드
 node scripts/install/build-mcp-config.js --servers=a,b,c
 ```
+
+## 재구축 시 걸리는 것 (2026-08-30 실측)
+
+컨테이너·이미지가 0인 상태에서 다시 띄우며 밟은 순서다.
+
+1. **`docker compose` 가 없다고 나온다** — Homebrew 의 `docker-compose` formula 는 플러그인
+   바이너리를 `$(brew --prefix)/lib/docker/cli-plugins/` 에만 두고 `~/.docker/cli-plugins/` 로
+   링크하지 않는다. `docker-compose`(하이픈)만 되고 `docker compose`(v2)는 "unknown command"다.
+   ```bash
+   mkdir -p ~/.docker/cli-plugins
+   ln -sfn /opt/homebrew/lib/docker/cli-plugins/docker-compose ~/.docker/cli-plugins/docker-compose
+   ```
+2. **`mcpProxy.version is required` 로 부팅 루프** — 이미지가 `:latest` 라서 상류 스키마가
+   v1 → v2 로 올라가면 기존 config 가 거부된다. `config.json` 과 빌더(`build-mcp-config.js`)
+   양쪽에 `mcpProxy.version` 을 넣었다. **스키마가 또 바뀔 수 있다는 뜻이므로**, 재구축이
+   실패하면 먼저 `docker logs harness-mcp-proxy` 를 보고 상류
+   `docs/CONFIGURATION.md` 와 대조한다.
+3. **키가 필요한 2개는 따로** — 9개 중 `brave-search`·`obsidian` 만 `.env` 값을 요구하고,
+   비어 있으면 그 둘만 `transport closed` 로 죽고 나머지 7개는 정상 연결된다.
+   `.env` 위치는 **compose 와 같은 디렉터리**(`mcp-configs/proxy/.env`, `.gitignore` 대상)다.
+4. **`playwright` 는 프록시에 넣지 않는다** — 카탈로그에서 `route: "local"` 이다. 컨테이너 안에
+   브라우저가 없으므로 호스트 stdio 로 등록한다: `claude mcp add -s user playwright -- npx -y
+   @playwright/mcp --headless`.
