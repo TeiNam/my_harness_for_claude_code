@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-08-30
 
+- feat: 브라우저 경로를 "Orca 1순위 → 실패 시 Playwright" 두 갈래로 확정 (v0.7.0) (#41) (96354e1)
 - feat: 브라우저 컨트롤을 Orca 임베디드 브라우저로 라우팅 (v0.6.0) (#40) (49e6829)
 - docs(mcp): Orca 안에서는 임베디드 브라우저가 playwright MCP 를 대체한다 (#39) (93bca8d)
 - fix(mcp): playwright 를 번들 chromium 으로 고정 (v0.5.2) (#38) (ae2a200)
