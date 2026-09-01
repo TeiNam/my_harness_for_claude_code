@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-09-01
+
+- chore(lessons): 2026-09-01 세션 실수 6건 기록 + 비밀값 마스킹을 상시 규칙으로 승격 (v0.8.0) (#42) (e4a74aa)
+
 ## 2026-08-30
 
 - feat: 브라우저 경로를 "Orca 1순위 → 실패 시 Playwright" 두 갈래로 확정 (v0.7.0) (#41) (96354e1)

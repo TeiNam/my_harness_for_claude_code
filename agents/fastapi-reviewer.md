@@ -58,11 +58,25 @@ You are a senior FastAPI reviewer focused on production Python APIs.
 - Test overrides targeting the wrong dependency.
 - `allow_origins=["*"]` combined with credentialed CORS.
 - Missing request validation for write endpoints.
+- **인증이 필요한 라우트에 security 의존성이 없다.** 공개 허용 목록(`/auth/*`·`/health` 등)에
+  없는 라우트가 무인증으로 열려 있으면 Critical 직전으로 본다. 특히 **개별 라우트에만 인증이
+  붙어 있고 라우터 레벨이 비어 있으면** 신규 형제 라우트가 그대로 노출되므로 High 로 보고한다
+  — 고치는 방향은 `APIRouter(dependencies=[Security(...)])`.
+- **`Depends(get_current_user)` 로만 보호한 라우트.** 검증은 돌지만 OpenAPI 의 `security` 로
+  올라가지 않아 스펙·Swagger 가 무인증처럼 보인다 → `Security(...)` 로 교체.
+- `OAuth2PasswordBearer(tokenUrl=...)` 의 경로가 실제 로그인 엔드포인트와 다르다(Swagger
+  Authorize 가 동작하지 않는다).
 
 ### Medium
 
 - Missing pagination on list endpoints.
 - OpenAPI docs missing response models or error response descriptions.
+- **라우트에 `summary` 가 없다** — Swagger 가 함수명을 그대로 노출한다(정보량 0).
+- **라우터에 `tags` 가 없거나 라우트마다 태그를 반복한다**(그룹의 단일 출처는 라우터).
+- 라우터가 쓰는 태그가 `openapi_tags` 에 정의돼 있지 않다(설명·순서가 빈다).
+- 내부·헬스 라우트가 `include_in_schema=False` 없이 공개 문서에 노출된다.
+- OpenAPI 계약 테스트가 없다 — 태그·요약 누락과 무인증 라우트는 문서가 아니라 테스트로
+  막아야 재발하지 않는다(`api-design/openapi-documentation.md` §5 의 두 테스트).
 - Duplicated route logic that should move into a service/dependency.
 - Missing timeout settings for external HTTP clients.
 
