@@ -102,6 +102,29 @@ async def get_user(
     return await service.get_by_id(user_id)
 ```
 
+### 5. 문서와 인증은 라우터를 만들 때 함께 박는다
+
+Swagger 정리와 인증 배선을 "나중에" 로 미루면 반드시 빠진다. 라우터를 선언하는 순간 셋을 같이 쓴다.
+
+```python
+router = APIRouter(
+    prefix="/orders",
+    tags=["Orders"],                            # 그룹은 라우터가 정한다(라우트에서 반복 금지)
+    dependencies=[Security(get_current_user)],  # 보호는 라우터 레벨 — 신규 라우트가 상속한다
+    responses={401: {"model": ErrorResponse, "description": "인증 필요"}},
+)
+
+@router.post("", status_code=201, summary="주문 생성", response_model=OrderResponse)
+async def create_order(...): ...               # summary·response_model 은 라우트마다 필수
+```
+
+- **`Depends` 가 아니라 `Security`** — `Depends` 는 검증은 하지만 OpenAPI 의 `security` 로
+  올라가지 않아 스펙과 Swagger 가 무인증처럼 보인다.
+- **개별 라우트에만 인증을 붙이지 않는다** — 나중에 추가된 형제 라우트가 무인증으로 열린다.
+- 기본은 잠그고 공개만 뚫는다(`/auth/login`·`/health`). 반대로 하면 새 라우트가 기본 노출된다.
+- **이걸 잊지 않는 방법은 테스트다**: OpenAPI 스펙을 순회해 `summary`·`tags` 누락과
+  허용 목록에 없는 무인증 라우트를 실패시킨다 → `api-design/openapi-documentation.md` §5.
+
 ## Coding Conventions
 
 ### Type Hinting (Required)
