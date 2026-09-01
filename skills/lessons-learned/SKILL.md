@@ -58,8 +58,13 @@ Examples:
 
 ### Build failure patterns
 
-<!-- Add build lessons one line at a time here -->
+- [2026-09-01] (build) `cd A && cmd` 로 시작한 뒤 다음 Bash 호출에서 cwd 가 리셋돼 "No such file or directory" 를 3회 반복 -> 경로는 매 호출마다 절대경로로 주거나, `cd` 와 작업을 한 호출 안에서 끝낸다.
+- [2026-09-01] (build) perl/sed 치환에서 `@`·`$` 가 보간돼 문서 문자열이 손상됨(`@playwright@playwright/mcp`) -> 파일 내용 치환은 Edit 툴로 한다. perl 은 정규식이 꼭 필요한 대량 치환에만 쓰고, 쓴 뒤에는 해당 줄을 다시 읽어 확인한다.
+- [2026-09-01] (build) `docker compose --profile` 을 v2 플러그인 존재 확인 없이 호출해 "unknown flag" -> 외부 CLI 는 서브커맨드 가용성을 먼저 확인한다(`docker compose version`). Homebrew 는 compose 플러그인을 `~/.docker/cli-plugins/` 로 링크하지 않는다.
+- [2026-09-01] (build) `package.json` 만 올리고 설치 정본인 `VERSION` 을 빼서 설치본이 낡은 버전을 보고 -> **기계적으로 판정 가능한 드리프트는 교훈 로그가 아니라 테스트로 못박는다**(`manifest.test.js` 의 "VERSION and package.json version agree").
 
 ### User corrections
 
 - [2026-06-20] (User corrections) Request for "hook that reacts when pushing via git push / GitKraken or other GUI" -> Claude hooks (PreToolUse/PostToolUse) only fire on Claude's own tool invocations. To cover user's direct git manipulation via terminal or GUI, use native git hooks (`core.hooksPath` + `post-commit`/`pre-push`).
+- [2026-09-01] (User corrections) 정책을 `docs/` 에만 쓰고 "반영했다"고 보고했다가 "하네스에 반영 가능?" 을 다시 들었다 -> **`docs/` 는 근거 보관소이지 로드 경로가 아니다.** 행동을 바꾸려면 ① 상시 로드되는 `CLAUDE.md`·`rules/` ② **자산 본문**(스킬·에이전트) ③ 자산의 `frontmatter description`(매 세션 로드되므로 여기 남은 반대 신호가 제일 오래 산다) 까지 함께 내린다.
+- [2026-09-01] (User corrections) 비밀값 형식을 확인하려고 토큰 접두어를 11자 출력해 랜덤 부분이 전사에 남았다 -> 접두어 4자 + 길이까지만. `rules/common/security.md` 에 상시 규칙으로 승격했다.
