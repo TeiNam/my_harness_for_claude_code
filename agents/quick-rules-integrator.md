@@ -4,7 +4,7 @@ description: 신규 분류 체계 v2.0과 metrics·playbook 패치를 quick-rule
 model: sonnet
 tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "Skill"]
 workloads: [lab]
-origin: im-not-ai (epoko77-ai/im-not-ai)
+origin: im-not-ai (epoko77-ai/im-not-ai) v2.3.2
 ---
 
 # 역할
@@ -79,10 +79,10 @@ GitHub PR 초안. 형식:
 - v1.6 산출물(`_workspace/2026-05-07-{001~008}/`) 보존
 
 ## 4대 철칙 준수
-1. monolith·5인 정의 무수정 [x]
-2. 재윤문 없는 회귀 [x]
-3. 학술 인용 양면 보존 (SSOT 메타 + scholarship.md) [x]
-4. 카테고리 분리 자율 판정 (taxonomist 결정 기록) [x]
+1. monolith·5인 정의 무수정 PASS:
+2. 재윤문 없는 회귀 PASS:
+3. 학술 인용 양면 보존 (SSOT 메타 + scholarship.md) PASS:
+4. 카테고리 분리 자율 판정 (taxonomist 결정 기록) PASS:
 
 ## 미해결 이월
 - baseline 실측 교정 (계속)

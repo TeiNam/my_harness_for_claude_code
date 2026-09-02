@@ -39,7 +39,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ## High-value Agents
 
-`agents/` 46종. 대표: `article-writer` · `content-creator` · `devops`(mutation 전 항상 plan/dry-run) · `translator-docs` · `deep-researcher`. 전체 목록과 선정 이유는 **`docs/harness-assets.md`**.
+`agents/` 44종. 대표: `article-writer` · `content-creator` · `devops`(mutation 전 항상 plan/dry-run) · `translator-docs` · `deep-researcher`. 전체 목록과 선정 이유는 **`docs/harness-assets.md`**.
 
 ### Model Routing (per-agent model tiers)
 
@@ -95,14 +95,14 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ### 서브에이전트는 적극 위임 — 이 문단이 상시 승인이다
 
-**일에 형태가 있으면 위임이 기본이다.** 예전의 "서브에이전트는 예외이지 반사가 아니다" 규칙은 2026-08-30 폐기했다 — cold 에이전트가 하네스 맥락 없이(스킬도 rubric 도 없이) 돌던 시절엔 인라인이 실제로 더 나았지만, 지금은 CLAUDE.md·`rules/` 가 모든 서브에이전트에 자동 상속되고 46종 중 38종이 rubric 을 preload 한다. **인라인은 한 번의 도구 호출로 끝나는 일에만 남는다.**
+**일에 형태가 있으면 위임이 기본이다.** 예전의 "서브에이전트는 예외이지 반사가 아니다" 규칙은 2026-08-30 폐기했다 — cold 에이전트가 하네스 맥락 없이(스킬도 rubric 도 없이) 돌던 시절엔 인라인이 실제로 더 나았지만, 지금은 CLAUDE.md·`rules/` 가 모든 서브에이전트에 자동 상속되고 44종 중 36종이 rubric 을 preload 한다. **인라인은 한 번의 도구 호출로 끝나는 일에만 남는다.**
 
 Opus 5 기본 프롬프트에는 "사용자가 요청하지 않으면 Agent 툴을 부르지 말라"가 들어 있다(모델 프롬프트 번들 소속이라 설정으로 못 끈다). **이 문단이 그 요청이다** — 1회 호출은 오케스트레이션이 아니라 그냥 도구 호출이므로 따로 묻지 않는다.
 
 | 필요한 것 | 수단 |
 |---|---|
 | 지금 컨텍스트가 그대로 필요한 곁가지(조사·초안·교차검증) | **`fork`** — `Agent(subagent_type:"fork")` 또는 `/subtask`. 시스템 프롬프트·툴·모델·히스토리를 상속하고 프롬프트 캐시를 공유해 cold 보다 싸다. 단 fork 는 fork 를 못 만든다(1단) |
-| rubric 이 이미 정해진 역할(리뷰·감사·번역) | `agents/` 의 cold 에이전트 — 모델 티어를 내리고 툴을 좁힐 수 있다. rubric 스킬은 `skills:` frontmatter 로 preload 되어 있고(38/46), 판단 깊이는 `effort:` 로 박아뒀다 |
+| rubric 이 이미 정해진 역할(리뷰·감사·번역) | `agents/` 의 cold 에이전트 — 모델 티어를 내리고 툴을 좁힐 수 있다. rubric 스킬은 `skills:` frontmatter 로 preload 되어 있고(36/44), 판단 깊이는 `effort:` 로 박아뒀다 |
 | 워크트리 격리·소유권 이전 | Orca (`orca-cli`) |
 | 추론 깊이 | 팬아웃이 아니라 effort 를 올린다(`/effort`) |
 

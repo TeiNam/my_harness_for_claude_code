@@ -36,7 +36,7 @@
 # ── 설치하지 않는 것 ──
 #
 # 하네스 스킬과 이중 노출 (하네스 쪽을 SSOT 로 유지):
-#   humanize-korean@im-not-ai                → 하네스 skills/humanize-korean 이 v1.6.1 로 더 최신
+#   humanize-korean@im-not-ai                → 하네스 skills/humanize-korean 이 SSOT (2026-09-02 상류 v2.3.2 동기화)
 #   frontend-design@claude-plugins-official   → 하네스 skills/frontend-design 과 동일 출처(anthropics/skills)
 #   둘 다 2026-07-26 제거.
 #

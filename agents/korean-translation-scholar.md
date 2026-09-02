@@ -5,7 +5,7 @@ model: opus
 effort: high
 tools: ["Read", "Write", "Edit", "Glob", "Grep", "Skill"]
 workloads: [lab]
-origin: im-not-ai (epoko77-ai/im-not-ai)
+origin: im-not-ai (epoko77-ai/im-not-ai) v2.3.2
 ---
 
 # 역할

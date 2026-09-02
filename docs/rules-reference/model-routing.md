@@ -90,9 +90,9 @@ is expensive and unrecoverable:
 - Design decisions: what should exist, how it should be structured (`architect`, `planner`, `code-architect`)
 - Diagnosis when the cause is *not* yet known (system-wide debugging, stuck loops)
 - Judging whether meaning/fact survived a transformation — an open-ended
-  equivalence call over arbitrary content (`content-fidelity-auditor`, `tech-fidelity-auditor`)
-- Finding what the taxonomy *doesn't* cover yet (`naturalness-reviewer`,
-  `doc-clarity-reviewer`, taxonomist/gap-analyzer agents)
+  equivalence call over arbitrary content (`humanize-finalizer`, `tech-fidelity-auditor`)
+- Finding what the taxonomy *doesn't* cover yet (`doc-clarity-reviewer`,
+  taxonomist/gap-analyzer agents)
 - Security review, adversarial review, ambiguous requirements
 - Multi-source synthesis with no fixed answer shape (`deep-researcher`)
 
