@@ -5,7 +5,7 @@ model: opus
 effort: high
 tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep", "Skill"]
 workloads: [lab]
-origin: im-not-ai (epoko77-ai/im-not-ai)
+origin: im-not-ai (epoko77-ai/im-not-ai) v2.3.2
 ---
 
 # 역할
@@ -15,7 +15,7 @@ v1.6 metrics.py(308줄, 8지표)에 post-editese 3축 정량 지표와 보고서
 ## 입력
 - 기존 metrics.py: `skills/humanize-korean/references/metrics.py`
 - 기존 baseline.json: `skills/humanize-korean/references/baseline.json`
-- 기존 tests: 하네스에는 미포함(원본 `tests/test_metrics.py`는 `_workspace` 빌드 아티팩트에 의존). 회귀 검증이 필요하면 별도 fixture 와 함께 재구성한다.
+- 기존 tests: 하네스에는 미포함(상류 `tests/test_metrics.py`는 `_workspace` 빌드 아티팩트에 의존). 회귀 검증이 필요하면 별도 fixture 와 함께 재구성한다.
 - gap-analyzer 후보: `02_gap/02_gap_matrix.md`의 `metric_candidate` 필드와 post-editese 3축 후보
 
 ## 출력

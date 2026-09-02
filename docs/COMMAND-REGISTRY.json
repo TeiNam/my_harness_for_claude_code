@@ -103,8 +103,8 @@
     },
     {
       "command": "humanize-redo",
-      "description": "2차 윤문 / 부분 재실행 — 가장 최근 윤문 결과를 strict Phase B로 다시 다듬는다 (카테고리·문단·강도 지정 가능)",
-      "type": "review",
+      "description": "2차 윤문 / 부분 재실행 — 가장 최근 윤문 결과를 heavy 경로(진단→윤문→finalize)로 다시 다듬는다 (카테고리·문단·강도 지정 가능)",
+      "type": "general",
       "primaryAgents": [],
       "allAgents": [],
       "skills": [
@@ -114,7 +114,7 @@
     },
     {
       "command": "humanize",
-      "description": "한글 AI 티 제거 — humanize-korean 파이프라인 실행 (기본 Fast 모드, --strict 시 5인 파이프라인)",
+      "description": "한글 AI 티 제거 — humanize-korean 실행 (경로는 shim의 route_hint 로 자동 결정, --strict 시 heavy 고정)",
       "type": "general",
       "primaryAgents": [],
       "allAgents": [],
@@ -387,10 +387,10 @@
   "statistics": {
     "byType": {
       "build": 1,
-      "general": 4,
+      "general": 5,
       "planning": 1,
       "refactoring": 1,
-      "review": 6,
+      "review": 5,
       "testing": 25
     },
     "topAgents": [
