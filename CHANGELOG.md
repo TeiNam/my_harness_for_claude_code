@@ -2,8 +2,17 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-09-09
+
+- feat(model-routing): Fable 5 라우팅 반영 — per-call judge 계단 + 세션 모델 인지 (v0.11.0) (#45) (e1a43f3)
+
+## 2026-09-02
+
+- feat(humanize): 상류 im-not-ai v2.3.2 동기화 — route_hint 3경로 + 의미 함축 방지 게이트 (v0.10.0) (#44) (962f353)
+
 ## 2026-09-01
 
+- feat(fastapi): Swagger 태그·요약·그룹 규율과 JWT 인증 누락 방지를 넣는다 (v0.9.0) (#43) (0417bcb)
 - chore(lessons): 2026-09-01 세션 실수 6건 기록 + 비밀값 마스킹을 상시 규칙으로 승격 (v0.8.0) (#42) (e4a74aa)
 
 ## 2026-08-30
