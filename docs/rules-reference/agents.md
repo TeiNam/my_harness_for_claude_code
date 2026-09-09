@@ -77,7 +77,10 @@ pinning the middle would fight the user's `/effort`.
 | `sonnet`, closed box (30 agents) | **unset** — inherits the session |
 
 This is the frontmatter form of the tiering rule in `model-routing.md`: reach for
-effort before reaching for a higher tier. Deliberately still unused: `memory:`,
+effort before reaching for a higher tier. `fable` (Fable 5, the rung above Opus)
+is deliberately absent from this table — it never appears in frontmatter; it's a
+per-call escalation (one-off `model` override, or a fork when the session runs
+Fable) per model-routing.md → Current Lineup. Deliberately still unused: `memory:`,
 `isolation:`, `maxTurns:`, `permissionMode:`, `experimental.cacheTtl` — adopt
 them per agent when there is a reason, not as a sweep.
 

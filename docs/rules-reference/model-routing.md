@@ -4,11 +4,12 @@ Authoritative policy for which Claude model each task and agent runs on. This
 is the single source of truth; `performance.md`, `commands/model-route.md`, and
 the agent frontmatter all defer to it.
 
-## Current Lineup (2026-07, post Opus 5 launch)
+## Current Lineup (2026-09, post Fable 5 launch)
 
 | Alias | Resolves to | Character |
 |-------|-------------|-----------|
-| `opus` | **Opus 5** | Top tier here. Deepest reasoning: architecture, ambiguity, adversarial review, hard debugging, long-horizon autonomous runs, final high-stakes judge. Same price as Opus 4.8 ($5/$25). Also runs Fast mode (`/fast`) — same model, ~2.5× faster output at premium price (Claude API only). Escalate *within* the tier via effort (`high` → `xhigh` → `max`), not to another model. |
+| `fable` | **Fable 5** | Mythos-class tier above Opus (Claude 5 family; Mythos 5 is the same model without dual-use safety measures, approved orgs only). ~2× Opus cost ($10/$50); thinking always on. **Not a default assignment for any agent** — it's the last *up* rung: the final judge on an unrecoverable-miss gate after `opus` at `xhigh`/`max` still missed. When the session itself runs Fable, `fork` is the cheapest Fable access (inherits model, shares prompt cache). |
+| `opus` | **Opus 5** | Workhorse deep-reasoning tier: architecture, ambiguity, adversarial review, hard debugging, long-horizon autonomous runs, high-stakes judging. Same price as Opus 4.8 ($5/$25). Also runs Fast mode (`/fast`) — same model, ~2.5× faster output at premium price (Claude API only). Escalate *within* the tier via effort (`high` → `xhigh` → `max`) before reaching for `fable`. |
 | `sonnet` | **Sonnet 5** | Best coding model. Default for implementation, refactors, PR review. Handles ~90% of coding. |
 | `haiku` | **Haiku 4.5** | ~90% of Sonnet's capability at ~3× cost savings. Mechanical edits, search, doc scaffolding, high-frequency workers. |
 
@@ -37,6 +38,11 @@ Opus 5 behavioral deltas that affect agent prompts: thinking is **on by default*
 it delegates to subagents **more eagerly** (cap spawning where fan-out isn't wanted);
 default responses run longer (prompt explicitly for target length).
 
+Fable 5 deltas: the Opus 5 deltas above all apply (thinking always on, eager
+delegation, self-verification). Additionally it carries **dual-use safety
+classifiers** — handle `stop_reason: "refusal"` the same way as Opus 5 (fall
+back to Opus 4.8, or server-side `fallbacks` in API code; see `skills/claude-api`).
+
 ## Task → Model
 
 | Task | Model | Why |
@@ -56,15 +62,18 @@ default responses run longer (prompt explicitly for target length).
 | Ambiguous / underspecified work | `opus` | Reasoning about intent |
 | Debugging system-wide bugs | `opus` | Must hold the whole system in mind |
 | Overnight / long-horizon autonomous runs | `opus` at `xhigh` | Deepest reasoning available; raise effort, not tier |
-| Final adversarial verify on high-stakes output | `opus` at `xhigh`/`max` | Highest-ceiling judge when a miss is expensive |
+| Final adversarial verify on high-stakes output | `opus` at `xhigh`/`max` | Deep judge when a miss is expensive |
+| Unrecoverable-miss gate where `opus@max` already missed | `fable` | The one rung above Opus — pay 2× for the single judging call, not the pipeline |
 | Independent cross-family second opinion | **Codex** | Different model family — catches what re-prompting Claude cannot (see below) |
 
 **Default to Sonnet 5.** Escalate to Opus 5 when: the first Sonnet attempt
 failed, the task spans 5+ files, it's an architectural decision, or it's
-security-critical. Opus 5 is the ceiling — past it, raise **effort**
-(`high` → `xhigh` → `max`) rather than reaching for another tier, then get a
-**cross-family** opinion from Codex. Drop to Haiku 4.5 for anything
-deterministic and low-risk.
+security-critical. Past Opus, the ladder is: raise **effort**
+(`high` → `xhigh` → `max`) first, then **`fable`** for the single final-judge
+call where a miss is unrecoverable, then a **cross-family** opinion from Codex.
+Fable costs 2× Opus, so it buys one judging call, never a whole pipeline —
+effort-on-Opus remains the default deepening move. Drop to Haiku 4.5 for
+anything deterministic and low-risk.
 
 ## Agent Class → Model
 
@@ -113,6 +122,12 @@ When the two axes disagree — closed box but an expensive miss — the miss win
 Pick by *worst-case* cost of a wrong answer, not the average. A reviewer that
 gates a merge is `opus` even if most reviews are easy.
 
+**`fable` is not a standing assignment.** Fleet frontmatter stays within
+`haiku`/`sonnet`/`opus`. Reach Fable per call — a `model: "fable"` override on
+one Agent invocation, or a `fork` when the session already runs Fable — and
+retag an individual judge agent only after an `opus@xhigh/max` miss is actually
+observed on its gate, not preemptively.
+
 ## Multi-Agent Orchestration
 
 **Where orchestration runs** (see CLAUDE.md → Orca Integration): in **Orca
@@ -158,8 +173,10 @@ mode is Claude API only (not Bedrock/Vertex/Foundry).
 
 ## Cross-Model: Codex
 
-With Opus 5 as the ceiling, the remaining axis of escalation is **sideways, not
-up**: a different model family. Route to the OpenAI Codex CLI via the codex
+Up-escalation ends at Fable 5; past it the remaining axis is **sideways**: a
+different model family. Sideways is also the *right* move — regardless of tier —
+whenever the value is independence rather than depth, because a higher Claude
+still shares Claude's blind spots. Route to the OpenAI Codex CLI via the codex
 plugin (`codex:rescue` skill / `codex:codex-rescue` agent — install per
 `docs/plugin.md`). Treat its output as a proposal to verify, never as ground truth.
 

@@ -23,19 +23,30 @@ already established → nothing left to search → `sonnet`.
   whose cause is known (~90% of coding)
 - `opus` (Opus 5): architecture, security, deep/adversarial review, ambiguous
   requirements, diagnosing an unknown cause, judging whether meaning survived
+- `fable` (Fable 5): the one rung above Opus (~2× cost) — a single final-judge
+  call on an unrecoverable-miss gate after `opus` at `xhigh`/`max` still missed;
+  never a standing agent assignment
 - Codex (cross-family): independent second opinion, tie-break, mechanical grind — not a Claude tier
 
 Tier **per stage, not per pipeline**: detect → fix → judge is
 `sonnet` → `sonnet` → `opus`, not `opus` × 3.
 
 Default to Sonnet 5; escalate to Opus 5 on failed first attempt, 5+ files,
-architectural, or security-critical work. Opus 5 is the ceiling — past it raise
-**effort** (`high` → `xhigh` → `max`), then get a cross-family opinion from
-Codex rather than looking for a higher Claude tier. If Opus 5 refuses (safety classifier) or lacks a
-needed feature (web fetch, Priority Tier), fall back to Opus 4.8. Fast mode keeps
-Opus reasoning at lower latency — prefer it over downgrading when you need
-Opus-level judgment fast. For a cross-family second opinion, route to Codex
-(codex plugin — `codex:rescue`).
+architectural, or security-critical work. Past Opus the ladder is: raise
+**effort** (`high` → `xhigh` → `max`) → `fable` for one unrecoverable-miss
+judging call → a cross-family opinion from Codex. If Opus/Fable refuses
+(safety classifier) or Opus 5 lacks a needed feature (web fetch, Priority
+Tier), fall back to Opus 4.8. Fast mode keeps Opus reasoning at lower latency —
+prefer it over downgrading when you need Opus-level judgment fast. For a
+cross-family second opinion, route to Codex (codex plugin — `codex:rescue`).
+
+**Factor the current session model** (visible in the environment — Fable 5 and
+Opus 5 both serve as the daily main). The tier recommendation is
+session-agnostic, but the *route to it* is not: on a Fable session the `fable`
+rung is a `fork` (inherits the model, shares prompt cache — forks always
+inherit and ignore overrides); on an Opus/Sonnet session, reach it with a
+one-off `model: fable` override on the Agent call. A rung the session already
+runs on is always cheapest via fork.
 
 Full policy: `docs/rules-reference/model-routing.md`.
 
@@ -44,6 +55,7 @@ Full policy: `docs/rules-reference/model-routing.md`.
 - recommended model
 - confidence level
 - why this model fits
+- how to reach it from the current session model (fork vs per-call override)
 - fallback model if first attempt fails
 
 ## Arguments
