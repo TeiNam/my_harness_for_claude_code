@@ -40,6 +40,14 @@ Tier), fall back to Opus 4.8. Fast mode keeps Opus reasoning at lower latency �
 prefer it over downgrading when you need Opus-level judgment fast. For a
 cross-family second opinion, route to Codex (codex plugin — `codex:rescue`).
 
+**Factor the current session model** (visible in the environment — Fable 5 and
+Opus 5 both serve as the daily main). The tier recommendation is
+session-agnostic, but the *route to it* is not: on a Fable session the `fable`
+rung is a `fork` (inherits the model, shares prompt cache — forks always
+inherit and ignore overrides); on an Opus/Sonnet session, reach it with a
+one-off `model: fable` override on the Agent call. A rung the session already
+runs on is always cheapest via fork.
+
 Full policy: `docs/rules-reference/model-routing.md`.
 
 ## Required Output
@@ -47,6 +55,7 @@ Full policy: `docs/rules-reference/model-routing.md`.
 - recommended model
 - confidence level
 - why this model fits
+- how to reach it from the current session model (fork vs per-call override)
 - fallback model if first attempt fails
 
 ## Arguments
