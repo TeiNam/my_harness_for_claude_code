@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-09-09
 
+- chore(changelog): 스쿼시 머지 #43·#44·#45 누락분 정정 (#46) (f07b21f)
 - feat(model-routing): Fable 5 라우팅 반영 — per-call judge 계단 + 세션 모델 인지 (v0.11.0) (#45) (e1a43f3)
 
 ## 2026-09-02
