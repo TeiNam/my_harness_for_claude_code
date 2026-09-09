@@ -43,7 +43,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ### Model Routing (per-agent model tiers)
 
-`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5, `sonnet`→Sonnet 5, `haiku`→Haiku 4.5. **Opus 5 가 천장이다**: 더 깊은 추론이 필요하면 티어를 올리지 말고 effort 를 올리고(`high`→`xhigh`→`max`), 그다음은 위가 아니라 **옆(Codex)** 으로 간다.
+`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5, `sonnet`→Sonnet 5, `haiku`→Haiku 4.5, 그리고 `fable`→Fable 5(Opus 위 Mythos-class, ~2× Opus 비용). **`fable` 은 frontmatter 상시 배정 금지** — 사다리는 effort 먼저(`high`→`xhigh`→`max`), 그래도 미스가 나는 회복 불가 게이트의 최종 판정 1콜만 per-call `fable`(세션이 Fable 이면 fork 가 가장 싼 경로), 그다음은 위가 아니라 **옆(Codex)** 으로 간다.
 
 티어 판단 기준은 **"박스가 열려 있는가"** 하나다. 답의 형태가 이미 정해졌으면(rubric·taxonomy 가 주어짐, 원인·해결이 확정됨, 출력 형식이 고정됨) 탐색 공간이 없으므로 **`sonnet`**. 답의 형태가 미정이거나(원인 미상 진단, 설계, 의미 보존 판정, taxonomy 가 못 덮은 것 발견) 미스 비용이 회복 불가면 **`opus`**. 기계적 고빈도는 **`haiku`**. **파이프라인이 아니라 단계별로 태깅한다** — detect→fix→judge 는 `sonnet`→`sonnet`→`opus` 이고 opus×3 이 아니다. 두 축이 충돌하면 최악 비용이 이긴다.
 

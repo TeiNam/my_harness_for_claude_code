@@ -1805,6 +1805,15 @@ function runTests() {
     cleanupTestDir(testDir);
   })) passed++; else failed++;
 
+  if (test('accepts fable as a valid model alias', () => {
+    const testDir = createTestDir();
+    fs.writeFileSync(path.join(testDir, 'fable.md'), '---\nmodel: fable\ntools: Read\n---\n# Fable-tier agent');
+
+    const result = runValidatorWithDir('validate-agents', 'AGENTS_DIR', testDir);
+    assert.strictEqual(result.code, 0, 'Should accept fable alias');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
   if (test('handles space before colon in frontmatter key', () => {
     const testDir = createTestDir();
     // "model : sonnet" — space before colon. extractFrontmatter uses indexOf(':') + trim()
