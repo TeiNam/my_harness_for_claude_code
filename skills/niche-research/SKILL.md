@@ -1,12 +1,20 @@
 ---
 name: niche-research
 description: >
-  Surface the 20 most relevant stories in a niche from the last 7 days by driving a live browser. Verified dates, real links, shareable angles. Claude scrolls Reddit, X and runs Google searches — exactly like a human researcher would. Use this skill whenever the user says "research my niche", "what's trending", "find stories", "this week's news", "content research", or drops a niche and asks what's happening in it. Needs live browsing: Orca's embedded browser first, Playwright if that fails.
+  Surface the 20 most relevant stories in a niche from the last 7 days using available live research tools. Verified dates, real links, shareable angles. Use available browser or web search tools to inspect dated source material. Use this skill whenever the user says "research my niche", "what's trending", "find stories", "this week's news", "content research", or drops a niche and asks what's happening in it. Requires live source access for current research.
 origin: charlie947/social-media-skills
 workloads: [social-content]
 ---
 
 # Niche Research
+
+## Codex and Claude runtime
+
+- Use this skill in Codex or Claude with the tools actually available in the current task. `AskUserQuestion` examples describe the questions, not a required API: use an available question tool within its limits, or ask in chat. Reuse answers and source material already supplied.
+- Work in the user-selected project. Read its `about-me.md`, `voice.md` and relevant brand files before personalised work. Confirm the intended author if files conflict or contain starter defaults. Ask for missing facts or run `voice-builder`; never inherit the maintainer's identity, accounts or private files.
+- Resolve bundled `references/` relative to this skill folder. For an explicitly requested profile refresh, read and update the canonical `about-me.md`, `voice.md` or `newsletter-voice.md` in place, preserving unrelated user facts and rules. Consumers must reread those canonical files. Use a new filename only for new deliverables that would collide with unrelated existing files. Installation alone never starts an interview or writes files. Do not write persistent learnings unless requested.
+- Use supplied evidence first. Verify external claims through available search/source tools when needed. If a source or integration is unavailable, name the missing capability and offer supplied text/export input. Never invent facts, first-person experience, metrics or a successful tool run.
+- Connect only services needed for the chosen route through the user's existing account. Never print credentials or overwrite connections. Drafting, saving and reviewing do not authorise publishing, sending messages or changing accounts.
 
 ## CRITICAL: Auto-start on load
 
@@ -14,15 +22,11 @@ When this skill triggers, go straight to Step 1. Do not summarise the research m
 
 ## Prerequisites
 
-This skill needs live browsing. Use this order of preference:
+Use the live web search and browser capabilities actually available in Codex or Claude. No particular extension or assistant vendor is required. Read tool documentation and check access before choosing a route. Use the user's existing authorised sessions for personalised feeds; never change their connections.
 
-1. **Orca 임베디드 브라우저** (`orca-cli`) — 1순위. `tab create` → `goto` → `snapshot` → `scroll`
-   → `eval` 로 피드를 훑는다. 세션 프로필로 로그인이 유지되므로 Reddit·X 피드에 특히 유리하다.
-2. **Playwright** — Orca 브라우저가 실패할 때만 넘어간다(Orca 미실행, 임베디드 브라우저가
-   막히는 사이트 등). `npx playwright` 스크립트로 헤드리스 구동한다.
-3. **WebSearch + WebFetch tools** as a last resort (less thorough on feed scrolling).
+Browser feed access and indexed web search are different evidence surfaces. If feeds are unavailable, continue with indexed public results and label the missing feed coverage. If no live source access exists, current research is pending; supplied dated sources can support a clearly labelled limited brief.
 
-Pick the best available path and continue.
+Never scrape comments or replies on any platform. Read original post bodies and article text only. Aggregate engagement counts may be recorded when visible. Do not enable comment collection through an actor option.
 
 ## Step 1. Gather the niche
 
@@ -46,7 +50,7 @@ If the user picks "Pull from about-me.md", read the file from the project root. 
 
 ## Step 2. Browse like a human researcher
 
-Drive the browser through these actions in order. Verify publish dates on every item. Exclude anything older than 7 days from today without exception.
+Use the available route for the following sources; skip inaccessible feeds with an explicit coverage note. Verify publish dates on every item. Exclude anything older than 7 days from today without exception.
 
 ### 2a. Reddit feed scanning
 
@@ -61,7 +65,7 @@ Drive the browser through these actions in order. Verify publish dates on every 
 
 1. Navigate to https://x.com/home (For You feed).
 2. Scroll multiple screens.
-3. Open full threads for niche-relevant tweets.
+3. Open original niche-relevant posts. Author-authored continuations may supply context; do not collect the reply/comment thread.
 4. Check the post timestamp on each thread.
 5. Discard posts older than 7 days, even if engagement is high.
 
@@ -109,7 +113,7 @@ Then a markdown table with these exact columns:
 | Theme / Emerging Story | Platforms (Reddit, X, News) | Key Communities / Accounts / Sources | Representative Links | Attention Signals | What's Happening or Being Debated | Why It Matters for [NICHE] | Shareable Angle |
 ```
 
-No prose outside the table.
+Include a short coverage note naming which feeds or indexed searches were actually used, the date window and any inaccessible sources.
 
 ## Step 5. Offer the next move
 
@@ -122,8 +126,8 @@ After the table, ask:
 - Never invent links, metrics, or dates.
 - Exclude anything older than 7 days without exception.
 - Verify every publish date before including an item. No shortcuts.
-- Table only at the end. No commentary, no summary paragraph.
+- Keep the table compact, with the coverage note outside it.
 - If fewer than 20 themes pass the filter, say so. Do not pad with weak items.
-- If neither the Orca browser nor the Playwright fallback nor WebSearch can cover feed scrolling properly (Reddit and X), tell the user what is missing rather than faking the scan.
+- Indexed results do not prove a full feed scan. Missing feed access is a limitation, not evidence of no relevant stories.
 - British English throughout. DD/MM/YYYY date format.
 - Never use em dashes.
