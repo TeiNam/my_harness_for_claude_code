@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-09-10
+
+- feat(obsidian): 커뮤니티 플러그인 패스 기준을 2026-09 현행으로 동기화 (v0.12.0) (#47) (13c4950)
+
 ## 2026-09-09
 
 - chore(changelog): 스쿼시 머지 #43·#44·#45 누락분 정정 (#46) (f07b21f)

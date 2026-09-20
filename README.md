@@ -73,7 +73,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 - **문서 생성**: `pdf`(pypdf·reportlab·weasyprint), `docx`(python-docx·docxtpl), `xlsx`(openpyxl·pandas) — 프로그래밍 방식 PDF/Word/Excel 산출. 슬라이드는 `ppt-authoring`·`frontend-slides`. `core` 워크로드.
 - **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`, `tech-writer`(한/영 기술 문서 작성·윤문 오케스트레이터, 5개 전용 에이전트)
 - **소셜 콘텐츠 (LinkedIn 개인 브랜딩)**: 17종, origin: charlie947/social-media-skills. `writing`과 분리된 별도 워크로드이며, 파이프라인 단계별 3그룹으로 나뉩니다 — **`social-voice`**(`voice-builder`, `newsletter-voice`, `profile-optimizer`) → **`social-content`**(`post-writer`, `post-formatter`, `post-scorer`, `hook-generator`, `content-matrix`, `niche-research`, `pinned-comment`, `reels-scripting`, `analytics-dashboard`) → **`social-visual`**(`graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `youtube-thumbnail`). 설치 시 글쓰기 › 소셜 상세 tier(`--writing-social=`)로 골라 담습니다.
-- **한글 AI 티 제거**: `humanize-korean` v2.3.2 — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 70패턴을 탐지·윤문(`/humanize`·`/humanize-redo`). 정량 shim 의 `route_hint` 가 경로를 정하고(light 1콜 / standard 2콜 / heavy 3콜), 의미 함축은 결정적 게이트 3종(서법 복원·주입 쉼표 제거·`verify_gates.py` 4축)이 막습니다. epoko77-ai/im-not-ai 통합.
+- **한글 AI 티 제거**: `humanize-korean` v2.3.2+main@9747f03 — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 84패턴을 탐지·윤문(`/humanize`·`/humanize-redo`). 정량 shim 의 `route_hint` 가 경로를 정하고(light 1콜 / standard 2콜 / heavy 3콜), 의미 함축은 결정적 게이트 3종(서법 복원·주입 쉼표 제거·`verify_gates.py` 4축)이 막습니다. epoko77-ai/im-not-ai 통합.
 
 ## AWS Bedrock 워크플로 (최적화 포인트)
 
