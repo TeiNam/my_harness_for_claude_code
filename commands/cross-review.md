@@ -46,16 +46,20 @@ done | sort -u
 
 # (b) 동반변경 — 히스토리상 같은 커밋에 자주 등장한 파일 (import 관계가 없어도 잡힌다)
 changed | sort -u | while IFS= read -r f; do
-  git log --format='C%H' --name-only -- "$f" </dev/null \
-    | awk -v t="$f" '/^C/{if(n>1&&n<20){for(i=1;i<=n;i++)if(f[i]!=t)print f[i]};n=0;next} NF{f[++n]=$0}' \
+  git log --full-diff --format='C%H' --name-only -- "$f" </dev/null \
+    | awk -v t="$f" 'function flush(){if(n>1&&n<20)for(i=1;i<=n;i++)if(f[i]!=t)print f[i];n=0}
+                     /^C/{flush();next} NF{f[++n]=$0} END{flush()}' \
     | sort | uniq -c | sort -rn | head -5
 done | sort -rn
 ```
 
-> **셸 함정 두 개** — 실측으로 확인했다. ① `rg` 에 **경로 인자(`.`)와 `</dev/null` 을 반드시**
+> **셸 함정 세 개** — 실측으로 확인했다. ① `rg` 에 **경로 인자(`.`)와 `</dev/null` 을 반드시**
 > 준다. 경로 없이 쓰면 rg 가 stdin 을 읽어 `while` 루프의 입력을 삼켜 **첫 파일만 처리하고
 > 조용히 끝난다**(빈 결과처럼 보인다). ② `$CHANGED` 를 `for` 로 돌리지 말고 위처럼 한 줄씩
 > 읽는다 — 공백 있는 경로가 깨지고, `awk -v` 에 개행이 섞여 `newline in string` 으로 죽는다.
+>  ③ `git log -- <path>` 에는 **`--full-diff` 가 필수**다. pathspec 은 커밋만 고르는 게 아니라
+> `--name-only` 출력도 그 파일 하나로 좁혀서, 커밋마다 파일이 1개로 보이고(`n>1` 탈락) 동반변경이
+> **항상 빈 결과**가 된다. awk 의 `END{flush()}` 는 마지막(가장 오래된) 커밋 그룹을 빠뜨리지 않게 한다.
 
 결과에서 **diff에 포함되지 않은 파일만** 남겨 "참조 대상" 목록으로 만들고, 2단계의 두
 축에 함께 넘긴다. 특히 이 두 부류를 노린다:
