@@ -21,9 +21,9 @@ already established → nothing left to search → `sonnet`.
 - `sonnet` (Sonnet 5): default — implementation, refactors, scanning against a
   supplied rubric, rewriting what a detector already flagged, applying a fix
   whose cause is known (~90% of coding)
-- `opus` (Opus 5): architecture, security, deep/adversarial review, ambiguous
+- `opus` (Opus 5.5, default effort `medium`): architecture, security, deep/adversarial review, ambiguous
   requirements, diagnosing an unknown cause, judging whether meaning survived
-- `fable` (Fable 5): the one rung above Opus (~2× cost) — a single final-judge
+- `fable` (Fable 5.1): the one rung above Opus (~2.5× per token) — a single final-judge
   call on an unrecoverable-miss gate after `opus` at `xhigh`/`max` still missed;
   never a standing agent assignment
 - Codex (cross-family): independent second opinion, tie-break, mechanical grind — not a Claude tier
@@ -31,17 +31,20 @@ already established → nothing left to search → `sonnet`.
 Tier **per stage, not per pipeline**: detect → fix → judge is
 `sonnet` → `sonnet` → `opus`, not `opus` × 3.
 
-Default to Sonnet 5; escalate to Opus 5 on failed first attempt, 5+ files,
+Default to Sonnet 5; escalate to Opus 5.5 on failed first attempt, 5+ files,
 architectural, or security-critical work. Past Opus the ladder is: raise
 **effort** (`high` → `xhigh` → `max`) → `fable` for one unrecoverable-miss
 judging call → a cross-family opinion from Codex. If Opus/Fable refuses
-(safety classifier) or Opus 5 lacks a needed feature (web fetch, Priority
-Tier), fall back to Opus 4.8. Fast mode keeps Opus reasoning at lower latency —
-prefer it over downgrading when you need Opus-level judgment fast. For a
+(safety classifier), fall back per model-routing.md → Refusals and fallback
+(Fable 5.1 → Opus 4.8 / Opus 5). Fast mode keeps Opus reasoning at lower
+latency — Claude API only, so not on Bedrock. For a
 cross-family second opinion, route to Codex (codex plugin — `codex:rescue`).
 
-**Factor the current session model** (visible in the environment — Fable 5 and
-Opus 5 both serve as the daily main). The tier recommendation is
+**Factor the current session model** (visible in the environment — Fable 5.1 and
+Opus 5.5 both serve as the daily main). Switching up (Opus 5.5 → Fable 5.1)
+mid-session keeps thinking; to come down, recommend a fresh session.
+Alias resolution is provider-dependent (Bedrock: `sonnet` → Sonnet 4.5 unless
+`ANTHROPIC_DEFAULT_SONNET_MODEL` is pinned) — name the model that will actually run. The tier recommendation is
 session-agnostic, but the *route to it* is not: on a Fable session the `fable`
 rung is a `fork` (inherits the model, shares prompt cache — forks always
 inherit and ignore overrides); on an Opus/Sonnet session, reach it with a

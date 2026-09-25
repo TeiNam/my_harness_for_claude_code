@@ -21,13 +21,31 @@ Build applications with the Anthropic Claude API and SDKs.
 
 | Model | ID | Best For |
 |-------|-----|----------|
-| Fable 5 | `claude-fable-5` | Frontier long-horizon agents (thinking always on, ~2× Opus cost) |
-| Opus 5 | `claude-opus-5` | Complex reasoning, architecture, agentic coding |
-| Opus 4.8 | `claude-opus-4-8` | Fallback target for Opus 5 refusals; web fetch; Priority Tier |
-| Sonnet 5 | `claude-sonnet-5` | Balanced coding, most development tasks |
-| Haiku 4.5 | `claude-haiku-4-5` | Fast responses, high-volume, cost-sensitive |
+| Fable 5.1 | `claude-fable-5-1` | Frontier long-horizon agents — $10/$50, cache read 0.025×, default effort `high`, 1M ctx, 128k out (~2.5× Opus 5.5 per token) |
+| Opus 5.5 | `claude-opus-5-5` | Complex reasoning, architecture, agentic coding — $4/$20, cache read 0.05×, default effort **`medium`**, 1M ctx, 128k out |
+| Sonnet 5 | `claude-sonnet-5` | Balanced coding, most development tasks — $2/$10 |
+| Haiku 4.5 | `claude-haiku-4-5` | Fast responses, high-volume, cost-sensitive — $1/$5 |
+| Opus 5 / Opus 4.8 (legacy) | `claude-opus-5` / `claude-opus-4-8` | Refusal fallback targets (Fable 5.1 falls back to these); workloads not yet migrated — $5/$25 |
+| Fable 5 (legacy) | `claude-fable-5` | Superseded by Fable 5.1 (same price, cache read 0.1×) |
 
-Default to Opus 5 unless the task needs speed/cost optimization (Sonnet/Haiku). IDs from the 4.6 generation onward (`claude-opus-5`, `claude-sonnet-5`) are pinned snapshots — no date suffix exists or is needed. On Opus 5 / Sonnet 5 / Fable 5: thinking is adaptive by default, `budget_tokens` and non-default `temperature`/`top_p`/`top_k` return 400, and assistant prefill is rejected. Handle `stop_reason: "refusal"` on Opus 5 / Fable 5 (safety classifiers), ideally with the server-side `fallbacks` beta.
+Default to Opus 5.5 unless the task needs speed/cost optimization (Sonnet/Haiku). IDs from the 4.6 generation onward (`claude-opus-5-5`, `claude-sonnet-5`) are pinned snapshots — no date suffix exists or is needed. On Opus 5 / Sonnet 5 / Fable 5: thinking is adaptive by default, `budget_tokens` and non-default `temperature`/`top_p`/`top_k` return 400, and assistant prefill is rejected. Handle `stop_reason: "refusal"` on Opus 5.5 / Fable 5.1 (safety classifiers), ideally with the server-side `fallbacks` beta.
+
+**Set `effort` explicitly and re-sweep on migration.** Opus 5.5 defaults to `medium` (Opus 5 defaulted to `high`), and level names don't mean the same amount of thinking across models: Opus 5.5 `medium` matches or beats Opus 5 `high` on coding/knowledge evals, and at any given level it thinks *more* per turn — most of all at `xhigh`/`max`. Reserve `xhigh`/`max` for work with a measured gain, and leave room in `max_tokens` (thinking counts toward it; 128k works for long agentic turns).
+
+### Opus 5.5 / Fable 5.1 breaking changes
+
+| Change | Applies to | Fix |
+|--------|-----------|-----|
+| Forced tool use: `tool_choice` `{"type":"any"}` / `{"type":"tool",...}` → 400 | Opus 5.5, Fable 5.1 | Keep `auto`; add `strict: true` (strict tool use) or use structured outputs; say in the prompt when a tool applies |
+| `thinking: {"type":"disabled"}` or `{"type":"enabled","budget_tokens":N}` → 400 | Opus 5.5 (Fable already) | Omit `thinking` or send `{"type":"adaptive"}`; lower `effort` where you used to disable thinking |
+| Non-default `temperature`/`top_p`/`top_k`, assistant prefill → 400 | Fable 5.1 (unchanged from Fable 5) | Drop sampling params; steer via prompt/structured outputs |
+| Thinking blocks bound to model + conversation | Opus 5.5, Fable 5.1 | Keep history **append-only**; change instructions/tools via mid-conversation system messages, not edits. Opus 5.5 → Fable 5.1 keeps reasoning; the reverse (and other switches) drops it. Beta `thinking-binding-controls-2026-08-01` + `thinking.block_binding.prefix_mismatch_behavior: "drop_block"` drops instead of 400 and reports it in `input_transformations` |
+| `computer_20251124` → 400 | Opus 5.5 (Claude API / Google Cloud; Bedrock still accepts it) | Migrate to `computer_toolset_20260801` |
+| Text between tool calls arrives as `thinking` blocks, empty at default `display: "omitted"` | Opus 5.5, Fable 5.1 | Select blocks by `type`, not position; set `display: "updates"` (beta `thinking-display-updates-2026-08-18`) to get readable progress notes |
+
+**New betas (both models):** per-message effort — a `role: "system"` message carrying `output_config.effort` (beta `mid-conversation-output-config-2026-07-01`) changes depth without a cache miss, whereas changing top-level `effort` invalidates the cache; turn-scoped system messages via `clear_at: "next_user_message"` (beta `mid-conversation-system-clear-at-2026-08-21`) for per-turn reminders; inline tool definitions in system messages (`inline-tools-2026-09-15`); compaction on demand (`compact-2026-09-04`). Minimum cacheable prompt is 512 tokens.
+
+**Refusals:** Opus 5.5 runs biology, cybersecurity, and `reasoning_extraction` classifiers — don't prompt it to write its reasoning into the response (read `display: "summarized"` thinking instead); `fallbacks: "default"` does not retry `reasoning_extraction` declines. Fable 5.1's permitted fallback targets are Opus 4.8 and Opus 5. **Fast mode:** Opus 5.5 at $8/$40, Claude API only.
 
 ## Python SDK
 
@@ -192,7 +210,8 @@ message = client.messages.create(
 ## Adaptive Thinking
 
 For complex reasoning tasks. On Sonnet 5 / Opus 5 / Fable 5 thinking is adaptive
-(the old `budget_tokens` form returns 400); control depth with `output_config.effort`:
+(the old `budget_tokens` form returns 400; on Opus 5.5 / Fable 5.1 thinking can't be
+disabled at all); control depth with `output_config.effort`:
 
 ```python
 message = client.messages.create(
@@ -302,7 +321,7 @@ while True:
 
 | Strategy | Savings | When to Use |
 |----------|---------|-------------|
-| Prompt caching | Up to 90% on cached tokens | Repeated system prompts or context |
+| Prompt caching | Up to 90% on cached tokens (95% on Opus 5.5, 97.5% on Fable 5.1) | Repeated system prompts or context |
 | Batches API | 50% | Non-time-sensitive bulk processing |
 | Haiku instead of Sonnet | ~75% | Simple tasks, classification, extraction |
 | Shorter max_tokens | Variable | When you know output will be short |
@@ -334,7 +353,7 @@ except APIError as e:
 export ANTHROPIC_API_KEY="your-api-key-here"
 
 # Optional: set default model
-export ANTHROPIC_MODEL="claude-opus-5"
+export ANTHROPIC_MODEL="claude-opus-5-5"
 ```
 
 Never hardcode API keys. Always use environment variables.

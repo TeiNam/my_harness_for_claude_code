@@ -38,6 +38,14 @@ Run autonomous loops safely with clear stop conditions, observability, and recov
 - rollback path exists
 - branch/worktree isolation is configured
 
+## Early Stops
+
+A turn that ends in text with no tool call is a report, not proof the task is done.
+Keep the task's parts in a checklist file. If a turn ends with open items and no
+stated blocker, send one short message naming the open items and continue. Cap
+automatic continuations at 2–3 per task; beyond that, stop and escalate. Work
+still running (background command, subagent) means not done — wait for its output.
+
 ## Escalation
 
 Escalate when any condition is true:

@@ -29,23 +29,36 @@ const path = require('path');
 const { ensureDir, appendFile, getClaudeDir } = require('../lib/utils');
 const { sanitizeSessionId } = require('../lib/session-bridge');
 
-// Approximate per-1M-token billing rates (USD), 2026-07 lineup
-// (Haiku 4.5 / Sonnet 5 / Opus 5·4.8 / Fable 5 — see
-// skills/cost-aware-llm-pipeline Pricing Reference).
-// Cache creation: 1.25x input rate. Cache read: 0.1x input rate.
+// Approximate per-1M-token billing rates (USD), 2026-09 lineup
+// (Haiku 4.5 / Sonnet 5 / Opus 5.5 / Fable 5.1, plus the previous generation
+// for older transcripts — see skills/cost-aware-llm-pipeline Pricing Reference).
+// Cache read multipliers differ per model: 0.1x standard, 0.05x on Opus 5.5,
+// 0.025x on Fable 5.1. Cache write (5m) is 1.25x input everywhere.
 const RATE_TABLE = {
-  haiku:  { in: 1.00,  out: 5.0,  cacheWrite: 1.25,  cacheRead: 0.10 },
-  sonnet: { in: 3.00,  out: 15.0, cacheWrite: 3.75,  cacheRead: 0.30 },
-  opus:   { in: 5.00,  out: 25.0, cacheWrite: 6.25,  cacheRead: 0.50 },
-  fable:  { in: 10.00, out: 50.0, cacheWrite: 12.50, cacheRead: 1.00 }
+  haiku:       { in: 1.00,  out: 5.0,  cacheWrite: 1.25,  cacheRead: 0.10 },
+  sonnetLegacy:{ in: 3.00,  out: 15.0, cacheWrite: 3.75,  cacheRead: 0.30 },
+  sonnet:      { in: 2.00,  out: 10.0, cacheWrite: 2.50,  cacheRead: 0.20 },
+  opusLegacy:  { in: 5.00,  out: 25.0, cacheWrite: 6.25,  cacheRead: 0.50 },
+  opus:        { in: 4.00,  out: 20.0, cacheWrite: 5.00,  cacheRead: 0.20 },
+  fableLegacy: { in: 10.00, out: 50.0, cacheWrite: 12.50, cacheRead: 1.00 },
+  fable:       { in: 10.00, out: 50.0, cacheWrite: 12.50, cacheRead: 0.25 }
 };
+
+// 순서가 곧 우선순위다 — 버전이 붙은 패턴을 먼저 본다.
+// Bedrock ID(global.anthropic.claude-opus-5-5 등)도 부분 문자열로 매칭된다.
+const RATE_RULES = [
+  [/haiku/, 'haiku'],
+  [/(fable|mythos)-5-[1-9]/, 'fable'],
+  [/fable|mythos/, 'fableLegacy'],
+  [/opus-5-[1-9]/, 'opus'],
+  [/opus/, 'opusLegacy'],
+  [/sonnet-5/, 'sonnet']
+];
 
 function getRates(model) {
   const m = String(model || '').toLowerCase();
-  if (m.includes('haiku')) return RATE_TABLE.haiku;
-  if (m.includes('fable') || m.includes('mythos')) return RATE_TABLE.fable;
-  if (m.includes('opus'))  return RATE_TABLE.opus;
-  return RATE_TABLE.sonnet;
+  const hit = RATE_RULES.find(([re]) => re.test(m));
+  return RATE_TABLE[hit ? hit[1] : 'sonnetLegacy'];
 }
 
 function toNumber(v) {
@@ -96,66 +109,72 @@ function sumUsageFromTranscript(transcriptPath) {
 const MAX_STDIN = 64 * 1024;
 let raw = '';
 
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', chunk => {
-  if (raw.length < MAX_STDIN) raw += chunk.substring(0, MAX_STDIN - raw.length);
-});
+function main() {
+  process.stdin.setEncoding('utf8');
+  process.stdin.on('data', chunk => {
+    if (raw.length < MAX_STDIN) raw += chunk.substring(0, MAX_STDIN - raw.length);
+  });
 
-process.stdin.on('end', () => {
-  try {
-    const input = raw.trim() ? JSON.parse(raw) : {};
+  process.stdin.on('end', () => {
+    try {
+      const input = raw.trim() ? JSON.parse(raw) : {};
 
-    const transcriptPath = (typeof input.transcript_path === 'string' && input.transcript_path)
-      ? input.transcript_path
-      : process.env.CLAUDE_TRANSCRIPT_PATH || null;
+      const transcriptPath = (typeof input.transcript_path === 'string' && input.transcript_path)
+        ? input.transcript_path
+        : process.env.CLAUDE_TRANSCRIPT_PATH || null;
 
-    const sessionId =
-      sanitizeSessionId(input.session_id) ||
-      sanitizeSessionId(process.env.HARNESS_SESSION_ID) ||
-      sanitizeSessionId(process.env.CLAUDE_SESSION_ID) ||
-      'default';
+      const sessionId =
+        sanitizeSessionId(input.session_id) ||
+        sanitizeSessionId(process.env.HARNESS_SESSION_ID) ||
+        sanitizeSessionId(process.env.CLAUDE_SESSION_ID) ||
+        'default';
 
-    let usageTotals = null;
-    if (transcriptPath && fs.existsSync(transcriptPath)) {
-      usageTotals = sumUsageFromTranscript(transcriptPath);
+      let usageTotals = null;
+      if (transcriptPath && fs.existsSync(transcriptPath)) {
+        usageTotals = sumUsageFromTranscript(transcriptPath);
+      }
+
+      const {
+        inputTokens = 0,
+        outputTokens = 0,
+        cacheWriteTokens = 0,
+        cacheReadTokens = 0,
+        model = 'unknown'
+      } = usageTotals || {};
+
+      const rates = getRates(model);
+      const estimatedCostUsd = Math.round((
+        (inputTokens      / 1e6) * rates.in +
+        (outputTokens     / 1e6) * rates.out +
+        (cacheWriteTokens / 1e6) * rates.cacheWrite +
+        (cacheReadTokens  / 1e6) * rates.cacheRead
+      ) * 1e6) / 1e6;
+
+      const metricsDir = path.join(getClaudeDir(), 'metrics');
+      ensureDir(metricsDir);
+
+      const row = {
+        timestamp:          new Date().toISOString(),
+        session_id:         sessionId,
+        transcript_path:    transcriptPath || '',
+        model,
+        input_tokens:       inputTokens,
+        output_tokens:      outputTokens,
+        cache_write_tokens: cacheWriteTokens,
+        cache_read_tokens:  cacheReadTokens,
+        estimated_cost_usd: estimatedCostUsd
+      };
+
+      appendFile(path.join(metricsDir, 'costs.jsonl'), `${JSON.stringify(row)}\n`);
+    } catch {
+      // Non-blocking — never fail the Stop hook.
     }
 
-    const {
-      inputTokens = 0,
-      outputTokens = 0,
-      cacheWriteTokens = 0,
-      cacheReadTokens = 0,
-      model = 'unknown'
-    } = usageTotals || {};
+    // Pass stdin through (required by harness hook convention).
+    process.stdout.write(raw);
+  });
+}
 
-    const rates = getRates(model);
-    const estimatedCostUsd = Math.round((
-      (inputTokens      / 1e6) * rates.in +
-      (outputTokens     / 1e6) * rates.out +
-      (cacheWriteTokens / 1e6) * rates.cacheWrite +
-      (cacheReadTokens  / 1e6) * rates.cacheRead
-    ) * 1e6) / 1e6;
+if (require.main === module) main();
 
-    const metricsDir = path.join(getClaudeDir(), 'metrics');
-    ensureDir(metricsDir);
-
-    const row = {
-      timestamp:          new Date().toISOString(),
-      session_id:         sessionId,
-      transcript_path:    transcriptPath || '',
-      model,
-      input_tokens:       inputTokens,
-      output_tokens:      outputTokens,
-      cache_write_tokens: cacheWriteTokens,
-      cache_read_tokens:  cacheReadTokens,
-      estimated_cost_usd: estimatedCostUsd
-    };
-
-    appendFile(path.join(metricsDir, 'costs.jsonl'), `${JSON.stringify(row)}\n`);
-  } catch {
-    // Non-blocking — never fail the Stop hook.
-  }
-
-  // Pass stdin through (required by harness hook convention).
-  process.stdout.write(raw);
-});
+module.exports = { getRates, RATE_TABLE };

@@ -179,8 +179,8 @@ For MEDIUM+ tasks, always start with /plan. For EPIC tasks, use blueprint skill.
 |-------|------------------|-----------|
 | TRIVIAL-LOW | Sonnet 5 | Fast, cost-efficient for simple tasks |
 | MEDIUM | Sonnet 5 | Best coding model for standard work |
-| HIGH | Sonnet 5 (main) + Opus 5 (planning) | Opus for architecture, Sonnet for implementation |
-| EPIC | Opus 5 (blueprint) + Sonnet 5 (execution) | Deep reasoning for multi-session planning |
+| HIGH | Sonnet 5 (main) + Opus 5.5 (planning) | Opus for architecture, Sonnet for implementation |
+| EPIC | Opus 5.5 (blueprint) + Sonnet 5 (execution) | Deep reasoning for multi-session planning |
 
 **Multi-prompt splitting** (for HIGH/EPIC scope):
 
@@ -379,7 +379,7 @@ Each phase = 1 PR, with /verify gates between phases.
 Use /save-session between phases. Use /resume-session to continue.
 Use git worktrees for parallel service extraction when dependencies allow.
 
-Recommended: Opus 5 for blueprint planning, Sonnet 5 for phase execution.
+Recommended: Opus 5.5 for blueprint planning, Sonnet 5 for phase execution.
 ```
 
 ---

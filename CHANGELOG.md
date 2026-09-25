@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-09-20
+
+- feat(skills): 외부 출처 스킬 4개 소스 상류 동기화 (v0.13.0) (#48) (f3e547b)
+
 ## 2026-09-10
 
 - feat(obsidian): 커뮤니티 플러그인 패스 기준을 2026-09 현행으로 동기화 (v0.12.0) (#47) (13c4950)

@@ -43,7 +43,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ### Model Routing (per-agent model tiers)
 
-`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5, `sonnet`→Sonnet 5, `haiku`→Haiku 4.5, 그리고 `fable`→Fable 5(Opus 위 Mythos-class, ~2× Opus 비용). **`fable` 은 frontmatter 상시 배정 금지** — 사다리는 effort 먼저(`high`→`xhigh`→`max`), 그래도 미스가 나는 회복 불가 게이트의 최종 판정 1콜만 per-call `fable`(세션이 Fable 이면 fork 가 가장 싼 경로), 그다음은 위가 아니라 **옆(Codex)** 으로 간다.
+`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5.5(기본 effort `medium`), `sonnet`→Sonnet 5, `haiku`→Haiku 4.5, 그리고 `fable`→Fable 5.1(Opus 위 Mythos-class, 토큰당 ~2.5× Opus 비용). **별칭 해석은 프로바이더마다 다르다** — Bedrock 에서는 `ANTHROPIC_DEFAULT_SONNET_MODEL` 을 핀하지 않으면 `sonnet` 이 Sonnet 4.5 로 풀리고, 최상위 `effortLevel` 은 Opus 5.5 에 적용되지 않는다(`modelSettings`·`/effort` 사용). 상세·모델 전환 방향 규칙은 `docs/rules-reference/model-routing.md`. **`fable` 은 frontmatter 상시 배정 금지** — 사다리는 effort 먼저(`high`→`xhigh`→`max`), 그래도 미스가 나는 회복 불가 게이트의 최종 판정 1콜만 per-call `fable`(세션이 Fable 이면 fork 가 가장 싼 경로), 그다음은 위가 아니라 **옆(Codex)** 으로 간다.
 
 티어 판단 기준은 **"박스가 열려 있는가"** 하나다. 답의 형태가 이미 정해졌으면(rubric·taxonomy 가 주어짐, 원인·해결이 확정됨, 출력 형식이 고정됨) 탐색 공간이 없으므로 **`sonnet`**. 답의 형태가 미정이거나(원인 미상 진단, 설계, 의미 보존 판정, taxonomy 가 못 덮은 것 발견) 미스 비용이 회복 불가면 **`opus`**. 기계적 고빈도는 **`haiku`**. **파이프라인이 아니라 단계별로 태깅한다** — detect→fix→judge 는 `sonnet`→`sonnet`→`opus` 이고 opus×3 이 아니다. 두 축이 충돌하면 최악 비용이 이긴다.
 
@@ -97,7 +97,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 **일에 형태가 있으면 위임이 기본이다.** 예전의 "서브에이전트는 예외이지 반사가 아니다" 규칙은 2026-08-30 폐기했다 — cold 에이전트가 하네스 맥락 없이(스킬도 rubric 도 없이) 돌던 시절엔 인라인이 실제로 더 나았지만, 지금은 CLAUDE.md·`rules/` 가 모든 서브에이전트에 자동 상속되고 44종 중 36종이 rubric 을 preload 한다. **인라인은 한 번의 도구 호출로 끝나는 일에만 남는다.**
 
-Opus 5 기본 프롬프트에는 "사용자가 요청하지 않으면 Agent 툴을 부르지 말라"가 들어 있다(모델 프롬프트 번들 소속이라 설정으로 못 끈다). **이 문단이 그 요청이다** — 1회 호출은 오케스트레이션이 아니라 그냥 도구 호출이므로 따로 묻지 않는다.
+Opus 5 계열 기본 프롬프트에는 "사용자가 요청하지 않으면 Agent 툴을 부르지 말라"가 들어 있다(모델 프롬프트 번들 소속이라 설정으로 못 끈다). **이 문단이 그 요청이다** — 1회 호출은 오케스트레이션이 아니라 그냥 도구 호출이므로 따로 묻지 않는다.
 
 | 필요한 것 | 수단 |
 |---|---|

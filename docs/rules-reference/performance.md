@@ -5,7 +5,7 @@
 > Full policy — task tables, agent-class map, orchestration, Codex — lives in
 > [model-routing.md](./model-routing.md). Summary below.
 
-**Haiku 4.5** (~90% of Sonnet capability, ~3x cost savings):
+**Haiku 4.5** (~90% of Sonnet capability, ~2x cheaper than Sonnet 5):
 - Lightweight agents with frequent invocation
 - Mechanical edits, search, doc scaffolding
 - Worker agents in multi-agent systems
@@ -18,7 +18,7 @@
   spans a detector already flagged, implementing a fix whose cause and remedy
   are known. No search space left → no reason to pay for reasoning depth.
 
-**Opus 5** (Top tier — deepest reasoning available):
+**Opus 5.5** (Workhorse deep-reasoning tier; default effort `medium`; `fable`/Fable 5.1 sits above it per call):
 - Complex architectural decisions
 - Security analysis and adversarial review
 - Ambiguous requirements, system-wide debugging
@@ -26,8 +26,8 @@
   fact survived a transformation, finding what the taxonomy doesn't cover yet
 - Long-horizon autonomous runs (overnight builds, large migrations) at `xhigh` effort
 - Final adversarial judge on highest-stakes output at `xhigh`/`max`
-- Fast mode (`/fast`) keeps Opus reasoning with faster output
-- Falls back to Opus 4.8 on safety-classifier refusals, web-fetch needs, or Priority Tier capacity
+- Fast mode (`/fast`) keeps Opus reasoning with faster output — Claude API only (not Bedrock)
+- Refusals: fall back per model-routing.md → Refusals and fallback
 
 **Codex** (cross-family, not a Claude tier):
 - Independent adversarial review — breaks the correlated blind spots of Claude reviewing Claude
