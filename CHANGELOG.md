@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-09-25
 
+- chore(changelog): 스쿼시 머지 #49 누락분 정정 (#50) (dfb9cf8)
 - feat(model-routing): Opus 5.5 / Fable 5.1 라인업 반영 + Bedrock 별칭·effort 함정 정리 (v0.14.0) (#49) (4b4ea92)
 
 ## 2026-09-20
