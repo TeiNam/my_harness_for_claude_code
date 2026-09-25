@@ -3,7 +3,7 @@
 하네스 설치 스크립트는 플러그인을 **건드리지 않는다** (`install.sh` 는 agent·command·skill·rule
 심볼릭 링크와 hooks·mcp 프롬프트까지만 담당). 아래 명령은 손으로 실행한다.
 
-설치된 6종의 상시 컨텍스트 비용은 스킬 `description` 합계 약 4.0k tok 이다
+설치된 8종의 상시 컨텍스트 비용은 스킬·에이전트 `description` 합계 약 5.0k tok 이다
 (`claude plugin details <name>` 으로 개별 확인).
 
   # 1) superpowers — anthropics 공식 마켓플레이스 (~584 tok)
@@ -29,16 +29,36 @@
   # 6) easy-rdbms — 하네스에서 분리한 RDBMS 자산의 도착지 (~1,603 tok)
   #    bcb4bcb 에서 제거한 mysql-guideline·postgres-guideline·database-migrations·
   #    rdbms-data-modeler 가 여기로 갔다. RDBMS 작업을 하지 않는 기간에는 빼도 된다
-  #    (6종 중 상시 비용이 가장 크다 — 나머지 5종 합계의 2/3).
+  #    (8종 중 상시 비용이 가장 크다 — 나머지 7종 합계의 절반가량).
   claude plugin marketplace add TeiNam/easy-rdbms
   claude plugin install easy-rdbms@easy-rdbms
+
+  # 7) humanize-korean (im-not-ai) — 한글 AI 티 제거. 2026-09-25 하네스에서 이관 (~988 tok)
+  #    하네스 사본(skills/humanize-korean + 에이전트 9종 + /humanize·/humanize-redo)이
+  #    동기화 PR 을 거듭해도 상류보다 뒤처져서 공식 플러그인으로 넘겼다.
+  #    커맨드: /humanize-korean:humanize · humanize-redo · humanize-scan
+  #    상류에 없는 humanize-web-architect(lab)만 하네스에 남는다.
+  claude plugin marketplace add epoko77-ai/im-not-ai
+  claude plugin install humanize-korean@im-not-ai
+
+  # 8) eli5 — 주제를 5살 눈높이 HTML 그림 설명으로 (/eli5 <topic>) (~39 tok)
+  claude plugin marketplace add anthropics/claude-plugins-community
+  claude plugin install eli5@claude-community
+
+# ── 플러그인이 아닌 외부 스킬 ──
+#
+#   archify — 아키텍처·워크플로·시퀀스 다이어그램을 standalone HTML 로 (2026-09-25 하네스에서 이관)
+#     상류(tt-a1i/archify)는 .claude-plugin 이 없고 skills CLI 로 배포한다. 복사 설치라
+#     ~/.claude/skills/archify 가 실제 디렉터리가 된다(하네스 심볼릭 아님).
+#     npx -y skills add tt-a1i/archify --skill archify --agent claude-code --global --yes
+#     갱신은 같은 명령을 다시 실행한다.
 
 # ── 설치하지 않는 것 ──
 #
 # 하네스 스킬과 이중 노출 (하네스 쪽을 SSOT 로 유지):
-#   humanize-korean@im-not-ai                → 하네스 skills/humanize-korean 이 SSOT (2026-09-02 상류 v2.3.2 동기화)
 #   frontend-design@claude-plugins-official   → 하네스 skills/frontend-design 과 동일 출처(anthropics/skills)
-#   둘 다 2026-07-26 제거.
+#   2026-07-26 제거. (humanize-korean@im-not-ai 는 이 목록에 있다가 2026-09-25 에 반대로
+#   하네스 사본을 걷고 플러그인 쪽을 SSOT 로 삼았다 — 위 7번.)
 #
 # 워크로드와 무관 (2026-08-14 제거, 마켓플레이스 등록·캐시까지 정리):
 #   motion-creative@motion-mcp     → 광고 크리에이티브 분석. 17스킬 395 tok.

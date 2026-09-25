@@ -18,9 +18,9 @@
 
 | 디렉터리 | 항목 수 | 설명 |
 |---|---:|---|
-| `agents/` | 44 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
-| `commands/` | 38 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 115 | 도메인 지식·워크플로 정의 (NoSQL / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(archify·drawio) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
+| `agents/` | 35 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
+| `commands/` | 36 | 슬래시 커맨드 (frontmatter 기반 markdown) |
+| `skills/` | 114 | 도메인 지식·워크플로 정의 (NoSQL / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(drawio — archify 는 skills CLI 외부 설치) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
 | `rules/` | 27 | common 4개(상시 로드되는 불변 제약) + 언어별 23개(typescript / python / rust / web) — 절차·참고 문서는 `docs/rules-reference/` |
 | `hooks/` | 2 + 28 | 코어 훅 2그룹(기본 설치 — 되돌리기 어려운 행위 차단만) + 옵트인 28그룹 (실행 스크립트 40종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
@@ -73,7 +73,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 - **문서 생성**: `pdf`(pypdf·reportlab·weasyprint), `docx`(python-docx·docxtpl), `xlsx`(openpyxl·pandas) — 프로그래밍 방식 PDF/Word/Excel 산출. 슬라이드는 `ppt-authoring`·`frontend-slides`. `core` 워크로드.
 - **글쓰기**: `markdown-writing`, `article-writing`, `brand-voice`, `crosspost`, `frontend-slides`, `tech-blogging`, `creative-writing`, `ppt-authoring`, `tech-writer`(한/영 기술 문서 작성·윤문 오케스트레이터, 5개 전용 에이전트)
 - **소셜 콘텐츠 (LinkedIn 개인 브랜딩)**: 17종, origin: charlie947/social-media-skills. `writing`과 분리된 별도 워크로드이며, 파이프라인 단계별 3그룹으로 나뉩니다 — **`social-voice`**(`voice-builder`, `newsletter-voice`, `profile-optimizer`) → **`social-content`**(`post-writer`, `post-formatter`, `post-scorer`, `hook-generator`, `content-matrix`, `niche-research`, `pinned-comment`, `reels-scripting`, `analytics-dashboard`) → **`social-visual`**(`graphic-designer`, `gemini-carousel`, `gemini-infographic`, `quote-post`, `youtube-thumbnail`). 설치 시 글쓰기 › 소셜 상세 tier(`--writing-social=`)로 골라 담습니다.
-- **한글 AI 티 제거**: `humanize-korean` v2.3.2+main@9747f03 — AI가 쓴 한글 글의 번역투·관용구·기계적 병렬·피동태 남용 등 10대 카테고리 84패턴을 탐지·윤문(`/humanize`·`/humanize-redo`). 정량 shim 의 `route_hint` 가 경로를 정하고(light 1콜 / standard 2콜 / heavy 3콜), 의미 함축은 결정적 게이트 3종(서법 복원·주입 쉼표 제거·`verify_gates.py` 4축)이 막습니다. epoko77-ai/im-not-ai 통합.
+- **한글 AI 티 제거**: 상류 공식 플러그인 `humanize-korean@im-not-ai`(epoko77-ai/im-not-ai) 로 이관(2026-09-25) — 10대 카테고리 84패턴 탐지·윤문, route_hint 3경로. 설치는 아래 동반 플러그인 표.
 
 ## AWS Bedrock 워크플로 (최적화 포인트)
 
@@ -182,7 +182,7 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 ## 동반 플러그인 (하네스와 같이 설치)
 
 설치 스크립트는 플러그인을 건드리지 않습니다 — 아래는 손으로 설치하며, 명령 전체는 `docs/plugin.md`.
-6종 합계 상시 컨텍스트 비용은 스킬 `description` 기준 약 4.0k tok 입니다.
+8종 합계 상시 컨텍스트 비용은 스킬·에이전트 `description` 기준 약 5.0k tok 입니다.
 
 | 플러그인 | 마켓플레이스 | 상시 | 역할 (하네스와의 관계) |
 |---|---|---|---|
@@ -191,13 +191,17 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 | `codex` | openai/codex-plugin-cc | ~327 tok | 교차 모델 세컨드 오피니언 — 하네스 자체 `codex-cli` 스킬은 중복이라 제거됨 |
 | `ui-ux-pro-max` | nextlevelbuilder/ui-ux-pro-max-skill | ~720 tok | 디자인 시스템·UI 스타일링 — 하네스 자체 `design-system` 스킬은 중복이라 제거됨 |
 | `claude-dashboard` | uppinote20/claude-dashboard | ~89 tok | **statusLine 담당** — 하네스 `harness-statusline.js`는 등록 대상이 아닌 죽은 경로라 2026-08 제거. 비용 DB(`cost-tracking`)는 SQLite 기반이라 별개 유지 |
-| `easy-rdbms` | TeiNam/easy-rdbms | ~1,603 tok | MySQL·PostgreSQL·SQLite 모델링·리뷰 — `bcb4bcb` 에서 하네스 밖으로 뺀 RDBMS 자산의 도착지. 6종 중 상시 비용이 가장 커서 RDBMS 작업을 하지 않는 기간에는 빼도 됩니다 |
+| `easy-rdbms` | TeiNam/easy-rdbms | ~1,603 tok | MySQL·PostgreSQL·SQLite 모델링·리뷰 — `bcb4bcb` 에서 하네스 밖으로 뺀 RDBMS 자산의 도착지. 8종 중 상시 비용이 가장 커서 RDBMS 작업을 하지 않는 기간에는 빼도 됩니다 |
+| `humanize-korean` | epoko77-ai/im-not-ai | ~988 tok | 한글 AI 티 제거(`/humanize-korean:humanize`·`humanize-redo`·`humanize-scan`) — 2026-09-25 하네스 사본을 걷고 상류 플러그인을 SSOT 로 삼음. 하네스에는 `humanize-web-architect`(lab)만 남음 |
+| `eli5` | anthropics/claude-plugins-community | ~39 tok | 주제를 5살 눈높이 HTML 그림 설명으로(`/eli5 <topic>`) |
+
+플러그인이 아닌 외부 스킬: **`archify`**(다이어그램 → standalone HTML) — 상류가 skills CLI 로만 배포해 `npx -y skills add tt-a1i/archify --skill archify --agent claude-code --global --yes` 로 설치합니다(2026-09-25 하네스에서 이관).
 
 전부 user scope 입니다. 로드 실패(`cache-miss`) 복구 절차는 `docs/plugin.md` 의 트러블슈팅 절을 봅니다.
 
 **설치하지 말 것**
 
-- 하네스 스킬과 이중 노출 (2026-07-26 제거, 하네스 쪽이 SSOT): `humanize-korean@im-not-ai`(하네스 `skills/humanize-korean`이 SSOT — 2026-09-02 상류 v2.3.2 를 하네스 레이아웃으로 동기화), `frontend-design@claude-plugins-official`(하네스 `skills/frontend-design`과 동일 출처 중복).
+- 하네스 스킬과 이중 노출 (2026-07-26 제거, 하네스 쪽이 SSOT): `frontend-design@claude-plugins-official`(하네스 `skills/frontend-design`과 동일 출처 중복).
 - 워크로드와 무관 (2026-08-14 제거 — 마켓플레이스 등록·캐시까지 정리): `motion-creative@motion-mcp`(광고 크리에이티브 분석, 17스킬 395 tok — 2026-07-26에 뺐다가 재설치돼 있던 것), `scroll-world@scroll-world`(스크롤 시네마틱 랜딩 — 랜딩페이지는 하네스 `taste`/`redesign`/`soft`/`output-skill`이 담당), `rust-analyzer-lsp@claude-plugins-official`(LSP 서버, 스킬 0개라 컨텍스트 비용은 없었으나 Rust 작업에서 쓰지 않음).
 - 2026-08-30 제거 (마켓플레이스 등록·캐시까지 정리): `obsidian@obsidian-skills`(user·project 이중 scope 드리프트를 걷어내면서 플러그인 자체를 내렸습니다 — Obsidian 작업은 MCP 서버 `obsidian` 이 담당하고 플러그인과 무관하게 유지됩니다), `andrej-karpathy-skills@karpathy-skills`(스킬 1개짜리 행동 지침인데 `ponytail` 과 역할이 겹침 — 설치 후 줄곧 disabled 였음).
 
