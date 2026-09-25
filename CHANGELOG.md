@@ -2,6 +2,10 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-09-25
+
+- feat(model-routing): Opus 5.5 / Fable 5.1 라인업 반영 + Bedrock 별칭·effort 함정 정리 (v0.14.0) (#49) (4b4ea92)
+
 ## 2026-09-20
 
 - feat(skills): 외부 출처 스킬 4개 소스 상류 동기화 (v0.13.0) (#48) (f3e547b)
