@@ -57,7 +57,8 @@ response = client.converse(
     modelId="anthropic.claude-sonnet-5",
     messages=[{"role": "user", "content": [{"text": "Summarise this PR"}]}],
     system=[{"text": "You are a senior reviewer. Be concise."}],
-    inferenceConfig={"maxTokens": 1024, "temperature": 0.2},
+    # No temperature/topP: non-default sampling params return 400 on the Claude 5 family
+    inferenceConfig={"maxTokens": 1024},
 )
 text = response["output"]["message"]["content"][0]["text"]
 ```
@@ -69,7 +70,8 @@ const client = new BedrockRuntimeClient({ region: "us-east-1" });
 const out = await client.send(new ConverseCommand({
   modelId: "anthropic.claude-sonnet-5",
   messages: [{ role: "user", content: [{ text: "Summarise this PR" }] }],
-  inferenceConfig: { maxTokens: 1024, temperature: 0.2 },
+  // No temperature/topP: non-default sampling params return 400 on the Claude 5 family
+  inferenceConfig: { maxTokens: 1024 },
 }));
 ```
 
@@ -83,9 +85,24 @@ Bedrock model IDs come in two flavours:
 - **Foundation model ARN/ID** — `anthropic.claude-sonnet-5`
   (region-bound; only callable in regions where the model is hosted).
 - **Cross-region inference profile** — `us.anthropic.claude-sonnet-5`
-  (`us.*`, `eu.*`, `apac.*`). Routes across AZs/regions for higher availability
-  and throughput. **Default to inference profiles** in production unless data
-  residency forbids it.
+  (`us.*`, `eu.*`, `apac.*`, `global.*`). Routes across AZs/regions for higher
+  availability and throughput. **Default to inference profiles** in production
+  unless data residency forbids it. Regional/multi-region endpoints carry a 10%
+  premium over `global.*`.
+
+Current Claude IDs: `anthropic.claude-opus-5-5`, `anthropic.claude-fable-5-1`,
+`anthropic.claude-sonnet-5`, `anthropic.claude-haiku-4-5-20251001-v1:0` —
+e.g. `global.anthropic.claude-opus-5-5`, `global.anthropic.claude-fable-5-1`,
+`global.anthropic.claude-sonnet-5`, `global.anthropic.claude-haiku-4-5-20251001-v1:0`
+(the last three verified callable 2026-09). Opus 5.5 / Fable 5.1 reject forced
+`toolChoice` (`any`/`tool`) and disabled thinking — see `claude-api` for the
+full breaking-change table.
+
+**Claude Code on Bedrock:** the `sonnet` alias resolves to **Sonnet 4.5**, not
+Sonnet 5, and `haiku` has no pinned target, unless you set
+`ANTHROPIC_DEFAULT_SONNET_MODEL` / `ANTHROPIC_DEFAULT_HAIKU_MODEL` (e.g. to the
+`global.*` IDs above). `opus` → Opus 5.5 and `fable` → Fable 5.1 already.
+Fast mode is not available on Bedrock.
 
 ```python
 # Cross-region profile — recommended default
@@ -149,7 +166,8 @@ response = client.converse(
 )
 ```
 
-Cache hits are 10% of input cost; misses cost a 25% premium. Worth it for any
+Cache hits are 10% of input cost (5% on Opus 5.5, 2.5% on Fable 5.1); misses
+cost a 25% premium. Worth it for any
 prompt > ~2k tokens that gets reused.
 
 ## Knowledge Bases (Managed RAG)

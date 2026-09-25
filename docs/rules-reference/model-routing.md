@@ -4,44 +4,72 @@ Authoritative policy for which Claude model each task and agent runs on. This
 is the single source of truth; `performance.md`, `commands/model-route.md`, and
 the agent frontmatter all defer to it.
 
-## Current Lineup (2026-09, post Fable 5 launch)
+## Current Lineup (2026-09, Opus 5.5 / Fable 5.1)
 
 | Alias | Resolves to | Character |
 |-------|-------------|-----------|
-| `fable` | **Fable 5** | Mythos-class tier above Opus (Claude 5 family; Mythos 5 is the same model without dual-use safety measures, approved orgs only). ~2× Opus cost ($10/$50); thinking always on. **Not a default assignment for any agent** — it's the last *up* rung: the final judge on an unrecoverable-miss gate after `opus` at `xhigh`/`max` still missed. When the session itself runs Fable, `fork` is the cheapest Fable access (inherits model, shares prompt cache). |
-| `opus` | **Opus 5** | Workhorse deep-reasoning tier: architecture, ambiguity, adversarial review, hard debugging, long-horizon autonomous runs, high-stakes judging. Same price as Opus 4.8 ($5/$25). Also runs Fast mode (`/fast`) — same model, ~2.5× faster output at premium price (Claude API only). Escalate *within* the tier via effort (`high` → `xhigh` → `max`) before reaching for `fable`. |
-| `sonnet` | **Sonnet 5** | Best coding model. Default for implementation, refactors, PR review. Handles ~90% of coding. |
-| `haiku` | **Haiku 4.5** | ~90% of Sonnet's capability at ~3× cost savings. Mechanical edits, search, doc scaffolding, high-frequency workers. |
+| `fable` | **Fable 5.1** | Mythos-class tier above Opus (Mythos 5.1 is the same model without dual-use safety measures, Glasswing participants only). $10/$50 per MTok — **~2.5× Opus per token** — but cache reads are $0.25 (0.025×), nearly Opus's $0.20, so in a cache-heavy Claude Code session the premium is mostly the 2.5× on output. Thinking always on, default effort `high`. **Not a default assignment for any agent** — it's the last *up* rung: the final judge on an unrecoverable-miss gate after `opus` at `xhigh`/`max` still missed. When the session itself runs Fable, `fork` is the cheapest Fable access (inherits model, shares prompt cache). Requires Claude Code ≥ v2.1.257. |
+| `opus` | **Opus 5.5** | Workhorse deep-reasoning tier: architecture, ambiguity, adversarial review, hard debugging, long-horizon autonomous runs, high-stakes judging. $4/$20 (cheaper than Opus 5's $5/$25), cache reads $0.20 (0.05×). **Default effort is `medium`** — per the docs, Opus 5.5 at `medium` matches or beats Opus 5 at `high`, and at a given level it thinks more per turn than Opus 5. Thinking cannot be disabled. Escalate *within* the tier via effort (`high` → `xhigh` → `max`) before reaching for `fable`. |
+| `sonnet` | **Sonnet 5** | Best coding model. Default for implementation, refactors, PR review. Handles ~90% of coding. $2/$10 (the launch price is now standard). *Provider-dependent — see below.* |
+| `haiku` | **Haiku 4.5** | ~90% of Sonnet's capability at ~2× cost savings vs Sonnet 5 ($1/$5). Mechanical edits, search, doc scaffolding, high-frequency workers. No `effort` parameter. |
 
 > **Use aliases, never version IDs.** Agent frontmatter must say `model: sonnet`,
 > not `model: claude-sonnet-5`. Aliases auto-resolve to the current lineup, so
 > the harness follows model upgrades without a mass re-tag. The one place a
 > pinned ID belongs is application code calling the API (see `skills/claude-api`).
 
-### Opus 5 → Opus 4.8 fallback
+### Provider caveat — aliases resolve per provider
 
-Opus 5 is the `opus` target, but fall back to **Opus 4.8** when Opus 5 can't serve
-the task:
+The table above is the Anthropic API resolution. On **Amazon Bedrock / Google
+Agent Platform** `opus`→Opus 5.5 and `fable`→Fable 5.1, but `sonnet`→**Sonnet 4.5**
+and `haiku` is unspecified unless you pin them with `ANTHROPIC_DEFAULT_SONNET_MODEL`
+/ `ANTHROPIC_DEFAULT_HAIKU_MODEL`. The owner runs on Bedrock: measured 2026-09-25,
+default `sonnet` answered as `claude-sonnet-4-5`; with
+`ANTHROPIC_DEFAULT_SONNET_MODEL=global.anthropic.claude-sonnet-5` it runs Sonnet 5.
+Without the pin every `model: sonnet` agent silently runs the previous generation.
 
-- **Safety-classifier refusal** (`stop_reason: "refusal"`, mostly `category: "cyber"`)
-  — retry on Opus 4.8. In API code, opt in to server-side fallbacks by default:
-  `fallbacks: "default"` with beta `server-side-fallback-2026-07-01` (or an explicit
-  `fallbacks: [{"model": "claude-opus-4-8"}]`).
-- **Web fetch tool needed** — Opus 5 doesn't have it; use Opus 4.8 (or Sonnet 5).
-- **Priority Tier capacity** — Opus 5 doesn't support Priority Tier; capacity-pinned
-  workloads stay on Opus 4.8.
-- **Platform gaps** — anywhere `claude-opus-5` isn't served yet, use `claude-opus-4-8`.
+Effort settings (Claude Code):
 
-Opus 5 behavioral deltas that affect agent prompts: thinking is **on by default**
-(omitting `thinking` runs adaptive; `disabled` + `xhigh`/`max` effort → 400); it
-**self-verifies unprompted** (strip carried-over "double-check your work" scaffolding);
-it delegates to subagents **more eagerly** (cap spawning where fan-out isn't wanted);
-default responses run longer (prompt explicitly for target length).
+- A top-level `effortLevel` in user settings **does not apply to Opus 5.5**. Save
+  its level with `/effort` or `modelSettings["claude-opus-5-5"].effortLevel`.
+- `max` isn't accepted in either settings key — it's per session only.
+- Don't set `CLAUDE_CODE_EFFORT_LEVEL`: the env var overrides subagent `effort:`
+  frontmatter, which flattens the fleet's per-agent tiers.
 
-Fable 5 deltas: the Opus 5 deltas above all apply (thinking always on, eager
-delegation, self-verification). Additionally it carries **dual-use safety
-classifiers** — handle `stop_reason: "refusal"` the same way as Opus 5 (fall
-back to Opus 4.8, or server-side `fallbacks` in API code; see `skills/claude-api`).
+### Switching models mid-session
+
+Thinking blocks are bound to the model that produced them. **Opus 5.5 → Fable 5.1
+keeps** the reasoning; **Fable → Opus** (or any other switch) drops it, and every
+switch starts a fresh prompt cache. Rule: escalating *up* mid-session is fine; to
+come *down*, start a fresh session. A per-call `model: "fable"` Agent invocation
+is its own conversation, so it's unaffected.
+
+### Refusals and fallback
+
+Opus 5.5 and Fable 5.1 run safety classifiers; a decline returns HTTP 200 with
+`stop_reason: "refusal"` and a `stop_details` category. In API code, opt in to
+server-side fallback (`fallbacks: "default"`, beta) — see `skills/claude-api`.
+
+- **Opus 5.5 categories:** biology (new vs Opus 5), cybersecurity, and
+  `reasoning_extraction`. `reasoning_extraction` declines are **not** retried by
+  server-side fallback — don't write prompts that ask the model to reproduce its
+  reasoning in the response; read summarized thinking instead.
+- **Fable 5.1 fallback targets:** Opus 4.8 and Opus 5.
+
+Behavioral deltas that affect agent prompts:
+
+- **Opus 5.5** — default effort `medium` (set it explicitly). In unattended
+  loops it can end a turn with a text-only progress report (`end_turn`) while
+  work is still owed: keep a checklist and allow at most 2–3 automatic
+  continuations. Remove "think carefully before answering" lines — effort is the
+  control. Sharper reading of charts/screenshots; re-test vision workarounds.
+- **Fable 5.1** — more variable parallel tool calling (may issue one call per
+  turn), fewer progress updates, less bold/headers/lists in chat, denser prose,
+  answers from memory more often at `low` effort, and a tendency to rewrite whole
+  files for small edits. The batching and targeted-Edit instructions live in
+  `rules/common/coding-style.md`.
+- Both: eager subagent delegation carries over — in orchestrator prompts state
+  when NOT to spawn.
 
 ## Task → Model
 
@@ -63,15 +91,15 @@ back to Opus 4.8, or server-side `fallbacks` in API code; see `skills/claude-api
 | Debugging system-wide bugs | `opus` | Must hold the whole system in mind |
 | Overnight / long-horizon autonomous runs | `opus` at `xhigh` | Deepest reasoning available; raise effort, not tier |
 | Final adversarial verify on high-stakes output | `opus` at `xhigh`/`max` | Deep judge when a miss is expensive |
-| Unrecoverable-miss gate where `opus@max` already missed | `fable` | The one rung above Opus — pay 2× for the single judging call, not the pipeline |
+| Unrecoverable-miss gate where `opus@max` already missed | `fable` | The one rung above Opus — pay ~2.5× for the single judging call, not the pipeline |
 | Independent cross-family second opinion | **Codex** | Different model family — catches what re-prompting Claude cannot (see below) |
 
-**Default to Sonnet 5.** Escalate to Opus 5 when: the first Sonnet attempt
+**Default to Sonnet 5.** Escalate to Opus 5.5 when: the first Sonnet attempt
 failed, the task spans 5+ files, it's an architectural decision, or it's
 security-critical. Past Opus, the ladder is: raise **effort**
 (`high` → `xhigh` → `max`) first, then **`fable`** for the single final-judge
 call where a miss is unrecoverable, then a **cross-family** opinion from Codex.
-Fable costs 2× Opus, so it buys one judging call, never a whole pipeline —
+Fable costs ~2.5× Opus per token, so it buys one judging call, never a whole pipeline —
 effort-on-Opus remains the default deepening move. Drop to Haiku 4.5 for
 anything deterministic and low-risk.
 
@@ -158,22 +186,26 @@ bodies.
   `sonnet` → `sonnet` → `opus`, not `opus` × 3. Tiering the whole pipeline to its
   hardest stage is the default failure mode; the closed/open box test above is
   applied stage by stage.
-- Opus 5 delegates to subagents more eagerly than 4.8 — in orchestrator prompts,
+- Opus 5.x and Fable delegate to subagents eagerly — in orchestrator prompts,
   state explicitly when NOT to spawn (single-file reads, sequential steps).
 - Effort routing inside a tier is cheaper than jumping tiers: `low` for
-  mechanical workers, default `high`, `xhigh`/`max` for the hardest
-  verify/judge stages.
+  mechanical workers, `high` for open-box judges, `xhigh`/`max` only for the
+  hardest verify/judge stages where a quality gain has been measured (docs:
+  *"Reserve xhigh and max for work where you've measured a quality gain"*).
+  Level names are model-relative — Opus 5.5 `medium` ≈ Opus 5 `high`.
 
 ## Fast Mode
 
-`/fast` (Opus 5, and Opus 4.8 as legacy) keeps Opus reasoning with ~2.5× faster
-output. Prefer it over downgrading to Sonnet when you need Opus-level judgment
-but want lower latency — it does **not** swap in a smaller model. Opus 5 fast
-mode is Claude API only (not Bedrock/Vertex/Foundry).
+`/fast` (Opus 5.5; Opus 5 / 4.8 as legacy) keeps Opus reasoning with faster
+output at premium price (Opus 5.5: $8/$40). Prefer it over downgrading to Sonnet
+when you need Opus-level judgment but want lower latency — it does **not** swap
+in a smaller model. Fast mode is **Claude API only** (not Bedrock, Claude Platform
+on AWS, Google Cloud, or Foundry) — the owner runs on Bedrock, so `/fast` is not
+available in this environment.
 
 ## Cross-Model: Codex
 
-Up-escalation ends at Fable 5; past it the remaining axis is **sideways**: a
+Up-escalation ends at Fable 5.1; past it the remaining axis is **sideways**: a
 different model family. Sideways is also the *right* move — regardless of tier —
 whenever the value is independence rather than depth, because a higher Claude
 still shares Claude's blind spots. Route to the OpenAI Codex CLI via the codex

@@ -134,9 +134,9 @@ Orca 는 자기 스킬을 `~/.agents/skills/<name>` 에 두고 `~/.claude/skills
 사용자명으로 기록돼 6개 플러그인이 전부 `cache-miss` 였다. 하네스 심볼릭 링크 218개가 같은 날
 끊긴 것과 **동일한 원인**이다. 복구 절차는 `docs/plugin.md` 의 트러블슈팅 절.
 
-### Opus 5 에 내장된 제한
+### Opus 5 계열에 내장된 제한
 
-Opus 5 프롬프트 번들에는 "사용자가 요청하지 않으면 Agent 툴·workflow 를 쓰지 말라"가
+Opus 5 계열 프롬프트 번들에는 "사용자가 요청하지 않으면 Agent 툴·workflow 를 쓰지 말라"가
 하드코딩돼 있다(Claude Code 2.1.236 바이너리에서 확인 — 모델이 `opus_5_prompt_bundle` 을
 가질 때 주입되고 원격 플래그로만 교체된다. `settings.json` 으로는 못 끈다). 하네스도 Orca 도
 넣은 것이 아니다. 탈출구는 문구 자체에 있다 — **"unless the user requested it"**. 그래서

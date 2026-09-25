@@ -41,12 +41,12 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 | 별칭 | 현재 매핑 | 성격 | 대표 에이전트 |
 |---|---|---|---|
-| `fable` | **Fable 5** | Opus 위의 Mythos-class 티어(~2× Opus 비용, thinking 상시) — **상시 배정 없음.** `opus`@`xhigh`/`max` 로도 미스가 난 회복 불가 게이트의 최종 판정 1콜에만 per-call 로 쓴다. 세션이 Fable 이면 fork 가 가장 싼 경로 | (frontmatter 배정 0건 — per-call 전용) |
-| `opus` | **Opus 5** | 심층 추론 주력 티어 — 답의 형태가 미정인 일: 설계·미지의 원인 진단·사실 보존 판정·미분류 패턴 발견·보안/적대적 리뷰. 더 필요하면 먼저 effort(`high`→`xhigh`→`max`)를 올린다. refusal·web fetch·Priority Tier 필요 시 Opus 4.8 폴백 | `architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity 감사관, 최종 리뷰어 |
+| `fable` | **Fable 5.1** | Opus 위의 Mythos-class 티어(토큰당 ~2.5× Opus 비용, 캐시 읽기는 Opus 와 비슷, thinking 상시) — **상시 배정 없음.** `opus`@`xhigh`/`max` 로도 미스가 난 회복 불가 게이트의 최종 판정 1콜에만 per-call 로 쓴다. 세션이 Fable 이면 fork 가 가장 싼 경로 | (frontmatter 배정 0건 — per-call 전용) |
+| `opus` | **Opus 5.5** | 심층 추론 주력 티어(기본 effort `medium`) — 답의 형태가 미정인 일: 설계·미지의 원인 진단·사실 보존 판정·미분류 패턴 발견·보안/적대적 리뷰. 더 필요하면 먼저 effort(`high`→`xhigh`→`max`)를 올린다. refusal 시 폴백 규칙은 model-routing.md | `architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity 감사관, 최종 리뷰어 |
 | `sonnet` | **Sonnet 5** | 최고의 코딩 모델 — 기준이 이미 주어진 일: 구현·리팩터·PR 리뷰·rubric 대조 스캔·리포트대로 윤문·원인이 확정된 수리(코딩의 ~90%) | 언어별 리뷰어, `code-*`, `devops`, `tdd-guide`, `refactor-cleaner`, 탐지기, 작성가/윤문가 |
-| `haiku` | **Haiku 4.5** | Sonnet의 ~90% 성능을 ~3× 저렴하게 — 기계적 편집·검색·문서 스캐폴딩 | `doc-updater`, `docs-lookup`, 고빈도 워커 |
+| `haiku` | **Haiku 4.5** | Sonnet의 ~90% 성능을 ~2× 저렴하게 — 기계적 편집·검색·문서 스캐폴딩 | `doc-updater`, `docs-lookup`, 고빈도 워커 |
 
-**티어를 가르는 질문은 "박스가 열려 있는가"입니다.** 추론 깊이는 답의 형태가 미정일 때만 의미가 있습니다. taxonomy·rubric 이 이미 있거나 원인과 해결이 확정된 상태에서 실행만 하는 일은 탐색 공간이 없으므로 Sonnet 5 로 충분합니다. **여기에 opus 를 붙이는 것이 에이전트 함대에서 가장 흔한 낭비였습니다.** 반대로 설계·미지의 원인 진단·의미 보존 판정처럼 답을 스스로 만들어야 하는 일은 Opus 5 를 씁니다. Opus 위 사다리는 **effort 먼저**(`high`→`xhigh`→`max`) → 회복 불가 미스의 최종 판정 1콜만 **`fable`**(Fable 5) → 그다음은 위가 아니라 **옆(Codex, 다른 모델 패밀리)**입니다.
+**티어를 가르는 질문은 "박스가 열려 있는가"입니다.** 추론 깊이는 답의 형태가 미정일 때만 의미가 있습니다. taxonomy·rubric 이 이미 있거나 원인과 해결이 확정된 상태에서 실행만 하는 일은 탐색 공간이 없으므로 Sonnet 5 로 충분합니다. **여기에 opus 를 붙이는 것이 에이전트 함대에서 가장 흔한 낭비였습니다.** 반대로 설계·미지의 원인 진단·의미 보존 판정처럼 답을 스스로 만들어야 하는 일은 Opus 5.5 를 씁니다. Opus 위 사다리는 **effort 먼저**(`high`→`xhigh`→`max`) → 회복 불가 미스의 최종 판정 1콜만 **`fable`**(Fable 5.1) → 그다음은 위가 아니라 **옆(Codex, 다른 모델 패밀리)**입니다.
 
 함정 둘: ① "중요한 파이프라인이니 전부 opus" — 중요도는 추론 깊이가 아닙니다(40패턴 taxonomy 대조는 lookup). ② "수리니까 sonnet" — 원인이 *확정된 뒤에만* 참입니다(원인 찾기는 열린 박스). **파이프라인이 아니라 단계별로 태깅**합니다: detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. 두 축이 충돌하면(닫힌 박스인데 미스 비용이 큼) 평균이 아니라 **틀렸을 때의 최악 비용**이 이깁니다 (머지를 게이팅하는 리뷰어는 대부분 쉬워도 `opus`).
 

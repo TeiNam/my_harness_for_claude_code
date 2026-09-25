@@ -72,12 +72,21 @@ pinning the middle would fight the user's `/effort`.
 | Class | Setting |
 |---|---|
 | `opus`, open box (design, unknown-cause diagnosis, multi-source synthesis) | `effort: high` |
-| `opus`, unrecoverable miss (security, fidelity audit, taxonomy discovery) | `effort: xhigh` |
-| `haiku`, mechanical high-frequency | `effort: low` |
+| `opus`, unrecoverable miss (security, fidelity audit, taxonomy discovery) | `effort: high` (was `xhigh` on Opus 5 — see below) |
+| `haiku`, mechanical high-frequency | `effort: low` (Haiku 4.5 has no effort parameter — harmless, kept for a future Haiku) |
 | `sonnet`, closed box (30 agents) | **unset** — inherits the session |
 
+**Level names are model-relative.** Opus 5.5 defaults to `medium`, and per the
+docs its `medium` matches or beats Opus 5 at `high` while thinking more per turn
+at any given level. So the 2026-09 remap moved the four former `xhigh` agents
+(`security-reviewer`, `tech-fidelity-auditor`, `korean-ai-tell-taxonomist`,
+`taxonomy-gap-analyzer`) to `high`, and kept the open-box `high` agents at `high`
+as the conservative choice — drop them to the default only after measuring.
+Official guidance: *"Reserve xhigh and max for work where you've measured a
+quality gain"* — reach them per call (`/effort`), not in frontmatter.
+
 This is the frontmatter form of the tiering rule in `model-routing.md`: reach for
-effort before reaching for a higher tier. `fable` (Fable 5, the rung above Opus)
+effort before reaching for a higher tier. `fable` (Fable 5.1, the rung above Opus)
 is deliberately absent from this table — it never appears in frontmatter; it's a
 per-call escalation (one-off `model` override, or a fork when the session runs
 Fable) per model-routing.md → Current Lineup. Deliberately still unused: `memory:`,

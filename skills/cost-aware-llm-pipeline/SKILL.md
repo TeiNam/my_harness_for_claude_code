@@ -152,14 +152,20 @@ def process(text: str, config: Config, tracker: CostTracker) -> tuple[Result, Co
     return parse_result(response), tracker
 ```
 
-## Pricing Reference (2026-07)
+## Pricing Reference (2026-09)
 
-| Model | Input ($/1M tokens) | Output ($/1M tokens) | Relative Cost |
-|-------|---------------------|----------------------|---------------|
-| Haiku 4.5 | $1.00 | $5.00 | 1x |
-| Sonnet 5 | $3.00 ($2.00 intro through 2026-08-31) | $15.00 ($10.00 intro) | ~3x |
-| Opus 5 / Opus 4.8 | $5.00 | $25.00 | ~5x |
-| Fable 5 | $10.00 | $50.00 | ~10x |
+| Model | Input ($/1M tokens) | Output ($/1M tokens) | Cache read ($/1M) | Relative Cost |
+|-------|---------------------|----------------------|-------------------|---------------|
+| Haiku 4.5 | $1.00 | $5.00 | $0.10 (0.1×) | 1x |
+| Sonnet 5 | $2.00 | $10.00 | $0.20 (0.1×) | ~2x |
+| Opus 5.5 | $4.00 | $20.00 | $0.20 (0.05×) | ~4x |
+| Fable 5.1 | $10.00 | $50.00 | $0.25 (0.025×) | ~10x |
+| Opus 5 / Opus 4.8 (legacy) | $5.00 | $25.00 | $0.50 (0.1×) | ~5x |
+
+Cache-read multipliers differ per model (0.05× Opus 5.5, 0.025× Fable 5.1, 0.1×
+everyone else), so on cache-heavy agent loops the Fable/Opus gap is mostly the
+output rate. Sonnet 5's $2/$10 is now the standard price (the planned rise to
+$3/$15 was cancelled).
 
 ## Best Practices
 

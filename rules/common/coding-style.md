@@ -78,6 +78,11 @@ Use named constants for meaningful thresholds, delays, and limits.
 
 Split large functions into focused pieces with clear responsibilities.
 
+## Tool Use
+
+- Batch independent reads, searches, and commands into one turn as parallel tool calls instead of one call per turn.
+- For small changes, edit only the affected lines; rewrite a whole file only when most of it changes.
+
 ## Code Quality Checklist
 
 Before marking work complete:
