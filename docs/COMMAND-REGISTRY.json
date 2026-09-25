@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "totalCommands": 38,
+  "totalCommands": 36,
   "commands": [
     {
       "command": "aside",
@@ -100,28 +100,6 @@
       "allAgents": [],
       "skills": [],
       "path": "commands/harness-audit.md"
-    },
-    {
-      "command": "humanize-redo",
-      "description": "2차 윤문 / 부분 재실행 — 가장 최근 윤문 결과를 heavy 경로(진단→윤문→finalize)로 다시 다듬는다 (카테고리·문단·강도 지정 가능)",
-      "type": "general",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [
-        "humanize-korean"
-      ],
-      "path": "commands/humanize-redo.md"
-    },
-    {
-      "command": "humanize",
-      "description": "한글 AI 티 제거 — humanize-korean 실행 (경로는 shim의 route_hint 로 자동 결정, --strict 시 heavy 고정)",
-      "type": "general",
-      "primaryAgents": [],
-      "allAgents": [],
-      "skills": [
-        "humanize-korean"
-      ],
-      "path": "commands/humanize.md"
     },
     {
       "command": "learn",
@@ -387,7 +365,7 @@
   "statistics": {
     "byType": {
       "build": 1,
-      "general": 5,
+      "general": 3,
       "planning": 1,
       "refactoring": 1,
       "review": 5,
@@ -419,10 +397,6 @@
       {
         "skill": "rust-patterns",
         "count": 3
-      },
-      {
-        "skill": "humanize-korean",
-        "count": 2
       },
       {
         "skill": "rust-testing",

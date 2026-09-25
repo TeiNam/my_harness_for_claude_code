@@ -105,9 +105,9 @@ Orca 는 자기 스킬을 `~/.agents/skills/<name>` 에 두고 `~/.claude/skills
 1. **CLAUDE.md 계층 + `rules/`** — 자동. 프로젝트를 가리지 않는 전역 규칙을 서브에이전트까지
    내리려면 `~/.claude/CLAUDE.md` 에 둔다(현재 없음). `rules/` 는 설치가 링크한다.
 2. **`skills:` frontmatter** — 에이전트가 쓸 스킬 본문(description 이 아니라 **전문**)을 preload
-   한다. `agents/` 46종 중 **38종에 적용**(2026-08-30) — 나머지 8종은 lab 메타 에이전트 6종
-   (lab 만 설치했을 때 preload 가 깨진다)과 매칭되는 rubric 스킬이 없는 2종(`tdd-guide`
-   — TDD 는 superpowers 플러그인 담당, `quick-rules-integrator`)이다. 규칙은
+   한다. `agents/` 35종 중 **33종에 적용**(2026-09-25) — 나머지 2종은 매칭되는 rubric 스킬이
+   하네스에 없는 `tdd-guide`(TDD 는 superpowers 플러그인 담당)와 `humanize-web-architect`
+   (humanize 스킬은 im-not-ai 플러그인으로 이관)이다. 규칙은
    `docs/rules-reference/agents.md` → Frontmatter Conventions.
 3. **`SubagentStart` 훅** — `subagent:budget` 이 예산·탐색 규율을 모든 서브에이전트에 주입한다
    (SessionStart 컨텍스트가 상속되지 않기 때문에 존재하는 훅이다). 훅은 늘릴 대상이 아니므로

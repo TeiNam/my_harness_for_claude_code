@@ -79,8 +79,8 @@ pinning the middle would fight the user's `/effort`.
 **Level names are model-relative.** Opus 5.5 defaults to `medium`, and per the
 docs its `medium` matches or beats Opus 5 at `high` while thinking more per turn
 at any given level. So the 2026-09 remap moved the four former `xhigh` agents
-(`security-reviewer`, `tech-fidelity-auditor`, `korean-ai-tell-taxonomist`,
-`taxonomy-gap-analyzer`) to `high`, and kept the open-box `high` agents at `high`
+(`security-reviewer`, `tech-fidelity-auditor`, and `korean-ai-tell-taxonomist` /
+`taxonomy-gap-analyzer` — the latter two moved to the im-not-ai plugin in v0.15.0) to `high`, and kept the open-box `high` agents at `high`
 as the conservative choice — drop them to the default only after measuring.
 Official guidance: *"Reserve xhigh and max for work where you've measured a
 quality gain"* — reach them per call (`/effort`), not in frontmatter.

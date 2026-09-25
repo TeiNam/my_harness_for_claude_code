@@ -127,7 +127,7 @@ is expensive and unrecoverable:
 - Design decisions: what should exist, how it should be structured (`architect`, `planner`, `code-architect`)
 - Diagnosis when the cause is *not* yet known (system-wide debugging, stuck loops)
 - Judging whether meaning/fact survived a transformation — an open-ended
-  equivalence call over arbitrary content (`humanize-finalizer`, `tech-fidelity-auditor`)
+  equivalence call over arbitrary content (`tech-fidelity-auditor`; `humanize-finalizer` in the im-not-ai plugin)
 - Finding what the taxonomy *doesn't* cover yet (`doc-clarity-reviewer`,
   taxonomist/gap-analyzer agents)
 - Security review, adversarial review, ambiguous requirements
