@@ -70,7 +70,8 @@ message = client.messages.create(
         {"role": "user", "content": "Explain async/await in Python"}
     ]
 )
-print(message.content[0].text)
+# Claude 5 models may open with a thinking block — select by type, not position
+print(next(b.text for b in message.content if b.type == "text"))
 ```
 
 ### Streaming
@@ -118,7 +119,9 @@ const message = await client.messages.create({
     { role: "user", content: "Explain async/await in TypeScript" }
   ],
 });
-console.log(message.content[0].text);
+// Claude 5 models may open with a thinking block — select by type, not position
+const text = message.content.find((b) => b.type === "text");
+console.log(text?.type === "text" ? text.text : "");
 ```
 
 ### Streaming
@@ -277,7 +280,8 @@ while True:
 
 # Get results
 for result in client.messages.batches.results(batch.id):
-    print(result.result.message.content[0].text)
+    content = result.result.message.content
+    print(next(b.text for b in content if b.type == "text"))
 ```
 
 ## Claude Agent SDK
@@ -310,6 +314,9 @@ while True:
         tools=tools,
         messages=messages,
     )
+    # Opus 5.5 can end a turn with a text-only progress report while work is
+    # still owed — in unattended loops, check a task checklist before breaking
+    # and cap automatic continuations at 2-3.
     if response.stop_reason == "end_turn":
         break
     # Handle tool calls and continue the loop
@@ -323,7 +330,7 @@ while True:
 |----------|---------|-------------|
 | Prompt caching | Up to 90% on cached tokens (95% on Opus 5.5, 97.5% on Fable 5.1) | Repeated system prompts or context |
 | Batches API | 50% | Non-time-sensitive bulk processing |
-| Haiku instead of Sonnet | ~75% | Simple tasks, classification, extraction |
+| Haiku instead of Sonnet | ~50% (Haiku 4.5 $1/$5 vs Sonnet 5 $2/$10) | Simple tasks, classification, extraction |
 | Shorter max_tokens | Variable | When you know output will be short |
 | Streaming | None (same cost) | Better UX, same price |
 
