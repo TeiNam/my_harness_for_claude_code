@@ -4,6 +4,7 @@ All notable changes, grouped by commit date.
 
 ## 2026-09-25
 
+- refactor: humanize-korean 을 im-not-ai 플러그인으로, archify 를 skills CLI 로 이관 + eli5 등록 (v0.15.0) (#53) (5dea8cc)
 - chore(changelog): 스쿼시 머지 #51 누락분 정정 (#52) (16bf237)
 - fix(claude-api): 예제의 content[0] 위치 가정 제거 + Haiku 절감률·end_turn 주석 정정 (v0.14.1) (#51) (605d82f)
 - chore(changelog): 스쿼시 머지 #49 누락분 정정 (#50) (dfb9cf8)
