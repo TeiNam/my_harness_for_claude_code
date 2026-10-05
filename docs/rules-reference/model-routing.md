@@ -78,8 +78,9 @@ Behavioral deltas that affect agent prompts:
   `rules/common/coding-style.md`.
 - **Sonnet 5.5** — effort levels are recalibrated (don't carry Sonnet 5
   settings). Docs: `medium` for well-specified agentic coding, `high` for harder
-  or longer tasks — which is what the fleet's unset `effort:` inheriting the
-  Opus 5.5 session's `medium` already gives closed-box work. At `low`/`medium` it
+  or longer tasks. The five closed-box coding executors pin `effort: medium`
+  (rationale: `agents.md` → Frontmatter Conventions); other `sonnet` agents
+  inherit the session. At `low`/`medium` it
   may **stop to check in** before a multipart task is done and, at `low`, report
   done without running a check; at every level it **adds unrequested tests/docs**;
   at `xhigh`/`max` it starts its own review rounds, sometimes with reviewer
