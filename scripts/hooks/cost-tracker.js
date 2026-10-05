@@ -29,8 +29,8 @@ const path = require('path');
 const { ensureDir, appendFile, getClaudeDir } = require('../lib/utils');
 const { sanitizeSessionId } = require('../lib/session-bridge');
 
-// Approximate per-1M-token billing rates (USD), 2026-09 lineup
-// (Haiku 4.5 / Sonnet 5 / Opus 5.5 / Fable 5.1, plus the previous generation
+// Approximate per-1M-token billing rates (USD), 2026-10 lineup
+// (Haiku 4.5 / Sonnet 5.5 / Opus 5.5 / Fable 5.1, plus the previous generation
 // for older transcripts — see skills/cost-aware-llm-pipeline Pricing Reference).
 // Cache read multipliers differ per model: 0.1x standard, 0.05x on Opus 5.5,
 // 0.025x on Fable 5.1. Cache write (5m) is 1.25x input everywhere.

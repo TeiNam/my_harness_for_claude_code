@@ -32,6 +32,7 @@ const CASES = [
   ['claude-opus-4-8', RATE_TABLE.opusLegacy],
   ['global.anthropic.claude-fable-5-1', RATE_TABLE.fable],
   ['claude-fable-5', RATE_TABLE.fableLegacy],
+  ['claude-sonnet-5-5', RATE_TABLE.sonnet],
   ['global.anthropic.claude-sonnet-5', RATE_TABLE.sonnet],
   ['global.anthropic.claude-sonnet-4-5-20250929-v1:0', RATE_TABLE.sonnetLegacy],
   ['global.anthropic.claude-haiku-4-5-20251001-v1:0', RATE_TABLE.haiku],

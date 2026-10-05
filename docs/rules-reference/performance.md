@@ -5,12 +5,12 @@
 > Full policy — task tables, agent-class map, orchestration, Codex — lives in
 > [model-routing.md](./model-routing.md). Summary below.
 
-**Haiku 4.5** (~90% of Sonnet capability, ~2x cheaper than Sonnet 5):
+**Haiku 4.5** (~90% of Sonnet capability, ~2x cheaper than Sonnet 5.5):
 - Lightweight agents with frequent invocation
 - Mechanical edits, search, doc scaffolding
 - Worker agents in multi-agent systems
 
-**Sonnet 5** (Best coding model — default for ~90% of coding):
+**Sonnet 5.5** (Best coding model — default for ~90% of coding):
 - Main development work
 - Orchestrating multi-agent workflows
 - Multi-file implementation and refactors
