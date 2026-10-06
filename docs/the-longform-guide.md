@@ -117,9 +117,9 @@ Optimize the tools you use and subagent architecture designed to delegate the ch
 | ------------------------- | ------------- | ------------------------------------------ |
 | Exploration/search        | Haiku 4.5     | Fast, cheap, good enough for finding files |
 | Simple edits              | Haiku 4.5     | Single-file changes, clear instructions    |
-| Multi-file implementation | Sonnet 5      | Best balance for coding                    |
+| Multi-file implementation | Sonnet 5.5      | Best balance for coding                    |
 | Complex architecture      | Opus 5.5      | Deep reasoning needed                      |
-| PR reviews                | Sonnet 5      | Understands context, catches nuance        |
+| PR reviews                | Sonnet 5.5      | Understands context, catches nuance        |
 | Security analysis         | Opus 5.5      | Can't afford to miss vulnerabilities       |
 | Writing docs              | Haiku 4.5     | Structure is simple                        |
 | Debugging complex bugs    | Opus 5.5      | Needs to hold entire system in mind        |
@@ -127,7 +127,7 @@ Optimize the tools you use and subagent architecture designed to delegate the ch
 | Unrecoverable-miss final judge | Fable 5.1 | One rung above Opus (~2.5× per token) — one judging call, never a pipeline |
 | Independent 2nd opinion   | Codex         | Different model family, not a Claude tier   |
 
-Default to Sonnet 5 for 90% of coding tasks. Upgrade to Opus 5.5 when first attempt failed, task spans 5+ files, architectural decisions, or security-critical code. Past Opus, raise effort first (`high` → `xhigh` → `max`), reserve Fable 5.1 for a single unrecoverable-miss judging call, then reach sideways to Codex for a cross-family check. On a safety refusal, fall back per model-routing.md (Fable 5.1 → Opus 4.8 / Opus 5). On Bedrock, pin `ANTHROPIC_DEFAULT_SONNET_MODEL` or `sonnet` resolves to Sonnet 4.5. Full policy: `docs/rules-reference/model-routing.md`.
+Default to Sonnet 5.5 for 90% of coding tasks. Upgrade to Opus 5.5 when first attempt failed, task spans 5+ files, architectural decisions, or security-critical code. Past Opus, raise effort first (`high` → `xhigh` → `max`), reserve Fable 5.1 for a single unrecoverable-miss judging call, then reach sideways to Codex for a cross-family check. On a safety refusal, fall back per model-routing.md (Fable 5.1 → Opus 4.8 / Opus 5). On Bedrock, pin `ANTHROPIC_DEFAULT_SONNET_MODEL` or `sonnet` resolves to Sonnet 4.5. Full policy: `docs/rules-reference/model-routing.md`.
 
 **Pricing Reference:**
 

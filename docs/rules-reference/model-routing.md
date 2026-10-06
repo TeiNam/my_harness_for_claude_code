@@ -4,17 +4,17 @@ Authoritative policy for which Claude model each task and agent runs on. This
 is the single source of truth; `performance.md`, `commands/model-route.md`, and
 the agent frontmatter all defer to it.
 
-## Current Lineup (2026-09, Opus 5.5 / Fable 5.1)
+## Current Lineup (2026-10, Opus 5.5 / Sonnet 5.5 / Fable 5.1)
 
 | Alias | Resolves to | Character |
 |-------|-------------|-----------|
 | `fable` | **Fable 5.1** | Mythos-class tier above Opus (Mythos 5.1 is the same model without dual-use safety measures, Glasswing participants only). $10/$50 per MTok — **~2.5× Opus per token** — but cache reads are $0.25 (0.025×), nearly Opus's $0.20, so in a cache-heavy Claude Code session the premium is mostly the 2.5× on output. Thinking always on, default effort `high`. **Not a default assignment for any agent** — it's the last *up* rung: the final judge on an unrecoverable-miss gate after `opus` at `xhigh`/`max` still missed. When the session itself runs Fable, `fork` is the cheapest Fable access (inherits model, shares prompt cache). Requires Claude Code ≥ v2.1.257. |
 | `opus` | **Opus 5.5** | Workhorse deep-reasoning tier: architecture, ambiguity, adversarial review, hard debugging, long-horizon autonomous runs, high-stakes judging. $4/$20 (cheaper than Opus 5's $5/$25), cache reads $0.20 (0.05×). **Default effort is `medium`** — per the docs, Opus 5.5 at `medium` matches or beats Opus 5 at `high`, and at a given level it thinks more per turn than Opus 5. Thinking cannot be disabled. Escalate *within* the tier via effort (`high` → `xhigh` → `max`) before reaching for `fable`. |
-| `sonnet` | **Sonnet 5** | Best coding model. Default for implementation, refactors, PR review. Handles ~90% of coding. $2/$10 (the launch price is now standard). *Provider-dependent — see below.* |
-| `haiku` | **Haiku 4.5** | ~90% of Sonnet's capability at ~2× cost savings vs Sonnet 5 ($1/$5). Mechanical edits, search, doc scaffolding, high-frequency workers. No `effort` parameter. |
+| `sonnet` | **Sonnet 5.5** | Best coding model. Default for implementation, refactors, PR review. Handles ~90% of coding. $2/$10, cache reads $0.20 (0.1×) — same price as Sonnet 5. API default effort `high`; levels are recalibrated vs Sonnet 5. Released 2026-09-28; requires Claude Code ≥ v2.1.284. *Provider-dependent — see below.* |
+| `haiku` | **Haiku 4.5** | ~90% of Sonnet's capability at ~2× cost savings vs Sonnet 5.5 ($1/$5). Mechanical edits, search, doc scaffolding, high-frequency workers. No `effort` parameter. Retirement "not sooner than 2026-10-15" — watch for its successor. |
 
 > **Use aliases, never version IDs.** Agent frontmatter must say `model: sonnet`,
-> not `model: claude-sonnet-5`. Aliases auto-resolve to the current lineup, so
+> not `model: claude-sonnet-5-5`. Aliases auto-resolve to the current lineup, so
 > the harness follows model upgrades without a mass re-tag. The one place a
 > pinned ID belongs is application code calling the API (see `skills/claude-api`).
 
@@ -24,9 +24,17 @@ The table above is the Anthropic API resolution. On **Amazon Bedrock / Google
 Agent Platform** `opus`→Opus 5.5 and `fable`→Fable 5.1, but `sonnet`→**Sonnet 4.5**
 and `haiku` is unspecified unless you pin them with `ANTHROPIC_DEFAULT_SONNET_MODEL`
 / `ANTHROPIC_DEFAULT_HAIKU_MODEL`. The owner runs on Bedrock: measured 2026-09-25,
-default `sonnet` answered as `claude-sonnet-4-5`; with
-`ANTHROPIC_DEFAULT_SONNET_MODEL=global.anthropic.claude-sonnet-5` it runs Sonnet 5.
-Without the pin every `model: sonnet` agent silently runs the previous generation.
+default `sonnet` answered as `claude-sonnet-4-5`; measured 2026-10-06 with
+`ANTHROPIC_DEFAULT_SONNET_MODEL=claude-sonnet-5-5`, `claude -p --model sonnet`
+reports `modelUsage` key `claude-sonnet-5-5`. Without the pin every
+`model: sonnet` agent silently runs an older generation. Verify after any
+upgrade with `claude -p --model sonnet --output-format json "ok"` → `modelUsage`.
+
+Trade-off of pinning Sonnet 5.5 on Bedrock: its cybersecurity-flagged refusals
+re-run on the `ANTHROPIC_DEFAULT_SONNET_MODEL` target — a pin naming Sonnet 5.5
+itself leaves the refusal standing unless a Sonnet 5 entry is in the provider's
+model list (and an Opus target must also resolve). Security review agents are
+`opus` anyway, so this mostly hits `sonnet` agents reading exploit-adjacent code.
 
 Effort settings (Claude Code):
 
@@ -68,8 +76,20 @@ Behavioral deltas that affect agent prompts:
   answers from memory more often at `low` effort, and a tendency to rewrite whole
   files for small edits. The batching and targeted-Edit instructions live in
   `rules/common/coding-style.md`.
-- Both: eager subagent delegation carries over — in orchestrator prompts state
-  when NOT to spawn.
+- **Sonnet 5.5** — effort levels are recalibrated (don't carry Sonnet 5
+  settings). Docs: `medium` for well-specified agentic coding, `high` for harder
+  or longer tasks. The five closed-box coding executors pin `effort: medium`
+  (rationale: `agents.md` → Frontmatter Conventions); other `sonnet` agents
+  inherit the session. At `low`/`medium` it
+  may **stop to check in** before a multipart task is done and, at `low`, report
+  done without running a check; at every level it **adds unrequested tests/docs**;
+  at `xhigh`/`max` it starts its own review rounds, sometimes with reviewer
+  subagents. The `subagent:budget` brief counters all three (finish the task,
+  no scope additions, leaf). Text between tool calls arrives as `thinking`
+  blocks. Prefers its training knowledge over a search on "what's
+  allowed/charged" questions — don't tell research agents to minimize tool calls.
+- Opus 5.5 / Fable 5.1: eager subagent delegation carries over — in orchestrator
+  prompts state when NOT to spawn.
 
 ## Task → Model
 

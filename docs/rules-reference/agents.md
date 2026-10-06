@@ -66,15 +66,31 @@ rubric, `Skill` covers the rest on demand. The cost is the skill listing in the
 subagent's context — throttle with `skillListingMaxDescChars` /
 `skillListingBudgetFraction` in `settings.json` if it grows.
 
-**`effort:` — pin depth only at the extremes.** It *overrides* session effort, so
-pinning the middle would fight the user's `/effort`.
+**`effort:` — pin only where the depth is known in advance.** It *overrides*
+session effort, so pinning a judgment agent would fight the user's `/effort`.
+The exception is the closed-box coding executor: its depth doesn't depend on
+how hard the *session* is, and the session's `/effort` is tuned for the Opus
+main thread anyway (level names are model-relative).
 
 | Class | Setting |
 |---|---|
 | `opus`, open box (design, unknown-cause diagnosis, multi-source synthesis) | `effort: high` |
 | `opus`, unrecoverable miss (security, fidelity audit, taxonomy discovery) | `effort: high` (was `xhigh` on Opus 5 — see below) |
 | `haiku`, mechanical high-frequency | `effort: low` (Haiku 4.5 has no effort parameter — harmless, kept for a future Haiku) |
-| `sonnet`, closed box (30 agents) | **unset** — inherits the session |
+| `sonnet`, closed-box coding executor — cause/spec already fixed, job is edit → verify (`build-error-resolver`, `rust-build-resolver`, `refactor-cleaner`, `e2e-runner`, `tdd-guide`) | `effort: medium` |
+| `sonnet`, everything else (reviewers, writers, open-ish diagnosis like `pytorch-build-resolver`/`performance-optimizer`, `devops`) | **unset** — inherits the session |
+
+**Why `medium` for the executors (Sonnet 5.5, 2026-10).** Official guidance:
+*"For agentic coding and multistep tool use, start at `medium` for well-specified
+tasks and move to `high` for harder or longer ones."* The neighbours lose:
+`low` *"can skip verifying a change"* — fatal for a build fixer whose output is a
+green build; `high` (the API default) spends thinking on a box with nothing left
+to search; inheriting means an `/effort xhigh` Opus session hands a lint fix to
+Sonnet at `xhigh`, where it *"can start its own rounds of review and
+verification"*. `medium`'s one known weakness — stopping to check in before a
+multipart task is done — is countered by the `subagent:budget` brief ("끝까지
+한다… 실제 검사 후 보고"). If an executor keeps missing on a task, the task
+wasn't closed-box: route it to `opus`, don't raise the pin.
 
 **Level names are model-relative.** Opus 5.5 defaults to `medium`, and per the
 docs its `medium` matches or beats Opus 5 at `high` while thinking more per turn

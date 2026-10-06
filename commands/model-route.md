@@ -18,7 +18,7 @@ shape of the answer is undecided. Criteria already supplied, or cause and fix
 already established → nothing left to search → `sonnet`.
 
 - `haiku` (Haiku 4.5): deterministic, low-risk mechanical changes, search
-- `sonnet` (Sonnet 5): default — implementation, refactors, scanning against a
+- `sonnet` (Sonnet 5.5): default — implementation, refactors, scanning against a
   supplied rubric, rewriting what a detector already flagged, applying a fix
   whose cause is known (~90% of coding)
 - `opus` (Opus 5.5, default effort `medium`): architecture, security, deep/adversarial review, ambiguous
@@ -31,7 +31,7 @@ already established → nothing left to search → `sonnet`.
 Tier **per stage, not per pipeline**: detect → fix → judge is
 `sonnet` → `sonnet` → `opus`, not `opus` × 3.
 
-Default to Sonnet 5; escalate to Opus 5.5 on failed first attempt, 5+ files,
+Default to Sonnet 5.5; escalate to Opus 5.5 on failed first attempt, 5+ files,
 architectural, or security-critical work. Past Opus the ladder is: raise
 **effort** (`high` → `xhigh` → `max`) → `fable` for one unrecoverable-miss
 judging call → a cross-family opinion from Codex. If Opus/Fable refuses
