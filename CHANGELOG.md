@@ -2,8 +2,13 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-10-07
+
+- chore: 모델 라인업을 Sonnet 5.5 로 갱신 (v0.16.0) (#57) (ff9da22)
+
 ## 2026-09-25
 
+- chore(changelog): 스쿼시 머지 #55 누락분 정정 (#56) (9826112)
 - fix(cross-review): 동반변경 분석이 항상 빈 결과를 내던 문제 수정 (v0.15.1) (#55) (18211cc)
 - chore(changelog): 스쿼시 머지 #53 누락분 정정 (#54) (1b7110c)
 - refactor: humanize-korean 을 im-not-ai 플러그인으로, archify 를 skills CLI 로 이관 + eli5 등록 (v0.15.0) (#53) (5dea8cc)
