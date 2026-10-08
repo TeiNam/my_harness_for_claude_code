@@ -27,11 +27,11 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - `skills/` — domain knowledge / workflow definitions
 - `commands/` — slash commands (markdown with `description:` frontmatter)
 - `hooks/` — trigger-based hook configs (JSON + handler scripts)
-- `rules/` — **컨텍스트 예산이지 문서 폴더가 아니다.** 설치된 rule 은 `paths:` frontmatter 가 없으면 모든 프로젝트의 모든 세션에 로드된다. 그래서 `rules/common/` 에는 언제나 참인 불변 제약 4개만 둔다(`korean-language`·`git-workflow`·`security`·`coding-style`, 합계 <12KB). 언어·도메인 폴더(`python/`·`typescript/`·`rust/`·`web/`)는 전부 `paths:` 로 게이팅해 해당 파일을 건드릴 때만 로드된다. 절차·참고 자료(테스트 전략, 리뷰 체크리스트, 모델 라우팅, README 배지 규칙 등)는 `docs/rules-reference/` 로 — 필요할 때 읽는다. 두 규칙은 `tests/scripts/install/workloads.test.js` 가 강제한다.
+- `rules/` — **컨텍스트 예산이지 문서 폴더가 아니다.** 설치된 rule 은 `paths:` frontmatter 가 없으면 모든 프로젝트의 모든 세션에 로드된다. 그래서 `rules/common/` 에는 언제나 참인 불변 제약 4개만 둔다(`korean-language`·`git-workflow`·`security`·`coding-style`, 합계 <12KB). 언어·도메인 폴더(`python/`·`typescript/`·`rust/`·`web/`)는 전부 `paths:` 로 게이팅해 해당 파일을 건드릴 때만 로드된다. 절차·참고 자료(테스트 전략, 리뷰 체크리스트, 모델 라우팅 등)는 `docs/rules-reference/` 로 — 필요할 때 읽는다. 두 규칙은 `tests/scripts/install/workloads.test.js` 가 강제한다. `korean-language` 는 워크로드 선택과 무관하게 **항상 설치**된다(`select-assets.js` 의 `ALWAYS_INSTALLED` — `--no-core`·`--workload=rust` 로 core 를 빼도 따라온다).
 - `mcp-configs/` — MCP 설정(proxy-first). **커밋된 `proxy/config.json`(9개)이 실사용 SSOT** 이고, `--with-mcp` 는 워크로드 전체 기준으로 이 파일을 덮어써 65개까지 늘린 사고 전례가 있다(디스크 9Gi + 프록시 3.0GiB). MCP 만 다시 띄울 때는 `cd mcp-configs/proxy && docker compose --profile terraform up -d`. 카탈로그 구조·사고 상세는 **`mcp-configs/README.md`**.
 - `scripts/` — Node.js utilities for hooks, install/uninstall, audits
 - `tests/` — test suite for `scripts/`
-- `docs/rules-reference/` — 옛 `rules/common/` 중 상시 로드가 필요 없는 9개(`testing`·`patterns`·`performance`·`hooks`·`code-review`·`development-workflow`·`agents`·`model-routing`·`readme-rule`)와 rules 설치 안내 `README.md`. 설치되지 않으므로 컨텍스트를 먹지 않는다. 언어별 rule 의 `> This file extends …` 링크가 여기를 가리킨다.
+- `docs/rules-reference/` — 옛 `rules/common/` 중 상시 로드가 필요 없는 8개(`testing`·`patterns`·`performance`·`hooks`·`code-review`·`development-workflow`·`agents`·`model-routing`)와 rules 설치 안내 `README.md`. 설치되지 않으므로 컨텍스트를 먹지 않는다. 언어별 rule 의 `> This file extends …` 링크가 여기를 가리킨다.
 - `docs/hooks-policy.md` — 훅 판정 기준·은퇴 이력(어떤 훅이 왜 내려갔는지)·프로파일 CSV 분포·머지 동작·루프 제어 표. **훅을 추가·제거하려면 먼저 읽는다.** 프로파일별 훅 수 문장은 `scripts/ci/validate-hooks.js` 가 hooks.json 실측과 대조한다.
 - `docs/orca-dependencies.md` — Orca 와 `~/.claude` 를 공유하는 지점 전체(훅 11개·스킬 5종·역할 분리·점검 명령·Orca 없이 쓸 때).
 - `docs/harness-assets.md` · `docs/install-menu.md` — CLAUDE.md 에서 옮겨온 스킬·에이전트 카탈로그와 설치 메뉴 상세. CLAUDE.md 는 매 세션 100% 로드되므로 "작업할 때만 필요한 목록"은 여기 둔다.
@@ -51,7 +51,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ## High-value Skills for Owner's Workloads
 
-`skills/` 114종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
+`skills/` 115종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
 
 새 스킬을 추가할 때 확인할 것 두 가지: ① 동반 플러그인(`docs/plugin.md`)과 겹치지 않는지 — 겹쳐서 제거된 전례가 있다(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`) ② 기존 스킬의 부분집합이 아닌지(`seo` 가 `seo-geo-aeo` 에 흡수된 전례).
 
@@ -152,9 +152,7 @@ node tests/hooks/hooks.test.js
 
 ## README Conventions
 
-README.md 를 새로 쓰거나 배지를 손볼 때는 프로젝트 파일(`package.json`·`pyproject.toml`·`Dockerfile`·`LICENSE` 등)을 먼저 읽어 **실제 사용 중인 기술만** 배지로 올린다. 후원 배지(Buy Me A Coffee 등)는 규칙으로 넣지 않는다 — 개인 계정 링크가 클라이언트·회사 레포까지 새어 나가기 때문이며, 필요하면 그때 직접 붙인다.
-
-감지 조건 → 배지 매핑 표와 배치 규칙 전문은 `docs/rules-reference/readme-rule.md` 에 있다 — README 작업을 할 때 그 파일을 읽고 따른다.
+README.md 를 새로 쓰거나 고칠 때는 **`readme-rule` 스킬**(`skills/readme-rule/`, `core` 워크로드)을 쓴다. 프로젝트 파일(`package.json`·`pyproject.toml`·`Dockerfile`·`LICENSE` 등)을 먼저 읽어 **실제 사용 중인 기술만** 배지로 올리고, 업데이트할 때는 배지 집합을 다시 계산해 차이만 고친다. 후원 배지(Buy Me A Coffee)는 `git remote` owner 가 `teinam` 인 개인 레포에만 붙인다 — 클라이언트·회사 레포로 개인 링크가 새어 나가지 않게 하기 위해서다.
 
 ## Code Style (Node parts)
 
