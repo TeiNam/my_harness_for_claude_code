@@ -35,6 +35,8 @@ Buy Me A Coffee 배지는 **레포 owner 가 본인 계정(`teinam`)일 때만**
 git remote get-url origin   # github.com/teinam/<repo> 또는 github.com:teinam/<repo> 이면 개인 레포
 ```
 
+owner 비교는 **대소문자를 무시한다** — GitHub 계정명은 대소문자를 구분하지 않고, 실제 remote 는 `TeiNam/...` 으로 찍힌다.
+
 | 판정 | 처리 |
 |------|------|
 | origin owner 가 `teinam` | 기술 배지 줄 아래 빈 줄 1개를 두고 후원 배지를 붙인다 |
