@@ -25,6 +25,8 @@
  *   2. Default: every group enabled
  *   3. After resolving the active group set, an asset is selected when its
  *      classified groups intersect that set.
+ *   4. ALWAYS_INSTALLED assets are selected regardless of the group set
+ *      (--no-core / --workload=rust 로 core 를 빼도 따라온다).
  *
  * CLI:
  *   node scripts/install/select-assets.js [--workload=...] [--skip-workload=...]
@@ -250,6 +252,11 @@ function listAllAssets(root) {
   return [...listAgentAssets(root), ...listCommandAssets(root), ...listSkillAssets(root), ...listRuleAssets(root)];
 }
 
+// 워크로드 선택과 무관하게 항상 설치하는 자산 (repo-relative source).
+// 응답 언어 규칙은 어떤 워크로드 조합에서도 빠지면 안 된다.
+// ponytail: 프로젝트 로컬 설치(CLAUDE_HOME=$PWD/.claude)에도 따라가서 전역과 겹치면 두 번 로드된다(~0.5k tok). 문제가 되면 전역 대상일 때만 넣도록 install.sh 에서 플래그를 넘긴다.
+const ALWAYS_INSTALLED = new Set(['rules/common/korean-language.md']);
+
 function intersect(a, b) {
   const setB = new Set(b);
   return a.some(x => setB.has(x));
@@ -260,7 +267,7 @@ function selectAssets({ root, workload, skipWorkload }) {
   const all = listAllAssets(root);
   return {
     activeGroups,
-    selected: all.filter(a => intersect(a.groups, activeGroups)),
+    selected: all.filter(a => ALWAYS_INSTALLED.has(a.sourceRel) || intersect(a.groups, activeGroups)),
     all
   };
 }
@@ -313,6 +320,7 @@ if (require.main === module) {
 
 module.exports = {
   GROUPS,
+  ALWAYS_INSTALLED,
   parseArgs,
   parseInlineList,
   readWorkloads,

@@ -24,7 +24,7 @@ rules/
 docs/rules-reference/   # NOT installed → costs no context. Read when relevant.
 ├── testing.md · patterns.md · performance.md · hooks.md
 ├── code-review.md · development-workflow.md · agents.md
-├── model-routing.md · readme-rule.md
+├── model-routing.md
 └── README.md (this file)
 ```
 

@@ -210,6 +210,24 @@ function runTests() {
   else failed++;
 
   if (
+    test('selectAssets: korean-language rule 은 core 를 빼도 항상 선택된다', () => {
+      const root = buildFixture();
+      writeFile(path.join(root, 'rules/common/korean-language.md'), 'no frontmatter\n');
+
+      const rustOnly = selectAssets({ root, workload: ['rust'] }).selected.map(a => a.sourceRel);
+      const noCore = selectAssets({ root, skipWorkload: ['core'] }).selected.map(a => a.sourceRel);
+      for (const ids of [rustOnly, noCore]) {
+        assert.ok(ids.includes('rules/common/korean-language.md'));
+        assert.ok(!ids.includes('rules/common/git-workflow.md'), '다른 common rule 은 그대로 core 에 묶인다');
+      }
+
+      fs.rmSync(root, { recursive: true, force: true });
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
     test('selectAssets target paths: skills top-level, others under _harness/', () => {
       const root = buildFixture();
       const all = selectAssets({ root });
