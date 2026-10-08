@@ -2,8 +2,13 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-10-08
+
+- feat: korean-language 상시 설치 + readme-rule 스킬화 (v0.17.0) (#59) (727cbc1)
+
 ## 2026-10-07
 
+- chore(changelog): 스쿼시 머지 #57 누락분 정정 (#58) (a22e8d4)
 - chore: 모델 라인업을 Sonnet 5.5 로 갱신 (v0.16.0) (#57) (ff9da22)
 
 ## 2026-09-25
