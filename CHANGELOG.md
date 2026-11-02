@@ -2,8 +2,13 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-11-02
+
+- feat(skills): Anthropic 스킬 작성 규칙(2026-10) 기준 전체 스킬 점검·보완 (v0.18.0) (#61) (4ce6ba7)
+
 ## 2026-10-08
 
+- chore(changelog): 스쿼시 머지 #59 누락분 정정 (#60) (8c893c1)
 - feat: korean-language 상시 설치 + readme-rule 스킬화 (v0.17.0) (#59) (727cbc1)
 
 ## 2026-10-07
