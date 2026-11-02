@@ -29,9 +29,11 @@ default `sonnet` answered as `claude-sonnet-4-5`; measured 2026-10-06 with
 reports `modelUsage` key `claude-sonnet-5-5`. Without the pin every
 `model: sonnet` agent silently runs an older generation. Verify after any
 upgrade with `claude -p --model sonnet --output-format json "ok"` → `modelUsage`.
-The same applies to `haiku`: measured 2026-11-03, the owner's pin still pointed at
-`global.anthropic.claude-haiku-4-5-20251001-v1:0` while `global.anthropic.claude-haiku-5-5`
-answers on Bedrock — set `ANTHROPIC_DEFAULT_HAIKU_MODEL=global.anthropic.claude-haiku-5-5`.
+The same applies to `haiku`: until 2026-11-03 the owner's pin pointed at
+`global.anthropic.claude-haiku-4-5-20251001-v1:0`. It is now
+`ANTHROPIC_DEFAULT_HAIKU_MODEL=global.anthropic.claude-haiku-5-5`, and
+`claude -p --model haiku --effort medium` reports `modelUsage` key
+`global.anthropic.claude-haiku-5-5` (verified 2026-11-03).
 
 Trade-off of pinning Sonnet 5.5 on Bedrock: its cybersecurity-flagged refusals
 re-run on the `ANTHROPIC_DEFAULT_SONNET_MODEL` target — a pin naming Sonnet 5.5
