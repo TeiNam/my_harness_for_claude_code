@@ -173,6 +173,8 @@ See the [Remotion docs](https://www.remotion.dev/docs) for detailed patterns and
 
 Generate only what you need. Do not generate the whole video.
 
+ElevenLabs and fal.ai bill per request. List the assets you plan to generate with an estimated cost and get the user's approval before the first call.
+
 ### Voiceover with ElevenLabs
 
 ```python

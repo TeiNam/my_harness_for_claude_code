@@ -83,6 +83,8 @@ Apply safe fixes automatically (only fixes marked as auto-fixable):
 npx ecc-agentshield scan --fix
 ```
 
+`--fix` rewrites config files in place. Run the scan without `--fix` first, show the user which findings are auto-fixable, and apply only after they approve. Then run the scan again and report the new grade.
+
 This will:
 - Replace hardcoded secrets with environment variable references
 - Tighten wildcard permissions to scoped alternatives
@@ -110,6 +112,8 @@ Scaffold a new secure `.claude/` configuration from scratch:
 ```bash
 npx ecc-agentshield init
 ```
+
+Run `init` only where `.claude/` has no `settings.json` or `CLAUDE.md` yet. If either exists, ask the user before running it, because the scaffold replaces their configuration.
 
 Creates:
 - `settings.json` with scoped permissions and deny list

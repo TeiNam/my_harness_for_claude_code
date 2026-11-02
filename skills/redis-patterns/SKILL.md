@@ -340,6 +340,8 @@ Set via `redis.conf`: `maxmemory-policy allkeys-lru`
 | Not handling cache miss stampede | Thundering herd on cold start | Use locks or probabilistic early expiry |
 | `FLUSHALL` without thought | Wipes entire instance | Scope deletes by key pattern |
 
+Do not run `FLUSHALL`, `FLUSHDB`, or bulk `DEL`/`UNLINK` against a shared or production instance yourself. Show the scoped command and run it only after the user approves.
+
 ### Cache Miss Stampede Prevention
 
 ```python

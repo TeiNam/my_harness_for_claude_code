@@ -328,6 +328,8 @@ docker compose down -v                # Also remove volumes (DESTRUCTIVE)
 docker system prune                   # Remove unused images/containers
 ```
 
+`down -v` deletes named volumes (database data included) and `system prune` deletes images and stopped containers; neither can be undone. Run them only after the user confirms, and list what will be removed first (`docker volume ls`, `docker system df`).
+
 ### Debugging Network Issues
 
 ```bash

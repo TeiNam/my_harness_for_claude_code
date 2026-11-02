@@ -41,7 +41,7 @@ Analyse the content and produce an infographic brief in plain language. Include:
 - **Core structure**: decide between steps, framework, comparison, stats, or list
 - **Key points**: aim for 3 to 7 short bullets. Preserve every required step, item and qualification; if they do not fit legibly, propose a split in the brief rather than silently dropping content.
 - **Visual suggestions**: arrows, boxes, highlighted numbers, icons, color accents. Be specific about placement and colour.
-- **Footer CTA**: handwritten text reading "Follow [Name] [Tagline] for more helpful content | Repost ♻️"
+- **Footer CTA**: handwritten text reading "Follow [Name] [Tagline] for more helpful content | Repost [recycle emoji U+267B]"
 
 Tell the user:
 

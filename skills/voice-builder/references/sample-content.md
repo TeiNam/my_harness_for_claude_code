@@ -1,5 +1,7 @@
 # Sample Content
 
+> In the original posts `[recycle emoji]` is U+267B and each `✓` bullet is U+2611 (ballot box with check). The repo stores them as text because it bans literal emoji; reproduce the originals when matching this voice.
+
 ## Contents
 
 - Post 1
@@ -50,7 +52,7 @@ It's knowing which layer to reach for.
 I wrote the complete setup guide for all three.
 Free to read (drops Sunday) → https://lnkd.in/e--fakyi
 
-Repost ♻️ to help someone in your network.
+Repost [recycle emoji] to help someone in your network.
 
 ---
 
@@ -75,7 +77,7 @@ Stitch them in order. You have a UGC video.
 The whole thing runs in one chat thread.
 No creators, studios or shipping products.
 
-Repost ♻️ to help someone in your network.
+Repost [recycle emoji] to help someone in your network.
 
 ---
 
@@ -94,7 +96,7 @@ Use this prompt:
 
 "This is my brand identity file. Load it and apply every rule to all content and visuals you create for me. Every visual uses my exact hex colors, typography, and branding. Every piece of writing follows my voice rules and formatting. Confirm you've loaded it."
 
-☑︎ Computer saves this to memory permanently.
+✓ Computer saves this to memory permanently.
 You only do this once.
 
 Step 2: Feed it one piece of long-form content
@@ -112,10 +114,10 @@ Use a prompt like this:
 
 Step 3: Let Computer orchestrate
 It spawns multiple AI models working in parallel.
-☑︎ Opus 4.6 builds carousels and PDFs.
-☑︎ Nano Banana generates branded images.
-☑︎ Sonnet 4.6 writes all the copy simultaneously.
-☑︎ Gemini Flash handles research and transcripts.
+✓ Opus 4.6 builds carousels and PDFs.
+✓ Nano Banana generates branded images.
+✓ Sonnet 4.6 writes all the copy simultaneously.
+✓ Gemini Flash handles research and transcripts.
 
 Perplexity Computer has 400+ app connectors.
 Gmail, Notion, Slack, Google Drive, Salesforce.
@@ -133,6 +135,6 @@ You are creating 1 and letting AI handle the rest.
 $200/month on the Perplexity Max plan.
 If you repurpose weekly, the time savings add up.
 
-Repost ♻️ to help someone in your network.
+Repost [recycle emoji] to help someone in your network.
 
 P.S. Have you tried Perplexity Computer?

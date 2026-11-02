@@ -20,16 +20,15 @@ Use Manim for technical explainers where motion, structure, and clarity matter m
 
 - `manim` CLI for scene rendering
 - `ffmpeg` for post-processing if needed
+- `video-editing` for final assembly or polish
+- `remotion-video-creation` when the final package needs composited UI, captions, or additional motion layers
 
 Setup (이미 설치돼 있으면 건너뛴다.):
 
 ```bash
-brew install py3cairo ffmpeg pango pkg-config   # macOS system libs (Linux: apt install libcairo2-dev libpango1.0-dev ffmpeg)
+brew install py3cairo ffmpeg pango pkg-config   # macOS system libs (Linux: apt install build-essential python3-dev pkg-config libcairo2-dev libpango1.0-dev ffmpeg)
 pip install manim
 ```
-
-- `video-editing` for final assembly or polish
-- `remotion-video-creation` when the final package needs composited UI, captions, or additional motion layers
 
 ## Default Output
 

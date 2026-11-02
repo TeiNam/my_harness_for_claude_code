@@ -237,6 +237,9 @@ Use `InvokeModel` for embeddings — Converse is text-generation only.
 - **Provisioned Throughput** only when you've measured a steady RPS that
   justifies the hourly commit (math: monthly commit / on-demand cost at that
   RPS). Most teams overprovision.
+  Buying it is a commitment billed by the hour: show the RPS evidence, model
+  units, term, and monthly cost, and let the user buy it. Do not call
+  `CreateProvisionedModelThroughput` yourself.
 - **Batch inference** for non-interactive jobs — 50% cheaper than on-demand,
   hours-scale latency.
 - Tag `bedrock-runtime` invocations via the `applicationId` field in

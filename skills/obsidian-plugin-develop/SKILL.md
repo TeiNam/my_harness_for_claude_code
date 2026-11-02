@@ -279,6 +279,8 @@ esbuild.build({
 
 Deployment details: `release-checklist.md`
 
+A GitHub release or directory submission is public and starts automated review. Run every item in `release-checklist.md`, fix failures and re-run the list, then publish (tag push, GitHub release, directory submit) only after the user approves.
+
 ---
 
 ## 9⃣ Practical Tips

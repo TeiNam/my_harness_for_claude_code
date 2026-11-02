@@ -115,6 +115,8 @@ Then a markdown table with these exact columns:
 
 Include a short coverage note naming which feeds or indexed searches were actually used, the date window and any inaccessible sources.
 
+Before sending, recheck every row: each representative link opens and its publish date is inside the 7-day window. Replace or drop failing rows (back to Step 2 for that theme), then recheck.
+
 ## Step 5. Offer the next move
 
 After the table, ask:

@@ -302,6 +302,8 @@ test('wallet connection', async ({ page, context }) => {
 
 ## Financial / Critical Flow Testing
 
+Run money-moving tests only against a staging `BASE_URL` with test funds or a sandbox account. The `NODE_ENV` skip below is a last guard, not the safeguard: confirm the target environment with the user before running these specs.
+
 ```typescript
 test('trade execution', async ({ page }) => {
   // Skip on production — real money

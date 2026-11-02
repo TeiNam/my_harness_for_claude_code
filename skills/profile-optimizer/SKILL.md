@@ -122,6 +122,8 @@ Constraints:
 
 Format: [Core value] + [for target audience]
 
+Count the characters of each option and check the constraints above before showing them. Rewrite any option that fails and check it again.
+
 ```
 Option 1 (Direct): [outcome + audience]
 Option 2 (Pain-focused): [problem + audience]

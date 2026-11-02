@@ -121,3 +121,5 @@ Background decorative elements should have subtle infinite animations:
 - [ ] Korean text has `break-keep-all` and `leading-snug` or `leading-tight`
 - [ ] All visible text is natural Korean — no translated feel
 - [ ] The page reads as "$150k Korean agency build", not "AI-generated template"
+
+If any item fails, fix that part of the page and run the whole checklist again. Output the page only when every item passes.
