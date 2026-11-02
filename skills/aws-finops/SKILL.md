@@ -8,7 +8,8 @@ description: >
   Foundation Framework (Inform / Optimize / Operate). Trigger: cost anomaly,
   Savings Plan, Reserved Instance, rightsizing, cost allocation tag, chargeback,
   showback, unit cost, budget alert, CUR, Cost Explorer, unblended/amortized cost,
-  RI coverage, commitment, "왜 청구서가 늘었지".
+  RI coverage, commitment, "왜 청구서가 늘었지". Use before buying or
+  recommending any Savings Plan, RI, or reserved capacity purchase ("SP 사줘", "구매 진행").
 origin: custom
 workloads: [finops]
 ---
@@ -31,6 +32,10 @@ workloads: [finops]
 
 인프라 구성 자체(IAM·VPC·서비스 선택)는 `aws-cloud`, LLM 토큰 비용은
 `cost-aware-llm-pipeline`. 이 스킬은 **청구서와 커밋먼트** 계층을 다룬다.
+
+## 안전 규칙
+
+Savings Plan·RI 구매는 되돌릴 수 없다. 분석 결과(종류·금액·기간·예상 절감)를 표로 보여주고 사용자가 승인해야 구매한다. Claude 가 구매 API 를 직접 호출하지 않는다. 자세한 기준은 아래 "Optimize" 절.
 
 ## FinOps 3단계 (Inform → Optimize → Operate)
 

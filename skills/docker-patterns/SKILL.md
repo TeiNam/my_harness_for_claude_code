@@ -1,6 +1,6 @@
 ---
 name: docker-patterns
-description: Docker and Docker Compose patterns for local development, container security, networking, volume strategies, and multi-service orchestration.
+description: Docker and Docker Compose patterns for local development, container security, networking, volume strategies, and multi-service orchestration. Use when writing Dockerfiles or compose files, debugging containers, and before any destructive cleanup — wiping or resetting volumes or a container DB (docker compose down -v, volume rm, system prune).
 origin: harness
 workloads: [cloud, devops]
 ---
@@ -16,6 +16,11 @@ Docker and Docker Compose best practices for containerized development.
 - Troubleshooting container networking or volume issues
 - Reviewing Dockerfiles for security and size
 - Migrating from local dev to containerized workflow
+- Wiping or resetting volumes, a container database, or images
+
+## Destructive Cleanup
+
+`docker compose down -v`, `docker volume rm`, and `docker system prune` delete data that cannot be recovered. Before giving or running one: list what will go (`docker volume ls`, `docker compose config --volumes`, `docker system df`), offer a dump of anything worth keeping, say plainly that the deletion cannot be undone, and wait for the user to confirm. Do not hand over a one-line `down -v && up -d`, and do not add `-f`/`--force` to prune.
 
 ## Docker Compose for Local Development
 

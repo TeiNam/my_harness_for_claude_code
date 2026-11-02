@@ -16,6 +16,10 @@ Note: Developer Policies and Submission Requirements moved under `Community dire
 
 ---
 
+## Safety
+
+A GitHub release or community directory submission is public and starts automated review. Run `release-checklist.md` end to end, then tag, release, or submit only after the user approves.
+
 ## Project Structure
 
 ```
