@@ -1,5 +1,19 @@
 # Iterators and Closures
 
+## Contents
+
+- Chain Over Manual Loop
+- Common Adaptors
+- Common Terminals
+- `collect()` — Type-Driven
+- Avoid `.clone()` Just to Iterate
+- Closures
+- `iter()` vs `into_iter()` vs `iter_mut()`
+- Custom Iterators
+- Performance Note
+- When to Drop the Chain
+- Related
+
 Iterator chains are the Rust equivalent of comprehensions. Lazy, composable, often faster than hand-rolled loops thanks to monomorphization.
 
 ## Chain Over Manual Loop

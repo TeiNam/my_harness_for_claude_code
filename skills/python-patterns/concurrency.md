@@ -1,5 +1,17 @@
 # Concurrency
 
+## Contents
+
+- Decision Table
+- Threads (I/O-Bound)
+- Processes (CPU-Bound)
+- asyncio
+- Mixing CPU into asyncio
+- Shared State
+- Cancellation and Timeouts
+- Pitfalls
+- Related
+
 Three primitives, three workloads. Pick by what's blocking, not by what feels modern.
 
 ## Decision Table

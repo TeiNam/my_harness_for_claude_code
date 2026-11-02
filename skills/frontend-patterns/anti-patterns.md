@@ -1,5 +1,26 @@
 # Anti-Patterns
 
+## Contents
+
+- Mutating State
+- `useEffect` for Derived State
+- `useEffect` to Fetch Data
+- Array Index as `key`
+- Unstable References Through `memo`
+- Conditional Hooks
+- `forwardRef` Without Naming
+- `dangerouslySetInnerHTML` for User Input
+- Inline Functions That Trigger Effects
+- God Components
+- Provider Pyramid
+- `any` in Props
+- Suppressing `exhaustive-deps`
+- DOM Manipulation Outside `useEffect`
+- Returning Different Hook Counts
+- Forgetting Loading and Error States
+- `useState` for Form Fields That Don't Need It
+- Related
+
 Things ESLint flags, things React DevTools warns about, and things experienced reviewers reject on sight.
 
 ## Mutating State

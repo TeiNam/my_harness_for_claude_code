@@ -65,6 +65,8 @@ This layer is about structure, not final creative taste.
 
 FFmpeg handles the boring but critical work: splitting, trimming, concatenating, and preprocessing.
 
+Setup (이미 설치돼 있으면 건너뛴다.): `brew install ffmpeg` (macOS) · `apt install ffmpeg` (Linux).
+
 ### Extract segment by timestamp
 
 ```bash

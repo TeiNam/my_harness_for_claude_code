@@ -1,5 +1,14 @@
 # Newsletter Archetype Defaults
 
+## Contents
+
+- 1. Data tutorial
+- 2. Contrarian essay
+- 3. Case study teardown
+- 4. Curated digest
+- 5. Personal essay
+- 6. Interview or profile
+
 Loaded when a user runs newsletter-voice without sample newsletters. Each archetype provides default structure. Always tune every field using voice.md and about-me.md before writing newsletter-voice.md. Flag inside the output that archetype defaults were used and recommend revisiting after 5 published issues.
 
 ---

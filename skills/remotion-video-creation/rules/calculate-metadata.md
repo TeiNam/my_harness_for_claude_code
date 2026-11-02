@@ -7,6 +7,15 @@ metadata:
 
 # Using calculateMetadata
 
+## Contents
+
+- Setting duration based on a video
+- Matching dimensions of a video
+- Setting duration based on multiple videos
+- Setting a default outName
+- Transforming props
+- Return value
+
 Use `calculateMetadata` on a `<Composition>` to dynamically set duration, dimensions, and transform props before rendering.
 
 ```tsx

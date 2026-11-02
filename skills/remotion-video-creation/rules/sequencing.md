@@ -5,6 +5,13 @@ metadata:
   tags: sequence, series, timing, delay, trim
 ---
 
+## Contents
+
+- Premounting
+- Series
+- Frame References Inside Sequences
+- Nested Sequences
+
 Use `<Sequence>` to delay when an element appears in the timeline.
 
 ```tsx

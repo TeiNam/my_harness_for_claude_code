@@ -1,5 +1,21 @@
 # [WIP] Android Development Skill for Claude Code
 
+## Contents
+
+- Overview
+- Installation
+- Usage
+- Project Structure
+- Core Principles
+- Reference Documentation
+- Architecture Overview
+- Features
+- Standard Patterns
+- Technology Stack
+- License
+- Acknowledgments
+- Resources
+
 A production-ready skill that enables Claude Code to build Android applications following Google's official architecture guidance and best practices from the [NowInAndroid](https://github.com/android/nowinandroid) reference app.
 
 ## Overview

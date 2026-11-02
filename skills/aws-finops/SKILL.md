@@ -97,6 +97,7 @@ workloads: [finops]
 - 1년 no-upfront 부터 시작해 안정성이 확인되면 3년·upfront 로. 처음부터 3년 all-upfront 는
   예측이 확실할 때만.
 - 구매 전 **Purchase analysis**(what-if)로 시뮬레이션. 커밋은 되돌리기 어렵다.
+- **구매는 사람이 한다.** 분석 결과(종류·금액·기간·예상 절감·유틸리제이션 가정)를 표로 제시하고 승인을 받는다. Claude 가 SP·RI 구매 API(`savingsplans create-savings-plan`, `purchase-reserved-*`)를 직접 호출하지 않는다.
 
 ### 흔한 낭비 (체크리스트)
 - [ ] 미연결 EBS 볼륨·오래된 스냅샷·미사용 Elastic IP

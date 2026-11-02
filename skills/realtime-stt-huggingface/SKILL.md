@@ -69,6 +69,14 @@ Two principles that keep this sane:
 
 ## Faster-Whisper Setup
 
+Install only what the chosen stack uses (이미 설치돼 있으면 건너뛴다.):
+
+```bash
+pip install faster-whisper            # this section
+pip install torch                     # Silero VAD (loaded via torch.hub below)
+pip install pyannote.audio            # diarization (needs an HF token + accepted model terms)
+```
+
 ```python
 from faster_whisper import WhisperModel
 

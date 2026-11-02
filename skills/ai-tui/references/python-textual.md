@@ -1,5 +1,13 @@
 # Python — textual / rich
 
+## Contents
+
+- 패키지
+- 경로 A: rich (정적 배너)
+- 경로 B: textual (풀 TUI — pi-tui 구조 이식)
+- 비동기 LLM 스트리밍
+- 이 언어 고유 함정
+
 두 경로가 있다. 필요에 맞춰 하나만 고른다.
 
 - **정적 배너 + 스크롤 로그만** → `rich` (println 방식, TUI 아님, 가장 가벼움)

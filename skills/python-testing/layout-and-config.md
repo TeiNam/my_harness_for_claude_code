@@ -1,5 +1,17 @@
 # Project Layout and Configuration
 
+## Contents
+
+- Directory Layout
+- `__init__.py` in tests
+- `pyproject.toml`
+- Coverage Config
+- conftest.py — Where Things Go
+- Useful Plugins
+- CI Configuration
+- `--strict-markers` Workflow
+- Related
+
 ## Directory Layout
 
 ```

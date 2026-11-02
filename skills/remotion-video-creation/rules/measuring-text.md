@@ -7,6 +7,14 @@ metadata:
 
 # Measuring text in Remotion
 
+## Contents
+
+- Prerequisites
+- Measuring text dimensions
+- Fitting text to a width
+- Checking text overflow
+- Best practices
+
 ## Prerequisites
 
 Install @remotion/layout-utils if it is not already installed:

@@ -1,5 +1,18 @@
 # Unsafe Code
 
+## Contents
+
+- When Unsafe Is Acceptable
+- When Unsafe Is NOT Acceptable
+- Required: `// SAFETY` Comments
+- FFI Boundary
+- Common Unsafe Operations
+- Avoid `transmute`
+- Test with Miri
+- Wrapping Unsafe in Safe APIs
+- When in Doubt
+- Related
+
 `unsafe` lets you bypass the borrow checker, dereference raw pointers, and call FFI. **You promise the compiler what it can't check.** Every `unsafe` block must be justifiable in writing.
 
 ## When Unsafe Is Acceptable

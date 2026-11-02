@@ -1,5 +1,19 @@
 # Markers and Test Selection
 
+## Contents
+
+- Custom Markers
+- Register Markers (Required with `--strict-markers`)
+- Selection Expressions
+- Built-in Markers
+- Skip / Skipif
+- Xfail
+- Marker on a Class
+- Marker on a Module
+- Combining with Parametrize
+- Selection by Keyword (`-k`)
+- Related
+
 Markers tag tests so you can run subsets. Slow vs fast, integration vs unit, platform-specific, expected-fail.
 
 ## Custom Markers

@@ -105,11 +105,26 @@ origin: auto-extracted
 - [x] MEMORY.md: no overlap (or: overlap found → details)
 - [x] Existing skill append: new file appropriate (or: should append to [X])
 - [x] Reusability: confirmed (or: one-off → Drop)
+- [x] Layout: Skill Layout Rules 1–7 checked (or: rule N → fix)
 
 ### Verdict: Save / Improve then Save / Absorb into [X] / Drop
 
 **Rationale:** (1-2 sentences explaining the verdict)
 ```
+
+## Skill Layout Rules
+
+Anthropic 스킬 작성 가이드(2026-10 개정) 기준. 저장 전에 하나씩 확인한다.
+
+1. **목차** — 100줄 넘는 참고 파일은 맨 위에 `## Contents` 를 둔다. Claude 는 긴 파일의 앞부분만 보고 더 읽을지 정한다.
+2. **자유도** — 단계마다 "다르게 하면 무슨 일이 생기나"를 묻는다. 정답이 여러 개면 목표만 주고, 돈·삭제·배포·마이그레이션처럼 되돌리기 어려우면 스크립트나 "이 명령 그대로"로 잠근다.
+3. **모델** — 최신 모델에는 과한 MUST·대문자 강조가 역효과다. 공유할 스킬이면 검증한 모델(haiku/sonnet/opus)을 본문 첫머리에 적는다.
+4. **1단계 참조** — SKILL.md ≤ 500줄, 세부는 파일로 빼되 모든 파일을 SKILL.md 에서 직접 링크한다(파일→파일 사슬 금지).
+5. **체크리스트** — 순서가 중요한 긴 작업에만 단계 목록을 주고, 검증 실패 시 "N단계로 돌아가라"를 넣는다.
+6. **검사-수정 루프** — 산출물을 기준(스타일 가이드·rubric·테스트)과 대조→수정→재검사하고, 통과해야 끝낸다.
+7. **설치 명시** — 스크립트·라이브러리를 쓰면 정확한 설치 명령을 실행 직전에 적는다("이미 있으면 건너뛴다").
+
+하네스 `skills/` 에 둘 때는 `node scripts/ci/validate-skills.js` 가 1·4번을 검사하고, `--fix-toc` 가 목차를 넣는다.
 
 ## Design Rationale
 

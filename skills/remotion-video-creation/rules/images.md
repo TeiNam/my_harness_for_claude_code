@@ -7,6 +7,16 @@ metadata:
 
 # Using images in Remotion
 
+## Contents
+
+- The `<Img>` component
+- Important restrictions
+- Local images with staticFile()
+- Remote images
+- Sizing and positioning
+- Dynamic image paths
+- Getting image dimensions
+
 ## The `<Img>` component
 
 Always use the `<Img>` component from `remotion` to display images:

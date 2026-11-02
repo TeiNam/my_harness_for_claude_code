@@ -1,5 +1,19 @@
 # IT 기술 문서 품질 분류 체계 v1.1 (Tech Doc Quality Taxonomy)
 
+## Contents
+
+- 대분류 개요
+- A. 번역투 (Translation-ese) — 제거
+- B. 모호성·정확성 (Vagueness & Precision) — 제거/보강
+- C. 코드·예제 결함 (Code & Example) — 보강
+- D. AI 관용구·hype (Signature & Hype) — 제거
+- E. 구조·탐색성 (Structure) — 보강 (제거 아님)
+- F. 용어·표기 일관성 (Terminology) — 통일
+- G. 독자·전제 (Audience & Prerequisites) — 보강
+- H. 능동·간결·시제 (Active & Concise) — 제거
+- I. 문서 위생 (Doc Hygiene) — 교정
+- 버전 노트
+
 IT 기술 문서(개발 가이드·API 레퍼런스·README·테크 블로그·기술 리포트·RFC/설계서·업무 문서)에서 반복적으로 관찰되는 품질 결함을 9개 대분류 × 서브 패턴으로 정리한다. `doc-quality-detector`·`tech-doc-writer`·`doc-clarity-reviewer`가 공유하는 단일 진실 원천(SSOT). slim 룰북 `quick-rules.md`의 ID와 1:1 매칭.
 
 각 패턴: (1) 정의, (2) 시그니처 예문(KR/EN), (3) 심각도(S1 결정적 / S2 강함 / S3 약함), (4) 처방.

@@ -1,5 +1,19 @@
 # Error Handling
 
+## Contents
+
+- `?` Propagation
+- Library Errors with `thiserror`
+- Application Errors with `anyhow`
+- Don't Mix Strategies in One Crate
+- Option Combinators Over Nested Match
+- `?` Across Result Types — Use `From`
+- `let else` for Early Exit
+- `#[must_use]` on Important Returns
+- `panic!` — Strictly for Bugs
+- Don't Stringify Errors
+- Related
+
 `Result<T, E>` and `?` everywhere; `unwrap()` nowhere. Use `thiserror` for libraries (typed enums, stable API), `anyhow` for applications (one error type, easy context).
 
 ## `?` Propagation

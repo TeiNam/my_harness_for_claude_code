@@ -352,6 +352,13 @@ Guidelines:
 
 ## Script Template
 
+Setup (이미 설치돼 있으면 건너뛴다.):
+
+```bash
+npm i -D playwright
+npx playwright install chromium
+```
+
 ```javascript
 'use strict';
 const { chromium } = require('playwright');

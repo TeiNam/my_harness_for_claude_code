@@ -1,5 +1,20 @@
 # Animations
 
+## Contents
+
+- Tooling
+- List Enter / Exit
+- Modals
+- Layout Animation
+- Variants — Reusable Animation States
+- Gestures
+- CSS Transitions Are Often Enough
+- Respect `prefers-reduced-motion`
+- View Transitions API
+- Don't Animate Layout-Triggering Properties
+- Performance
+- Related
+
 Animation should reinforce hierarchy and state changes — not decorate. Cheap, purposeful, accessible.
 
 ## Tooling

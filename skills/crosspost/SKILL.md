@@ -74,6 +74,7 @@ Do not build a second ad hoc voice checklist here unless the user explicitly wan
 ## Posting Order
 
 Default:
+0. show the final copy for every platform and wait for explicit approval — publishing is not reversible, so never post through `x-api` or any other tool without it
 1. post the strongest native version first
 2. adapt for the secondary platforms
 3. stagger timing only if the user wants sequencing help

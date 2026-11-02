@@ -1,5 +1,21 @@
 # Running Tests — CLI Cheat Sheet
 
+## Contents
+
+- Selection
+- Failure Triage
+- Output
+- Coverage
+- Debugging
+- Parallel
+- Performance / Profiling
+- Environment
+- Random / Repro
+- Continuous
+- CI Combinations
+- My Defaults (in `pyproject.toml`)
+- Related
+
 ## Selection
 
 ```bash

@@ -1,5 +1,14 @@
 # HTML Presentation Template
 
+## Contents
+
+- Base HTML Structure
+- Required JavaScript Features
+- Inline Editing Implementation (Opt-In Only)
+- Image Pipeline (Skip If No Images)
+- Code Quality
+- File Structure
+
 Reference architecture for generating slide presentations. Every presentation follows this structure.
 
 ## Base HTML Structure

@@ -7,6 +7,12 @@ metadata:
 
 # Using fonts in Remotion
 
+## Contents
+
+- Google Fonts with @remotion/google-fonts
+- Local fonts with @remotion/fonts
+- Using in components
+
 ## Google Fonts with @remotion/google-fonts
 
 The recommended way to use Google Fonts. It's type-safe and automatically blocks rendering until the font is ready.

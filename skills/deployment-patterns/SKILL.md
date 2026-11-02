@@ -368,6 +368,8 @@ export const env = envSchema.parse(process.env);
 
 ### Instant Rollback
 
+Run the command for your platform exactly as written — do not add flags or chain other commands. Confirm the target revision with the user first.
+
 ```bash
 # Docker/Kubernetes: point to previous image
 kubectl rollout undo deployment/app
@@ -378,8 +380,10 @@ vercel rollback
 # Railway: redeploy previous commit
 railway up --commit <previous-sha>
 
-# Database: rollback migration (if reversible)
-npx prisma migrate resolve --rolled-back <migration-name>
+# Database: Prisma has no automatic down migration. Apply a reviewed
+# down script first, then mark the migration as rolled back:
+npx prisma db execute --file ./rollback/<migration-name>.sql
+npx prisma migrate resolve --rolled-back <migration-name>  # 기록만 바꾼다 — 스키마는 위 스크립트가 되돌린다
 ```
 
 ### Rollback Checklist

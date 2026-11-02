@@ -1,3 +1,13 @@
+## Contents
+
+- OpenAPI Documentation & Swagger
+  - 1. 그룹은 라우터가 정한다 (tags·prefix 는 한 곳)
+  - 2. 태그 메타데이터로 Swagger 를 읽히게 만든다
+  - 3. 라우트마다 채우는 5개
+  - 4. JWT 인증: 라우터 레벨 + `Security()`
+  - 5. 잊지 않는 방법은 테스트다
+  - 체크리스트
+
 ## OpenAPI Documentation & Swagger
 
 Swagger 는 "나중에 정리하는 것"이 아니다. 태그·요약·그룹은 라우터를 만들 때 함께 박고,

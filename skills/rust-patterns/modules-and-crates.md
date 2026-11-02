@@ -1,5 +1,18 @@
 # Modules and Crate Structure
 
+## Contents
+
+- Single Crate Layout
+- Visibility Defaults
+- Re-exports for a Stable API
+- Workspaces
+- `Cargo.toml` Hygiene
+- Public API Stability
+- Conditional Compilation
+- Tests at the Right Level
+- Documentation
+- Related
+
 Organize by domain, expose minimally, plan the public API as carefully as the data model.
 
 ## Single Crate Layout

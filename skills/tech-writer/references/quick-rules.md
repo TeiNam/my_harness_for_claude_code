@@ -1,5 +1,20 @@
 # Quick Rules — Tech Writer Fast Path 전용 (v1.1)
 
+## Contents
+
+- A. 번역투 (Translation-ese) — 제거
+- B. 모호성·정확성 (Vagueness & Precision) — 기술 문서 핵심
+- C. 코드·예제 결함 (Code & Example) — 기술 문서 전용
+- D. AI 관용구·hype (Signature & Hype) — 제거
+- E. 구조·탐색성 (Structure) — 기술 문서는 **보강** (제거 아님)
+- F. 용어·표기 일관성 (Terminology) — 기술 문서 전용
+- G. 독자·전제 (Audience & Prerequisites) — 기술 문서 전용
+- H. 능동·간결·시제 (Active & Concise)
+- I. 문서 위생 (Doc Hygiene) — 기술 문서 전용
+- 작성 모드 vs 윤문 모드
+- 자체검증 체크리스트 (작성·윤문 후 자가 점검)
+- 등급 기준 (정본 SSOT — 전 문서가 이 정의를 참조)
+
 `tech-writer-monolith` 에이전트가 한 콜에서 **작성·윤문·자체검증**을 끝내기 위해 사용하는 슬림 룰북. IT 기술 문서(개발 가이드·API 문서·테크 블로그·기술 리포트·RFC/설계서·업무 문서)에 최적화했다.
 
 **적용 언어:** 한국어 · 영어 양방향. 패턴마다 `[KR]`·`[EN]`·`[KR/EN]` 태그로 적용 범위 표시.

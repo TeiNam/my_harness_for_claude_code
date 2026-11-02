@@ -84,8 +84,4 @@ Patterns for building maintainable, performant, accessible React applications. T
 - `frontend-design-direction` / `liquid-glass-design` / `make-interfaces-feel-better` — visual direction
 - `a11y-architect` (agent) — accessibility deep review
 
-## See Also
-
-- `_archive/SKILL-original.md` — original harness single-file version (642 lines).
-
 **Remember**: ship behavior, not abstraction. Compose first, abstract only when the same pattern appears three times. Server state and client state belong in different tools.

@@ -87,6 +87,14 @@ attention.
 
 ## Markdown Slide Workflows
 
+Setup — install only the tool you picked (이미 설치돼 있으면 건너뛴다.):
+
+```bash
+npm init slidev@latest            # Slidev (new deck)
+npm i -D @marp-team/marp-cli      # Marp → npx marp deck.md --pdf
+pip install python-pptx           # python-pptx
+```
+
 ### Slidev (Vue + Markdown, dev-friendly)
 
 ```markdown

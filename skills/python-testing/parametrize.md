@@ -1,5 +1,17 @@
 # Parametrize
 
+## Contents
+
+- Basic Parametrize
+- Multiple Parameters
+- Custom Test IDs
+- Stacked Parametrize → Cartesian Product
+- Parametrize Over Fixtures (Indirect)
+- Generating Cases
+- Filtering Parametrize Rows
+- When Not to Parametrize
+- Related
+
 Run the same test against many inputs. The single most leverage-y feature in pytest.
 
 ## Basic Parametrize

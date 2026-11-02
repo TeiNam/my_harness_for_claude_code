@@ -1,5 +1,19 @@
 # Common Patterns
 
+## Contents
+
+- FastAPI (sync `TestClient`)
+- FastAPI (async `httpx.AsyncClient`)
+- Database — Transaction Rollback per Test
+- Database — In-Memory SQLite
+- Real Postgres via testcontainers
+- Class-Based Tests
+- Service + Repository (Hexagonal)
+- CLI Tests with Click / Typer
+- Error Path Testing
+- Snapshot Testing
+- Related
+
 Templates for the situations that come up in every project: API tests, DB tests, class-based tests, and the transaction-rollback pattern.
 
 ## FastAPI (sync `TestClient`)

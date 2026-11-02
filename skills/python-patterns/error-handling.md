@@ -1,5 +1,15 @@
 # Error Handling
 
+## Contents
+
+- Catch the Narrowest Exception
+- Chain Exceptions with `raise ... from`
+- Custom Exception Hierarchy
+- Don't Use Exceptions for Control Flow
+- `else` and `finally`
+- Logging Exceptions
+- Related
+
 Catch specific exceptions, chain causes, and design a small custom hierarchy at the package boundary.
 
 ## Catch the Narrowest Exception

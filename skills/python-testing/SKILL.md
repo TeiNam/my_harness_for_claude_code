@@ -79,8 +79,4 @@ Pytest-first testing for Python ≥ 3.9. TDD workflow, fixtures, parametrize, mo
 - `fastapi-backend-best-practices/testing/` — API integration tests, factory pattern
 - `superpowers:test-driven-development` — universal red/green/refactor cadence
 
-## See Also
-
-- `_archive/SKILL-original.md` — original harness single-file version (816 lines).
-
 **Remember**: tests are production code. They prove behavior, document intent, and catch regressions. Brittle tests that break on every refactor are worse than no tests.

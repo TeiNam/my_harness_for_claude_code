@@ -1,5 +1,22 @@
 # Tooling
 
+## Contents
+
+- Daily Commands
+- clippy — The Default Lint Pass
+- cargo audit — Security CVEs
+- cargo expand — See Macro Output
+- cargo machete — Find Unused Deps
+- cargo nextest — Faster Test Runner
+- cargo bench — Benchmarks
+- Profiling
+- miri — Undefined Behavior Detection
+- rust-toolchain.toml — Pin the Toolchain
+- CI Recipe
+- `Cargo.lock` — Commit or Not
+- Editor / IDE
+- Related
+
 `cargo` covers most of the workflow; a handful of tools fill in the gaps.
 
 ## Daily Commands
