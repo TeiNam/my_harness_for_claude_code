@@ -1,6 +1,6 @@
 ---
 name: redis-patterns
-description: Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production applications. Use when designing Redis usage or before flushing or bulk-deleting keys.
+description: Use before running FLUSHALL, FLUSHDB, or bulk DEL/UNLINK on any Redis instance, and when designing Redis usage. Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production applications.
 origin: harness
 workloads: [python-backend, nodejs]
 ---

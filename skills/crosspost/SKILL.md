@@ -1,6 +1,6 @@
 ---
 name: crosspost
-description: Multi-platform content distribution across X, LinkedIn, Threads, and Bluesky. Adapts content per platform using content-engine patterns. Never posts identical content cross-platform. Use when the user wants to distribute content across social platforms.
+description: Use when the user wants to post or distribute content to X, LinkedIn, Threads, or Bluesky — drafts per platform and waits for approval before anything is published. Adapts content per platform using content-engine patterns and never posts identical copy cross-platform.
 origin: harness
 workloads: [writing]
 ---

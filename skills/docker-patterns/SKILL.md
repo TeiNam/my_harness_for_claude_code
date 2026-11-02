@@ -1,6 +1,6 @@
 ---
 name: docker-patterns
-description: Docker and Docker Compose patterns for local development, container security, networking, volume strategies, and multi-service orchestration. Use when writing Dockerfiles or compose files, debugging containers, and before any destructive cleanup — wiping or resetting volumes or a container DB (docker compose down -v, volume rm, system prune).
+description: Use before giving or running docker compose down -v, docker volume rm, or docker system prune (they delete data), and when writing Dockerfiles or compose files or debugging containers. Docker and Docker Compose patterns for local development, container security, networking, volumes, and multi-service orchestration.
 origin: harness
 workloads: [cloud, devops]
 ---

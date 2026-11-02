@@ -1,6 +1,6 @@
 ---
 name: e2e-testing
-description: Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies. Use when writing or running Playwright tests, especially against shared or payment flows.
+description: Use when writing or running Playwright tests, especially against shared environments or payment flows. Playwright E2E testing patterns, Page Object Model, configuration, CI/CD integration, artifact management, and flaky test strategies.
 origin: harness
 workloads: [core]
 ---

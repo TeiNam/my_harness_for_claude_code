@@ -1,6 +1,6 @@
 ---
 name: deployment-patterns
-description: Deployment workflows, CI/CD pipeline patterns, Docker containerization, health checks, rollback strategies, and production readiness checklists for web applications. Use when deploying, rolling back a release or a database migration, or preparing for production.
+description: Use when deploying, or rolling back a release or a database migration, and when preparing for production. Deployment workflows, CI/CD pipeline patterns, Docker containerization, health checks, rollback strategies, and production readiness checklists for web applications.
 origin: harness
 workloads: [cloud, devops]
 ---
