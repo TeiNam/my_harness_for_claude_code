@@ -4,6 +4,8 @@ All notable changes, grouped by commit date.
 
 ## 2026-11-02
 
+- fix(skills): 스킬 점검 남은 위험 조치 — 규칙 2·5·6 전수 정독, 설치 명령 검증, CI 추가 (v0.19.0) (#63) (f1ed587)
+- chore(changelog): 스쿼시 머지 #61 누락분 정정 (#62) (7ccca8d)
 - feat(skills): Anthropic 스킬 작성 규칙(2026-10) 기준 전체 스킬 점검·보완 (v0.18.0) (#61) (4ce6ba7)
 
 ## 2026-10-08
