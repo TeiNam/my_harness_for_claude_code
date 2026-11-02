@@ -1,15 +1,15 @@
 ---
 name: aws-finops
 description: >
-  AWS cost management and FinOps practice — Cost Explorer, Budgets, Cost Anomaly
+  Use before buying or recommending any Savings Plan, RI, or reserved capacity
+  ("SP 사줘", "구매 진행"), and for AWS cost questions. AWS cost management and FinOps practice — Cost Explorer, Budgets, Cost Anomaly
   Detection, CUR/data exports, cost allocation tags, Cost Categories, Savings
   Plans vs Reserved Instances, Compute Optimizer / Cost Optimization Hub,
   rightsizing, unit economics, showback/chargeback. Grounded in the FinOps
   Foundation Framework (Inform / Optimize / Operate). Trigger: cost anomaly,
   Savings Plan, Reserved Instance, rightsizing, cost allocation tag, chargeback,
   showback, unit cost, budget alert, CUR, Cost Explorer, unblended/amortized cost,
-  RI coverage, commitment, "왜 청구서가 늘었지". Use before buying or
-  recommending any Savings Plan, RI, or reserved capacity purchase ("SP 사줘", "구매 진행").
+  RI coverage, commitment, "왜 청구서가 늘었지".
 origin: custom
 workloads: [finops]
 ---

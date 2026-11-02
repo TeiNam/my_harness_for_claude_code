@@ -43,7 +43,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ### Model Routing (per-agent model tiers)
 
-`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5.5(기본 effort `medium`), `sonnet`→Sonnet 5.5, `haiku`→Haiku 4.5, 그리고 `fable`→Fable 5.1(Opus 위 Mythos-class, 토큰당 ~2.5× Opus 비용). **별칭 해석은 프로바이더마다 다르다** — Bedrock 에서는 `ANTHROPIC_DEFAULT_SONNET_MODEL` 을 핀하지 않으면 `sonnet` 이 Sonnet 4.5 로 풀리고, 최상위 `effortLevel` 은 Opus 5.5 에 적용되지 않는다(`modelSettings`·`/effort` 사용). 상세·모델 전환 방향 규칙은 `docs/rules-reference/model-routing.md`. **`fable` 은 frontmatter 상시 배정 금지** — 사다리는 effort 먼저(`high`→`xhigh`→`max`), 그래도 미스가 나는 회복 불가 게이트의 최종 판정 1콜만 per-call `fable`(세션이 Fable 이면 fork 가 가장 싼 경로), 그다음은 위가 아니라 **옆(Codex)** 으로 간다.
+`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5.5(기본 effort `medium`), `sonnet`→Sonnet 5.5, `haiku`→Haiku 5.5, 그리고 `fable`→Fable 5.1(Opus 위 Mythos-class, 토큰당 ~2.5× Opus 비용). **별칭 해석은 프로바이더마다 다르다** — Bedrock 에서는 `ANTHROPIC_DEFAULT_SONNET_MODEL`·`ANTHROPIC_DEFAULT_HAIKU_MODEL` 을 핀하지 않으면 `sonnet`·`haiku` 가 4.5 로 풀리고(Haiku 5.5 = `global.anthropic.claude-haiku-5-5`), 최상위 `effortLevel` 은 Opus 5.5 에 적용되지 않는다(`modelSettings`·`/effort` 사용). 상세·모델 전환 방향 규칙은 `docs/rules-reference/model-routing.md`. **`fable` 은 frontmatter 상시 배정 금지** — 사다리는 effort 먼저(`high`→`xhigh`→`max`), 그래도 미스가 나는 회복 불가 게이트의 최종 판정 1콜만 per-call `fable`(세션이 Fable 이면 fork 가 가장 싼 경로), 그다음은 위가 아니라 **옆(Codex)** 으로 간다.
 
 티어 판단 기준은 **"박스가 열려 있는가"** 하나다. 답의 형태가 이미 정해졌으면(rubric·taxonomy 가 주어짐, 원인·해결이 확정됨, 출력 형식이 고정됨) 탐색 공간이 없으므로 **`sonnet`**. 답의 형태가 미정이거나(원인 미상 진단, 설계, 의미 보존 판정, taxonomy 가 못 덮은 것 발견) 미스 비용이 회복 불가면 **`opus`**. 기계적 고빈도는 **`haiku`**. **파이프라인이 아니라 단계별로 태깅한다** — detect→fix→judge 는 `sonnet`→`sonnet`→`opus` 이고 opus×3 이 아니다. 두 축이 충돌하면 최악 비용이 이긴다.
 
@@ -53,7 +53,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 `skills/` 114종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
 
-새 스킬을 추가할 때 확인할 것 세 가지: ① 동반 플러그인(`docs/plugin.md`)과 겹치지 않는지 — 겹쳐서 제거된 전례가 있다(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`) ② 기존 스킬의 부분집합이 아닌지(`seo` 가 `seo-geo-aeo` 에 흡수된 전례). ③ 레이아웃 — 100줄 넘는 참고 파일엔 목차, SKILL.md ≤500줄, 모든 파일은 SKILL.md 에서 직접 링크(1단계). `node scripts/ci/validate-skills.js` 가 경고하고 `--fix-toc` 가 목차를 넣는다. 나머지 규칙(자유도·체크리스트·검사 루프·설치 명시)은 `/learn` 의 Skill Layout Rules. 행동이 바뀌는지는 `npm run eval:skills`(유료, `evals/skills/` 케이스를 스킬 있음/없음 두 군으로 실행, 리포트는 로컬 전용)로 모델별로 잰다 — 2026-11 실측에서 Haiku 4.5 실패는 전부 스킬 미호출이었다.
+새 스킬을 추가할 때 확인할 것 세 가지: ① 동반 플러그인(`docs/plugin.md`)과 겹치지 않는지 — 겹쳐서 제거된 전례가 있다(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`) ② 기존 스킬의 부분집합이 아닌지(`seo` 가 `seo-geo-aeo` 에 흡수된 전례). ③ 레이아웃 — 100줄 넘는 참고 파일엔 목차, SKILL.md ≤500줄, 모든 파일은 SKILL.md 에서 직접 링크(1단계). `node scripts/ci/validate-skills.js` 가 경고하고 `--fix-toc` 가 목차를 넣는다. 나머지 규칙(자유도·체크리스트·검사 루프·설치 명시)은 `/learn` 의 Skill Layout Rules. 행동이 바뀌는지는 `npm run eval:skills`(유료, `evals/skills/` 케이스를 스킬 있음/없음 두 군으로 실행, 리포트는 로컬 전용)로 모델별로 잰다 — 2026-11 실측에서 Haiku 4.5·5.5 의 실패는 전부 스킬 미호출이었고, Haiku 5.5 는 기본 판단은 강하지만 스킬을 스스로 잘 부르지 않아 위험 작업 스킬은 description 맨 앞에 트리거를 둔다.
 
 ## Workload-based Install (2-tier 메뉴)
 

@@ -11,7 +11,7 @@ the agent frontmatter all defer to it.
 | `fable` | **Fable 5.1** | Mythos-class tier above Opus (Mythos 5.1 is the same model without dual-use safety measures, Glasswing participants only). $10/$50 per MTok — **~2.5× Opus per token** — but cache reads are $0.25 (0.025×), nearly Opus's $0.20, so in a cache-heavy Claude Code session the premium is mostly the 2.5× on output. Thinking always on, default effort `high`. **Not a default assignment for any agent** — it's the last *up* rung: the final judge on an unrecoverable-miss gate after `opus` at `xhigh`/`max` still missed. When the session itself runs Fable, `fork` is the cheapest Fable access (inherits model, shares prompt cache). Requires Claude Code ≥ v2.1.257. |
 | `opus` | **Opus 5.5** | Workhorse deep-reasoning tier: architecture, ambiguity, adversarial review, hard debugging, long-horizon autonomous runs, high-stakes judging. $4/$20 (cheaper than Opus 5's $5/$25), cache reads $0.20 (0.05×). **Default effort is `medium`** — per the docs, Opus 5.5 at `medium` matches or beats Opus 5 at `high`, and at a given level it thinks more per turn than Opus 5. Thinking cannot be disabled. Escalate *within* the tier via effort (`high` → `xhigh` → `max`) before reaching for `fable`. |
 | `sonnet` | **Sonnet 5.5** | Best coding model. Default for implementation, refactors, PR review. Handles ~90% of coding. $2/$10, cache reads $0.20 (0.1×) — same price as Sonnet 5. API default effort `high`; levels are recalibrated vs Sonnet 5. Released 2026-09-28; requires Claude Code ≥ v2.1.284. *Provider-dependent — see below.* |
-| `haiku` | **Haiku 4.5** | ~90% of Sonnet's capability at ~2× cost savings vs Sonnet 5.5 ($1/$5). Mechanical edits, search, doc scaffolding, high-frequency workers. No `effort` parameter. Retirement "not sooner than 2026-10-15" — watch for its successor. |
+| `haiku` | **Haiku 5.5** (pin required on Bedrock) | Mechanical edits, search, doc scaffolding, high-frequency workers. Successor to Haiku 4.5 (retirement "not sooner than 2026-10-15"). Price and `effort` support not yet verified here. Measured 2026-11-03 with the skill evals: strong baseline judgment, but it rarely invokes skills on its own — put the trigger first in descriptions of skills that guard destructive or billing actions. |
 
 > **Use aliases, never version IDs.** Agent frontmatter must say `model: sonnet`,
 > not `model: claude-sonnet-5-5`. Aliases auto-resolve to the current lineup, so
@@ -29,6 +29,9 @@ default `sonnet` answered as `claude-sonnet-4-5`; measured 2026-10-06 with
 reports `modelUsage` key `claude-sonnet-5-5`. Without the pin every
 `model: sonnet` agent silently runs an older generation. Verify after any
 upgrade with `claude -p --model sonnet --output-format json "ok"` → `modelUsage`.
+The same applies to `haiku`: measured 2026-11-03, the owner's pin still pointed at
+`global.anthropic.claude-haiku-4-5-20251001-v1:0` while `global.anthropic.claude-haiku-5-5`
+answers on Bedrock — set `ANTHROPIC_DEFAULT_HAIKU_MODEL=global.anthropic.claude-haiku-5-5`.
 
 Trade-off of pinning Sonnet 5.5 on Bedrock: its cybersecurity-flagged refusals
 re-run on the `ANTHROPIC_DEFAULT_SONNET_MODEL` target — a pin naming Sonnet 5.5
@@ -120,7 +123,7 @@ security-critical. Past Opus, the ladder is: raise **effort**
 (`high` → `xhigh` → `max`) first, then **`fable`** for the single final-judge
 call where a miss is unrecoverable, then a **cross-family** opinion from Codex.
 Fable costs ~2.5× Opus per token, so it buys one judging call, never a whole pipeline —
-effort-on-Opus remains the default deepening move. Drop to Haiku 4.5 for
+effort-on-Opus remains the default deepening move. Drop to Haiku 5.5 for
 anything deterministic and low-risk.
 
 ## Agent Class → Model

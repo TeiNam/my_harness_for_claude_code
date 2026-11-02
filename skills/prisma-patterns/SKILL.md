@@ -1,6 +1,6 @@
 ---
 name: prisma-patterns
-description: Prisma ORM patterns for TypeScript backends — schema design, query optimization, transactions, pagination, and critical traps like updateMany returning count not records, $transaction timeouts, migrate dev resetting the DB, @updatedAt skipped on bulk writes, and serverless connection exhaustion. Use when writing Prisma code or running prisma migrate.
+description: Use when writing Prisma code or running prisma migrate — especially if migrate dev asks to reset the database. Prisma ORM patterns for TypeScript backends: schema design, query optimization, transactions, pagination, and traps like updateMany returning a count, $transaction timeouts, @updatedAt skipped on bulk writes, and serverless connection exhaustion.
 origin: harness
 workloads: [nodejs]
 ---
