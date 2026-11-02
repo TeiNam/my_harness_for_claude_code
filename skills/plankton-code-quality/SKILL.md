@@ -116,7 +116,7 @@ To use Plankton hooks in your own project:
 
 | Concern | harness | Plankton |
 |---------|-----|----------|
-| Code quality enforcement | PostToolUse hooks (Prettier, tsc) | PostToolUse hooks (20+ linters + subprocess fixes) |
+| Code quality enforcement | No core Edit hooks; opt-in `post:quality-gate` and `post:edit:accumulator` (batch format + typecheck at Stop) via `merge-hooks.js --optional`, or `/quality-gate` on demand | PostToolUse hooks (20+ linters + subprocess fixes) |
 | Security scanning | AgentShield, security-reviewer agent | Bandit (Python), Semgrep (TypeScript) |
 | Config protection | — | PreToolUse blocks + Stop hook detection |
 | Package manager | Detection + setup | Enforcement (blocks legacy PMs) |
@@ -133,9 +133,9 @@ To use Plankton hooks in your own project:
 ### Avoiding Hook Conflicts
 
 If running both harness and Plankton hooks:
-- the harness's Prettier hook and Plankton's biome formatter may conflict on JS/TS files
-- Resolution: disable the harness's Prettier PostToolUse hook when using Plankton (Plankton's biome is more comprehensive)
-- Both can coexist on different file types (harness handles what Plankton doesn't cover)
+- the harness core has no Edit/Write hooks, so there is nothing to disable by default
+- if you merged the optional hooks (`node scripts/install/merge-hooks.js --optional`), `post:quality-gate` and `post:edit:accumulator` format the same JS/TS files Plankton's biome does — rerun `merge-hooks.js` without `--optional` to remove them, or keep `/quality-gate` as a manual check
+- Plankton then owns write-time formatting; the harness keeps commands, skills, and the core Bash guard
 
 ## Configuration Reference
 

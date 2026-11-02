@@ -231,6 +231,8 @@ Fill every section from the actual samples. No generic filler. If a pattern is n
 
 Separate explicit user prohibitions from patterns merely absent in this small sample. Label the latter provisional, with sample counts; absence alone does not establish a permanent ban. Starter samples describe a borrowed style, never the user’s experiences or established voice.
 
+Before Step 6, check every line of voice.md against the samples. Each pattern should be visible in at least two samples; remove or mark as provisional any line that is not, then check the word limits (about-me.md under 300, voice.md under 500) again.
+
 ## Step 6. Confirm and hand off
 
 Tell the user:

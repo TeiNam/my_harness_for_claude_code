@@ -208,6 +208,7 @@ Generate or update a project-specific CLAUDE.md based on detected conventions. I
 3. **Respect existing CLAUDE.md** — if one already exists, enhance it rather than replacing it. Call out what's new vs existing.
 4. **Stay concise** — the onboarding guide should be scannable in 2 minutes. Details belong in the code, not the guide.
 5. **Flag unknowns** — if a convention can't be confidently detected, say so rather than guessing. "Could not determine test runner" is better than a wrong answer.
+6. **Check the commands before writing** — every command in Common Tasks and the CLAUDE.md must exist in the manifest or Makefile (`package.json` scripts, `pyproject.toml`, `Makefile` targets). Fix or mark unverified any that do not, then re-check the list before writing the files.
 
 ## Anti-Patterns to Avoid
 

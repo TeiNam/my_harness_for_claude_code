@@ -206,6 +206,8 @@ Before sending the deck:
 - [ ] Exported PDF still readable (in case projector dies)
 - [ ] Practiced once at full speed to confirm timing
 
+Fix every unchecked item and go through the list again. Send the deck only when every item is checked.
+
 ## Common Pitfalls
 
 - **Topic titles** ("Architecture") instead of assertion titles

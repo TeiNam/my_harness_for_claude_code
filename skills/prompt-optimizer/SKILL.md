@@ -33,7 +33,6 @@ and output a complete optimized prompt the user can paste and run.
 - User pastes a draft prompt and asks for feedback or enhancement
 - User says "I don't know how to prompt for this"
 - User says "how should I use the harness for..."
-- User explicitly invokes `/prompt-optimize`
 
 ### Do Not Use When
 
@@ -104,9 +103,9 @@ from the prompt description alone and mark the estimate as uncertain.
 |-------|-----------|---------------|
 | TRIVIAL | Single file, < 50 lines | Direct execution |
 | LOW | Single component or module | Single command or skill |
-| MEDIUM | Multiple components, same domain | Command chain + /verify |
+| MEDIUM | Multiple components, same domain | Command chain + /quality-gate |
 | HIGH | Cross-domain, 5+ files | /plan first, then phased execution |
-| EPIC | Multi-session, multi-PR, architectural shift | Use blueprint skill for multi-session plan |
+| EPIC | Multi-session, multi-PR, architectural shift | /plan-prd → /plan per phase; parallel worktrees via Orca (`orca-cli`) |
 
 ### Phase 3: harness Component Matching
 
@@ -116,31 +115,33 @@ Map intent + scope + tech stack (from Phase 0) to specific harness components.
 
 | Intent | Commands | Skills | Agents |
 |--------|----------|--------|--------|
-| New Feature | /plan, /tdd, /code-review, /verify | superpowers:test-driven-development, superpowers:verification-before-completion | planner, tdd-guide, code-reviewer |
-| Bug Fix | /tdd, /build-fix, /verify | superpowers:test-driven-development | tdd-guide, build-error-resolver |
-| Refactor | /refactor-clean, /code-review, /verify | superpowers:verification-before-completion | refactor-cleaner, code-reviewer |
-| Research | /plan | search-first, iterative-retrieval | — |
-| Testing | /tdd, /e2e, /test-coverage | superpowers:test-driven-development, e2e-testing | tdd-guide, e2e-runner |
-| Review | /code-review | security-review | code-reviewer, security-reviewer |
-| Documentation | /update-docs, /update-codemaps | — | doc-updater |
-| Infrastructure | /plan, /verify | docker-patterns, deployment-patterns | architect |
+| New Feature | /plan, /feature-dev, /code-review, /quality-gate | superpowers:test-driven-development, superpowers:verification-before-completion | planner, tdd-guide, code-reviewer |
+| Bug Fix | /build-fix, /quality-gate | superpowers:systematic-debugging, superpowers:test-driven-development | tdd-guide, build-error-resolver |
+| Refactor | /refactor-clean, /code-review, /quality-gate | superpowers:verification-before-completion | refactor-cleaner, code-reviewer |
+| Research | /plan | search-first, iterative-retrieval, deep-research | deep-researcher |
+| Testing | /test-coverage | superpowers:test-driven-development, e2e-testing | tdd-guide, e2e-runner |
+| Review | /code-review, /cross-review | security-review | code-reviewer, security-reviewer |
+| Documentation | /update-docs, /update-codemaps | tech-writer, readme-rule | doc-updater |
+| Infrastructure | /plan, /quality-gate | docker-patterns, deployment-patterns, aws-cloud | devops, architect |
 | Design (MEDIUM-HIGH) | /plan | — | planner, architect |
-| Design (EPIC) | — | blueprint (invoke as skill) | planner, architect |
+| Design (EPIC) | /plan-prd, /plan | architecture-decision-records | planner, architect |
 
 #### By Tech Stack
 
-| Tech Stack | Skills to Add | Agent |
+| Tech Stack | Skills to Add | Agent / Command |
 |------------|--------------|-------|
-| Python / Django | django-patterns, django-tdd, django-security, django-verification, python-patterns, python-testing | python-reviewer |
-| Go | golang-patterns, golang-testing | go-reviewer, go-build-resolver |
-| Spring Boot / Java | springboot-patterns, springboot-tdd, springboot-security, springboot-verification, java-coding-standards, jpa-patterns | java-reviewer |
-| Quarkus / Java | quarkus-patterns, quarkus-tdd, quarkus-security, quarkus-verification, java-coding-standards, jpa-patterns | java-reviewer |
-| Kotlin / Android | kotlin-coroutines-flows, compose-multiplatform-patterns, android-clean-architecture | kotlin-reviewer |
-| TypeScript / React | frontend-patterns, backend-patterns, coding-standards | code-reviewer |
-| Swift / iOS | swiftui-patterns, swift-concurrency-6-2, swift-actor-persistence, swift-protocol-di-testing | code-reviewer |
-| Perl | perl-patterns, perl-testing, perl-security | code-reviewer |
-| C++ | cpp-coding-standards, cpp-testing | code-reviewer |
+| Python / FastAPI | python-patterns, python-testing, fastapi-patterns, fastapi-backend-best-practices | python-reviewer, fastapi-reviewer (/python-review, /fastapi-review) |
+| Python data | python-data-analysis, duckdb-patterns, analysis-methodology | python-reviewer |
+| Rust | rust-patterns, rust-testing | rust-reviewer, rust-build-resolver (/rust-review, /rust-build, /rust-test) |
+| TypeScript / React / Vite | frontend-patterns, vite-patterns, coding-standards | typescript-reviewer |
+| Obsidian plugin | obsidian-plugin-develop, frontend-patterns | typescript-reviewer |
+| Node.js backend | backend-patterns, api-design, coding-standards | typescript-reviewer |
+| RDBMS / MongoDB / DynamoDB | easy-rdbms plugin skills (rdbms-modeling, postgres-guideline, mysql-guideline), mongodb-guideline, dynamodb-guideline | easy-rdbms:rdbms-reviewer |
+| AWS / Bedrock | aws-cloud, aws-bedrock, aws-finops | devops |
+| Android | android-development (claude-android-skill) | code-reviewer |
 | Other / Unlisted | coding-standards (universal) | code-reviewer |
+
+The harness has no Go, Java, Kotlin, Swift, Perl, or C++ skills. For those stacks, recommend `coding-standards` plus `code-reviewer`; do not name skills that are not installed.
 
 ### Phase 4: Missing Context Detection
 
@@ -171,7 +172,7 @@ Determine where this prompt sits in the development lifecycle:
 Research → Plan → Implement (TDD) → Review → Verify → Commit
 ```
 
-For MEDIUM+ tasks, always start with /plan. For EPIC tasks, use blueprint skill.
+For MEDIUM+ tasks, always start with /plan. For EPIC tasks, start with /plan-prd.
 
 **Model recommendation** (include in output):
 
@@ -180,13 +181,13 @@ For MEDIUM+ tasks, always start with /plan. For EPIC tasks, use blueprint skill.
 | TRIVIAL-LOW | Sonnet 5.5 | Fast, cost-efficient for simple tasks |
 | MEDIUM | Sonnet 5.5 | Best coding model for standard work |
 | HIGH | Sonnet 5.5 (main) + Opus 5.5 (planning) | Opus for architecture, Sonnet for implementation |
-| EPIC | Opus 5.5 (blueprint) + Sonnet 5.5 (execution) | Deep reasoning for multi-session planning |
+| EPIC | Opus 5.5 (planning) + Sonnet 5.5 (execution) | Deep reasoning for multi-session planning |
 
 **Multi-prompt splitting** (for HIGH/EPIC scope):
 
 For tasks that exceed a single session, split into sequential prompts:
 - Prompt 1: Research + Plan (use search-first skill, then /plan)
-- Prompt 2-N: Implement one phase per prompt (each ends with /verify)
+- Prompt 2-N: Implement one phase per prompt (each ends with /quality-gate)
 - Final Prompt: Integration test + /code-review across all phases
 - Use /save-session and /resume-session to preserve context between sessions
 
@@ -230,8 +231,7 @@ The prompt must be self-contained and ready to copy-paste. Include:
 - Verification steps
 - Scope boundaries (what NOT to do)
 
-For items that reference blueprint, write: "Use the blueprint skill to..."
-(not `/blueprint`, since blueprint is a skill, not a command).
+Only name commands, skills, and agents that exist in this harness (see the tables above). If unsure, check `~/.claude/commands/_harness/`, `~/.claude/skills/`, and `~/.claude/agents/_harness/` before recommending one.
 
 ### Section 4: Optimized Prompt — Quick Version
 
@@ -239,14 +239,14 @@ A compact version for experienced harness users. Vary by intent type:
 
 | Intent | Quick Pattern |
 |--------|--------------|
-| New Feature | `/plan [feature]. /tdd to implement. /code-review. /verify.` |
-| Bug Fix | `/tdd — write failing test for [bug]. Fix to green. /verify.` |
-| Refactor | `/refactor-clean [scope]. /code-review. /verify.` |
+| New Feature | `/plan [feature]. Implement test-first (superpowers:test-driven-development). /code-review. /quality-gate.` |
+| Bug Fix | `Write a failing test for [bug] (superpowers:systematic-debugging). Fix to green. /quality-gate.` |
+| Refactor | `/refactor-clean [scope]. /code-review. /quality-gate.` |
 | Research | `Use search-first skill for [topic]. /plan based on findings.` |
-| Testing | `/tdd [module]. /e2e for critical flows. /test-coverage.` |
+| Testing | `/test-coverage [module]. Use the e2e-runner agent for critical flows.` |
 | Review | `/code-review. Then use security-reviewer agent.` |
 | Docs | `/update-docs. /update-codemaps.` |
-| EPIC | `Use blueprint skill for "[objective]". Execute phases with /verify gates.` |
+| EPIC | `/plan-prd "[objective]", then /plan per phase. Gate each phase with /quality-gate.` |
 
 ### Section 5: Enhancement Rationale
 
@@ -291,10 +291,10 @@ A compact version for experienced harness users. Vary by intent type:
 
 工作流：
 1. /plan 先规划组件结构和认证流程，参考现有页面的模式
-2. /tdd 测试先行：编写登录表单的单元测试和认证流程的集成测试
+2. 测试先行（superpowers:test-driven-development）：编写登录表单的单元测试和认证流程的集成测试
 3. 实现登录页面和认证逻辑
 4. /code-review 审查实现
-5. /verify 验证所有测试通过且页面正常渲染
+5. /quality-gate 验证所有测试通过且页面正常渲染
 
 安全要求：
 - 密码不明文传输
@@ -320,13 +320,13 @@ A compact version for experienced harness users. Vary by intent type:
 Add a REST API endpoint for user profile updates with validation
 ```
 
-**Phase 0 detects:** `go.mod` with Go 1.22, Chi router
+**Phase 0 detects:** `pyproject.toml` with Python 3.13, FastAPI
 
 **Optimized Prompt (Full):**
 ```
 Add a REST API endpoint for user profile updates (PATCH /api/users/:id).
 
-Tech stack: Go 1.22 + Chi router (detected from project)
+Tech stack: Python 3.13 + FastAPI (detected from project)
 
 Requirements:
 - PATCH /api/users/:id — partial update of user profile
@@ -338,11 +338,11 @@ Requirements:
 - Follow existing API patterns in the codebase
 
 Workflow:
-1. /plan the endpoint structure, middleware chain, and validation logic
-2. /tdd — write table-driven tests for success, validation failure, auth failure, not-found
-3. Implement following existing handler patterns
-4. /go-review
-5. /verify — run full test suite, confirm no regressions
+1. /plan the endpoint structure, dependencies, and Pydantic validation
+2. Write pytest cases first (superpowers:test-driven-development) for success, validation failure, auth failure, not-found
+3. Implement following existing router patterns
+4. /fastapi-review
+5. /quality-gate — run the full test suite, confirm no regressions
 
 Do not:
 - Modify existing endpoints
@@ -359,27 +359,27 @@ Migrate our monolith to microservices
 
 **Optimized Prompt (Full):**
 ```
-Use the blueprint skill to plan: "Migrate monolith to microservices architecture"
+Run /plan-prd, then /plan, for: "Migrate monolith to microservices architecture"
 
-Before executing, answer these questions in the blueprint:
+Before executing, answer these questions in the PRD:
 1. Which domain boundaries exist in the current monolith?
 2. Which service should be extracted first (lowest coupling)?
 3. Communication pattern: REST APIs, gRPC, or event-driven (Kafka/RabbitMQ)?
 4. Database strategy: shared DB initially or database-per-service from start?
 5. Deployment target: Kubernetes, Docker Compose, or serverless?
 
-The blueprint should produce phases like:
+The plan should produce phases like:
 - Phase 1: Identify service boundaries and create domain map
 - Phase 2: Set up infrastructure (API gateway, service mesh, CI/CD per service)
 - Phase 3: Extract first service (strangler fig pattern)
 - Phase 4: Verify with integration tests, then extract next service
 - Phase N: Decommission monolith
 
-Each phase = 1 PR, with /verify gates between phases.
+Each phase = 1 PR, with /quality-gate between phases.
 Use /save-session between phases. Use /resume-session to continue.
-Use git worktrees for parallel service extraction when dependencies allow.
+Use Orca worktrees (`orca-cli`) for parallel service extraction when dependencies allow.
 
-Recommended: Opus 5.5 for blueprint planning, Sonnet 5.5 for phase execution.
+Recommended: Opus 5.5 for planning, Sonnet 5.5 for phase execution.
 ```
 
 ---
@@ -389,5 +389,5 @@ Recommended: Opus 5.5 for blueprint planning, Sonnet 5.5 for phase execution.
 | Component | When to Reference |
 |-----------|------------------|
 | `search-first` | Research phase in optimized prompts |
-| `blueprint` | EPIC-scope optimized prompts (invoke as skill, not command) |
+| `/plan-prd` + `/plan` | EPIC-scope optimized prompts |
 | `cost-aware-llm-pipeline` | Token optimization recommendations |

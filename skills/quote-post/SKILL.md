@@ -48,6 +48,8 @@ Every quote must:
 - Work as a standalone line without context
 - Punch hard in the first 3 words
 
+Before showing the options, count the words in each quote and check for em dashes and invented attribution. Rewrite any quote that fails and check it again.
+
 Output format:
 
 ```

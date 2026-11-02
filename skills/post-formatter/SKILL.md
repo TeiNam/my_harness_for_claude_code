@@ -90,6 +90,8 @@ Framework maps:
 
 ## Step 4. Output
 
+Before output, count nonblank lines and characters per line in the final copy. Rewrite any line that breaks a Step 2 or Step 3 limit and recount; output only when every limit passes.
+
 Output the finished post inside a code block. Keep any next-step question outside the paste-ready copy.
 
 ## Step 5. Offer the next move

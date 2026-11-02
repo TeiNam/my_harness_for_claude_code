@@ -125,6 +125,8 @@ Before delivering:
 - no duplicated copy across platforms unless requested
 - any CTA is earned and user-approved
 
+If a draft fails any item, rewrite that draft and run the gate again; deliver only when every draft passes.
+
 ## Related Skills
 
 - `brand-voice` for source-derived voice profiles

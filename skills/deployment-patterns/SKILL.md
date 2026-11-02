@@ -381,7 +381,10 @@ vercel rollback
 railway up --commit <previous-sha>
 
 # Database: Prisma has no automatic down migration. Apply a reviewed
-# down script first, then mark the migration as rolled back:
+# down script first, then mark the migration as rolled back (Prisma 6–7, the
+# project-local CLI; Prisma 6 also needs --schema prisma/schema.prisma,
+# Prisma 7 reads the datasource from prisma.config.ts; the Prisma 8 CLI has
+# neither command — check `npx prisma --version` first):
 npx prisma db execute --file ./rollback/<migration-name>.sql
 npx prisma migrate resolve --rolled-back <migration-name>  # 기록만 바꾼다 — 스키마는 위 스크립트가 되돌린다
 ```

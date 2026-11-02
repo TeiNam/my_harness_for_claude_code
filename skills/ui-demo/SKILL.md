@@ -19,6 +19,8 @@ Record polished demo videos of web applications using Playwright's video recordi
 
 Every demo goes through three phases: **Discover -> Rehearse -> Record**. Never skip straight to recording.
 
+Rehearsal and recording submit real forms. Run them against a local or staging environment, or a test account. If only production is available, confirm with the user before any step that creates, changes, or sends data.
+
 ---
 
 ## Phase 1: Discover

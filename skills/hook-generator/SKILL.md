@@ -96,4 +96,4 @@ Ask:
 - No filler words. Every word earns its place.
 - Prefer digits over spelled numbers (3, not three).
 - British English unless voice.md says otherwise.
-- Preserve uncertainty in the source. Never invent a result or certainty to make a hook stronger. Count the exact characters with an available text tool before delivery.
+- Preserve uncertainty in the source. Never invent a result or certainty to make a hook stronger. Count the exact characters with an available text tool before delivery. Rewrite any line over 40 characters (or any question in line 1) and recount; deliver only when all 12 lines pass.

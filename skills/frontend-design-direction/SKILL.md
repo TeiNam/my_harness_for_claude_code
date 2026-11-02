@@ -91,3 +91,6 @@ needs repeated daily use.
 - Motion improves orientation and does not mask sluggishness.
 - The result matches the repo's existing frontend conventions unless there is a
   clear reason to depart.
+
+If an item fails, fix it and re-check the whole list (from a fresh screenshot
+at mobile and desktop width when a browser is available) before delivering.

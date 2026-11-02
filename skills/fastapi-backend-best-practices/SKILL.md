@@ -261,3 +261,5 @@ DB:         Mount separate DB skill (PostgreSQL, MongoDB, DynamoDB, etc.)
 4. Write Tests (`testing/test-configuration.md`)
 5. Security Audit (Security table above)
 6. Deployment (`deployment/docker-build.md`)
+
+If tests (including the OpenAPI auth/summary contract test) or the security audit fail, return to step 3 for the failing layer and re-run steps 4–5; deploy only when both pass.

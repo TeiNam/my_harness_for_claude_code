@@ -14,6 +14,7 @@ When applied to an existing landing page, follow this sequence:
 1. **Scan** — Read the HTML/CSS. Identify the styling method, current design patterns, font stack, color palette, and layout structure.
 2. **Diagnose** — Run through the audit below. Document every generic pattern, weak point, and missing element.
 3. **Fix** — Apply targeted upgrades. Do not rewrite from scratch. Improve what's there while maintaining the existing structure.
+4. **Re-audit** — Run the audit again on the edited page. Fix what still fails, and stop when the audit is clean or the remaining items would require breaking the existing structure (list those for the user).
 
 ## Design Audit for Landing Pages
 

@@ -69,7 +69,7 @@ The comment names what the image shows as if reporting the news.
 Fixed structure:
 
 ```
-📌 [Line 1: Describe the absurd thing as normal fact]
+[pushpin] [Line 1: Describe the absurd thing as normal fact]
 [Line 2: Flip the author's status downward]
 [Line 3: A sad flex, the smallest possible win]
 [Line 4: Resigned acceptance, no punchline reach]
@@ -92,7 +92,7 @@ If any test fails, fix before sending.
 - Exactly 4 lines. No more, no less.
 - Each line is one complete sentence.
 - Each line is 40 characters max.
-- Start with 📌 on line 1.
+- Start line 1 with the pushpin emoji (U+1F4CC). This file writes it as `[pushpin]` because the repo bans literal emoji; the output uses the real emoji.
 - No P.S. (line 4 IS the punchline)
 - No line breaks between sentences (they sit tight together)
 - British English throughout
@@ -110,7 +110,7 @@ This is the benchmark. When in doubt, compare new comments against this one.
 **The comment:**
 
 ```
-📌 Claude wears the tie now.
+[pushpin] Claude wears the tie now.
 I wear the pyjamas.
 The cereal was my idea, at least.
 Small wins where you find them.
@@ -156,7 +156,7 @@ When triggered, always output:
 
 1. **The admission** (one sentence, what the post is quietly confessing)
 2. **The image prompt** (full paragraph in the standard format)
-3. **The 4-line comment** (with 📌)
+3. **The 4-line comment** (starting with the pushpin emoji)
 4. **A one-line note** recording the five textual checks and whether an actual image was inspected
 
 Optionally provide 2-3 variations if the first attempt is borderline.

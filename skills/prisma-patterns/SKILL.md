@@ -271,6 +271,8 @@ await prisma.$transaction(async (tx) => { ... }, { timeout: 30_000 });
 
 `migrate dev` detects schema drift and may prompt to reset the DB, dropping all data.
 
+If `migrate dev` asks to reset, stop and ask the user. Do not answer yes, pass `--force`, or run `migrate reset` yourself.
+
 ```bash
 # NEVER on shared dev, staging, or production
 npx prisma migrate dev --name add_column

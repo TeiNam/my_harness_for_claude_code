@@ -155,6 +155,8 @@ Create newsletter-voice.md in the project root. Single file, 800 to 1,200 words 
 
 Fill every section from the samples (or tuned archetype defaults). No generic filler. If the samples do not cover something, say "no clear pattern across samples" rather than guessing.
 
+Before Step 4, check the file against the Rules below: every rule traces to a sample (or a tuned archetype default), nothing repeats voice.md, the word count is within 800 to 1,200, and there are no em dashes. Fix the failing sections and check again until all pass.
+
 ## Step 4. Confirm and hand off
 
 Tell the user:

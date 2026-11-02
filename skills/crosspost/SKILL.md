@@ -106,6 +106,8 @@ Before delivering:
 - no copy is duplicated verbatim across platforms
 - any extra context added for LinkedIn or newsletter use is actually necessary
 
+If a version fails any item, rewrite that version and run the gate again; hand over only when every version passes.
+
 ## Related Skills
 
 - `brand-voice` for reusable source-derived voice capture

@@ -95,6 +95,8 @@ Before finishing:
 - the first step is anchored to a real file or directory
 - the tour tells a coherent story rather than listing files
 
+If any check fails, go back to step 3, fix the anchor or step, and run the whole list again. Finish only when every check passes.
+
 ## Step Types
 
 ### Content
