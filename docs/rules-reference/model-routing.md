@@ -11,7 +11,7 @@ the agent frontmatter all defer to it.
 | `fable` | **Fable 5.1** | Mythos-class tier above Opus (Mythos 5.1 is the same model without dual-use safety measures, Glasswing participants only). $10/$50 per MTok — **~2.5× Opus per token** — but cache reads are $0.25 (0.025×), nearly Opus's $0.20, so in a cache-heavy Claude Code session the premium is mostly the 2.5× on output. Thinking always on, default effort `high`. **Not a default assignment for any agent** — it's the last *up* rung: the final judge on an unrecoverable-miss gate after `opus` at `xhigh`/`max` still missed. When the session itself runs Fable, `fork` is the cheapest Fable access (inherits model, shares prompt cache). Requires Claude Code ≥ v2.1.257. |
 | `opus` | **Opus 5.5** | Workhorse deep-reasoning tier: architecture, ambiguity, adversarial review, hard debugging, long-horizon autonomous runs, high-stakes judging. $4/$20 (cheaper than Opus 5's $5/$25), cache reads $0.20 (0.05×). **Default effort is `medium`** — per the docs, Opus 5.5 at `medium` matches or beats Opus 5 at `high`, and at a given level it thinks more per turn than Opus 5. Thinking cannot be disabled. Escalate *within* the tier via effort (`high` → `xhigh` → `max`) before reaching for `fable`. |
 | `sonnet` | **Sonnet 5.5** | Best coding model. Default for implementation, refactors, PR review. Handles ~90% of coding. $2/$10, cache reads $0.20 (0.1×) — same price as Sonnet 5. API default effort `high`; levels are recalibrated vs Sonnet 5. Released 2026-09-28; requires Claude Code ≥ v2.1.284. *Provider-dependent — see below.* |
-| `haiku` | **Haiku 5.5** (pin required on Bedrock) | Mechanical edits, search, doc scaffolding, high-frequency workers. Successor to Haiku 4.5 (retirement "not sooner than 2026-10-15"). Price and `effort` support not yet verified here. Measured 2026-11-03 with the skill evals: strong baseline judgment, but it rarely invokes skills on its own — put the trigger first in descriptions of skills that guard destructive or billing actions. |
+| `haiku` | **Haiku 5.5** (pin required on Bedrock) | Mechanical edits, search, doc scaffolding, high-frequency workers. Successor to Haiku 4.5 (retirement "not sooner than 2026-10-15"). Price: $0.10/$0.50 per MTok for prompts up to 100k tokens, $0.50/$2.50 above — keep haiku subagent context under 100k (the new tokenizer counts ~30% more tokens than Haiku 4.5). Adaptive thinking with effort, default `medium`; `low` skips searches/checks and stops early in long agent prompts, so harness haiku agents pin `medium`. Measured 2026-11-03 with the skill evals: strong baseline judgment, but it rarely invokes skills on its own — put the trigger first in descriptions of skills that guard destructive or billing actions. |
 
 > **Use aliases, never version IDs.** Agent frontmatter must say `model: sonnet`,
 > not `model: claude-sonnet-5-5`. Aliases auto-resolve to the current lineup, so
@@ -91,6 +91,13 @@ Behavioral deltas that affect agent prompts:
   no scope additions, leaf). Text between tool calls arrives as `thinking`
   blocks. Prefers its training knowledge over a search on "what's
   allowed/charged" questions — don't tell research agents to minimize tool calls.
+- **Haiku 5.5** — first Haiku with effort (default `medium`). At `low` in long
+  agent prompts it skips searches and checks and stops early; the two `haiku`
+  agents pin `medium`. Give it today's date and an explicit "versions and
+  'latest' may have changed — look them up" line when it searches (`docs-lookup`
+  has one). Strong baseline judgment but rarely invokes skills unprompted —
+  safety-critical skills lead their description with "Use before …". Treats
+  user text inside `tool_result` as untrusted; omit `temperature`/`top_p`/`top_k`.
 - Opus 5.5 / Fable 5.1: eager subagent delegation carries over — in orchestrator
   prompts state when NOT to spawn.
 

@@ -76,7 +76,7 @@ main thread anyway (level names are model-relative).
 |---|---|
 | `opus`, open box (design, unknown-cause diagnosis, multi-source synthesis) | `effort: high` |
 | `opus`, unrecoverable miss (security, fidelity audit, taxonomy discovery) | `effort: high` (was `xhigh` on Opus 5 — see below) |
-| `haiku`, mechanical high-frequency | `effort: low` (Haiku 4.5 has no effort parameter — harmless, kept for a future Haiku) |
+| `haiku`, mechanical high-frequency | `effort: medium` (Haiku 5.5 — see below) |
 | `sonnet`, closed-box coding executor — cause/spec already fixed, job is edit → verify (`build-error-resolver`, `rust-build-resolver`, `refactor-cleaner`, `e2e-runner`, `tdd-guide`) | `effort: medium` |
 | `sonnet`, everything else (reviewers, writers, open-ish diagnosis like `pytorch-build-resolver`/`performance-optimizer`, `devops`) | **unset** — inherits the session |
 
@@ -91,6 +91,14 @@ verification"*. `medium`'s one known weakness — stopping to check in before a
 multipart task is done — is countered by the `subagent:budget` brief ("끝까지
 한다… 실제 검사 후 보고"). If an executor keeps missing on a task, the task
 wasn't closed-box: route it to `opus`, don't raise the pin.
+
+**Why `medium` for `haiku` (Haiku 5.5, 2026-11).** Haiku 5.5 is the first Haiku
+with effort (default `medium`). Official guidance: *"`low` … In long agent prompts,
+the model is more likely to skip a search, stop early, or skip a check at this
+level."* A Claude Code subagent runs under a long system prompt, and both haiku
+agents depend on exactly those steps (`docs-lookup` searches, `doc-updater`
+edits then validates). Haiku 5.5 is ~10× cheaper than Haiku 4.5 below 100k
+prompt tokens, so `medium` still costs far less than the old setting.
 
 **Level names are model-relative.** Opus 5.5 defaults to `medium`, and per the
 docs its `medium` matches or beats Opus 5 at `high` while thinking more per turn
