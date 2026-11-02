@@ -32,7 +32,9 @@ uv run <cmd>       # run inside the env — no manual activation needed
 - One-off tool without installing: `uvx <tool>` (e.g. `uvx ruff check .`).
 - Never mix `pip install` into a uv-managed env — it bypasses the lockfile.
 - Legacy `requirements.txt` project: `uv pip install -r requirements.txt` is the transitional form; prefer migrating to `pyproject.toml` + `uv add`.
-- Fall back to `pyenv` / `poetry` / `pdm` only when a project already standardizes on that tool.
+- One-off script that needs a package: `uv run --no-project --with <pkg> python script.py` — nothing is installed globally, and `--no-project` keeps uv from creating a `uv.lock`/`.venv` in whatever project you are standing in.
+- No exceptions for other tools. If a project uses `poetry`, `pdm`, `pipenv`, `conda`, or bare `pip` + `requirements.txt`, propose moving it to uv first — `uvx migrate-to-uv` for Poetry, Pipenv, pip-tools, and pip; for PDM or Conda, `uv init` and re-add the dependencies from the old manifest with `uv add`. Review the diff and remove the old lockfile in the same commit. Until the user agrees, change nothing about its dependencies — do not run the old tool and do not add a `uv.lock` beside its lockfile.
+- Python itself also comes from uv (`uv python install`), not pyenv or the system installer.
 
 ### Python Version
 

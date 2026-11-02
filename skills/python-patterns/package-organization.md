@@ -133,7 +133,7 @@ packages = ["src/mypackage"]
 ## Lockfiles & Environments
 
 - **Library** (something others install): `pyproject.toml` lists ranges, no lockfile.
-- **Application** (something you deploy): use a lockfile — `uv.lock`, `poetry.lock`, `pdm.lock`, or `requirements.lock` from `pip-compile`.
+- **Application** (something you deploy): use a lockfile — `uv.lock` (commit it; `uv sync --locked` in CI).
 
 ## Tests Directory
 

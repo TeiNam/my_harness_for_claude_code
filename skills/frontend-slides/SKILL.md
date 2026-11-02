@@ -123,8 +123,7 @@ Use the correct opener for the current OS:
 For PowerPoint conversion:
 1. Extract text, images, and notes with the bundled script:
    ```bash
-   pip install python-pptx                      # 이미 설치돼 있으면 건너뛴다.
-   python3 scripts/extract-pptx.py <input.pptx> [output_dir]
+   uv run --no-project --with python-pptx python scripts/extract-pptx.py <input.pptx> [output_dir]
    ```
 2. If installing is not allowed, ask whether to fall back to a manual/export-based workflow.
 3. Preserve slide order, speaker notes, and extracted assets.

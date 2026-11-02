@@ -36,7 +36,7 @@ writer. Use Postgres / SQLite for OLTP.
 
 ## Connection Modes
 
-Setup (이미 설치돼 있으면 건너뛴다.): `pip install duckdb` (Python) · `brew install duckdb` (CLI).
+Setup (이미 설치돼 있으면 건너뛴다.): `uv add duckdb` (Python project; one-off: `uv run --no-project --with duckdb python`) · `brew install duckdb` (CLI).
 
 ```python
 import duckdb

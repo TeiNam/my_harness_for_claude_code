@@ -207,11 +207,10 @@ Windows 10+ + Developer Mode 또는 관리자 권한이 필요합니다 (심볼�
 
 ## 필수 도구 버전
 
-`.tool-versions`에 asdf / mise용 핀이 들어 있습니다.
+`.tool-versions`에 asdf / mise용 Node 핀이 들어 있습니다. 하네스 자체는 Python 을 쓰지 않고, 스킬이 쓰는 Python 은 uv 가 설치·관리합니다(`uv python install`).
 
 ```
 nodejs 20.19.0
-python 3.12.8
 ```
 
 `engines.node`는 `>=18`. ESLint 9.x로 lint를 실행합니다.

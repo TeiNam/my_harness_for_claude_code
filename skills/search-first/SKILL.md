@@ -70,7 +70,7 @@ that are relevant to the task and project in front of you.
 | Channel | Check | If missing |
 |---------|-------|------------|
 | Repository search | `rg --files` and targeted `rg` queries | State that only visible files were inspected |
-| Package registry | `npm --version`, `python -m pip --version`, or project package manager | Use web/docs search and avoid claiming registry coverage |
+| Package registry | `npm --version`, `uv --version`, or project package manager | Use web/docs search and avoid claiming registry coverage |
 | GitHub CLI | `gh auth status` | Use public web or local git history only |
 | MCP/docs tools | Available tool list or local MCP config | Fall back to official docs/web search |
 | Skills directory | `ls ~/.claude/skills ~/.codex/skills` where applicable | Say no local skill catalog was available |
