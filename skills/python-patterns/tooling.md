@@ -28,15 +28,15 @@ mypy .
 pytest --cov=mypackage --cov-report=html
 
 # Security scan
-bandit -r src/
-pip-audit
+uvx bandit -r src/
+uv export --format requirements-txt --no-hashes > /tmp/req.txt && uvx pip-audit -r /tmp/req.txt  # bare `uvx pip-audit` audits its own tool env, not the project
 ```
 
-For one-off scripts, `uv run` (or `pipx run`) drops the install step entirely:
+For one-off tool runs, `uvx` drops the install step entirely; for a one-off script, `uv run --no-project --with <pkg>`:
 
 ```bash
-uv run --with ruff ruff check .
-uv run --with mypy mypy .
+uvx ruff check .
+uv run --with mypy mypy .   # inside the project: mypy needs the project's deps to type-check imports
 ```
 
 ## `pyproject.toml` Template
@@ -175,15 +175,9 @@ pre-commit install
 pre-commit run --all-files
 ```
 
-## Package Managers (pick one)
+## Package Manager: uv
 
-| Tool | Best for |
-|---|---|
-| `uv` | Speed; modern default, replaces pip + venv + pip-tools |
-| `poetry` | App with lockfile, opinionated, mature |
-| `pdm` | PEP 582 + standards-first |
-| `hatch` | Library, build backend, env management |
-| pip + `pip-compile` | Minimal, scripted environments |
+Use `uv` for every project — it replaces pip, venv, pip-tools, and pyenv. Projects on Poetry, PDM, Pipenv, or pip are migrated to uv first (see `rules/python/coding-style.md`). `hatchling` is still fine as a *build backend* in `[build-system]`; uv drives it.
 
 Recommendation for new projects in 2026: **`uv`** — installs Python, manages venvs, resolves with a lockfile, and runs ad-hoc tools.
 

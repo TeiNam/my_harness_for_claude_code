@@ -149,22 +149,25 @@ CMD ["/server"]
 
 ```dockerfile
 FROM python:3.12-slim AS builder
+# Pin the current stable uv (Dockerfiles have no trailing comments)
+COPY --from=ghcr.io/astral-sh/uv:0.13.6 /uv /uvx /bin/
 WORKDIR /app
-RUN pip install --no-cache-dir uv
-COPY requirements.txt .
-RUN uv pip install --system --no-cache -r requirements.txt
+# Use the base image's Python; fail instead of downloading one the runner stage won't have.
+# requires-python must accept the base image's version.
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_PYTHON_DOWNLOADS=0
+COPY pyproject.toml uv.lock ./
+RUN uv sync --locked --no-dev --no-install-project
+COPY . .
+RUN uv sync --locked --no-dev
 
 FROM python:3.12-slim AS runner
 WORKDIR /app
 
 RUN useradd -r -u 1001 appuser
+COPY --from=builder --chown=appuser /app /app
 USER appuser
 
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
-COPY . .
-
-ENV PYTHONUNBUFFERED=1
+ENV PATH="/app/.venv/bin:$PATH" PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 HEALTHCHECK --interval=30s --timeout=3s CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/')" || exit 1

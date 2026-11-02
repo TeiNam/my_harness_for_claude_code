@@ -330,7 +330,7 @@ exportFile() {
 
 If user chose "No images" in Phase 1, skip this entirely. If images were provided, process them before generating HTML.
 
-**Dependency:** `uv add Pillow` (or one-off: `uv run --with pillow python script.py`; install uv first if missing: `curl -LsSf https://astral.sh/uv/install.sh | sh`)
+**Dependency:** `uv add Pillow` (or one-off: `uv run --no-project --with pillow python script.py`; install uv first if missing: `curl -LsSf https://astral.sh/uv/install.sh | sh`)
 
 ### Image Processing
 

@@ -27,7 +27,7 @@ Setup (이미 설치돼 있으면 건너뛴다.):
 
 ```bash
 brew install py3cairo ffmpeg pango pkg-config   # macOS system libs (Linux: apt install build-essential python3-dev pkg-config libcairo2-dev libpango1.0-dev ffmpeg)
-pip install manim
+uv tool install manim   # CLI goes to ~/.local/bin — run `uv tool update-shell` once if `manim` is not found; inside a project use uv add manim
 ```
 
 ## Default Output
