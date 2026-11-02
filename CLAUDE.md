@@ -53,7 +53,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 `skills/` 114종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
 
-새 스킬을 추가할 때 확인할 것 세 가지: ① 동반 플러그인(`docs/plugin.md`)과 겹치지 않는지 — 겹쳐서 제거된 전례가 있다(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`) ② 기존 스킬의 부분집합이 아닌지(`seo` 가 `seo-geo-aeo` 에 흡수된 전례). ③ 레이아웃 — 100줄 넘는 참고 파일엔 목차, SKILL.md ≤500줄, 모든 파일은 SKILL.md 에서 직접 링크(1단계). `node scripts/ci/validate-skills.js` 가 경고하고 `--fix-toc` 가 목차를 넣는다. 나머지 규칙(자유도·체크리스트·검사 루프·설치 명시)은 `/learn` 의 Skill Layout Rules.
+새 스킬을 추가할 때 확인할 것 세 가지: ① 동반 플러그인(`docs/plugin.md`)과 겹치지 않는지 — 겹쳐서 제거된 전례가 있다(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`) ② 기존 스킬의 부분집합이 아닌지(`seo` 가 `seo-geo-aeo` 에 흡수된 전례). ③ 레이아웃 — 100줄 넘는 참고 파일엔 목차, SKILL.md ≤500줄, 모든 파일은 SKILL.md 에서 직접 링크(1단계). `node scripts/ci/validate-skills.js` 가 경고하고 `--fix-toc` 가 목차를 넣는다. 나머지 규칙(자유도·체크리스트·검사 루프·설치 명시)은 `/learn` 의 Skill Layout Rules. 행동이 바뀌는지는 `npm run eval:skills`(유료, `evals/skills/` 케이스를 스킬 있음/없음 두 군으로 실행, 리포트는 로컬 전용)로 모델별로 잰다 — 2026-11 실측에서 Haiku 4.5 실패는 전부 스킬 미호출이었다.
 
 ## Workload-based Install (2-tier 메뉴)
 

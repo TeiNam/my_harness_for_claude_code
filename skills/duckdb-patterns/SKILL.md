@@ -30,6 +30,10 @@ infrastructure.
 Don't reach for it as a transactional store — it's an OLAP engine, single
 writer. Use Postgres / SQLite for OLTP.
 
+## Safety
+
+`COPY ... (OVERWRITE_OR_IGNORE)` and `OVERWRITE` replace existing files. Check the target directory first and confirm with the user before writing over existing output.
+
 ## Connection Modes
 
 Setup (이미 설치돼 있으면 건너뛴다.): `pip install duckdb` (Python) · `brew install duckdb` (CLI).

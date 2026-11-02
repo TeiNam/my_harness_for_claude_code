@@ -1,6 +1,6 @@
 ---
 name: redis-patterns
-description: Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production applications.
+description: Redis data structure patterns, caching strategies, distributed locks, rate limiting, pub/sub, and connection management for production applications. Use when designing Redis usage or before flushing or bulk-deleting keys.
 origin: harness
 workloads: [python-backend, nodejs]
 ---
@@ -21,6 +21,10 @@ Redis is an in-memory data structure store that supports strings, hashes, lists,
 - Setting up session or token storage
 - Using Pub/Sub or Redis Streams for messaging
 - Configuring Redis in production (pooling, eviction, clustering)
+
+## Safety
+
+Do not run `FLUSHALL`, `FLUSHDB`, or bulk `DEL`/`UNLINK` against a shared or production instance yourself. Show the scoped command and run it only after the user approves.
 
 ## Data Structure Cheat Sheet
 

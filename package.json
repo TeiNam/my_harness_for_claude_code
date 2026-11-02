@@ -1,6 +1,6 @@
 {
   "name": "my-harness-for-claude-code",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "private": true,
   "description": "Personal Claude Code harness — agents, skills, commands, hooks, rules, and MCP configs tailored to my workloads",
   "license": "MIT",
@@ -15,7 +15,8 @@
     "install:link": "bash ./install.sh",
     "uninstall:link": "bash ./install.sh --uninstall",
     "check-drift": "node scripts/install/check-drift.js",
-    "optimize-settings": "node scripts/install/optimize-settings.js"
+    "optimize-settings": "node scripts/install/optimize-settings.js",
+    "eval:skills": "node scripts/eval-skills.js"
   },
   "dependencies": {
     "@iarna/toml": "^2.2.5",

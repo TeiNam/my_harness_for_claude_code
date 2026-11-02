@@ -18,6 +18,10 @@ AI-assisted editing for real footage. Not generation from prompts. Editing exist
 - Reframing video for different platforms (YouTube, TikTok, Instagram)
 - User says "edit video", "cut this footage", "make a vlog", or "video workflow"
 
+## Safety
+
+ElevenLabs and fal.ai bill per request. List the assets to generate with an estimated cost and get the user's approval before the first call.
+
 ## Core Thesis
 
 AI video editing is useful when you stop asking it to create the whole video and start using it to compress, structure, and augment real footage. The value is not generation. The value is compression.
