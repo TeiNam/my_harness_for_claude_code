@@ -4,6 +4,8 @@ All notable changes, grouped by commit date.
 
 ## 2026-11-03
 
+- docs(model-routing): Haiku 5.5 핀 적용·검증 결과 반영 (#71) (25c857b)
+- chore(changelog): 스쿼시 머지 #69 누락분 정정 (#70) (2bf524b)
 - perf(agents): 5.5 공식 프롬프트 지침 반영 — haiku 에이전트 effort medium, docs-lookup 검색 유도 (v0.22.0) (#69) (885dc2c)
 - chore(changelog): 스쿼시 머지 #67 누락분 정정 (#68) (bd45a7f)
 - perf(skills): Haiku 5.5 대응 — 위험 작업 스킬 트리거 전진 배치, 문서 Haiku 5.5 반영 (v0.21.0) (#67) (bad9ec8)
