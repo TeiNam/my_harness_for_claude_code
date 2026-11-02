@@ -4,6 +4,8 @@ All notable changes, grouped by commit date.
 
 ## 2026-11-03
 
+- perf(skills): Haiku 5.5 대응 — 위험 작업 스킬 트리거 전진 배치, 문서 Haiku 5.5 반영 (v0.21.0) (#67) (bad9ec8)
+- chore(changelog): 스쿼시 머지 #65 누락분 정정 (#66) (96a9f8d)
 - perf(skills): Opus 5.5·Sonnet 5.5·Haiku 4.5 실측 기반 스킬 튜닝 + eval 러너 (v0.20.0) (#65) (3635f52)
 
 ## 2026-11-02
