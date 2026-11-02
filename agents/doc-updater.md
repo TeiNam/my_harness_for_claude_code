@@ -4,7 +4,7 @@ description: Documentation and codemap specialist. Use for updating codemaps and
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "Skill"]
 model: haiku
 skills: [repo-scan]
-effort: low
+effort: medium
 workloads: [core]
 ---
 
