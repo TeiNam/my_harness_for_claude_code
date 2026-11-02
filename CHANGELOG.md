@@ -4,6 +4,8 @@ All notable changes, grouped by commit date.
 
 ## 2026-11-03
 
+- feat(rules): 의존성은 항상 최신 stable, Python 은 항상 uv (v0.23.0) (#73) (436f820)
+- chore(changelog): 스쿼시 머지 #71 누락분 정정 (#72) (da13266)
 - docs(model-routing): Haiku 5.5 핀 적용·검증 결과 반영 (#71) (25c857b)
 - chore(changelog): 스쿼시 머지 #69 누락분 정정 (#70) (2bf524b)
 - perf(agents): 5.5 공식 프롬프트 지침 반영 — haiku 에이전트 effort medium, docs-lookup 검색 유도 (v0.22.0) (#69) (885dc2c)
