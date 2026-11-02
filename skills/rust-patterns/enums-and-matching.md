@@ -1,5 +1,20 @@
 # Enums and Pattern Matching
 
+## Contents
+
+- Model State as an Enum
+- Exhaustive Matching — No Wildcards on Business Enums
+- `if let` and `let else` for Single-Variant Cases
+- Match Guards
+- Binding with `@`
+- Or-Patterns
+- Destructuring Structs and Tuples
+- Refutability and `if-let` Chains (Stable in Recent Rust)
+- `match` Returns a Value
+- Common Built-In Enums
+- Adding Variants — Plan for It
+- Related
+
 Rust's enums carry data per variant and exhaustive match makes invalid states fail to compile. This is the single most leverage-y feature for correctness.
 
 ## Model State as an Enum

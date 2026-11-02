@@ -1,5 +1,24 @@
 # Anti-Patterns to Avoid
 
+## Contents
+
+- Mutable Default Arguments
+- `type(x) ==` for Type Checking
+- `== None` / `!= None`
+- `from module import *`
+- Bare `except:`
+- Unused or Ambiguous Variable Names
+- Comparing Booleans Explicitly
+- Catching to Re-Raise Without Modification
+- Mutable Class Attributes
+- Manual Index Counter
+- Indexing Instead of Unpacking
+- "Strip the Comment, Lose the Comment"
+- Dict Membership With `.keys()`
+- Abusing `lambda`
+- Catch-All Exception Hierarchies
+- Related
+
 A short list of things `ruff` and `mypy` flag — fix on sight.
 
 ## Mutable Default Arguments

@@ -1,5 +1,18 @@
 # Error Boundaries
 
+## Contents
+
+- Basic Error Boundary
+- Or Use `react-error-boundary`
+- What Error Boundaries Catch
+- Where to Place Boundaries
+- Reset Strategies
+- Pair with Suspense
+- Async Errors — `useErrorBoundary`
+- Logging
+- Don't Show Stack Traces to Users
+- Related
+
 Class component that catches render-phase errors in its subtree, prevents them from unmounting the whole app, and shows a fallback. The only place class components are still required (until React ships a hook equivalent).
 
 ## Basic Error Boundary

@@ -1,3 +1,4 @@
+# Requires: pip install manim (+ cairo/pango/ffmpeg system libs, see SKILL.md Setup)
 from manim import DOWN, LEFT, RIGHT, UP, Circle, Create, FadeIn, FadeOut, Scene, Text, VGroup, CurvedArrow
 
 

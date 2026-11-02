@@ -7,6 +7,13 @@ metadata:
 
 # Displaying captions in Remotion
 
+## Contents
+
+- Prerequisites
+- Creating pages
+- Rendering with Sequences
+- Word highlighting
+
 This guide explains how to display captions in Remotion, assuming you already have captions in the `Caption` format.
 
 ## Prerequisites

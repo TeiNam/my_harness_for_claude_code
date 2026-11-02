@@ -1,5 +1,20 @@
 # Traits and Generics
 
+## Contents
+
+- `impl Trait` in Argument Position
+- `impl Trait` in Return Position
+- Trait Bounds — Multiple Constraints
+- `dyn Trait` — Trait Objects
+- Default Methods
+- Associated Types vs Generic Parameters
+- Blanket Implementations
+- Marker Traits
+- Newtype + Trait Coherence
+- When Generics Become Painful
+- `Fn`, `FnMut`, `FnOnce`
+- Related
+
 Generics for static dispatch and zero-cost abstraction; `dyn Trait` for heterogeneous collections.
 
 ## `impl Trait` in Argument Position

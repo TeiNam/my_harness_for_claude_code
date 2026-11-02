@@ -78,3 +78,5 @@ Before delivering:
 - the voice matches the supplied examples or the agreed `VOICE PROFILE`
 - every section adds something new
 - formatting matches the intended medium
+
+If any item fails, fix only the affected section and run the whole gate again; deliver when every item passes. If a fix was needed for a reason the `VOICE PROFILE` does not cover yet, propose up to three new rules for it at the end and add them only after the user approves.

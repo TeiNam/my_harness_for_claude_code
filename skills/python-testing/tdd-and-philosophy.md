@@ -1,5 +1,16 @@
 # TDD and Test Philosophy
 
+## Contents
+
+- The Cycle
+- Test Behavior, Not Implementation
+- What to Test
+- What Not to Test
+- One Behavior Per Test
+- Coverage Targets
+- Test Pyramid
+- Related
+
 ## The Cycle
 
 1. **RED** — write a failing test that pinpoints the desired behavior. Run it, see it fail. The fail message should be informative.

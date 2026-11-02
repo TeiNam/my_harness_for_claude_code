@@ -1,5 +1,17 @@
 # Tooling
 
+## Contents
+
+- Essential Commands
+- `pyproject.toml` Template
+- ruff — Replace black + isort + flake8
+- mypy
+- pytest
+- Pre-commit Hooks
+- Package Managers (pick one)
+- Security Scans
+- Related
+
 One-stop config in `pyproject.toml`. Modern stack: `ruff` (lint+format) → `mypy` (type) → `pytest` (test) → `bandit`/`pip-audit` (security).
 
 ## Essential Commands

@@ -1,5 +1,17 @@
 # Memory and Performance
 
+## Contents
+
+- `__slots__` for Many Instances
+- Generators Over Lists for Streaming
+- Avoid `+=` on Strings in Loops
+- Use the Right Container
+- `functools.lru_cache` for Pure Functions
+- Local-Variable Lookup
+- Profile Before Optimizing
+- When Pure Python Isn't Enough
+- Related
+
 Reach for these only after profiling. `cProfile` + `snakeviz` (CPU) and `tracemalloc` / `memray` (memory) tell you where to spend effort.
 
 ## `__slots__` for Many Instances

@@ -114,9 +114,11 @@ Output the post inside a plain code block:
 
 After the code block, add 2 to 3 sentences on why you chose this hook and structure, referencing specific patterns from voice.md.
 
-Before presenting the draft, review it in the running assistant against the supplied facts, voice and requested format. For a roster or step caption, map every required item to its matching caption passage and check ordering, duplicates and omissions. Do not replace requested structure with a generic post framework. Keep source notes separate from paste-ready copy. Claude is not a required reviewer in Codex.
+Before presenting the draft, review it in the running assistant against the supplied facts, voice and requested format. For a roster or step caption, map every required item to its matching caption passage and check ordering, duplicates and omissions. List every place the draft breaks a rule in voice.md (including its "never" / absence patterns), fix them, and check again; present the draft only when the list is empty. Do not replace requested structure with a generic post framework. Keep source notes separate from paste-ready copy. Claude is not a required reviewer in Codex.
 
 ## Step 4. Iterate
+
+When user feedback points at something voice.md does not cover, suggest the rule to add to voice.md so the next draft is checked against it.
 
 Ask the user:
 

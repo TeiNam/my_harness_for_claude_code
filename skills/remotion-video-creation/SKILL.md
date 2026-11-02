@@ -11,6 +11,10 @@ workloads: [frontend]
 
 Use this skills whenever you are dealing with Remotion code to obtain the domain-specific knowledge.
 
+## Setup
+
+New project: `npx create-video@latest`. Existing project: add each package a rule file names with `npx remotion add <package>` (bun/yarn/pnpm variants are in the rule). 이미 설치돼 있으면 건너뛴다.
+
 ## How to use
 
 Read individual rule files for detailed explanations and code examples:

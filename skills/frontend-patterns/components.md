@@ -1,5 +1,18 @@
 # Component Composition
 
+## Contents
+
+- Composition Over Inheritance
+- Slots via Named Props
+- Compound Components (Shared State via Context)
+- Render Props (Use Sparingly)
+- Polymorphic Components (`as` Prop)
+- Forwarding Refs
+- Children as a Function vs ReactNode
+- Splitting Components
+- Container vs Presentational — Mostly Outdated
+- Related
+
 Composition over inheritance. Children, slots, compound components, render props — pick the lightest tool that fits.
 
 ## Composition Over Inheritance

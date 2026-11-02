@@ -9,8 +9,18 @@
  *   4. SKILL.md frontmatter `description:` uses an inline scalar — not a
  *      literal block scalar (`|` / `|-` / `|+`), which preserves internal
  *      newlines and breaks flat-table renderers keyed off `description`.
+ *   5. Layout (Anthropic skill authoring guide, 2026-10 revision):
+ *      - SKILL.md stays within MAX_SKILL_LINES (split details into files)
+ *      - every other .md over TOC_THRESHOLD lines opens with a table of
+ *        contents — Claude previews only the head of a long file
+ *      - references are one level deep: a file SKILL.md links to must not
+ *        be the only route to another file (SKILL.md links them directly)
+ *      - every bundled .md (README.md aside) is linked from SKILL.md
  *
- * Frontmatter findings default to WARN so CI does not break while
+ * `--fix-toc` inserts a heading-derived "## Contents" block into every
+ * file that check 5 flags for a missing table of contents.
+ *
+ * Frontmatter and layout findings default to WARN so CI does not break while
  * pre-existing data defects are being cleaned up out of band (see #1663).
  * Pass `--strict` or set `CI_STRICT_SKILLS=1` to promote frontmatter
  * findings to errors (exit 1).
@@ -27,6 +37,105 @@ const path = require('path');
 const SKILLS_DIR = path.join(__dirname, '../../skills');
 
 const STRICT = process.argv.includes('--strict') || process.env.CI_STRICT_SKILLS === '1';
+const FIX_TOC = process.argv.includes('--fix-toc');
+
+const MAX_SKILL_LINES = 500;
+const TOC_THRESHOLD = 100;
+// TOC 를 찾는 범위 — 제목·소개 문단 뒤에 와도 잡히도록 머리 40줄을 본다.
+const TOC_SCAN_LINES = 40;
+const SKIP_DIRS = new Set(['node_modules', '__pycache__']);
+// `${CLAUDE_SKILL_DIR}/x.md`, `[x](x.md)`, `` `x.md` `` 형태의 상대 경로 참조.
+const MD_REF = /(?:\]\(|[`\s(}]|^)((?:\.\/)?[\w./-]+\.md)(?=[)#`\s,.:;]|$)/gm;
+
+function listMarkdown(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => {
+    if (SKIP_DIRS.has(e.name) || e.name.startsWith('.')) return [];
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) return listMarkdown(full);
+    return e.name.endsWith('.md') ? [full] : [];
+  });
+}
+
+function hasToc(content) {
+  const head = content.split(/\r?\n/).slice(0, TOC_SCAN_LINES).join('\n');
+  return /^#{1,4}\s*(table of contents|contents|목차|toc)\b/im.test(head) || (head.match(/\]\(#[^)]+\)/g) || []).length >= 3;
+}
+
+/** Headings outside code fences: H2s, or H2+H3 when there are fewer than 3 H2s. */
+function buildToc(content) {
+  const headings = [];
+  let inFence = false;
+  for (const line of content.split(/\r?\n/)) {
+    if (/^\s*(```|~~~)/.test(line)) inFence = !inFence;
+    const m = !inFence && line.match(/^(#{2,3})\s+(.+?)\s*#*\s*$/);
+    if (m) headings.push({ level: m[1].length, text: m[2] });
+  }
+  const h2 = headings.filter(h => h.level === 2);
+  const picked = h2.length >= 3 ? h2 : headings;
+  if (picked.length < 2) return null;
+  return ['## Contents', '', ...picked.map(h => `${h.level === 3 && h2.length ? '  ' : ''}- ${h.text}`), ''];
+}
+
+/** Insert the TOC after frontmatter and the H1 title (if any). */
+function insertToc(content) {
+  const toc = buildToc(content);
+  if (!toc) return null;
+  const lines = content.split('\n');
+  let i = 0;
+  if (lines[0] === '---') {
+    const end = lines.indexOf('---', 1);
+    if (end > 0) i = end + 1;
+  }
+  while (i < lines.length && lines[i].trim() === '') i++;
+  if (/^#\s/.test(lines[i] || '')) {
+    i++;
+    while (i < lines.length && lines[i].trim() === '') i++;
+  }
+  return [...lines.slice(0, i), ...toc, ...lines.slice(i)].join('\n');
+}
+
+function mdRefs(content, fromDir, skillDir) {
+  const out = new Set();
+  for (const m of content.matchAll(MD_REF)) {
+    const rel = m[1].replace(/^\.?\//, '');
+    const hit = [path.resolve(fromDir, rel), path.resolve(skillDir, rel)].find(a => a.startsWith(skillDir + path.sep) && fs.existsSync(a));
+    if (hit) out.add(path.relative(skillDir, hit));
+  }
+  return out;
+}
+
+function checkLayout(dir, skillsDir, skillContent, report) {
+  const skillDir = path.resolve(skillsDir, dir);
+  const skillLines = skillContent.split(/\r?\n/).length;
+  if (skillLines > MAX_SKILL_LINES) {
+    report(`${dir}/SKILL.md - ${skillLines} lines exceeds ${MAX_SKILL_LINES}; move detail into files linked from SKILL.md`);
+  }
+  const direct = mdRefs(skillContent, skillDir, skillDir);
+  for (const file of listMarkdown(skillDir)) {
+    const rel = path.relative(skillDir, file);
+    if (rel === 'SKILL.md') continue;
+    let content = fs.readFileSync(file, 'utf8');
+    if (content.split(/\r?\n/).length > TOC_THRESHOLD && !hasToc(content)) {
+      const fixed = FIX_TOC && insertToc(content);
+      if (fixed) {
+        fs.writeFileSync(file, fixed);
+        content = fixed;
+        console.log(`FIXED: ${dir}/${rel} - inserted table of contents`);
+      } else {
+        report(`${dir}/${rel} - over ${TOC_THRESHOLD} lines without a table of contents at the top`);
+      }
+    }
+    if (!direct.has(rel)) {
+      if (path.basename(rel).toLowerCase() !== 'readme.md') report(`${dir}/${rel} - not linked from SKILL.md`);
+      continue;
+    }
+    for (const nested of mdRefs(content, path.dirname(file), skillDir)) {
+      if (nested !== rel && nested !== 'SKILL.md' && !direct.has(nested)) {
+        report(`${dir}/${rel} -> ${nested} - nested reference; link ${nested} from SKILL.md directly`);
+      }
+    }
+  }
+}
 
 /**
  * Parse the leading YAML frontmatter of a markdown document.
@@ -143,6 +252,8 @@ function validateSkillDir(dir, skillsDir, reportFrontmatterFinding) {
     console.error(`ERROR: ${dir}/SKILL.md - Empty file`);
     return { fatal: true };
   }
+
+  checkLayout(dir, skillsDir, content, reportFrontmatterFinding);
 
   const fm = extractFrontmatter(content);
   if (fm.present) {

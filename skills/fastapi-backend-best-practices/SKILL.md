@@ -27,17 +27,89 @@ All code is async/await based, choosing appropriate modeling patterns according 
 
 ## Reference Guide
 
-Read and apply references suited to business needs:
+Every reference file is linked here directly — open only the one the current step needs.
+
+### Project structure
 
 | File | Content | When to read |
 |------|---------|--------------|
-| `project-structure/README.md` | Project layout, config, Lifespan, DI | Starting a new project, structural refactoring |
-| `async-patterns/README.md` | Async patterns, concurrency, background tasks, SSE/WebSocket | Designing async processing, performance optimization |
-| `domain-modeling/README.md` | Pydantic modeling for CRUD/CQRS/Event-Driven/Saga/DDD | Domain model design, structuring business logic |
-| `api-design/README.md` | Routers, middleware, error handling, pagination, versioning | API endpoint design, error handling |
-| `testing/README.md` | httpx AsyncClient, fixtures, mocking, integration testing | Writing tests, TDD |
-| `security/README.md` | JWT, OAuth2, CORS, Rate Limiting, input validation | Implementing auth, security checks |
-| `deployment/README.md` | Docker, uvicorn tuning, health checks, monitoring | Deployment, performance tuning, operations |
+| `project-structure/project-layout.md` | Directory layout | Starting a new project |
+| `project-structure/vertical-slice-vs-layered.md` | Feature slices vs layers | Choosing or refactoring structure |
+| `project-structure/pydantic-settings-config.md` | `pydantic-settings` config | Env/config handling |
+| `project-structure/lifespan-startup-shutdown-hook.md` | Lifespan startup/shutdown | Pools, clients, warmup |
+| `project-structure/dependency-injection-pattern.md` | `Depends` wiring | Service/repository injection |
+| `project-structure/structlog-config.md` | structlog setup | Logging |
+| `project-structure/pyproject-toml-fastapi-project.md` | pyproject.toml | Dependencies, ruff, mypy, pytest config |
+
+### Async patterns
+
+| File | Content | When to read |
+|------|---------|--------------|
+| `async-patterns/basic-principles.md` | async/await ground rules | Any async handler |
+| `async-patterns/concurrency-control.md` | gather, semaphores, limits | Fan-out, throttling |
+| `async-patterns/background-tasks.md` | BackgroundTasks vs task queues | Work after the response |
+| `async-patterns/streaming-responses.md` | SSE / WebSocket / streaming | Streaming output |
+| `async-patterns/external-api-calls.md` | httpx client, retries, timeouts | Calling other services |
+| `async-patterns/blocking-code.md` | `to_thread`, sync libraries | Sync I/O or CPU work |
+| `async-patterns/graceful-shutdown.md` | Draining on shutdown | Deploy/restart safety |
+
+### Domain modeling
+
+Start with the simplest pattern and evolve it as complexity grows; patterns compose (e.g. CRUD + an event to notify afterwards).
+
+| File | Pattern — use when | When to read |
+|------|--------------------|--------------|
+| `domain-modeling/crud.md` | Repository + Service — simple CRUD (e.g. config) | Default starting point |
+| `domain-modeling/cqrs.md` | CQRS — reads ≫ writes (dashboards) | Separate read/write models |
+| `domain-modeling/event-driven.md` | Event-Driven — loose inter-service coupling | Publishing/consuming events |
+| `domain-modeling/saga.md` | Saga — distributed transactions | Multi-service consistency |
+| `domain-modeling/ddd.md` | DDD Aggregate — complex business rules | Invariants, aggregates |
+| `domain-modeling/pydantic-patterns.md` | Common Pydantic modeling | Any schema design |
+
+### API design
+
+| File | Content | When to read |
+|------|---------|--------------|
+| `api-design/router-structure.md` | Router organization | Adding endpoints |
+| `api-design/error-handling.md` | Domain → HTTP error mapping | Exception handlers |
+| `api-design/pagination.md` | Offset/cursor pagination | List endpoints |
+| `api-design/middleware.md` | Middleware | Cross-cutting request handling |
+| `api-design/api-versioning.md` | Versioning | Breaking API changes |
+| `api-design/standardized-responses.md` | Response envelopes | Response shape |
+| `api-design/openapi-documentation.md` | Tags, summaries, auth wiring, OpenAPI contract tests | Every new router (see Core Principle 5) |
+
+### Security
+
+Route-level auth discipline (router-level `dependencies=[Security(...)]`, `Security` not `Depends`) lives in `api-design/openapi-documentation.md` §4; the files below cover token issuing/verification and RBAC *implementation*.
+
+| File | Content | When to read |
+|------|---------|--------------|
+| `security/jwt-authentication.md` | JWT issue/verify | Token auth |
+| `security/oauth2-password-hashing.md` | OAuth2 flow, password hashing | Login, credentials |
+| `security/rbac-authorization.md` | Role-based authorization | Permission checks |
+| `security/rate-limiting.md` | Rate limiting | Abuse protection |
+| `security/security-headers-cors.md` | Security headers, CORS | Browser-facing APIs |
+| `security/input-validation-defense.md` | Input validation & defense | Untrusted input |
+
+### Testing
+
+| File | Content | When to read |
+|------|---------|--------------|
+| `testing/test-configuration.md` | pytest / pytest-asyncio config | Setting up tests |
+| `testing/api-integration-testing.md` | httpx AsyncClient integration tests | Endpoint tests |
+| `testing/service-unit-testing.md` | Service unit tests, mocking | Business logic tests |
+| `testing/factory-pattern.md` | Test data factories | Fixtures and test data |
+| `testing/async-testing-patterns.md` | Async test patterns | Async edge cases |
+
+### Deployment
+
+| File | Content | When to read |
+|------|---------|--------------|
+| `deployment/docker-build.md` | Dockerfile build | Containerizing |
+| `deployment/uvicorn-tuning.md` | Workers, timeouts | Performance tuning |
+| `deployment/healthcheck.md` | Health/readiness endpoints | Orchestrator probes |
+| `deployment/monitoring.md` | Metrics, tracing | Operations |
+| `deployment/docker-compose.md` | Local compose stack | Local/dev environment |
 
 > **Mounting DB Skill**: Database implementations (ORM, drivers, migrations, query optimization) rely on mounting a separate DB skill. This skill only provides DB-agnostic Repository Protocols and domain patterns.
 
@@ -183,9 +255,9 @@ DB:         Mount separate DB skill (PostgreSQL, MongoDB, DynamoDB, etc.)
 7. Hardcoded configuration values → Use `pydantic-settings`
 
 ## Development Workflow
-1. Requirements → Pattern Selection (refer to domain-modeling/README.md)
-2. Project Structure Setup (refer to project-structure/README.md)
+1. Requirements → Pattern Selection (Domain modeling table above)
+2. Project Structure Setup (`project-structure/project-layout.md`)
 3. Implement in order: Domain Model → Repository → Service → Router
-4. Write Tests (refer to testing/README.md)
-5. Security Audit (refer to security/README.md)
-6. Deployment (refer to deployment/README.md)
+4. Write Tests (`testing/test-configuration.md`)
+5. Security Audit (Security table above)
+6. Deployment (`deployment/docker-build.md`)

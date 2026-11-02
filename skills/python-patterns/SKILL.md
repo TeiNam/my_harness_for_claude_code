@@ -85,8 +85,4 @@ Idiomatic Python patterns for robust, efficient, maintainable applications. Cove
 - `python-data-analysis` — pandas/polars/duckdb workflows
 - `mle-workflow`, `pytorch-patterns` — ML pipelines
 
-## See Also
-
-- `_archive/SKILL-original.md` — original harness single-file version (700+ lines), kept for reference.
-
 __Remember__: Python code should be readable, explicit, and follow the principle of least surprise. When in doubt, prioritize clarity over cleverness.

@@ -1,5 +1,17 @@
 # Type Hints
 
+## Contents
+
+- Modern Syntax (Python ≥ 3.9 / 3.10)
+- Common Annotations
+- Type Aliases
+- Generics with TypeVar
+- Protocols (Structural Subtyping)
+- Literal & Final
+- Self-Referential Types
+- When to skip type hints
+- Related
+
 Annotate every public signature. Type hints are documentation, IDE help, and a contract — `mypy` makes them enforceable.
 
 ## Modern Syntax (Python ≥ 3.9 / 3.10)

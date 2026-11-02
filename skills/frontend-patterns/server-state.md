@@ -1,5 +1,20 @@
 # Server State
 
+## Contents
+
+- Why Server State Is Different
+- TanStack Query Basics
+- Parameterized Queries
+- Mutations
+- Optimistic Updates
+- Query Keys — Conventions
+- Suspense Mode (React 18+)
+- SWR Alternative
+- Pagination & Infinite
+- Server Components / RSC (Next.js App Router)
+- Pitfalls
+- Related
+
 Server state is data with a remote source of truth. It needs caching, deduplication, revalidation, and consistency — patterns that don't belong in `useState`. Use **TanStack Query** (React Query) or **SWR**.
 
 ## Why Server State Is Different

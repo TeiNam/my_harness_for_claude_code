@@ -1,5 +1,15 @@
 # Node / TypeScript — pi-tui (stocker 원본 기반)
 
+## Contents
+
+- 크레이트/패키지
+- 컴포넌트 트리 — init에서 한 번만 조립
+- 배너 + 로고 (`intro.ts`)
+- 색상 팔레트 (`theme.ts`)
+- 힌트 바 (`hint-bar.ts`) — ANSI 폭 함정 주의
+- ASCII 로고 생성
+- 이 언어 고유 함정
+
 `@mariozechner/pi-tui` 유지형(retained) 위젯 트리. stocker의 실제 구현을 그대로 따온 틀.
 
 ## 크레이트/패키지

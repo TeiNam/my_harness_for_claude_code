@@ -1,5 +1,16 @@
 # Comprehensions and Generators
 
+## Contents
+
+- List / Dict / Set Comprehensions
+- Generator Expressions
+- Generator Functions (`yield`)
+- `yield from`
+- itertools Idioms
+- When to Choose Each
+- Pitfalls
+- Related
+
 Comprehensions for simple eager transforms; generators for lazy/streaming data.
 
 ## List / Dict / Set Comprehensions

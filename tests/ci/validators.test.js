@@ -576,6 +576,40 @@ function runTests() {
     cleanupTestDir(testDir);
   })) passed++; else failed++;
 
+  if (test('warns on layout: long SKILL.md, missing TOC, nested and unlinked refs', () => {
+    const testDir = createTestDir();
+    const skillDir = path.join(testDir, 'layout-skill');
+    fs.mkdirSync(skillDir);
+    const body = n => Array.from({ length: n }, (_, i) => `line ${i}`).join('\n');
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), `# Skill\nSee [a](a.md).\n${body(510)}`);
+    fs.writeFileSync(path.join(skillDir, 'a.md'), `# A\n\n## One\n## Two\n## Three\nNext: [b](b.md)\n${body(120)}`);
+    fs.writeFileSync(path.join(skillDir, 'b.md'), '# B\nshort');
+    fs.writeFileSync(path.join(skillDir, 'orphan.md'), '# Orphan');
+
+    const result = runSkillsValidator(testDir);
+    assert.strictEqual(result.code, 0, `Layout findings must not fail default mode; stderr: ${result.stderr}`);
+    for (const needle of ['exceeds 500', 'a.md - over 100 lines without a table of contents', 'a.md -> b.md - nested reference', 'orphan.md - not linked from SKILL.md']) {
+      assert.ok(result.stderr.includes(needle), `missing "${needle}" in: ${result.stderr}`);
+    }
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('--fix-toc inserts heading-derived contents after the title', () => {
+    const testDir = createTestDir();
+    const skillDir = path.join(testDir, 'toc-skill');
+    fs.mkdirSync(skillDir);
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '# Skill\nSee `ref.md`.');
+    const filler = Array.from({ length: 120 }, (_, i) => `text ${i}`).join('\n');
+    fs.writeFileSync(path.join(skillDir, 'ref.md'), `# Ref\n\nIntro.\n\n## Alpha\n${filler}\n\`\`\`\n## not-a-heading\n\`\`\`\n## Beta\n## Gamma\n`);
+
+    const result = runSkillsValidator(testDir, ['--fix-toc']);
+    assert.strictEqual(result.code, 0, result.stderr);
+    const fixed = fs.readFileSync(path.join(skillDir, 'ref.md'), 'utf8');
+    assert.ok(fixed.startsWith('# Ref\n\n## Contents\n\n- Alpha\n- Beta\n- Gamma\n\nIntro.'), fixed.slice(0, 80));
+    assert.ok(!result.stderr.includes('table of contents'), 'fixed file must not still warn');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
   if (test('warns on literal block-scalar description (|-)', () => {
     const testDir = createTestDir();
     const skillDir = path.join(testDir, 'block-desc-skill');

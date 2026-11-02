@@ -1,5 +1,24 @@
 # Anti-Patterns
 
+## Contents
+
+- `.unwrap()` / `.expect()` in Production
+- `.clone()` to Dodge the Borrow Checker
+- `String` Where `&str` Would Do
+- `Box<dyn Error>` in Library APIs
+- Ignoring `#[must_use]`
+- Blocking in Async Context
+- Holding `std::sync::Mutex` Across `.await`
+- Wildcard Match on Business Enum
+- Using `unsafe` for Convenience
+- `if let Some(x) = opt { Some(x) } else { None }`
+- `match` That Could Be `if let`
+- `Vec::new()` + Loop `push` in Hot Code
+- `String + &str` in a Loop
+- Misusing `Default`
+- Returning References to Locals
+- Related
+
 Things clippy yells about, things that compile but read as a code smell.
 
 ## `.unwrap()` / `.expect()` in Production

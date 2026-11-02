@@ -7,6 +7,16 @@ metadata:
 
 # Using Animated images in Remotion
 
+## Contents
+
+- Basic usage
+- Sizing and fit
+- Playback speed
+- Looping behavior
+- Styling
+- Getting GIF duration
+- Alternative
+
 ## Basic usage
 
 Use `<AnimatedImage>` to display a GIF, APNG, AVIF or WebP image synchronized with Remotion's timeline:

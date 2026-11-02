@@ -13,7 +13,7 @@ workloads: [frontend]
 * VISUAL_DENSITY: 3 (1=Art Gallery/Airy, 10=Pilot Cockpit/Packed Data)
 * LANDING_PURPOSE: conversion (conversion | brand | portfolio | saas | ecommerce)
 
-**AI Instruction:** The standard baseline for all generations is strictly set to these values (8, 6, 3, conversion). Do not ask the user to edit this file. ALWAYS listen to the user: adapt these values dynamically based on what they explicitly request in their prompts. Use these baseline (or user-overridden) values as your global variables to drive the specific logic in Sections 3 through 8.
+**AI Instruction:** The standard baseline for all generations is strictly set to these values (8, 6, 3, conversion). Do not ask the user to edit this file. Follow the user: adapt these values dynamically based on what they explicitly request in their prompts. Use these baseline (or user-overridden) values as your global variables to drive the specific logic in Sections 3 through 8.
 
 ## 2. DEFAULT ARCHITECTURE & CONVENTIONS
 All output is **standalone HTML** designed for direct browser rendering. No build tools, no bundlers, no frameworks.
@@ -25,13 +25,13 @@ All output is **standalone HTML** designed for direct browser rendering. No buil
   * **English Display Font:** Pair with `Geist`, `Outfit`, `Cabinet Grotesk`, or `Satoshi` for English headlines. Load via Google Fonts CDN or self-hosted link.
   * **Font Stack:** `font-family: 'Pretendard', 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;`
 * **Icons:** Use Iconify with Solar icon set exclusively. Load via `<script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>`. Usage: `<iconify-icon icon="solar:arrow-right-linear"></iconify-icon>`.
-* **Images:** Use `https://picsum.photos/seed/{descriptive_name}/{width}/{height}` for all placeholder images. NEVER use Unsplash URLs (they break). For avatars, use `https://i.pravatar.cc/150?u={unique_name}`.
+* **Images:** Use `https://picsum.photos/seed/{descriptive_name}/{width}/{height}` for all placeholder images. Unsplash URLs break, so do not use them. For avatars, use `https://i.pravatar.cc/150?u={unique_name}`.
 * **Animation Library:** For `MOTION_INTENSITY > 5`, include `<script src="https://unpkg.com/motion@latest/dist/motion.js"></script>` (Motion One — lightweight, standalone). For simpler animations, use pure CSS `@keyframes` and Tailwind's `animate-` utilities.
-* **ANTI-EMOJI POLICY [CRITICAL]:** NEVER use emojis in markup or visible text content. Replace with Iconify Solar icons or clean SVG primitives.
+* **No emoji:** do not use emojis in markup or visible text content. Replace with Iconify Solar icons or clean SVG primitives.
 * **Responsiveness:**
   * Standardize breakpoints (`sm:`, `md:`, `lg:`, `xl:`).
   * Contain page layouts using `max-w-7xl mx-auto px-4 sm:px-6 lg:px-8`.
-  * **Viewport Stability [CRITICAL]:** NEVER use `h-screen`. ALWAYS use `min-h-[100dvh]` to prevent layout jumping on iOS Safari.
+  * **Viewport stability:** use `min-h-[100dvh]` instead of `h-screen` — `h-screen` makes the layout jump on iOS Safari.
   * **Grid over Flex-Math:** Use CSS Grid (`grid grid-cols-1 md:grid-cols-3 gap-6`) instead of complex flexbox percentage calculations.
 * **Language:** Default content language is **Korean**. All placeholder text, headings, descriptions, and CTAs must be written in natural, professional Korean — not translated-sounding text.
 
@@ -40,7 +40,7 @@ LLMs have statistical biases toward specific UI cliches. These rules produce pre
 
 **Rule 1: Deterministic Typography**
 * **Korean Headlines:** `text-4xl md:text-5xl lg:text-6xl tracking-tight leading-tight font-bold`. Pretendard handles Korean beautifully at these sizes.
-  * **CRITICAL:** Korean text requires `leading-tight` to `leading-snug` (NOT `leading-none`). Korean characters need more vertical breathing room than Latin text.
+  * Korean text needs `leading-tight` to `leading-snug` (NOT `leading-none`). Korean characters need more vertical breathing room than Latin text.
   * **Word Breaking:** Always add `word-break: keep-all` (`break-keep-all` in Tailwind) to Korean text blocks to prevent mid-word line breaks.
 * **English Display Text:** Use `tracking-tighter leading-none` for maximum impact with Latin fonts.
 * **Body/Paragraphs:** `text-base md:text-lg text-gray-600 leading-relaxed max-w-[65ch]`.
@@ -88,7 +88,7 @@ Systematically implement these high-end patterns as your baseline:
 * **Staggered Reveals:** Sections fade in sequentially using CSS `animation-delay` cascades. Use `@keyframes fadeInUp { from { opacity: 0; transform: translateY(2rem); } to { opacity: 1; transform: translateY(0); } }` with `animation-delay: calc(var(--index) * 100ms)`.
 * **Floating Elements:** Subtle infinite float animations on decorative elements: `@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }`.
 * **Gradient Mesh Backgrounds:** Use multiple `radial-gradient` layers for organic, blob-like ambient backgrounds instead of flat solid colors.
-* **Scroll-Triggered Animations (MOTION_INTENSITY > 6):** Use `IntersectionObserver` for viewport-based reveals. NEVER use `window.addEventListener('scroll')`.
+* **Scroll-Triggered Animations (MOTION_INTENSITY > 6):** Use `IntersectionObserver` for viewport-based reveals. avoid `window.addEventListener('scroll')` — it fires on every frame.
 
 ## 5. PERFORMANCE GUARDRAILS
 * **DOM Cost:** Grain/noise filters go on `position: fixed; inset: 0; z-index: 50; pointer-events: none` elements ONLY. Never on scrolling containers.

@@ -1,5 +1,22 @@
 # Mocking and Patching
 
+## Contents
+
+- Where to Patch
+- Three Tools
+- monkeypatch
+- `@patch` Decorator
+- `patch` as Context Manager
+- Configuring Mock Behavior
+- Asserting Call Patterns
+- `autospec=True` — Enforce the Signature
+- Mocking Classes
+- Mocking Context Managers
+- Async Mocks
+- Fakes Over Mocks (When Reasonable)
+- Anti-Patterns
+- Related
+
 Mock the **boundary** — anything that crosses a process or network. Don't mock your own code's internals.
 
 ## Where to Patch

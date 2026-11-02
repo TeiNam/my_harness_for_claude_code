@@ -1,5 +1,16 @@
 # Decorators
 
+## Contents
+
+- Function Decorators
+- Parameterized Decorators
+- Class-Based Decorators
+- Preserving Type Information
+- Common Built-in / stdlib Decorators
+- Stacking Decorators
+- Pitfalls
+- Related
+
 Decorators wrap a function or class to add behavior. Always use `functools.wraps` so introspection (name, docstring, signature) survives.
 
 ## Function Decorators

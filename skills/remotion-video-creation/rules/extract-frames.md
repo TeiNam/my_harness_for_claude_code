@@ -7,6 +7,14 @@ metadata:
 
 # Extracting frames from videos
 
+## Contents
+
+- The `extractFrames()` function
+- Basic usage
+- Creating a filmstrip
+- Cancellation with AbortSignal
+- Timeout with Promise.race
+
 Use Mediabunny to extract frames from videos at specific timestamps. This is useful for generating thumbnails, filmstrips, or processing individual frames.
 
 ## The `extractFrames()` function

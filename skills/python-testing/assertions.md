@@ -1,5 +1,16 @@
 # Assertions and Basic Structure
 
+## Contents
+
+- Basic Test
+- Assertion Patterns
+- Exception Assertions
+- Warning Assertions
+- Soft Assertions / Multiple Checks
+- Custom Assertion Helpers
+- Don't Catch and Inspect
+- Related
+
 Plain `assert` is the right answer 99% of the time. pytest rewrites assert AST so failures show the values involved.
 
 ## Basic Test

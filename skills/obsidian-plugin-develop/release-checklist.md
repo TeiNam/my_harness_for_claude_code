@@ -1,5 +1,12 @@
 # Community Plugin Release Checklist
 
+## Contents
+
+- Pre-Submission Checklist
+- Submission — Community Directory (current process)
+- BRAT Deployment (Beta)
+- Automation (GitHub Actions)
+
 > Source: Developer Policies, Submission Requirements, Plugin Guidelines (synced 2026-09).
 > Developer Policies and Submission Requirements now live under `Community directory/` on docs.obsidian.md:
 > <https://docs.obsidian.md/Community+directory/Developer+policies> · <https://docs.obsidian.md/Community+directory/Submission+requirements+for+plugins>

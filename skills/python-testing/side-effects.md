@@ -1,5 +1,20 @@
 # Side Effects: Files, Env, Stdout, Logs, Time
 
+## Contents
+
+- Filesystem — `tmp_path`
+- Env Vars — `monkeypatch`
+- CWD
+- Stdout / Stderr — `capsys` and `capfd`
+- Logs — `caplog`
+- Time — Freeze It
+- Randomness — Seed It
+- Subprocess
+- HTTP — `responses` / `respx` / `httpx_mock`
+- Database
+- Pitfalls
+- Related
+
 For anything that touches the world, pytest gives you a fixture that captures or sandboxes it.
 
 ## Filesystem — `tmp_path`

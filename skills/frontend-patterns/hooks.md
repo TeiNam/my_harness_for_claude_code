@@ -1,5 +1,17 @@
 # Custom Hooks
 
+## Contents
+
+- Rules of Hooks (Strict)
+- Anatomy of a Custom Hook
+- Useful Hook Patterns
+- Async Data Hook (Don't Roll Your Own)
+- Capturing Stale State
+- When to Extract a Hook
+- Don't Conditionally Call Hooks
+- Cleanup Is Not Optional
+- Related
+
 Hooks let you extract stateful logic without changing component hierarchy. The most powerful refactoring tool in React.
 
 ## Rules of Hooks (Strict)

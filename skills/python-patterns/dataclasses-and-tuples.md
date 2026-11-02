@@ -1,5 +1,17 @@
 # Dataclasses and NamedTuples
 
+## Contents
+
+- Plain Dataclass
+- Frozen Dataclass — Default to This
+- Validation with `__post_init__`
+- Inheritance and Defaults
+- NamedTuple
+- TypedDict
+- Pydantic (External — Worth Knowing)
+- Decision Quick Reference
+- Related
+
 Pick the simplest container that fits the data. In order of preference: `NamedTuple` (immutable, light) → `@dataclass(frozen=True)` (immutable + flexible) → `@dataclass` (mutable) → custom class (only when you have non-trivial behavior).
 
 ## Plain Dataclass

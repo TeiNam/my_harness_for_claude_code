@@ -1,5 +1,25 @@
 # Performance
 
+## Contents
+
+- When to Optimize
+- React.memo for Pure Components
+- `useMemo` — for Expensive Computations
+- `useCallback` — Stable Callbacks for Children
+- Stable Object/Array Props
+- Don't Memo Without a Reason
+- Code Splitting with `lazy`
+- Preload What's Coming
+- Virtualization for Long Lists
+- Image Optimization
+- Avoid Unnecessary Re-renders
+- Avoid Expensive Work in Render
+- Concurrent Rendering — `useTransition`
+- `useDeferredValue` for Stale-While-Loading
+- React Compiler (Coming/Stable Depending on When You Read This)
+- Profiling Workflow
+- Related
+
 Profile first; optimize what's actually slow. The React Profiler (DevTools) tells you which components rendered, why, and how long they took.
 
 ## When to Optimize

@@ -5,6 +5,16 @@ metadata:
   tags: transitions, fade, slide, wipe, scenes
 ---
 
+## Contents
+
+- Fullscreen transitions
+- Prerequisites
+- Example usage
+- Available Transition Types
+- Slide Transition with Direction
+- Timing Options
+- Duration calculation
+
 ## Fullscreen transitions
 
 Using `<TransitionSeries>` to animate between multiple scenes or clips.

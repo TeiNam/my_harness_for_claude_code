@@ -1,5 +1,19 @@
 # Fixtures
 
+## Contents
+
+- Basic Fixture
+- Setup / Teardown via `yield`
+- Scopes
+- Multiple Fixtures
+- Parameterized Fixtures
+- Autouse Fixtures
+- `conftest.py` — Shared Fixtures
+- Built-in Fixtures Worth Knowing
+- Factory Fixtures
+- Common Mistakes
+- Related
+
 Fixtures are pytest's dependency-injection. Test asks for `db_session` by name; pytest finds the fixture and provides it. Setup, teardown, scope, parameterization all flow from there.
 
 ## Basic Fixture

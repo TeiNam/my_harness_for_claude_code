@@ -1,5 +1,17 @@
 # Package Organization
 
+## Contents
+
+- Standard Project Layout
+- Import Order (PEP 8)
+- Absolute vs Relative Imports
+- `__init__.py` — Keep It Narrow
+- Project Metadata in `pyproject.toml`
+- Lockfiles & Environments
+- Tests Directory
+- Common Mistakes
+- Related
+
 `src/` layout, explicit imports, narrow `__init__.py`.
 
 ## Standard Project Layout

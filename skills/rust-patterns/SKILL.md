@@ -86,8 +86,4 @@ Idiomatic Rust for safe, performant, maintainable code. Edition 2021+ assumed (2
 - `rust-testing` — `#[test]`, `#[tokio::test]`, integration tests, criterion bench
 - `rust-build-resolver` (agent) — fix compile errors
 
-## See Also
-
-- `_archive/SKILL-original.md` — original harness single-file version (499 lines).
-
 **Remember**: if it compiles, it's *probably* correct — but only if you avoid `unwrap()`, minimize `unsafe`, and let the type system work for you.

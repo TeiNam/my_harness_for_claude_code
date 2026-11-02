@@ -166,6 +166,8 @@ outranks your own site.
 - [ ] Internal links to ≥2 related posts
 - [ ] One trusted reader has read it before publish (or 24h cooldown if not)
 
+If a code block fails to run, fix it in place (see Code Samples above) and run the whole checklist again before publishing.
+
 ## Common Pitfalls
 
 - **Hedge stacking**: "It might be the case that some users could potentially…"

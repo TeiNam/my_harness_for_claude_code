@@ -1,5 +1,18 @@
 # Ownership, Borrowing, Cow
 
+## Contents
+
+- Pass References by Default
+- `&str` vs `String`
+- `&[T]` vs `Vec<T>` and `&Path` vs `PathBuf`
+- `impl Into<X>` for Convenient Constructors
+- `Cow<'_, T>` — Sometimes-Owned
+- Lifetimes — Most of the Time, Don't Annotate
+- When to Clone (Honestly)
+- `Rc<T>` and `Arc<T>` — Shared Ownership
+- Interior Mutability
+- Related
+
 Rust's defining feature. Three rules: each value has one owner, references must outlive their use, and you can have either many shared `&T` or one exclusive `&mut T` — never both at once.
 
 ## Pass References by Default

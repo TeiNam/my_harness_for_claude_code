@@ -1,5 +1,18 @@
 # Concurrency
 
+## Contents
+
+- Decision Table
+- Shared State — `Arc<Mutex<T>>`
+- `RwLock` for Read-Heavy Workloads
+- Channels — Message Passing
+- Rayon — Data-Parallel CPU
+- Async with Tokio
+- Cancellation
+- Don't Block in Async
+- `Send` + `Sync` — What They Mean
+- Related
+
 Three flavors: OS threads with shared state, message passing via channels, async with tokio. Pick by what you're guarding.
 
 ## Decision Table

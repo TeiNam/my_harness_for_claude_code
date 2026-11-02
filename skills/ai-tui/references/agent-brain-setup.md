@@ -1,5 +1,13 @@
 # 에이전트 두뇌 세팅 — 프롬프트 · 스킬 · MCP · 사용룰 (언어 중립)
 
+## Contents
+
+- 1. 시스템 프롬프트
+- 2. 스킬 (Skill)
+- 3. MCP (Model Context Protocol)
+- 4. 사용 룰 (Usage Rules)
+- 조립 순서
+
 TUI 껍데기가 절반이면, 나머지 절반은 에이전트를 "무엇을 어떻게 하게 할지" 정하는 설정이다. 이 규약은 Node/Rust/Python 어느 쪽이든 동일하다. Claude Code·stocker의 구성을 일반화한 것.
 
 ---

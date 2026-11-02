@@ -1,5 +1,13 @@
 # Animation Patterns Reference
 
+## Contents
+
+- Effect-to-Feeling Guide
+- Entrance Animations
+- Background Effects
+- Interactive Effects
+- Troubleshooting
+
 Use this reference when generating presentations. Match animations to the intended feeling.
 
 ## Effect-to-Feeling Guide

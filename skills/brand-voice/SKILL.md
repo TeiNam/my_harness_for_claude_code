@@ -35,6 +35,8 @@ Do not use generic platform exemplars as source material.
 4. If live X access is available, use `x-api` to pull recent original posts before drafting.
 5. If site copy matters, include the current harness landing page and repo/plugin framing.
 
+6. Validate the profile: rewrite two held-out samples using only the profile, compare them with the originals, and adjust the axes that drifted. Repeat until the rewrites read like the author.
+
 ## What to Extract
 
 - rhythm and sentence length

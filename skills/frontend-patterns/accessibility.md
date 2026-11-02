@@ -1,5 +1,21 @@
 # Accessibility
 
+## Contents
+
+- Core Rules
+- Buttons vs Links
+- Form Labels
+- Errors and Required Fields
+- Keyboard Navigation
+- Focus Management — Modals
+- Skip Links
+- Live Regions
+- Color and Contrast
+- Images
+- ARIA Last Resort
+- Testing
+- Related
+
 Every interactive element keyboard-reachable; every form input labeled; every state change announced. Most a11y wins come from semantic HTML — reach for ARIA only when the native element doesn't fit.
 
 ## Core Rules

@@ -1,5 +1,20 @@
 # State Management
 
+## Contents
+
+- Decision Ladder
+- Local State — `useState`
+- `useReducer` for Complex State
+- Context — for Stable, Wide Values
+- Context + Reducer Pattern
+- Zustand — Drop-In Global Store
+- Jotai — Atomic Primitives
+- Redux Toolkit — When You Need It
+- Server State Goes Elsewhere
+- Forms Have Their Own Tool
+- URL Is State Too
+- Related
+
 Pick the smallest tool that fits. Most React apps need three categories: **local state** for component-scoped values, **global client state** for app-wide things (theme, auth, modals), and **server state** for data fetched from APIs (different category — see [server-state.md](server-state.md)).
 
 ## Decision Ladder

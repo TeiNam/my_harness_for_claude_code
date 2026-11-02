@@ -1,5 +1,17 @@
 # Structs, Derive, Builder, Newtype
 
+## Contents
+
+- Standard Derives
+- Newtype Pattern
+- Constructors
+- Builder Pattern
+- `..` to Update One Field
+- Visibility — Default to Private
+- `#[non_exhaustive]` on Public Structs
+- Field Access: `Deref` for Smart Pointers Only
+- Related
+
 ## Standard Derives
 
 ```rust
