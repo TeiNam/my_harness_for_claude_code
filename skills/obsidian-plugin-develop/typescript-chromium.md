@@ -1,325 +1,261 @@
-# TypeScript & Chromium Optimization Details
+# TypeScript, DOM, and Lifecycle Patterns
 
 ## Contents
 
-- TypeScript Patterns
-- Chromium (Electron) Optimization
-- CSS — Obsidian Theme Integration
-- Error Handling — Using Notice
-- Dev/Production Branching
-- Path Input — Vault File/Folder Autocomplete with AbstractInputSuggest
-- CodeMirror 6 Editor Integration
+- TypeScript patterns
+- Lifecycle and cleanup
+- Views
+- DOM
+- Pop-out windows
+- CSS — theme integration
+- Error handling
+- Dev/production branching
+- Path and custom suggesters
+- CodeMirror 6 editor integration
 
-## TypeScript Patterns
+The snippets here pass `tsc` and `eslint-plugin-obsidianmd` 0.5.1 with zero findings (checked 2026-11-13).
 
-### Type Guards for Safe Obsidian API Usage
+## TypeScript patterns
+
+### Narrow with instanceof, never cast
 
 ```typescript
-import { TFile, TFolder, TAbstractFile } from 'obsidian';
+import { TFile, TFolder } from 'obsidian';
 
-function isFile(f: TAbstractFile): f is TFile {
-  return f instanceof TFile;
-}
-
-function isFolder(f: TAbstractFile): f is TFolder {
-  return f instanceof TFolder;
+export function describe(file: unknown): string {
+  if (file instanceof TFile) return file.extension; // `as TFile` is reported
+  if (file instanceof TFolder) return 'folder';
+  return '';
 }
 ```
 
-### Async — Consistent async/await (No Mixed Promise Chaining)
+### async/await, no promise chains
 
 ```typescript
-// PASS: Single file
-async processFile(file: TFile): Promise<string> {
-  const content = await this.app.vault.read(file);
-  return content.trim();
-}
-
-// PASS: Parallel processing
 async processAllFiles(files: TFile[]): Promise<string[]> {
-  return Promise.all(files.map((f) => this.app.vault.read(f)));
+  return Promise.all(files.map((file) => this.app.vault.cachedRead(file)));
 }
 ```
 
-### Generic TTL Cache
+A promise you do not await needs `void`: `void this.refresh();`. Do not `await` a `Setting` chain; its `then()` is for chaining, not a promise.
+
+### Dates
+
+`moment` is bundled with Obsidian. Call `window.moment()`; never `import moment from 'moment'` (it would bundle a second copy). For a type, use `moment.Moment` from a type-only import.
+
+## Lifecycle and cleanup
+
+Ask of every resource: who owns it, and how long should it live? Register it on the component that owns it and Obsidian releases it on unload.
 
 ```typescript
-export class TTLCache<K, V> {
-  private cache = new Map<K, { value: V; expires: number }>();
-  constructor(private ttlMs: number) {}
+// Obsidian events
+this.registerEvent(this.app.metadataCache.on('changed', (file) => this.handleChange(file)));
 
-  get(key: K): V | undefined {
-    const entry = this.cache.get(key);
-    if (!entry || Date.now() > entry.expires) { this.cache.delete(key); return undefined; }
-    return entry.value;
-  }
-
-  set(key: K, value: V): void {
-    this.cache.set(key, { value, expires: Date.now() + this.ttlMs });
-  }
-
-  clear(): void { this.cache.clear(); }
-}
-```
-
-### Events — registerEvent / registerDomEvent Required
-
-```typescript
-// PASS: Obsidian events — auto-cleanup on unload
-this.registerEvent(
-  this.app.metadataCache.on('changed', (file: TFile) => {
-    this.handleMetadataChange(file);
-  })
-);
-
-// PASS: DOM events also managed via registerDomEvent
-this.registerDomEvent(document, 'keydown', (e: KeyboardEvent) => {
-  if (e.key === 'Escape') this.closePanel();
+// DOM events on long-lived targets (window, document)
+this.registerDomEvent(activeDocument, 'keydown', (evt) => {
+  if (evt.key === 'Escape') this.closePanel();
 });
+
+// Intervals — through window, and registered
+this.registerInterval(window.setInterval(() => this.poll(), 60_000));
 ```
 
----
+- A listener on an element you created needs no cleanup: it dies with the element.
+- A listener on `window` or `document` added with `addEventListener` leaks unless removed in `onunload()` / `onClose()`.
+- Workers, sockets, third-party library instances, and large caches are released in `onunload()`.
+- Group a feature's resources in a `Component` subclass and attach it with `this.addChild(new MyWidget(this.app))`; children unload before their parent.
+- In a modal, create a `Component`, `load()` it in the constructor, register on it in `onOpen()`, and `unload()` it in `onClose()`.
 
-## Chromium (Electron) Optimization
-
-### DOM Creation — createEl Pattern (innerHTML Prohibited)
+### MarkdownRenderer needs an owner
 
 ```typescript
-// PASS: XSS-safe, type-safe
-const card = containerEl.createDiv({ cls: 'plugin-card' });
-card.createEl('h3', { text: item.title, cls: 'plugin-card__title' });
-const meta = card.createDiv({ cls: 'plugin-card__meta' });
-meta.createEl('span', { text: formatDate(item.date, locale) });
-
-// Always use setText() when displaying user input
-el.setText(userInput);  // PASS:
+// In an ItemView: the view owns the rendered content and cleans it up on close.
+await MarkdownRenderer.render(this.app, markdown, this.contentEl, sourcePath, this);
 ```
 
-### Large Lists — DocumentFragment
+Passing the plugin (lives until disabled) or an inline `new Component()` (never unloaded) leaks, and is reported as an error.
+
+## Views
 
 ```typescript
-renderList(items: Item[]): void {
-  const fragment = document.createDocumentFragment();
-  items.forEach((item) => {
-    const el = document.createElement('div');
-    el.className = 'list-item';
-    el.textContent = item.label;
-    fragment.appendChild(el);
+export const VIEW_TYPE = 'clip-notes-view';
+
+// Return a new view each time. Do not keep the instance on the plugin.
+this.registerView(VIEW_TYPE, (leaf) => new ClipNotesView(leaf));
+
+// Views are deferred until their tab is visible (1.7.2+). Reveal, then check the type.
+async function getOpenView(app: App): Promise<ClipNotesView | null> {
+  const leaf = app.workspace.getLeavesOfType(VIEW_TYPE).first();
+  if (!leaf) return null;
+  await app.workspace.revealLeaf(leaf);
+  return leaf.view instanceof ClipNotesView ? leaf.view : null;
+}
+```
+
+- `leaf.view as ClipNotesView` after a `getViewType()` check is wrong: a deferred leaf holds a `DeferredView`.
+- To touch a view without revealing it, `await leaf.loadIfDeferred()` — sparingly, it removes the startup optimization.
+- Keep the view constructor cheap; Obsidian reopens every saved view on startup. Do not call `detachLeavesOfType()` in `onunload()`.
+
+## DOM
+
+```typescript
+// createEl helpers: XSS-safe and typed. innerHTML/outerHTML are errors.
+const card = containerEl.createDiv({ cls: 'clip-notes-card' });
+card.createEl('h3', { text: item.title, cls: 'clip-notes-card-title' });
+card.createSpan({ text: formatDate(item.date, locale) });
+el.setText(userInput); // user input always as text
+el.empty();            // clear children
+
+// Large lists: build once, append once.
+renderList(labels: string[]): void {
+  const fragment = createFragment((frag) => {
+    for (const label of labels) frag.createDiv({ cls: 'clip-notes-item', text: label });
   });
-  this.listContainer.empty();
-  this.listContainer.appendChild(fragment);
+  this.contentEl.empty();
+  this.contentEl.appendChild(fragment);
 }
+
+// Debounce with Obsidian's helper.
+import { debounce } from 'obsidian';
+const refresh = debounce(() => this.render(), 200, true);
+this.registerEvent(this.app.vault.on('rename', refresh));
+
+// Defer heavy first paint.
+window.requestAnimationFrame(() => this.renderContent());
 ```
 
-### Performance — RAF & Debounce
+## Pop-out windows
 
-```typescript
-// Defer heavy initial rendering with RAF
-onOpen(): void {
-  requestAnimationFrame(() => this.renderContent());
-}
+Each pop-out window has its own `window`, `document`, and constructors, so the globals refer to the main window only.
 
-// Debounce utility
-export function debounce<T extends unknown[]>(
-  fn: (...args: T) => void, ms: number
-): (...args: T) => void {
-  let timer: ReturnType<typeof setTimeout>;
-  return (...args: T) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), ms);
-  };
-}
-```
+| Instead of | Use |
+|------------|-----|
+| `document.body.appendChild(el)` | `someEl.doc.body.appendChild(el)` (the window that element is in) |
+| `document`, `window` for "the focused window" | `activeDocument`, `activeWindow` |
+| `el instanceof HTMLElement`, `evt instanceof MouseEvent` | `el.instanceOf(HTMLElement)`, `evt.instanceOf(MouseEvent)`, `evt.targetNode?.instanceOf(HTMLElement)` |
+| `setTimeout(…)`, `globalThis` | `window.setTimeout(…)`, `window` |
+| One-time change to `document.body` | Apply per window from `workspace.on('window-open')`, undo on `window-close` |
 
-### Memory Management — View Cleanup
+Renderers that hold a context (canvas, WebGL) re-initialize in `el.onWindowMigrated(callback)`.
 
-```typescript
-async onClose(): Promise<void> {
-  this.cache.clear();
-  this.containerEl.empty();  // PASS: Clean up DOM with el.empty()
-}
-```
+## CSS — theme integration
 
----
-
-## CSS — Obsidian Theme Integration
-
-No hardcoded styles. Use CSS classes + Obsidian variables:
+No inline styles and no `<style>` elements. Put classes in `styles.css` and use Obsidian's variables so themes and snippets can restyle the plugin. Prefix every class with the plugin ID.
 
 ```css
-.plugin-card {
+.clip-notes-card {
   background: var(--background-secondary);
   border: 1px solid var(--background-modifier-border);
   border-radius: var(--radius-m);
   padding: var(--size-4-3);
   color: var(--text-normal);
 }
-.plugin-card__title {
+.clip-notes-card-title {
   color: var(--text-accent);
   font-size: var(--font-ui-medium);
 }
 ```
 
-**Key CSS variables:**
-`--background-primary`, `--background-secondary`, `--text-normal`, `--text-muted`, `--text-accent`, `--interactive-accent`, `--background-modifier-border`, `--background-modifier-error`, `--font-ui-small/medium/large`, `--radius-s/m/l`
+Common variables: `--background-primary`, `--background-secondary`, `--text-normal`, `--text-muted`, `--text-accent`, `--interactive-accent`, `--background-modifier-border`, `--background-modifier-error`, `--font-ui-small/medium/large`, `--radius-s/m/l`. For a value computed at runtime, `el.setCssProps({ '--clip-notes-width': `${width}px` })` and read the variable in CSS.
 
----
-
-## Error Handling — Using Notice
+## Error handling
 
 ```typescript
-import { Notice } from 'obsidian';
+import { Notice, requestUrl } from 'obsidian';
 
-async safeReadFile(file: TFile): Promise<string | null> {
+async function fetchData(): Promise<string | null> {
   try {
-    return await this.app.vault.read(file);
-  } catch (err) {
-    console.error('[YourPlugin] Failed to read file:', err);
-    new Notice(this.t.ui.error);
+    const response = await requestUrl({ url: 'https://api.example.com/data' });
+    return response.text;
+  } catch (error) {
+    console.error('[clip-notes] request failed', error); // error/warn/debug are accepted; log is not
+    new Notice('Request failed.');
     return null;
   }
 }
 ```
 
----
-
-## Dev/Production Branching
+## Dev/production branching
 
 ```typescript
-declare const DEV: boolean;
-if (DEV) { /* dev-only debug */ }
-// Ensure console.log/warn/debug are completely removed in production builds
+declare const DEV: boolean; // defined by esbuild (`define: { DEV: … }`)
+if (DEV) console.debug('[clip-notes] state', state); // removed from the production bundle
 ```
 
----
+## Path and custom suggesters
 
-## Path Input — Vault File/Folder Autocomplete with AbstractInputSuggest
-
-When accepting folder/file paths in settings, use `AbstractInputSuggest` instead of plain text fields to provide autocomplete for actual vault paths.
-
-### FolderSuggest — Folder Path Autocomplete
+For a file or folder path in settings, use the declarative controls; they include vault autocomplete:
 
 ```typescript
-import { AbstractInputSuggest, App, TFolder } from 'obsidian';
+{ name: 'Template folder location', control: { type: 'folder', key: 'templateFolder' } },
+{ name: 'Default template', control: { type: 'file', key: 'template', filter: (file) => file.extension === 'md' } },
+```
 
-export class FolderSuggest extends AbstractInputSuggest<TFolder> {
-  constructor(app: App, private inputEl: HTMLInputElement) {
+Write an `AbstractInputSuggest` subclass only for what those do not cover (tags, commands, your own entities), in a modal, or when supporting Obsidian below 1.13.0. Do not copy the old `TextInputSuggest` class; it is reported.
+
+```typescript
+import { AbstractInputSuggest, type App } from 'obsidian';
+
+export class TagSuggest extends AbstractInputSuggest<string> {
+  constructor(app: App, private readonly inputEl: HTMLInputElement, private readonly tags: string[]) {
     super(app, inputEl);
   }
 
-  getSuggestions(query: string): TFolder[] {
-    const lowerQuery = query.toLowerCase();
-    return this.app.vault
-      .getAllLoadedFiles()
-      .filter((f): f is TFolder =>
-        f instanceof TFolder && f.path.toLowerCase().includes(lowerQuery)
-      )
-      .slice(0, 20);
+  protected getSuggestions(query: string): string[] {
+    const lower = query.toLowerCase();
+    return this.tags.filter((tag) => tag.toLowerCase().includes(lower)).slice(0, 20);
   }
 
-  renderSuggestion(folder: TFolder, el: HTMLElement): void {
-    el.setText(folder.path || '/');
+  renderSuggestion(tag: string, el: HTMLElement): void {
+    el.setText(tag);
   }
 
-  selectSuggestion(folder: TFolder): void {
-    this.inputEl.value = folder.path;
-    this.inputEl.trigger('input');   // Trigger Setting's onChange
+  selectSuggestion(tag: string): void {
+    this.setValue(tag);
+    this.inputEl.trigger('input'); // fires the Setting's onChange
     this.close();
   }
 }
-```
 
-### FileSuggest — File Path Autocomplete (Extension Filter Support)
-
-```typescript
-import { AbstractInputSuggest, App, TFile } from 'obsidian';
-
-export class FileSuggest extends AbstractInputSuggest<TFile> {
-  constructor(
-    app: App,
-    private inputEl: HTMLInputElement,
-    private extensions?: string[]   // ['md'], ['md', 'canvas'], etc.
-  ) {
-    super(app, inputEl);
-  }
-
-  getSuggestions(query: string): TFile[] {
-    const lowerQuery = query.toLowerCase();
-    return this.app.vault.getFiles()
-      .filter((f) =>
-        f.path.toLowerCase().includes(lowerQuery) &&
-        (!this.extensions || this.extensions.includes(f.extension))
-      )
-      .slice(0, 20);
-  }
-
-  renderSuggestion(file: TFile, el: HTMLElement): void {
-    el.setText(file.path);
-  }
-
-  selectSuggestion(file: TFile): void {
-    this.inputEl.value = file.path;
-    this.inputEl.trigger('input');
-    this.close();
-  }
-}
-```
-
-### Usage in settings-tab
-
-```typescript
-new Setting(containerEl)
-  .setName(t.settings.templateFolder.name)
-  .setDesc(t.settings.templateFolder.desc)
-  .addText((text) => {
-    // PASS: Connect Suggest — typing shows vault folder list as dropdown
-    new FolderSuggest(this.app, text.inputEl);
-    text
-      .setPlaceholder('Templates')
-      .setValue(this.plugin.settings.templateFolder)
-      .onChange(async (v) => {
-        this.plugin.settings.templateFolder = v;
+// In getSettingDefinitions(): a render callback, which must save by itself.
+{
+  name: 'Default tag',
+  render: (setting) => {
+    setting.addSearch((search) => {
+      new TagSuggest(this.app, search.inputEl, this.plugin.knownTags());
+      search.setValue(this.plugin.settings.defaultTag).onChange(async (value) => {
+        this.plugin.settings = { ...this.plugin.settings, defaultTag: value };
         await this.plugin.saveSettings();
       });
-  });
-
-// File selection (markdown only)
-new Setting(containerEl)
-  .setName('Default template')
-  .addText((text) => {
-    new FileSuggest(this.app, text.inputEl, ['md']);
-    text.setValue(this.plugin.settings.defaultTemplate)
-      .onChange(async (v) => {
-        this.plugin.settings.defaultTemplate = v;
-        await this.plugin.saveSettings();
-      });
-  });
+    });
+  },
+},
 ```
 
-**Tips:**
-- `getAllLoadedFiles()` returns both folders and files, `getFiles()` returns files only
-- `.slice(0, 20)` limits results → performance protection for large vaults
-- `inputEl.trigger('input')` is an Obsidian extension method that properly triggers Setting's `onChange`
+## CodeMirror 6 editor integration
 
----
-
-## CodeMirror 6 Editor Integration
+`@codemirror/*` and `@lezer/*` are provided by Obsidian at runtime: keep them `external` in the build so they are not bundled. Install the ones you import as `devDependencies` at the exact versions `obsidian` lists as peers (`npm view obsidian peerDependencies` — 2026-11: `@codemirror/state` 6.7.6, `@codemirror/view` 6.43.13); the linter warns about an import that is in no dependency list.
 
 ```typescript
+import type { Extension } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { Extension } from '@codemirror/state';
 
-export function createEditorExtension(plugin: YourPlugin): Extension {
+export function createEditorExtension(onChange: (view: EditorView) => void): Extension {
   return EditorView.updateListener.of((update) => {
-    if (update.docChanged) plugin.onDocChange(update.view);
+    if (update.docChanged) onChange(update.view);
   });
 }
 
-// In main.ts onload
-this.registerEditorExtension(createEditorExtension(this));
+// main.ts — register one array and mutate it in place to reconfigure
+private editorExtension: Extension[] = [];
 
-// WARNING: Must call when changing editor extensions
-this.editorExtension.length = 0;
-this.editorExtension.push(newExtension);
-this.app.workspace.updateOptions();
+onload(): void {
+  this.registerEditorExtension(this.editorExtension);
+}
+
+updateEditorExtension(): void {
+  this.editorExtension.length = 0; // keep the same array reference
+  this.editorExtension.push(createEditorExtension((view) => this.onDocChange(view)));
+  this.app.workspace.updateOptions(); // flush to all open editors
+}
 ```

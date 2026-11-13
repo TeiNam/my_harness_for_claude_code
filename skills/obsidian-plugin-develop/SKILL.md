@@ -1,310 +1,457 @@
 ---
 name: obsidian-plugin-dev
 description: >
-  Obsidian plugin development best practices guide. Covers TypeScript, i18n multilingual support, and Chromium optimization for a complete plugin development workflow. Use this skill whenever the user mentions Obsidian plugin creation, development, modification, or publishing. Actively apply this skill to all requests containing keywords such as "obsidian plugin", "plugin development", "BRAT", "obsidian API", "plugin publishing", or "community plugin".
+  Use when creating, modifying, reviewing, releasing, or submitting an Obsidian community plugin, and before tagging a release or submitting to the community directory. Covers the automated review (what blocks installation), manifest rules, declarative settings (1.13+), i18n, core API patterns, build, and release. Triggers: "obsidian plugin", "옵시디언 플러그인", "community plugin", "community directory", "plugin review", "BRAT", "obsidian API", "eslint-plugin-obsidianmd".
 origin: harness
 workloads: [frontend, obsidian]
 ---
 
-# Obsidian Plugin Development — Best Practices
+# Obsidian Plugin Development
 
-## Overview
-
-This skill covers the entire lifecycle of Obsidian plugin development.
-It reflects community plugin review criteria (Developer Policies, Submission Requirements, Plugin Guidelines — synced 2026-09).
-Note: Developer Policies and Submission Requirements moved under `Community directory/` on docs.obsidian.md; plugins are now submitted via the community directory with automated review, not an obsidian-releases PR (see `release-checklist.md`).
-
----
+Synced 2026-11-13 against the official sources: developer docs (`obsidianmd/obsidian-developer-docs`, 2026-10-21), the review linter `eslint-plugin-obsidianmd` 0.5.1, `obsidian` typings 1.14.4, and the current sample plugin. The example code in this skill was type-checked, linted with the official plugin (0 findings), and built before it was written down.
 
 ## Safety
 
-A GitHub release or community directory submission is public and starts automated review. Run `release-checklist.md` end to end, then tag, release, or submit only after the user approves.
+- A GitHub release and a community directory submission are public and start the automated review. Run the "Release workflow" below end to end, then tag, release, or submit only after the user approves.
+- A published plugin `id` can never change (it would orphan every install, its settings, and its hotkeys). Settle the `id` and `name` with the user before the first submission.
+- Command IDs are stable too: do not rename one after release, users' hotkeys point at it.
+
+## Toolchain
+
+Use the newest versions that the review tooling accepts. Look them up (`npm view <pkg> dist-tags.latest`); the pins below are what was verified on 2026-11-13.
+
+| Tool | Use | Constraint |
+|------|-----|-----------|
+| `obsidian` | latest (1.14.4) | Types only; the linter reads them for `no-unsupported-api` |
+| `eslint-plugin-obsidianmd` | latest (0.5.1) | The same rules the directory scanner runs |
+| `typescript` | latest **6.0.x** (6.0.3) | Not 7: `typescript-eslint` 8 requires `<6.1.0`, npm refuses `typescript@7` |
+| `eslint` | 10.x or 9.x | On 10, npm prints `ERESOLVE` peer warnings (harmless); with `strict-peer-deps` use 9 |
+| `esbuild` | latest (0.28.2) | |
+| Node.js | 20.19+, 22.13+, or 24+ | Node 18 is no longer supported by the linter |
+
+TypeScript 6 changes two things the older sample code relied on:
+
+- `moment()` imported from `obsidian` is not callable (namespace import under forced `esModuleInterop`). Call `window.moment()` instead. Never `import moment from 'moment'`.
+- `@types/*` are no longer picked up automatically. A desktop-only plugin that uses Node APIs adds `"types": ["node"]` to `tsconfig.json`.
 
 ## Project Structure
 
 ```
 your-plugin/
 ├── src/
-│   ├── main.ts              # Plugin entry point
-│   ├── settings.ts          # Settings data & types
-│   ├── settings-tab.ts      # Settings tab UI
-│   ├── i18n/
-│   │   ├── index.ts         # i18n loader
-│   │   ├── en.ts            # English (default — must be complete)
-│   │   └── ko.ts            # Korean
-│   ├── modals/
-│   ├── views/
-│   └── utils/
-├── styles.css
+│   ├── main.ts              # Lifecycle only: onload, registrations
+│   ├── settings.ts          # Settings interface + defaults
+│   ├── settings-tab.ts      # Declarative settings tab
+│   ├── i18n/                # en.ts (complete), ko.ts, index.ts
+│   ├── views/  modals/  utils/
+├── styles.css               # All CSS lives here (no <style> elements)
 ├── manifest.json
-├── versions.json
-├── LICENSE                   # WARNING: Required — rejected without it
+├── versions.json            # Only changes when minAppVersion changes
+├── LICENSE                  # Required; a license GitHub recognizes
+├── README.md                # Required; excerpt shown on the listing
+├── eslint.config.mjs
 ├── esbuild.config.mjs
-├── package.json
-└── tsconfig.json
+├── tsconfig.json
+└── package.json             # "build" must be the production build
 ```
 
----
+Do not commit `main.js` in a TypeScript project: it is build output and belongs in the release (the scanner warns). Keep `main.ts` minimal and split files past ~300 lines.
 
-## 1⃣ manifest.json
+## manifest.json
 
 ```json
 {
-  "id": "your-plugin-id",
-  "name": "Your Plugin Name",
+  "id": "clip-notes",
+  "name": "Clip Notes",
   "version": "1.0.0",
-  "minAppVersion": "1.4.0",
+  "minAppVersion": "1.13.2",
   "description": "Generate notes from clipboard content with templates.",
-  "author": "yourname",
-  "authorUrl": "https://github.com/yourname",
+  "author": "Your Name",
+  "authorUrl": "https://example.com",
   "isDesktopOnly": false
 }
 ```
 
-**Review criteria:**
-- `id`: lowercase + hyphens only, unique across all plugins, must NOT end with `plugin`, must NOT contain `obsidian`
-- `name`: unique across all plugins AND themes, no "Plugin" word, no "Obsidian" (including "Obsi-"/"-sidian" variants), no emoji, no punctuation except hyphen/`+`/parentheses, Basic Latin recommended, no core-feature names ("Live Preview" etc.)
-- `description`: max 250 chars, ends with period (`.`), starts with action sentence, correct trademark capitalization ("Obsidian", "Markdown", "PDF")
-  - PASS: `"Translate selected text into multiple languages."`
-  - FAIL: `"This is a plugin..."`, no emoji/special characters
-- `minAppVersion`: set according to the APIs used (if unknown, use the latest stable build number)
-- `isDesktopOnly`: must be `true` when using Node.js/Electron APIs
-- `fundingUrl`: sponsorship service links only (string, or label→URL object for multiple), omit if unnecessary
-- `version`: SemVer `x.y.z` only — release tag must match exactly
+Required: `id`, `name`, `version`, `minAppVersion`, `description`, `author`, `isDesktopOnly`. Optional: `authorUrl`, `fundingUrl`, `helpUrl`. Any other field is reported.
 
----
+- `id`: lowercase letters and hyphens, unique, does not contain `obsidian`, does not end with `plugin`. For local development the plugin folder name must equal the `id`.
+- `name`: unique across plugins and themes; no "Obsidian" or parts of it ("Obsi-", "-sidian", a leading "Ob"), no "Plugin"; Basic Latin; no emoji or punctuation except hyphen, `+`, parentheses; not a core feature name ("Live Preview", "Bases"). The name can be changed later in `manifest.json`; an invalid new name delists the plugin.
+- `description`: 10–250 characters, ends with a period, starts with an action ("Generate…", "Sync…"), does not contain "Obsidian", does not refer to itself ("This plugin…", "A plugin that…"), does not repeat or start with the name, no emoji.
+- `minAppVersion`: the lowest version that has every API you call. The linter reports any API newer than this (`no-unsupported-api`), so either raise it or guard with `requireApiVersion()`. Declarative settings need `1.13.0`, the `secret` control `1.13.2`.
+- `isDesktopOnly`: `true` if you use Node.js or Electron APIs without a platform guard.
+- `fundingUrl`: only real funding links (string, or `{ "Label": "url" }`); omit otherwise.
+- `version`: `x.y.z` only. The release tag must be identical, with no leading `v`.
 
-## 2⃣ Strictly Prohibited (Immediate Review Rejection)
+## Automated Review
 
-| Prohibited | Alternative |
-|------------|-------------|
-| `innerHTML` / `outerHTML` / `insertAdjacentHTML` | `createEl()` / `createDiv()` / `setText()` |
-| `window.app` / global `app` | `this.app` |
-| `var` | `const` / `let` |
-| `console.log/warn/debug` | Only error logs (`console.error`) allowed |
-| `workspace.activeLeaf` | `getActiveViewOfType(MarkdownView)` |
-| Storing view reference in `registerView()` | Return `new MyView(leaf)` in callback each time |
-| `detachLeavesOfType` in `onunload()` | Do not call (prevents leaf restoration) |
-| Default hotkeys on commands | Let users configure their own |
-| Hardcoded styles `el.style.color` | CSS classes + `var(--text-normal)` |
-| Plugin ID prefix in command IDs | Bare ID — Obsidian auto-prefixes |
-| Sample-plugin remnants (`MyPlugin`, `SampleSettingTab`) | Rename/remove all placeholder code before submission |
-| Node `crypto` / Electron clipboard | `SubtleCrypto` / `navigator.clipboard.readText()/writeText()` |
-| Code obfuscation | Prohibited |
-| Client telemetry / dynamic ads / self-update | Prohibited |
+Every release is scanned in four sections: **Manifest**, **Releases**, **Source code**, **Build verification** (the scanner runs your `build` script and checks that the release assets match the committed source). Each result is an Error, Warning, Recommendation, or Pass. **Errors make the plugin uninstallable until fixed**; warnings and disclosures appear on the public scorecard.
 
-> `eval()` / `new Function()`: not listed in the current official docs, but still avoid — security (CSP/XSS) risk.
+The source-code section is `eslint-plugin-obsidianmd`. Run it locally before every release (setup and the full rule list: `review-rules.md`).
 
----
+### Errors
 
-## 3⃣ i18n — Multilingual Support
+| Do not | Do instead |
+|--------|-----------|
+| `eval()`, `new Function()`, string arguments to timers | Plain functions |
+| `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write` | `createEl()` / `createDiv()` / `createSpan()` / `setText()`; `el.empty()` to clear |
+| Creating `<style>` or `<link>` elements | `styles.css` (Obsidian loads it) |
+| Regex lookbehind `(?<=…)` in a mobile-capable plugin | Rewrite; on iOS < 16.4 it stops the whole plugin from loading |
+| `eslint-disable` with no rule name, or with no explanation | `// eslint-disable-next-line rule-name -- reason` |
+| Sample leftovers (`MyPlugin`, `SampleSettingTab`, sample commands) | Rename and delete |
+| `el.style.color = …` and other fixed inline styles | CSS classes + `var(--text-normal)`; `setCssProps()` for dynamic values |
+| HTML headings in settings; a "General", "Settings", or plugin-name heading | No top heading; `setHeading()` or a `group` for later sections |
+| `navigator.userAgent` / `navigator.platform` for OS detection | `Platform.isMacOS`, `Platform.isMobile`, … |
+| Passing the plugin or `new Component()` to `MarkdownRenderer.render()` | Pass the view or modal that shows the content |
+| `detachLeavesOfType()` in `onunload()` | Nothing: Obsidian restores the leaves |
+| Storing a view instance on the plugin | Return `new MyView(leaf)` from `registerView`; look it up with `getLeavesOfType()` |
+| Calling an API newer than `minAppVersion` | Raise `minAppVersion` or guard with `requireApiVersion()` |
 
-> Place **language selection as the first option** in the settings tab.
+### Warnings (fix them: they show on the scorecard)
 
-### i18n/en.ts (Default language)
+- `console.log` — only `console.warn`, `console.error`, and `console.debug` are accepted.
+- Global `app` / `window.app` → `this.app`. `globalThis` → `window`.
+- `fetch`, `axios`, `got`, `ky`, `node-fetch` → `requestUrl()`.
+- `localStorage` → `app.saveLocalStorage()` / `app.loadLocalStorage()` (per vault).
+- Command ID or name containing the plugin ID/name or the word "command"; default hotkeys.
+- `as TFile` / `as TFolder` casts → `instanceof` checks.
+- `vault.delete()` / `vault.trash()` → `fileManager.trashFile()`.
+- Hardcoded `.obsidian` → `vault.configDir`.
+- `getFiles().find(…)` to locate a path → `getFileByPath()` / `getFolderByPath()`.
+- Bare `setTimeout`/`setInterval`/`requestAnimationFrame` → `window.setTimeout(…)`; `document` → `activeDocument` or `el.doc`; `x instanceof HTMLElement` → `x.instanceOf(HTMLElement)` (pop-out windows).
+- Node built-ins imported without a `Platform.isDesktopApp` guard (unless `isDesktopOnly`).
+- `Object.assign(DEFAULT_SETTINGS, data)` (mutates the defaults) → `{ ...DEFAULT_SETTINGS, ...data }`.
+- A settings tab with only `display()`; `this.display()` to refresh → `getSettingDefinitions()` and `this.update()`.
+- `editor-paste` / `editor-drop` handlers that skip `evt.defaultPrevented` or `evt.preventDefault()`.
+
+### Policy (removal from the directory)
+
+Not allowed at all: obfuscated code, ads loaded from the network, static ads outside the plugin's own UI, client-side telemetry, self-updating or installing dependencies at runtime. Allowed only when disclosed in the README: see "README Disclosures".
+
+## i18n
+
+Follow the language the user chose in Obsidian with `getLanguage()` (1.8.7+), not `navigator.language` or `localStorage.getItem('language')`. Keep a language override as the first setting.
 
 ```typescript
+// i18n/en.ts — the default language, must be complete
 export const en = {
   settings: {
     language: {
       name: 'Language',
-      desc: 'Select the display language. Restart may be required.',
-      options: { en: 'English', ko: '한국어' },
+      desc: 'Select the display language.',
+      options: { auto: 'Same as the app', en: 'English', ko: '한국어' },
     },
-    featureX: { name: 'Feature X', desc: 'Description of feature X.' },
+    templateFolder: { name: 'Template folder location', desc: 'Folder that holds your note templates.' },
+    openOnLaunch: { name: 'Open panel on launch' },
+    advanced: { heading: 'Advanced' },
+    apiKey: { name: 'API key', desc: 'Select a secret to use for the remote service.' },
   },
   commands: { openPanel: 'Open panel' },
-  ui: { confirm: 'Confirm', cancel: 'Cancel', loading: 'Loading...', error: 'An error occurred.' },
+  ui: { error: 'An error occurred.' },
 } as const;
 
-export type Translations = typeof en;
+// Same keys, any strings: a missing key in another locale is a compile error.
+type Widen<T> = T extends string ? string : { [K in keyof T]: Widen<T[K]> };
+export type Translations = Widen<typeof en>;
 ```
 
-### i18n/ko.ts — Prevent missing keys with `Translations` type
-
 ```typescript
-import type { Translations } from './en';
-export const ko: Translations = { /* full key mapping */ };
-```
-
-### i18n/index.ts
-
-```typescript
+// i18n/index.ts
+import { getLanguage } from 'obsidian';
 import { en, type Translations } from './en';
-import { ko } from './ko';
+import { ko } from './ko'; // export const ko: Translations = { … }
+
 export type SupportedLocale = 'en' | 'ko';
+export type LanguageSetting = SupportedLocale | 'auto';
+
 const LOCALES: Record<SupportedLocale, Translations> = { en, ko };
 
-export function detectLocale(settingLocale?: string): SupportedLocale {
-  if (settingLocale && settingLocale in LOCALES) return settingLocale as SupportedLocale;
-  const sys = navigator.language.split('-')[0];
-  return sys in LOCALES ? (sys as SupportedLocale) : 'en';
+function isSupported(code: string): code is SupportedLocale {
+  return code in LOCALES;
+}
+
+export function detectLocale(setting: LanguageSetting): SupportedLocale {
+  if (setting !== 'auto') return setting;
+  const appLanguage = getLanguage(); // e.g. "ko", "pt-BR"
+  if (isSupported(appLanguage)) return appLanguage;
+  const base = appLanguage.split('-')[0] ?? 'en';
+  return isSupported(base) ? base : 'en';
 }
 
 export function createI18n(locale: SupportedLocale): Translations {
-  return LOCALES[locale] ?? en;
+  return LOCALES[locale];
 }
+
+export type { Translations };
 ```
 
-Advanced patterns (plurals, dates, view refresh on language change): `i18n-patterns.md`
+UI text is sentence case ("Template folder location", not "Template Folder Location"). The scanner skips `i18n/`, `locales/`, `translations/` directories, so the wording there is on you. Plurals, dates, and refreshing open views: `i18n-patterns.md`.
 
----
-
-## 4⃣ main.ts — Plugin Entry Point
+## main.ts
 
 ```typescript
-import { Plugin } from 'obsidian';
-import { createI18n, detectLocale } from './i18n';
-import { DEFAULT_SETTINGS, type YourPluginSettings } from './settings';
-import { YourSettingTab } from './settings-tab';
+import { Notice, Plugin, type TFile } from 'obsidian';
+import { createI18n, detectLocale, type LanguageSetting, type Translations } from './i18n';
+import { DEFAULT_SETTINGS, type ClipNotesSettings } from './settings';
+import { ClipNotesSettingTab } from './settings-tab';
 
-export default class YourPlugin extends Plugin {
-  settings!: YourPluginSettings;
-  t!: ReturnType<typeof createI18n>;
+export default class ClipNotesPlugin extends Plugin {
+  settings!: ClipNotesSettings;
+  t!: Translations;
 
   async onload(): Promise<void> {
     await this.loadSettings();
     this.t = createI18n(detectLocale(this.settings.language));
-    this.addSettingTab(new YourSettingTab(this.app, this));
+    this.addSettingTab(new ClipNotesSettingTab(this.app, this));
 
-    // PASS: Register with registerEvent → auto-cleanup on unload
+    this.addCommand({
+      id: 'open-panel', // no plugin id, no "command", no default hotkey
+      name: this.t.commands.openPanel,
+      callback: () => this.openPanel(),
+    });
+
+    // Startup work and vault 'create' listeners wait for the layout:
+    // during startup Obsidian fires 'create' for every existing file.
+    this.app.workspace.onLayoutReady(() => {
+      this.registerEvent(
+        this.app.vault.on('create', (file) => {
+          void this.onFileCreated(file.path);
+        }),
+      );
+      if (this.settings.openOnLaunch) this.openPanel();
+    });
+
     this.registerEvent(
       this.app.workspace.on('file-open', (file) => {
         if (file) this.onFileOpen(file);
-      })
+      }),
     );
-
-    this.addCommand({
-      id: 'open-panel',
-      name: this.t.commands.openPanel,
-      callback: () => this.openPanel(),
-      // WARNING: Do not add hotkeys property
-    });
   }
 
-  onunload(): void {
-    // Only clean up manually added resources — do not call detachLeavesOfType
-  }
+  // No onunload(): everything above is registered and cleaned up by Obsidian.
 
   async loadSettings(): Promise<void> {
-    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    const stored = (await this.loadData()) as Partial<ClipNotesSettings> | null;
+    this.settings = { ...DEFAULT_SETTINGS, ...stored };
   }
 
   async saveSettings(): Promise<void> {
     await this.saveData(this.settings);
   }
+
+  async changeLanguage(language: LanguageSetting): Promise<void> {
+    this.settings = { ...this.settings, language };
+    this.t = createI18n(detectLocale(language));
+    await this.saveSettings();
+  }
+
+  /** The secret value lives in SecretStorage; settings only hold its name. */
+  getApiKey(): string | null {
+    return this.app.secretStorage.getSecret(this.settings.apiKeySecret);
+  }
+
+  private openPanel(): void {
+    new Notice(this.t.commands.openPanel);
+  }
+
+  private onFileOpen(file: TFile): void {
+    console.debug('[clip-notes] opened', file.path);
+  }
+
+  private async onFileCreated(path: string): Promise<void> {
+    const file = this.app.vault.getFileByPath(path);
+    if (!file) return;
+    await this.app.vault.process(file, (content) => content.trimEnd() + '\n');
+  }
 }
 ```
 
----
+Keep `onload()` to registrations: it runs before the user can interact with the app. Anything created outside the `register*` helpers (workers, sockets, third-party library instances) must be released in `onunload()`.
 
-## 5⃣ settings-tab.ts
+## settings-tab.ts (declarative, 1.13.0+)
 
-```typescript
-// PASS: NO top-level heading — never add "General", "Settings", or the plugin name as a heading
-// PASS: General settings go at the very top WITHOUT a heading
-// PASS: Sub-section headings (only when there are 2+ real sections): setHeading() (createEl("h2") prohibited)
-// PASS: Sentence case: "Template folder location" (not Title Case)
-
-new Setting(containerEl)
-  .setName(t.settings.language.name)       // #1: Language selection
-  .setDesc(t.settings.language.desc)
-  .addDropdown((dd) => {
-    Object.entries(t.settings.language.options).forEach(([v, l]) => dd.addOption(v, l));
-    dd.setValue(this.plugin.settings.language).onChange(async (v) => {
-      this.plugin.settings.language = v as SupportedLocale;
-      this.plugin.t = createI18n(v as SupportedLocale);
-      await this.plugin.saveSettings();
-      this.display();   // Refresh settings tab
-    });
-  });
-```
-
----
-
-## 6⃣ Core API Patterns (Review Criteria Applied)
+`display()` is deprecated since 1.13.0. Describe the settings with `getSettingDefinitions()`; Obsidian renders them, indexes them for settings search, and saves `control` values to `this.plugin.settings[key]` for you.
 
 ```typescript
-// Find file — no traversal, direct lookup
-const file = this.app.vault.getFileByPath(normalizePath(userInput));
+import { type App, PluginSettingTab, type SettingDefinitionItem } from 'obsidian';
+import type { LanguageSetting } from './i18n';
+import type ClipNotesPlugin from './main';
 
-// Background file modification — atomic edit with process() (instead of modify)
-await this.app.vault.process(file, (content) => content.replace('old', 'new'));
+export class ClipNotesSettingTab extends PluginSettingTab {
+  plugin: ClipNotesPlugin;
 
-// Frontmatter modification — do not parse YAML directly
-await this.app.fileManager.processFrontMatter(file, (fm) => { fm.tags = ['new']; });
+  constructor(app: App, plugin: ClipNotesPlugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
 
-// Network — prefer requestUrl() (CORS bypass, mobile compatible)
-import { requestUrl } from 'obsidian';
-const res = await requestUrl({ url: 'https://api.example.com/data' });
-// Use fetch() only when requestUrl doesn't support it (e.g., SSE), with justification comment
-
-// Editor access — do not access activeLeaf directly
-const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-
-// User input paths → normalizePath required
-import { normalizePath } from 'obsidian';
-
-// Vault API > Adapter API (caching, serial execution for safety)
-// Use adapter only for unavoidable cases like hidden files
+  // Called on every update() and once at registration for settings search: keep it cheap.
+  getSettingDefinitions(): SettingDefinitionItem[] {
+    const t = this.plugin.t;
+    return [
+      // General settings first, with no heading.
+      {
+        name: t.settings.language.name,
+        desc: t.settings.language.desc,
+        // render: this setting has a side effect (rebuild the translations), so no `control`.
+        render: (setting) => {
+          setting.addDropdown((dropdown) => {
+            dropdown
+              .addOptions(t.settings.language.options)
+              .setValue(this.plugin.settings.language)
+              .onChange(async (value) => {
+                await this.plugin.changeLanguage(value as LanguageSetting);
+                this.update(); // re-run getSettingDefinitions() with the new strings
+              });
+          });
+        },
+      },
+      {
+        name: t.settings.templateFolder.name,
+        desc: t.settings.templateFolder.desc,
+        // control: Obsidian reads/writes this.plugin.settings[key] and calls saveData() itself.
+        control: { type: 'folder', key: 'templateFolder' },
+      },
+      {
+        name: t.settings.openOnLaunch.name,
+        control: { type: 'toggle', key: 'openOnLaunch' },
+      },
+      // Later sections get a heading. No "settings" in the heading text.
+      {
+        type: 'group',
+        heading: t.settings.advanced.heading,
+        items: [
+          {
+            name: t.settings.apiKey.name,
+            desc: t.settings.apiKey.desc,
+            control: { type: 'secret', key: 'apiKeySecret' }, // 1.13.2+
+          },
+        ],
+      },
+    ];
+  }
+}
 ```
 
----
+- Control types: `toggle`, `text`, `textarea`, `number`, `slider`, `dropdown`, `file`, `folder`, `color`, `secret`. Each takes `key`, optional `defaultValue`, `validate` (return a string to reject and show it inline), and `disabled`.
+- One definition has exactly one of `control`, `render` (full control of the row; **does not auto-save**), or `action` (clickable row). Use `visible: () => boolean` to hide a row based on another setting.
+- Structure with `type: 'group'`, `type: 'list'` (add/delete/reorder), and `type: 'page'` (sub-page).
+- Refresh with `this.update()`. `this.display()` does nothing once definitions exist.
+- `validate` is a UI gate only. Re-validate stored data in `loadSettings()`.
+- Supporting Obsidian below 1.13.0: keep the old `display()` next to `getSettingDefinitions()` (1.13+ skips `display()`), and keep both in sync. Prefer raising `minAppVersion` instead.
+- Style: one control per row, descriptions of one sentence, no textarea in the main tab, warnings and multi-field input go in a modal.
 
-## 7⃣ README Required Disclosures
+## Core API Patterns
 
-If applicable, the following must be stated in the README:
-Network usage (which service, why), paid features, account requirements, vault-external file access, server-side telemetry (include privacy policy link), static ads in the interface, closed-source code (allowed case-by-case only with README disclosure)
+```typescript
+// Files — direct lookup, atomic background edits, user's trash setting
+const file = app.vault.getFileByPath(normalizePath(userPath));
+await app.vault.process(file, (content) => content.replace('old', 'new'));
+await app.fileManager.processFrontMatter(file, (fm: Record<string, unknown>) => { fm['tags'] = ['new']; });
+await app.fileManager.trashFile(file);
+const pluginDir = `${app.vault.configDir}/plugins/clip-notes`;
 
----
+// Active note — use the Editor API (keeps cursor, selection, folds), not vault.modify()
+const editor = app.workspace.getActiveViewOfType(MarkdownView)?.editor;
 
-## 8⃣ Build & Deploy
+// Views are deferred until visible (1.7.2+) — check with instanceof, never cast leaf.view
+const leaf = app.workspace.getLeavesOfType(VIEW_TYPE).first();
+if (leaf) {
+  await app.workspace.revealLeaf(leaf); // loads the view
+  if (leaf.view instanceof ClipNotesView) leaf.view.refresh();
+}
 
-### esbuild.config.mjs
+// Network, per-vault storage, secrets
+const response = await requestUrl({ url: 'https://api.example.com/data' });
+app.saveLocalStorage('clip-notes-last-run', String(Date.now()));
+const apiKey = app.secretStorage.getSecret(settings.apiKeySecret); // never store keys in data.json
+
+// Platform — guard Node modules instead of setting isDesktopOnly for one feature
+if (Platform.isDesktopApp) {
+  const { homedir } = await import('node:os');
+}
+
+// Paste/drop — let other handlers win, and claim the event when you insert
+plugin.registerEvent(app.workspace.on('editor-paste', (evt, editor) => {
+  if (evt.defaultPrevented) return;
+  editor.replaceSelection(transform(evt.clipboardData?.getData('text/plain') ?? ''));
+  evt.preventDefault();
+}));
+```
+
+Prefer the Vault API over `vault.adapter` (cached, serialized). Prefer `async`/`await` over promise chains. More patterns (pop-out windows, Component lifecycle, custom suggesters, CodeMirror): `typescript-chromium.md`.
+
+## README Disclosures
+
+State each that applies, with the reason: network use (which services, why), required payment or account, access to files outside the vault, static ads inside the plugin's UI, server-side telemetry (link a privacy policy), closed-source code (case by case). The scanner lists clipboard and network access as disclosures on the scorecard regardless. In the listing, set the payment type honestly: **Free**, **Optional payment** (a paid third-party service or paid extras), or **Paid**.
+
+## Build
 
 ```javascript
+// esbuild.config.mjs
 import esbuild from 'esbuild';
-import builtins from 'builtin-modules';
+import process from 'node:process';
+import { builtinModules } from 'node:module';
+
 const prod = process.argv[2] === 'production';
 
-esbuild.build({
+const context = await esbuild.context({
+  banner: { js: '/* THIS IS A GENERATED/BUNDLED FILE BY ESBUILD. Source: see the GitHub repository. */' },
   entryPoints: ['src/main.ts'],
   bundle: true,
-  external: ['obsidian', 'electron', '@codemirror/*', '@lezer/*', ...builtins],
+  external: [
+    'obsidian', 'electron',
+    '@codemirror/autocomplete', '@codemirror/collab', '@codemirror/commands', '@codemirror/language',
+    '@codemirror/lint', '@codemirror/search', '@codemirror/state', '@codemirror/view',
+    '@lezer/common', '@lezer/highlight', '@lezer/lr',
+    ...builtinModules,
+  ],
   format: 'cjs',
-  target: 'chrome106',
+  target: 'es2021',
+  logLevel: 'info',
   sourcemap: prod ? false : 'inline',
   treeShaking: true,
-  outfile: 'main.js',
   minify: prod,
   define: { DEV: JSON.stringify(!prod) },
-}).catch(() => process.exit(1));
+  outfile: 'main.js',
+});
+
+if (prod) {
+  await context.rebuild();
+  process.exit(0);
+} else {
+  await context.watch();
+}
 ```
 
-Deployment details: `release-checklist.md`
+`package.json` scripts: `"dev": "node esbuild.config.mjs"`, `"build": "tsc --noEmit --skipLibCheck && node esbuild.config.mjs production"`, `"lint": "eslint ."`. The scanner builds with the first of `build`, `build:plugin`, `compile` it finds, so `build` must be the production build. Run ESLint from the project root (`eslint .`, not `eslint src`): the manifest and LICENSE checks only run that way.
 
-A GitHub release or directory submission is public and starts automated review. Run every item in `release-checklist.md`, fix failures and re-run the list, then publish (tag push, GitHub release, directory submit) only after the user approves.
+## Release Workflow
 
----
+Order matters. If a step fails, fix it and go back to step 1.
 
-## 9⃣ Practical Tips
+1. `npm run build` — type-check and production bundle pass.
+2. `npm run lint` — zero errors; resolve warnings or justify each one.
+3. Walk `release-checklist.md` (manifest, README disclosures, LICENSE, versions).
+4. Push, then in the community directory run **Review branch → Run preview scan** on the branch. Fix every Error and go back to step 1.
+5. Show the user the version, tag, and what will be published. Wait for approval.
+6. Tag (`x.y.z`, no `v`) → the release workflow builds, attests, and drafts the release → publish it.
+7. First release only: submit the repository in the community directory. Later releases are picked up automatically.
 
-1. **`Vault.process()`**: Atomic modification instead of read→modify→write. Prevents concurrent edit conflicts
-2. **When changing editor extensions**: Must call `this.app.workspace.updateOptions()`
-3. **Mobile**: Regex lookbehind not supported on iOS < 16.4 → implement fallback
-4. **Debug branching**: `declare const DEV: boolean;` for automatic removal in production
-5. **Settings migration**: Version check + conversion in `loadSettings()` on schema changes
-6. **Command callback types**: `callback` (unconditional), `checkCallback` (conditional), `editorCallback` (editor required)
-7. **DocumentFragment**: For 100+ items, collect in fragment and append once
-8. **CSS variables**: Use `var(--background-primary)`, `var(--text-accent)` etc. for automatic theme compatibility
-9. **Path input with AbstractInputSuggest**: Connect vault folder/file autocomplete to text fields → see `typescript-chromium.md`
+## Practical Tips
 
----
+1. Mobile: no Node/Electron APIs, no regex lookbehind, keep memory small; test on iOS and Android when `isDesktopOnly` is `false`.
+2. Editor extensions: mutate the registered array in place, then `app.workspace.updateOptions()`.
+3. Command callbacks: `callback` (always), `checkCallback` (conditional — use its `checking` argument), `editorCallback` (needs an editor).
+4. Settings migration: version the stored data and convert in `loadSettings()`.
+5. Large lists: build in `createFragment()` and append once.
+6. React to settings changed by sync or another device with `onExternalSettingsChange()` (1.5.7+).
+7. Debug-only code: `declare const DEV: boolean;` and `if (DEV) { … }` — esbuild removes it in production.
 
 ## Reference Files
 
-| File | Contents |
-|------|----------|
-| `i18n-patterns.md` | Plurals, date formatting, view refresh on language change |
-| `typescript-chromium.md` | Type patterns, DOM optimization, memory management, CSS variables |
-| `release-checklist.md` | Community submission checklist + full review criteria |
+| File | Open when |
+|------|-----------|
+| `review-rules.md` | Setting up ESLint, reading a review result, or checking how a specific rule is scored |
+| `release-checklist.md` | Before tagging a release, submitting, or managing the listing (ownership, private source, archive) |
+| `typescript-chromium.md` | Writing views, DOM, pop-out window support, Component lifecycle, suggesters, CodeMirror |
+| `i18n-patterns.md` | Plurals, dates, refreshing views after a language change, adding a language |

@@ -1,5 +1,7 @@
 # i18n Advanced Patterns
 
+The base setup (`getLanguage()`, the `Translations` type, the `auto` language setting) is in SKILL.md → i18n.
+
 ## Plural Handling
 
 Obsidian is Chromium-based, so `Intl.PluralRules` is available:
@@ -53,19 +55,20 @@ export function formatRelativeTime(ms: number, locale: string): string {
 
 ```typescript
 // main.ts
-async changeLanguage(locale: SupportedLocale): Promise<void> {
-  this.settings.language = locale;
-  this.t = createI18n(locale);
+async changeLanguage(language: LanguageSetting): Promise<void> {
+  this.settings = { ...this.settings, language };
+  this.t = createI18n(detectLocale(language));
   await this.saveSettings();
 
-  // Refresh open custom views
-  this.app.workspace.getLeavesOfType(YOUR_VIEW_TYPE).forEach((leaf) => {
-    if (leaf.view instanceof YourView) {
-      leaf.view.onLanguageChange(this.t);
-    }
-  });
+  // Refresh open custom views. Deferred (not yet visible) views are skipped by the
+  // instanceof check and pick up the new strings when they load.
+  for (const leaf of this.app.workspace.getLeavesOfType(YOUR_VIEW_TYPE)) {
+    if (leaf.view instanceof YourView) leaf.view.onLanguageChange(this.t);
+  }
 }
 ```
+
+The settings tab refreshes itself with `this.update()` after calling `changeLanguage()` (not `this.display()`). Command names are fixed at `addCommand()` time; they change on the next plugin load, so say "Restart may be required" only if that matters to your plugin.
 
 ## Missing Translation Detection (Dev Build Only)
 
@@ -75,7 +78,7 @@ function createProxyTranslations(t: Translations): Translations {
   return new Proxy(t, {
     get(target, key) {
       if (!(key in target)) console.warn(`[i18n] Missing key: ${String(key)}`);
-      return (target as any)[key];
+      return Reflect.get(target, key) as unknown;
     },
   });
 }
@@ -87,3 +90,5 @@ function createProxyTranslations(t: Translations): Translations {
 2. Import the `Translations` type for type checking
 3. Add to the `LOCALES` map + `SupportedLocale` type in `i18n/index.ts`
 4. Add option to `language.options` in `en.ts` → apply the same to all translation files
+
+`getLanguage()` returns codes such as `ko`, `ja`, `pt-BR`, `zh-TW`. `detectLocale()` tries the full code first, then the part before the hyphen, then English.
