@@ -64,7 +64,7 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 - **DB (NoSQL)**: `mongodb-guideline`, `dynamodb-guideline` — 스키마 / 인덱스 / 샤딩 / 커넥션
 - **백엔드**: `fastapi-backend-best-practices`(7개 하위 영역), `python-patterns`, `rust-patterns`
-- **프론트엔드**: `obsidian-plugin-develop`(TypeScript + i18n + Chromium + 릴리스 체크리스트), `vite-patterns`, `frontend-patterns`, `frontend-design`(anthropics/skills — 심미적 방향성·타이포그래피)
+- **프론트엔드**: `obsidian-plugin-develop`(자동 리뷰 규칙 + 선언형 설정(1.13+) + i18n + 릴리스·커뮤니티 디렉터리 체크리스트), `vite-patterns`, `frontend-patterns`, `frontend-design`(anthropics/skills — 심미적 방향성·타이포그래피)
 - **랜딩페이지 디자인 (Supanova)**: `taste-skill`, `redesign-skill`, `soft-skill`, `output-skill` — 한글 우선 Standalone HTML + Tailwind CDN 랜딩페이지 생성/리디자인 엔진(origin: supanova-design-skill-main, based on Leonxlnx/taste-skill). `frontend` 워크로드.
 - **SEO/GEO/AEO**: `seo-geo-aeo`(origin: SNLabat/SEO-GEO-AEO-Skill) — SEO·생성형 검색엔진(GEO)·답변엔진(AEO) 3축 웹사이트 감사, Word/PDF 리포트. 기존 `seo` 스킬과 별개, `frontend` 워크로드.
 - **AI / 클라우드**: `claude-api`, `aws-bedrock`, `aws-cloud`, `aws-finops`(FinOps Foundation Framework + AWS 비용관리), `realtime-stt-huggingface`, `cost-aware-llm-pipeline`, `ai-regression-testing`
