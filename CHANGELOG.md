@@ -2,8 +2,13 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-11-13
+
+- feat(skills): obsidian-plugin-develop 를 2026-11 공식 문서·리뷰 린터 기준으로 갱신 (v0.24.0) (#75) (9437726)
+
 ## 2026-11-03
 
+- chore(changelog): 스쿼시 머지 #73 누락분 정정 (#74) (17bbb5f)
 - feat(rules): 의존성은 항상 최신 stable, Python 은 항상 uv (v0.23.0) (#73) (436f820)
 - chore(changelog): 스쿼시 머지 #71 누락분 정정 (#72) (da13266)
 - docs(model-routing): Haiku 5.5 핀 적용·검증 결과 반영 (#71) (25c857b)
