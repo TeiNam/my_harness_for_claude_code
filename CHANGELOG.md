@@ -2,8 +2,13 @@
 
 All notable changes, grouped by commit date.
 
+## 2026-11-15
+
+- feat: Fable 5.2 역할 정의·운영 스킬 + 현재 세대 모델만 쓰도록 고정 (v0.25.0) (#77) (ec12330)
+
 ## 2026-11-13
 
+- chore(changelog): 스쿼시 머지 #75 누락분 정정 (#76) (b8808e0)
 - feat(skills): obsidian-plugin-develop 를 2026-11 공식 문서·리뷰 린터 기준으로 갱신 (v0.24.0) (#75) (9437726)
 
 ## 2026-11-03
