@@ -14,9 +14,12 @@
  *   inert-env        옵트인 훅만 읽는 `HARNESS_*` env 인데 프로파일이 minimal (보고만)
  *   secret-backups   `settings.json.bak.*` 사본에 평문 비밀값이 있는지 (값은 절대 출력하지 않음)
  *   skill-listing    설치된 스킬 description 이 `skillListing*` 캡에 걸리는지 (보고만)
+ *   model-lineup     별칭 핀과 `availableModels` 가 현재 세대(`scripts/lib/model-lineup.js`)인지
+ *                    — 이전 세대 모델을 쓰지 못하게 한다
  *
  * 기본은 **읽기 전용**이고, 조치할 것이 있으면 exit 1 이다(CI 에서 쓸 수 있게).
- * `--apply` 를 주면 안전한 것만 고친다: 프로파일 기록, 죽은 env 제거, 비밀값 든 사본 삭제.
+ * `--apply` 를 주면 안전한 것만 고친다: 프로파일 기록, 죽은 env 제거, 비밀값 든 사본 삭제,
+ * 모델 핀·허용 목록 기록.
  *
  * Usage:
  *   node scripts/install/optimize-settings.js                 점검만 (drift 있으면 exit 1)
@@ -32,6 +35,7 @@ const crypto = require('crypto');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
 const { DEFAULT_HOOK_PROFILE, VALID_HOOK_PROFILES } = require('./merge-hooks');
+const { LINEUP, expectedLineup, stripVariant } = require('../lib/model-lineup');
 
 /** 이름 어디에 있어도 비밀로 보는 긴 단어들 — 부분 문자열로 봐도 오탐이 드물다. */
 const SECRET_WORD = /token|key|secret|password|passwd|credential|bearer/i;
@@ -261,11 +265,54 @@ function findSecretBackups(claudeHome) {
 }
 
 /**
- * @param {{claudeHome: string, settingsPath: string, root: string}} opts
+ * 별칭 핀·허용 목록·기본 모델이 현재 세대인지 본다.
+ * 프로바이더(Bedrock 접두어)는 settings.json 의 env 를 먼저, 없으면 셸 env 를 본다.
  */
-function audit({ claudeHome, settingsPath, root }) {
+function auditModelLineup(settings, processEnv) {
+  const env = { ...processEnv, ...(settings.env || {}) };
+  const expected = expectedLineup(env);
+  const out = [];
+
+  for (const [name, want] of Object.entries(expected.pins)) {
+    const have = settings.env && settings.env[name];
+    if (have === want) continue;
+    out.push({
+      name,
+      detail: have ? `"${have}" 는 현재 세대가 아닙니다 → ${want}` : `고정돼 있지 않습니다 → ${want} (고정하지 않으면 별칭이 다른 세대로 풀릴 수 있습니다)`,
+      fixable: true
+    });
+  }
+
+  const have = Array.isArray(settings.availableModels) ? settings.availableModels : null;
+  const sameSet = have && have.length === expected.availableModels.length && expected.availableModels.every(id => have.includes(id));
+  if (!sameSet) {
+    const extra = (have || []).filter(id => !expected.availableModels.includes(id));
+    out.push({
+      name: 'availableModels',
+      detail: have
+        ? `허용 목록이 현재 세대와 다릅니다${extra.length ? ` (빼야 할 것: ${extra.join(', ')})` : ''} → ${expected.availableModels.join(', ')}`
+        : `허용 목록이 없어 이전 세대 모델 ID 를 직접 지정해 쓸 수 있습니다 → ${expected.availableModels.join(', ')}`,
+      fixable: true
+    });
+  }
+
+  const model = stripVariant(settings.model);
+  if (model && !Object.keys(LINEUP).includes(model) && !expected.availableModels.includes(model)) {
+    out.push({
+      name: 'model',
+      detail: `기본 모델 "${settings.model}" 은 현재 세대가 아닙니다 — 허용 목록에 막혀 다른 모델로 대체됩니다. /model 로 바꾸세요`,
+      fixable: false
+    });
+  }
+  return out;
+}
+
+/**
+ * @param {{claudeHome: string, settingsPath: string, root: string, processEnv?: Record<string, string|undefined>}} opts
+ */
+function audit({ claudeHome, settingsPath, root, processEnv = process.env }) {
   const settings = readJson(settingsPath) || {};
-  const findings = { 'hook-profile': [], 'dead-env': [], 'inert-env': [], 'secret-backups': [], 'skill-listing': [] };
+  const findings = { 'hook-profile': [], 'dead-env': [], 'inert-env': [], 'secret-backups': [], 'skill-listing': [], 'model-lineup': [] };
 
   const profile = String((settings.env && settings.env.HARNESS_HOOK_PROFILE) || '')
     .trim()
@@ -314,18 +361,21 @@ function audit({ claudeHome, settingsPath, root }) {
     });
   }
 
+  findings['model-lineup'] = auditModelLineup(settings, processEnv);
+
   const actionable = Object.values(findings)
     .flat()
     .filter(f => f.fixable).length;
 
-  return { settings, findings, listing, actionable, effectiveProfile };
+  return { settings, findings, listing, actionable, effectiveProfile, processEnv };
 }
 
 /**
- * 고칠 수 있는 것만 적용한다: 프로파일 기록, 죽은 env 제거, 비밀값 든 사본 삭제.
- * 유효하지 않은 프로파일 값은 고치지 않는다 — 사용자 데이터를 덮어쓰지 않는다.
+ * 고칠 수 있는 것만 적용한다: 프로파일 기록, 죽은 env 제거, 비밀값 든 사본 삭제,
+ * 모델 핀·허용 목록 기록. 유효하지 않은 프로파일 값과 기본 모델(`model`)은 고치지
+ * 않는다 — 사용자가 고른 값을 덮어쓰지 않는다.
  */
-function applyFixes({ claudeHome, settingsPath, findings, settings }) {
+function applyFixes({ claudeHome, settingsPath, findings, settings, processEnv = process.env }) {
   const applied = [];
   const next = JSON.parse(JSON.stringify(settings));
 
@@ -341,6 +391,13 @@ function applyFixes({ claudeHome, settingsPath, findings, settings }) {
       applied.push(`env.${f.name} 제거`);
     }
   }
+  if ((findings['model-lineup'] || []).some(f => f.fixable)) {
+    const expected = expectedLineup({ ...processEnv, ...(settings.env || {}) });
+    next.env = { ...(next.env || {}), ...expected.pins };
+    next.availableModels = expected.availableModels;
+    applied.push(`모델 핀 4개와 availableModels 기록 (${expected.availableModels.join(', ')})`);
+  }
+
   if (next.env && Object.keys(next.env).length === 0) delete next.env;
 
   if (applied.length) fs.writeFileSync(settingsPath, `${JSON.stringify(next, null, 2)}\n`, 'utf8');
@@ -406,7 +463,7 @@ function main(argv = process.argv) {
         'optimize-settings.js — settings.json 을 하네스 기준으로 점검/정리',
         '',
         'Flags:',
-        '  --apply                 고칠 수 있는 항목 적용 (프로파일 기록, 죽은 env 제거, 비밀값 사본 삭제)',
+        '  --apply                 고칠 수 있는 항목 적용 (프로파일 기록, 죽은 env 제거, 비밀값 사본 삭제, 모델 핀·허용 목록)',
         '  --json                  기계용 출력',
         '  --claude-home=DIR       점검할 설치 위치 (기본: $CLAUDE_HOME 또는 ~/.claude)',
         '  --settings=PATH         settings.json 경로 직접 지정',
@@ -444,6 +501,7 @@ if (require.main === module) {
 module.exports = {
   parseArgs,
   audit,
+  auditModelLineup,
   applyFixes,
   harnessEnvNamesReadByCode,
   envNamesUsedOnlyByOptionalStack,

@@ -5,7 +5,7 @@
 > Full policy — task tables, agent-class map, orchestration, Codex — lives in
 > [model-routing.md](./model-routing.md). Summary below.
 
-**Haiku 4.5** (~90% of Sonnet capability, ~2x cheaper than Sonnet 5.5):
+**Haiku 5.5** (high-volume, latency-sensitive work; ~20× cheaper than Sonnet 5.5 below 100k prompt tokens):
 - Lightweight agents with frequent invocation
 - Mechanical edits, search, doc scaffolding
 - Worker agents in multi-agent systems
@@ -18,7 +18,7 @@
   spans a detector already flagged, implementing a fix whose cause and remedy
   are known. No search space left → no reason to pay for reasoning depth.
 
-**Opus 5.5** (Workhorse deep-reasoning tier; default effort `medium`; `fable`/Fable 5.1 sits above it per call):
+**Opus 5.5** (Workhorse deep-reasoning tier; default effort `medium`; `fable`/Fable 5.2 sits above it — for what Opus cannot solve, and as orchestrator):
 - Complex architectural decisions
 - Security analysis and adversarial review
 - Ambiguous requirements, system-wide debugging

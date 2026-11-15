@@ -21,31 +21,32 @@ Build applications with the Anthropic Claude API and SDKs.
 
 | Model | ID | Best For |
 |-------|-----|----------|
-| Fable 5.1 | `claude-fable-5-1` | Frontier long-horizon agents — $10/$50, cache read 0.025×, default effort `high`, 1M ctx, 128k out (~2.5× Opus 5.5 per token) |
+| Fable 5.2 | `claude-fable-5-2` | Demanding reasoning and long-horizon agentic work; planner/orchestrator for other models — $8/$40, cache read 0.025× ($0.20), default effort `high`, 1M ctx, 128k out (2× Opus 5.5 per token). Move here when Opus 5.5 at higher effort still falls short |
 | Opus 5.5 | `claude-opus-5-5` | Complex reasoning, architecture, agentic coding — $4/$20, cache read 0.05×, default effort **`medium`**, 1M ctx, 128k out |
 | Sonnet 5.5 | `claude-sonnet-5-5` | Balanced coding, most development tasks — $2/$10 |
-| Haiku 4.5 | `claude-haiku-4-5` | Fast responses, high-volume, cost-sensitive — $1/$5 |
-| Opus 5 / Opus 4.8 (legacy) | `claude-opus-5` / `claude-opus-4-8` | Refusal fallback targets (Fable 5.1 falls back to these); workloads not yet migrated — $5/$25 |
-| Fable 5 (legacy) | `claude-fable-5` | Superseded by Fable 5.1 (same price, cache read 0.1×) |
+| Haiku 5.5 | `claude-haiku-5-5` | High-volume, latency-sensitive: classification, extraction, routing, subagents — $0.10/$0.50 for prompts up to 100k tokens, $0.50/$2.50 above; effort supported (default `medium`) |
 
-Default to Opus 5.5 unless the task needs speed/cost optimization (Sonnet/Haiku). IDs from the 4.6 generation onward (`claude-opus-5-5`, `claude-sonnet-5-5`) are pinned snapshots — no date suffix exists or is needed. On Opus 5 / Sonnet 5.x / Fable 5: thinking is adaptive by default, `budget_tokens` and non-default `temperature`/`top_p`/`top_k` return 400, and assistant prefill is rejected. Handle `stop_reason: "refusal"` on Opus 5.5 / Fable 5.1 (safety classifiers), ideally with the server-side `fallbacks` beta.
+**Use only these four.** Earlier generations (Opus 5 / 4.8, Fable 5.1 / 5, Sonnet 5 and older, Haiku 4.5) are not used in new code. They appear in this skill only where the API names them, such as the server-side refusal-fallback targets.
+
+Default to Opus 5.5 unless the task needs speed/cost optimization (Sonnet/Haiku). IDs from the 4.6 generation onward (`claude-opus-5-5`, `claude-sonnet-5-5`) are pinned snapshots — no date suffix exists or is needed. On Opus 5 / Sonnet 5.x / Fable 5: thinking is adaptive by default, `budget_tokens` and non-default `temperature`/`top_p`/`top_k` return 400, and assistant prefill is rejected. Handle `stop_reason: "refusal"` on Opus 5.5 / Fable 5.2 (safety classifiers), ideally with the server-side `fallbacks` beta.
 
 **Set `effort` explicitly and re-sweep on migration.** Opus 5.5 defaults to `medium` (Opus 5 defaulted to `high`), and level names don't mean the same amount of thinking across models: Opus 5.5 `medium` matches or beats Opus 5 `high` on coding/knowledge evals, and at any given level it thinks *more* per turn — most of all at `xhigh`/`max`. Reserve `xhigh`/`max` for work with a measured gain, and leave room in `max_tokens` (thinking counts toward it; 128k works for long agentic turns). **Sonnet 5.5** defaults to `high` and its levels are recalibrated vs Sonnet 5 (re-sweep, don't carry the old setting): `medium` for well-specified agentic coding, `high` for harder/longer work, `medium`/`low` for latency-sensitive chat. At `low`/`medium` it may stop to check in mid-task or skip verification; at every level it tends to add unrequested tests/docs.
 
-### Opus 5.5 / Fable 5.1 / Sonnet 5.5 breaking changes
+### Opus 5.5 / Fable 5.2 / Sonnet 5.5 breaking changes
 
 | Change | Applies to | Fix |
 |--------|-----------|-----|
-| Forced tool use: `tool_choice` `{"type":"any"}` / `{"type":"tool",...}` → 400 | Opus 5.5, Fable 5.1, Sonnet 5.5 | Keep `auto`; add `strict: true` (strict tool use) or use structured outputs; say in the prompt when a tool applies |
+| Forced tool use: `tool_choice` `{"type":"any"}` / `{"type":"tool",...}` → 400 | Opus 5.5, Fable 5.2, Sonnet 5.5 | Keep `auto`; add `strict: true` (strict tool use) or use structured outputs; say in the prompt when a tool applies |
 | `thinking: {"type":"disabled"}` or `{"type":"enabled","budget_tokens":N}` → 400 | Opus 5.5 (Fable already); Sonnet 5.5: `disabled` → use `between_tools` | Omit `thinking` or send `{"type":"adaptive"}`; lower `effort` where you used to disable thinking. Sonnet 5.5 only: `{"type":"between_tools"}` turns off up-front thinking (effort `high` or below; 400 at `xhigh`/`max`, and with `display`/`budget_tokens`/per-message effort) |
-| Non-default `temperature`/`top_p`/`top_k`, assistant prefill → 400 | Fable 5.1 (unchanged from Fable 5) | Drop sampling params; steer via prompt/structured outputs |
-| Thinking blocks bound to model + conversation | Opus 5.5, Fable 5.1, Sonnet 5.5 | Keep history **append-only**; change instructions/tools via mid-conversation system messages, not edits. Opus 5.5 → Fable 5.1 keeps reasoning; the reverse (and other switches) drops it. Beta `thinking-binding-controls-2026-08-01` + `thinking.block_binding.prefix_mismatch_behavior: "drop_block"` drops instead of 400 and reports it in `input_transformations` |
-| `computer_20251124` → 400 | Opus 5.5, Sonnet 5.5 (Claude API / Google Cloud; Bedrock still accepts it) | Migrate to `computer_toolset_20260801` |
-| Text between tool calls arrives as `thinking` blocks, empty at default `display: "omitted"` | Opus 5.5, Fable 5.1, Sonnet 5.5 | Select blocks by `type`, not position; set `display: "updates"` (beta `thinking-display-updates-2026-08-18`) to get readable progress notes |
+| Non-default `temperature`/`top_p`/`top_k`, assistant prefill → 400 | Fable 5.x (stated for Fable 5 / 5.1; the 5.2 docs do not restate it — omit them) | Drop sampling params; steer via prompt/structured outputs |
+| Thinking blocks bound to model + conversation | Opus 5.5, Fable 5.2, Sonnet 5.5 | Keep history **append-only**; change instructions/tools via mid-conversation system messages, not edits. **On Fable 5.2 a failed prefix check (edited `system`, `tools`, or an earlier message) is a 400** (`The block is bound to a different conversation`). Only Fable 5.2 / Mythos 5.2 read Fable 5.2's thinking blocks: moving onto Fable 5.2 keeps earlier reasoning (Claude API, Google-managed Google Cloud), moving off it drops it. Beta `thinking-binding-controls-2026-08-01` + `thinking.block_binding.prefix_mismatch_behavior: "drop_block"` drops instead of 400 and reports it in `input_transformations` |
+| `computer_20251124` → 400 | Opus 5.5, Sonnet 5.5, Fable 5.2 (everywhere except Bedrock, which still accepts it) | Migrate to `computer_toolset_20260801` |
+| Advisor tool: a Fable 5.2 executor accepts only a Fable 5.2 / Mythos 5.2 advisor → 400 otherwise | Fable 5.2 | Set the advisor `model` to `claude-fable-5-2` in the same change (in new conversations — it edits `tools`) |
+| Text between tool calls arrives as `thinking` blocks, empty at default `display: "omitted"` | Opus 5.5, Fable 5.2, Sonnet 5.5 | Select blocks by `type`, not position; set `display: "updates"` (beta `thinking-display-updates-2026-08-18`) to get readable progress notes |
 
 **New betas (both models):** per-message effort — a `role: "system"` message carrying `output_config.effort` (beta `mid-conversation-output-config-2026-07-01`) changes depth without a cache miss, whereas changing top-level `effort` invalidates the cache; turn-scoped system messages via `clear_at: "next_user_message"` (beta `mid-conversation-system-clear-at-2026-08-21`) for per-turn reminders; inline tool definitions in system messages (`inline-tools-2026-09-15`); compaction on demand (`compact-2026-09-04`). Minimum cacheable prompt is 512 tokens.
 
-**Refusals:** Opus 5.5 runs biology, cybersecurity, and `reasoning_extraction` classifiers — don't prompt it to write its reasoning into the response (read `display: "summarized"` thinking instead); `fallbacks: "default"` does not retry `reasoning_extraction` declines. Fable 5.1's permitted fallback targets are Opus 4.8 and Opus 5. **Fast mode:** Opus 5.5 at $8/$40, Claude API only.
+**Refusals:** Opus 5.5 runs biology, cybersecurity, and `reasoning_extraction` classifiers — don't prompt it to write its reasoning into the response (read `display: "summarized"` thinking instead); `fallbacks: "default"` does not retry `reasoning_extraction` declines. Fable 5.2 declines by category (`cyber`, `bio`, `frontier_llm`, `reasoning_extraction`, `general_harms`); its permitted fallback targets are Opus 4.8 and Opus 5. **Fast mode:** Opus 5.5 at $8/$40 (Claude API only); Fable 5.2 at $16/$80 (Claude API, Google Cloud, Foundry — not Bedrock). **Fable 5.2 prompting:** start at `high`; a "think less" line does not work at `medium`+ (lower effort); for agents add finish-the-whole-task text at `low`/`medium`; say who owns the code; do not show a token budget in the prompt; early testers had good results with it as planner and orchestrator for other models — check which model your subagents default to.
 
 ## Python SDK
 
@@ -213,7 +214,7 @@ message = client.messages.create(
 ## Adaptive Thinking
 
 For complex reasoning tasks. On Sonnet 5.x / Opus 5 / Fable 5 thinking is adaptive
-(the old `budget_tokens` form returns 400; on Opus 5.5 / Fable 5.1 thinking can't be
+(the old `budget_tokens` form returns 400; on Opus 5.5 / Fable 5.2 thinking can't be
 disabled at all); control depth with `output_config.effort`:
 
 ```python
@@ -328,9 +329,9 @@ while True:
 
 | Strategy | Savings | When to Use |
 |----------|---------|-------------|
-| Prompt caching | Up to 90% on cached tokens (95% on Opus 5.5, 97.5% on Fable 5.1) | Repeated system prompts or context |
+| Prompt caching | Up to 90% on cached tokens (95% on Opus 5.5, 97.5% on Fable 5.2) | Repeated system prompts or context |
 | Batches API | 50% | Non-time-sensitive bulk processing |
-| Haiku instead of Sonnet | ~50% (Haiku 4.5 $1/$5 vs Sonnet 5.5 $2/$10) | Simple tasks, classification, extraction |
+| Haiku instead of Sonnet | ~95% (Haiku 5.5 $0.10/$0.50 up to 100k prompt tokens vs Sonnet 5.5 $2/$10) | Simple tasks, classification, extraction |
 | Shorter max_tokens | Variable | When you know output will be short |
 | Streaming | None (same cost) | Better UX, same price |
 
