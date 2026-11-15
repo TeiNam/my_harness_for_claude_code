@@ -176,7 +176,7 @@ npm run check-drift
 npm run optimize-settings
 ```
 
-`optimize-settings` 는 `env` 와 `settings.json.bak.*` 만 본다 — `hooks` 는 손대지 않으므로
+`optimize-settings` 는 `env`·`availableModels`(모델 라인업 고정)와 `settings.json.bak.*` 만 본다 — `hooks` 는 손대지 않으므로
 Orca 훅과 마주치지 않는다. Orca 가 쓰는 `ORCA_*` env 는 `HARNESS_*` 가 아니라서 판정 대상 밖이다.
 
 ---

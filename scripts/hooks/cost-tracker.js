@@ -29,26 +29,33 @@ const path = require('path');
 const { ensureDir, appendFile, getClaudeDir } = require('../lib/utils');
 const { sanitizeSessionId } = require('../lib/session-bridge');
 
-// Approximate per-1M-token billing rates (USD), 2026-10 lineup
-// (Haiku 4.5 / Sonnet 5.5 / Opus 5.5 / Fable 5.1, plus the previous generation
+// Approximate per-1M-token billing rates (USD), 2026-11 lineup
+// (Haiku 5.5 / Sonnet 5.5 / Opus 5.5 / Fable 5.2, plus earlier generations
 // for older transcripts — see skills/cost-aware-llm-pipeline Pricing Reference).
 // Cache read multipliers differ per model: 0.1x standard, 0.05x on Opus 5.5,
-// 0.025x on Fable 5.1. Cache write (5m) is 1.25x input everywhere.
+// 0.025x on Fable 5.1 / 5.2. Cache write (5m) is 1.25x input everywhere.
+// shortcut: Haiku 5.5 is priced at its base tier; a request whose prompt exceeds
+// 100k tokens bills 5x, which needs per-request prompt size — add it if haiku
+// subagents start carrying contexts that large.
 const RATE_TABLE = {
-  haiku:       { in: 1.00,  out: 5.0,  cacheWrite: 1.25,  cacheRead: 0.10 },
+  haikuLegacy: { in: 1.00,  out: 5.0,  cacheWrite: 1.25,  cacheRead: 0.10 },
+  haiku:       { in: 0.10,  out: 0.5,  cacheWrite: 0.125, cacheRead: 0.01 },
   sonnetLegacy:{ in: 3.00,  out: 15.0, cacheWrite: 3.75,  cacheRead: 0.30 },
   sonnet:      { in: 2.00,  out: 10.0, cacheWrite: 2.50,  cacheRead: 0.20 },
   opusLegacy:  { in: 5.00,  out: 25.0, cacheWrite: 6.25,  cacheRead: 0.50 },
   opus:        { in: 4.00,  out: 20.0, cacheWrite: 5.00,  cacheRead: 0.20 },
   fableLegacy: { in: 10.00, out: 50.0, cacheWrite: 12.50, cacheRead: 1.00 },
-  fable:       { in: 10.00, out: 50.0, cacheWrite: 12.50, cacheRead: 0.25 }
+  fable51:     { in: 10.00, out: 50.0, cacheWrite: 12.50, cacheRead: 0.25 },
+  fable:       { in: 8.00,  out: 40.0, cacheWrite: 10.00, cacheRead: 0.20 }
 };
 
 // 순서가 곧 우선순위다 — 버전이 붙은 패턴을 먼저 본다.
 // Bedrock ID(global.anthropic.claude-opus-5-5 등)도 부분 문자열로 매칭된다.
 const RATE_RULES = [
-  [/haiku/, 'haiku'],
-  [/(fable|mythos)-5-[1-9]/, 'fable'],
+  [/haiku-5/, 'haiku'],
+  [/haiku/, 'haikuLegacy'],
+  [/(fable|mythos)-5-[2-9]/, 'fable'],
+  [/(fable|mythos)-5-1/, 'fable51'],
   [/fable|mythos/, 'fableLegacy'],
   [/opus-5-[1-9]/, 'opus'],
   [/opus/, 'opusLegacy'],

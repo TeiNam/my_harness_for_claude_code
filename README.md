@@ -20,7 +20,7 @@
 |---|---:|---|
 | `agents/` | 35 | 위임 가능한 서브에이전트 (planner, reviewers, build-resolvers, devops, translator-docs, deep-researcher, tech-writer 등) |
 | `commands/` | 36 | 슬래시 커맨드 (frontmatter 기반 markdown) |
-| `skills/` | 114 | 도메인 지식·워크플로 정의 (NoSQL / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(drawio — archify 는 skills CLI 외부 설치) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
+| `skills/` | 115 | 도메인 지식·워크플로 정의 (NoSQL / FastAPI / Obsidian 플러그인 / AI / TUI 에이전트 / 문서 생성(PDF·DOCX·XLSX) / 다이어그램(drawio — archify 는 skills CLI 외부 설치) / 글쓰기 / 소셜 콘텐츠 / 랜딩페이지 디자인 등) |
 | `rules/` | 27 | common 4개(상시 로드되는 불변 제약) + 언어별 23개(typescript / python / rust / web) — 절차·참고 문서는 `docs/rules-reference/` |
 | `hooks/` | 2 + 28 | 코어 훅 2그룹(기본 설치 — 되돌리기 어려운 행위 차단만) + 옵트인 28그룹 (실행 스크립트 40종) |
 | `mcp-configs/` | — | MCP 서버 설정 샘플 |
@@ -37,16 +37,16 @@ Python(데이터 분석 / FastAPI), Rust, React + Vite + TypeScript, Obsidian �
 
 ## 모델 라우팅
 
-에이전트마다 작업 성격에 맞는 모델 티어를 `model:` frontmatter에 **별칭**(`opus` / `sonnet` / `haiku`)으로 선언합니다. 버전 ID를 직접 박지 않으므로, 모델이 업그레이드돼도 대규모 재태깅 없이 최신 라인업을 따라갑니다. (`fable` 별칭도 유효하지만 frontmatter 에는 쓰지 않습니다 — 아래 표 참조.)
+에이전트마다 작업 성격에 맞는 모델 티어를 `model:` frontmatter에 **별칭**(`opus` / `sonnet` / `haiku`)으로 선언합니다. 버전 ID를 직접 박지 않으므로, 모델이 업그레이드돼도 대규모 재태깅 없이 최신 라인업을 따라갑니다. (`fable` 별칭도 유효하지만 frontmatter 에는 쓰지 않습니다 — 아래 표 참조.) **이전 세대 모델은 쓰지 않습니다**: `npm run optimize-settings -- --apply` 가 별칭 4개를 현재 세대(Opus·Sonnet·Haiku 5.5, Fable 5.2)에 고정하고 `availableModels` 로 그 밖의 모델을 막습니다.
 
 | 별칭 | 현재 매핑 | 성격 | 대표 에이전트 |
 |---|---|---|---|
-| `fable` | **Fable 5.1** | Opus 위의 Mythos-class 티어(토큰당 ~2.5× Opus 비용, 캐시 읽기는 Opus 와 비슷, thinking 상시) — **상시 배정 없음.** `opus`@`xhigh`/`max` 로도 미스가 난 회복 불가 게이트의 최종 판정 1콜에만 per-call 로 쓴다. 세션이 Fable 이면 fork 가 가장 싼 경로 | (frontmatter 배정 0건 — per-call 전용) |
+| `fable` | **Fable 5.2** | Opus 위 티어(토큰당 2× Opus — $8/$40, 캐시 읽기는 Opus 와 동일, thinking 상시, 기본 effort `high`). 역할 셋: ① Opus 가 못 푼 어렵고 복잡한 문제를 단독으로 해결 ② 오케스트레이션 마스터(계획·위임·판정은 Fable, 실행은 하위 티어) ③ 회복 불가 게이트의 최종 판정 1콜. 운영 규칙은 `fable-mode` 스킬 | (frontmatter 배정 0건 — 세션 `/model fable`·per-call·fork 로만 사용) |
 | `opus` | **Opus 5.5** | 심층 추론 주력 티어(기본 effort `medium`) — 답의 형태가 미정인 일: 설계·미지의 원인 진단·사실 보존 판정·미분류 패턴 발견·보안/적대적 리뷰. 더 필요하면 먼저 effort(`high`→`xhigh`→`max`)를 올린다. refusal 시 폴백 규칙은 model-routing.md | `architect`, `planner`, `deep-researcher`, `security-reviewer`, fidelity 감사관, 최종 리뷰어 |
 | `sonnet` | **Sonnet 5.5** | 최고의 코딩 모델 — 기준이 이미 주어진 일: 구현·리팩터·PR 리뷰·rubric 대조 스캔·리포트대로 윤문·원인이 확정된 수리(코딩의 ~90%) | 언어별 리뷰어, `code-*`, `devops`, `tdd-guide`, `refactor-cleaner`, 탐지기, 작성가/윤문가 |
 | `haiku` | **Haiku 5.5** | 기계적 편집·검색·문서 스캐폴딩 (Bedrock 은 `ANTHROPIC_DEFAULT_HAIKU_MODEL` 핀 필요) | `doc-updater`, `docs-lookup`, 고빈도 워커 |
 
-**티어를 가르는 질문은 "박스가 열려 있는가"입니다.** 추론 깊이는 답의 형태가 미정일 때만 의미가 있습니다. taxonomy·rubric 이 이미 있거나 원인과 해결이 확정된 상태에서 실행만 하는 일은 탐색 공간이 없으므로 Sonnet 5.5 로 충분합니다. **여기에 opus 를 붙이는 것이 에이전트 함대에서 가장 흔한 낭비였습니다.** 반대로 설계·미지의 원인 진단·의미 보존 판정처럼 답을 스스로 만들어야 하는 일은 Opus 5.5 를 씁니다. Opus 위 사다리는 **effort 먼저**(`high`→`xhigh`→`max`) → 회복 불가 미스의 최종 판정 1콜만 **`fable`**(Fable 5.1) → 그다음은 위가 아니라 **옆(Codex, 다른 모델 패밀리)**입니다.
+**티어를 가르는 질문은 "박스가 열려 있는가"입니다.** 추론 깊이는 답의 형태가 미정일 때만 의미가 있습니다. taxonomy·rubric 이 이미 있거나 원인과 해결이 확정된 상태에서 실행만 하는 일은 탐색 공간이 없으므로 Sonnet 5.5 로 충분합니다. **여기에 opus 를 붙이는 것이 에이전트 함대에서 가장 흔한 낭비였습니다.** 반대로 설계·미지의 원인 진단·의미 보존 판정처럼 답을 스스로 만들어야 하는 일은 Opus 5.5 를 씁니다. Opus 위 사다리는 **effort 먼저**(`high`→`xhigh`) → Opus 가 그래도 못 풀면 **`fable`**(Fable 5.2 — 난제는 단독으로, 여러 티어에 걸친 일은 오케스트레이션 마스터로) → 그다음은 위가 아니라 **옆(Codex, 다른 모델 패밀리)**입니다.
 
 함정 둘: ① "중요한 파이프라인이니 전부 opus" — 중요도는 추론 깊이가 아닙니다(40패턴 taxonomy 대조는 lookup). ② "수리니까 sonnet" — 원인이 *확정된 뒤에만* 참입니다(원인 찾기는 열린 박스). **파이프라인이 아니라 단계별로 태깅**합니다: detect→fix→judge 는 `sonnet`→`sonnet`→`opus`. 두 축이 충돌하면(닫힌 박스인데 미스 비용이 큼) 평균이 아니라 **틀렸을 때의 최악 비용**이 이깁니다 (머지를 게이팅하는 리뷰어는 대부분 쉬워도 `opus`).
 

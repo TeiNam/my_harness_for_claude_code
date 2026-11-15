@@ -23,6 +23,8 @@ open question is *which vehicle*.
 | answerable by one tool call (a grep, a file read, a test run) | inline — delegation has a floor cost and a one-liner is below it |
 | fan-out, a task DAG, a coordinator loop | Orca `orchestration`, not this session |
 
+**On a Fable session, name the tier on every delegation.** A subagent with no model of its own — `fork`, `general-purpose`, the built-in `Explore` — inherits Fable at 2× the Opus price (measured 2026-11-15). Use an `agents/` entry (its tier is in frontmatter) or pass `model` on the call; the `fable-mode` skill has the stage → tier table and the brief template.
+
 Hard limits remain, but they cap **concurrency and recursion** — not frequency:
 
 - **Max 3 concurrent** unless the user asks for more scale. Beyond that it is Orca's.
@@ -110,10 +112,10 @@ Official guidance: *"Reserve xhigh and max for work where you've measured a
 quality gain"* — reach them per call (`/effort`), not in frontmatter.
 
 This is the frontmatter form of the tiering rule in `model-routing.md`: reach for
-effort before reaching for a higher tier. `fable` (Fable 5.1, the rung above Opus)
-is deliberately absent from this table — it never appears in frontmatter; it's a
-per-call escalation (one-off `model` override, or a fork when the session runs
-Fable) per model-routing.md → Current Lineup. Deliberately still unused: `memory:`,
+effort before reaching for a higher tier. `fable` (Fable 5.2, the tier above Opus)
+is deliberately absent from this table — it never appears in frontmatter; it is
+reached by session (`/model fable`), per call (one-off `model` override), or a
+fork when the session runs Fable, per model-routing.md → Fable 5.2 roles. Deliberately still unused: `memory:`,
 `isolation:`, `maxTurns:`, `permissionMode:`, `experimental.cacheTtl` — adopt
 them per agent when there is a reason, not as a sweep.
 

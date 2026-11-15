@@ -43,7 +43,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ### Model Routing (per-agent model tiers)
 
-`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5.5(기본 effort `medium`), `sonnet`→Sonnet 5.5, `haiku`→Haiku 5.5, 그리고 `fable`→Fable 5.1(Opus 위 Mythos-class, 토큰당 ~2.5× Opus 비용). **별칭 해석은 프로바이더마다 다르다** — Bedrock 에서는 `ANTHROPIC_DEFAULT_SONNET_MODEL`·`ANTHROPIC_DEFAULT_HAIKU_MODEL` 을 핀하지 않으면 `sonnet`·`haiku` 가 4.5 로 풀리고(Haiku 5.5 = `global.anthropic.claude-haiku-5-5`), 최상위 `effortLevel` 은 Opus 5.5 에 적용되지 않는다(`modelSettings`·`/effort` 사용). 상세·모델 전환 방향 규칙은 `docs/rules-reference/model-routing.md`. **`fable` 은 frontmatter 상시 배정 금지** — 사다리는 effort 먼저(`high`→`xhigh`→`max`), 그래도 미스가 나는 회복 불가 게이트의 최종 판정 1콜만 per-call `fable`(세션이 Fable 이면 fork 가 가장 싼 경로), 그다음은 위가 아니라 **옆(Codex)** 으로 간다.
+`model:` 은 항상 **별칭**(`opus`/`sonnet`/`haiku`)으로 적는다 — 핀된 버전 ID 금지. 현재 `opus`→Opus 5.5(기본 effort `medium`), `sonnet`→Sonnet 5.5, `haiku`→Haiku 5.5, 그리고 `fable`→Fable 5.2(Opus 위 티어, 토큰당 2× Opus — $8/$40). **별칭 해석은 프로바이더마다 다르다** — Bedrock 에서는 `ANTHROPIC_DEFAULT_SONNET_MODEL`·`ANTHROPIC_DEFAULT_HAIKU_MODEL` 을 핀하지 않으면 `sonnet`·`haiku` 가 4.5 로 풀리고(Haiku 5.5 = `global.anthropic.claude-haiku-5-5`), 최상위 `effortLevel` 은 Opus 5.5 에 적용되지 않는다(`modelSettings`·`/effort` 사용). **이전 세대는 쓰지 않는다** — Opus·Sonnet·Haiku 는 5.5, Fable 은 5.2 만. 라인업의 단일 출처는 `scripts/lib/model-lineup.js` 이고, `npm run optimize-settings` 가 `settings.json` 의 별칭 핀 4개와 `availableModels`(별칭이 아니라 **전체 ID** — 별칭 목록은 Opus 5·Fable 5.1 을 통과시킨다, 실측)를 검사·적용한다. 거절(refusal) 시에도 옛 세대로 폴백하지 않는다. 상세·모델 전환 방향 규칙은 `docs/rules-reference/model-routing.md`. **`fable` 의 역할은 셋이다** — ① Opus 가 effort 를 올려도 못 푼 어렵고 복잡한 문제를 **단독으로** 푼다 ② **오케스트레이션 마스터**: 계획·위임·판정은 Fable, 실행은 `opus`/`sonnet`/`haiku` ③ 회복 불가 게이트의 **최종 판정 1콜**. 사다리는 effort 먼저(`high`→`xhigh`) → `fable` → 그다음은 위가 아니라 **옆(Codex)**. frontmatter 상시 배정은 여전히 금지이고(세션 `/model fable`·per-call·fork 로만 닿는다), Fable 세션의 운영 규칙(공식 Fable 5.2 지침)은 **`fable-mode` 스킬**이 담는다. **Fable 세션에서 모델을 지정하지 않은 서브에이전트는 Fable 을 상속한다**(내장 `Explore` 포함, 2026-11-15 실측) — 위임할 때는 티어가 박힌 에이전트를 쓰거나 `model` 을 명시한다.
 
 티어 판단 기준은 **"박스가 열려 있는가"** 하나다. 답의 형태가 이미 정해졌으면(rubric·taxonomy 가 주어짐, 원인·해결이 확정됨, 출력 형식이 고정됨) 탐색 공간이 없으므로 **`sonnet`**. 답의 형태가 미정이거나(원인 미상 진단, 설계, 의미 보존 판정, taxonomy 가 못 덮은 것 발견) 미스 비용이 회복 불가면 **`opus`**. 기계적 고빈도는 **`haiku`**. **파이프라인이 아니라 단계별로 태깅한다** — detect→fix→judge 는 `sonnet`→`sonnet`→`opus` 이고 opus×3 이 아니다. 두 축이 충돌하면 최악 비용이 이긴다.
 
@@ -51,7 +51,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 ## High-value Skills for Owner's Workloads
 
-`skills/` 114종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
+`skills/` 115종 — 전부 실제 내용이 채워져 있고 placeholder 는 없다. 설치된 스킬은 `description` 이 매 세션 로드되므로 여기서 다시 나열하지 않는다. 워크로드별 카탈로그·출처(origin)·중복 판정 이력은 **`docs/harness-assets.md`**.
 
 새 스킬을 추가할 때 확인할 것 세 가지: ① 동반 플러그인(`docs/plugin.md`)과 겹치지 않는지 — 겹쳐서 제거된 전례가 있다(`tdd-workflow`·`verification-loop`·`codex-cli`·`design-system`) ② 기존 스킬의 부분집합이 아닌지(`seo` 가 `seo-geo-aeo` 에 흡수된 전례). ③ 레이아웃 — 100줄 넘는 참고 파일엔 목차, SKILL.md ≤500줄, 모든 파일은 SKILL.md 에서 직접 링크(1단계). `node scripts/ci/validate-skills.js` 가 경고하고 `--fix-toc` 가 목차를 넣는다. 나머지 규칙(자유도·체크리스트·검사 루프·설치 명시)은 `/learn` 의 Skill Layout Rules. 행동이 바뀌는지는 `npm run eval:skills`(유료, `evals/skills/` 케이스를 스킬 있음/없음 두 군으로 실행, 리포트는 로컬 전용)로 모델별로 잰다 — 2026-11 실측에서 Haiku 4.5·5.5 의 실패는 전부 스킬 미호출이었고, Haiku 5.5 는 기본 판단은 강하지만 스킬을 스스로 잘 부르지 않아 위험 작업 스킬은 description 맨 앞에 트리거를 둔다.
 
@@ -63,7 +63,7 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 - **메뉴 baseline 은 `core` + `writing` + `report`** (`menu.js` 의 `ALWAYS_INCLUDED`). 글·문서 작업 비중이 높아 매번 고르는 것이 의미가 없으므로 고르지 않아도 따라온다(합계 상시 비용 ~1.7k tok — 스킬은 description 만 로드되고 본문은 호출 시 읽힌다). 소셜 콘텐츠(`social-*`)는 별도 축이라 옵트인으로 남긴다. 이 baseline 은 **메뉴 경로에만** 적용된다 — `--workload=` 저수준 플래그는 "정확히 이것만"이라는 뜻이므로 그대로이고, 프로젝트 로컬 설치에서 글쓰기를 빼려면 그 경로를 쓴다.
 - 워크로드 흐름에 들어오는 kind 는 **agent·command·skill·rule** 4종. hooks·mcp 는 분류 밖이라 설치 후 별도로 묻는다(`--with-hooks` / `--with-mcp` / `--no-extras`).
 - 드리프트 점검: `npm run check-drift` — 레포가 깔아야 할 자산 vs 실제 심볼릭을 대조한다. 읽기 전용.
-- **settings.json 점검: `npm run optimize-settings`** — 읽기 전용이 기본이고 고칠 것이 있으면 exit 1, `-- --apply` 로 적용한다. 프로파일 유무·유효성, 하네스가 더 읽지 않는 `HARNESS_*` env, 평문 비밀값이 든 `settings.json.bak.*`(**값은 절대 출력하지 않고 sha+길이로만** 식별), 스킬 description 의 `skillListing*` 캡을 본다. 훅은 `merge-hooks.js`, 링크는 `check-drift.js` 담당이라 겹치지 않는다.
+- **settings.json 점검: `npm run optimize-settings`** — 읽기 전용이 기본이고 고칠 것이 있으면 exit 1, `-- --apply` 로 적용한다. 프로파일 유무·유효성, **모델 라인업**(별칭 핀·`availableModels` 가 현재 세대인지), 하네스가 더 읽지 않는 `HARNESS_*` env, 평문 비밀값이 든 `settings.json.bak.*`(**값은 절대 출력하지 않고 sha+길이로만** 식별), 스킬 description 의 `skillListing*` 캡을 본다. 훅은 `merge-hooks.js`, 링크는 `check-drift.js` 담당이라 겹치지 않는다.
 - **컨텍스트 절감 목적으로 워크로드를 줄이는 건 헛수고다**(실측): 안 쓰는 워크로드 6개를 다 빼도 상시 비용은 13 tok 만 줄었다(`aws-rds`·`devops`·`integration`·`data-analysis` 는 MCP 분류용 키라 자산이 없다). 줄일 곳은 **상시 로드분**이다 — 다른 프로젝트 상시는 ≈10.4k tok(스킬 description 5.1k + 에이전트 2.6k + rules 1.8k + 커맨드 0.9k)이고, 이 레포 CLAUDE.md 는 이 레포 세션에만 얹힌다.
 
 메뉴 구조·플래그·워크로드 키 전체 목록은 **`docs/install-menu.md`**.
@@ -87,9 +87,9 @@ When picking agents/skills/rules to apply, bias toward what's relevant to these:
 
 이 하네스는 **Orca 안에서 돌아간다.** Orca 는 자체 훅을 `settings.json` 의 12개 이벤트에 심고(Orca 밖에서는 no-op) 자체 스킬 5종을 링크한다. **겹치는 기능은 한쪽만 쓴다** — 워크트리 격리·핸드오프 = `orca-cli`, statusLine = claude-dashboard, 세션 재개 = 네이티브 `/resume`, **브라우저 컨트롤 = Orca 임베디드 브라우저**(`orca tab`·`goto`·`snapshot`·`click`·`eval`·`screenshot` + 세션 프로필) **→ 실패하면 Playwright**. playwright MCP 를 상시 등록하지는 않는다 — 폴백은 `npx playwright` 스크립트로 시작하고, 잦아지면 그때 등록한다. Claude for Chrome·`chrome-cli` 는 경로에서 제외한다(조작 층이 없거나 Orca 와 중복). E2E 러너·영상 녹화(`ui-demo`)·HTML→PDF(`pdf`)는 원래부터 Playwright 몫이다.
 
-### 오케스트레이션은 Orca 전담 — 하네스는 이 축의 자산을 두지 않는다
+### 워크트리 간 오케스트레이션은 Orca 전담 — 세션 내 지휘는 Fable 5.2
 
-팬아웃·task DAG·coordinator 루프·블로킹 ask/reply 는 전부 **Orca `orchestration`** 이다. 이유는 능력이 아니라 **상태의 소유자**다 — 워크트리·worker_done 대기를 들고 있는 쪽이 Orca 이고, 같은 작업 집합에 조율자가 둘이면 경쟁한다.
+**층이 둘이다.** 세션 안에서 한 메인 스레드가 계획하고 leaf 서브에이전트(동시 3개까지)에 위임해 판정하는 일은 Claude Code 안에서 하고, 세션이 Fable 5.2 면 Fable 이 그 **오케스트레이션 마스터**다(`fable-mode` 스킬). 워크트리를 넘는 팬아웃·task DAG·coordinator 루프·블로킹 ask/reply 는 전부 **Orca `orchestration`** 이다(이때 조율자 세션을 Fable 로 둘 수 있다). 이유는 능력이 아니라 **상태의 소유자**다 — 워크트리·worker_done 대기를 들고 있는 쪽이 Orca 이고, 같은 작업 집합에 조율자가 둘이면 경쟁한다.
 
 그래서 `Workflow` 툴은 **전역에서 내렸다**(`~/.claude/settings.json` 의 `enableWorkflows: false` · `ultracode: false`). 안 쓰기로 한 툴의 설명이 매 세션 시스템 프롬프트에 실리던 비용까지 함께 사라진다. Orca 밖에서 팬아웃이 필요해지면 문서에 분기를 남겨두는 대신 **그 키를 켠다**.
 

@@ -90,18 +90,19 @@ Bedrock model IDs come in two flavours:
   unless data residency forbids it. Regional/multi-region endpoints carry a 10%
   premium over `global.*`.
 
-Current Claude IDs: `anthropic.claude-opus-5-5`, `anthropic.claude-fable-5-1`,
-`anthropic.claude-sonnet-5-5`, `anthropic.claude-haiku-4-5-20251001-v1:0` —
-e.g. `global.anthropic.claude-opus-5-5`, `global.anthropic.claude-fable-5-1`,
-`global.anthropic.claude-sonnet-5-5`, `global.anthropic.claude-haiku-4-5-20251001-v1:0`
-(the last three verified callable 2026-09). Opus 5.5 / Fable 5.1 reject forced
+Current Claude IDs: `anthropic.claude-opus-5-5`, `anthropic.claude-fable-5-2`,
+`anthropic.claude-sonnet-5-5`, `anthropic.claude-haiku-5-5` —
+e.g. `global.anthropic.claude-opus-5-5`, `global.anthropic.claude-fable-5-2`,
+`global.anthropic.claude-sonnet-5-5`, `global.anthropic.claude-haiku-5-5`
+(all four verified callable through Claude Code 2026-11; Fable 5.2 is offered as
+`global.*` / `us.*` on the `bedrock-runtime` endpoint only). Opus 5.5 / Fable 5.2 reject forced
 `toolChoice` (`any`/`tool`) and disabled thinking — see `claude-api` for the
 full breaking-change table.
 
 **Claude Code on Bedrock:** the `sonnet` alias resolves to **Sonnet 4.5**, not
 Sonnet 5.5, and `haiku` has no pinned target, unless you set
 `ANTHROPIC_DEFAULT_SONNET_MODEL` / `ANTHROPIC_DEFAULT_HAIKU_MODEL` (e.g. to the
-`global.*` IDs above; the bare `claude-sonnet-5-5` also works — measured 2026-10-06). `opus` → Opus 5.5 and `fable` → Fable 5.1 already.
+`global.*` IDs above; the bare `claude-sonnet-5-5` also works — measured 2026-10-06). `opus` → Opus 5.5 and `fable` → Fable 5.2 already (measured 2026-11-15).
 Fast mode is not available on Bedrock.
 
 ```python
@@ -166,7 +167,7 @@ response = client.converse(
 )
 ```
 
-Cache hits are 10% of input cost (5% on Opus 5.5, 2.5% on Fable 5.1); misses
+Cache hits are 10% of input cost (5% on Opus 5.5, 2.5% on Fable 5.2); misses
 cost a 25% premium. Worth it for any
 prompt > ~2k tokens that gets reused.
 

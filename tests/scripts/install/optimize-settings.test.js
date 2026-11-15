@@ -18,6 +18,7 @@ const { execFileSync } = require('child_process');
 
 const SCRIPT = path.join(__dirname, '..', '..', '..', 'scripts', 'install', 'optimize-settings.js');
 const { audit, applyFixes, isSecretName, harnessEnvNamesReadByCode, envNamesUsedOnlyByOptionalStack } = require('../../../scripts/install/optimize-settings');
+const { LINEUP, expectedLineup, resolveModelId, stripVariant } = require('../../../scripts/lib/model-lineup');
 const REPO_ROOT = path.join(__dirname, '..', '..', '..');
 
 // A name no shipped script reads, so it must be reported dead.
@@ -27,7 +28,7 @@ const OPTIONAL_ONLY = 'HARNESS_CONTEXT_MONITOR_COST_WARNINGS';
 // A value that must never appear in output.
 const FAKE_SECRET = 'zzz-not-a-real-key-3f9a1c7e-do-not-print';
 
-function tmpHome(settings, extras = {}) {
+function rawHome(settings, extras = {}) {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'harness-optimize-'));
   fs.writeFileSync(path.join(home, 'settings.json'), `${JSON.stringify(settings, null, 2)}\n`);
   for (const [name, body] of Object.entries(extras)) {
@@ -38,15 +39,23 @@ function tmpHome(settings, extras = {}) {
   return home;
 }
 
+// 프로바이더 감지가 이 머신의 셸 env(Bedrock 여부)에 끌려가지 않게 비운다.
+const HERMETIC_ENV = { ...process.env, CLAUDE_CODE_USE_BEDROCK: '', ANTHROPIC_BEDROCK_REGION_PREFIX: '' };
+// 모델 라인업까지 맞춘 "고칠 것 없는" 설정 조각.
+const LINEUP_OK = expectedLineup({});
+const withLineup = (settings = {}) => ({ ...settings, env: { ...LINEUP_OK.pins, ...(settings.env || {}) }, availableModels: LINEUP_OK.availableModels });
+// 기본 픽스처는 모델 라인업이 맞춰진 상태다 — 각 테스트가 자기 관심사만 보게 한다. 라인업 자체를 볼 때는 rawHome.
+const tmpHome = (settings, extras) => rawHome(withLineup(settings), extras);
+
 function run(home, args = []) {
   try {
-    return { code: 0, stdout: execFileSync('node', [SCRIPT, `--claude-home=${home}`, ...args], { encoding: 'utf8' }) };
+    return { code: 0, stdout: execFileSync('node', [SCRIPT, `--claude-home=${home}`, ...args], { encoding: 'utf8', env: HERMETIC_ENV }) };
   } catch (e) {
     return { code: e.status || 1, stdout: e.stdout || '', stderr: e.stderr || '' };
   }
 }
 
-const auditHome = home => audit({ claudeHome: home, settingsPath: path.join(home, 'settings.json'), root: REPO_ROOT });
+const auditHome = home => audit({ claudeHome: home, settingsPath: path.join(home, 'settings.json'), root: REPO_ROOT, processEnv: {} });
 
 function test(name, fn) {
   try {
@@ -204,7 +213,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('exits 0 and says so when there is nothing to optimize', () => {
-    const home = tmpHome({ env: { HARNESS_HOOK_PROFILE: 'minimal' } });
+    const home = tmpHome(withLineup({ env: { HARNESS_HOOK_PROFILE: 'minimal' } }));
     const r = run(home);
     assert.strictEqual(r.code, 0, r.stdout);
     assert.ok(r.stdout.includes('최적화할 것이 없습니다'), r.stdout);
@@ -212,12 +221,12 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('applyFixes drops env entirely when the last key goes', () => {
-    const home = tmpHome({ env: { [RETIRED]: '1' }, model: 'keep-me' });
+    const home = tmpHome(withLineup({ env: { [RETIRED]: '1' }, model: 'keep-me' }));
     // 프로파일이 없으므로 기록되고, 죽은 env 는 지워진다 → env 는 남는다.
     run(home, ['--apply']);
     let after = JSON.parse(fs.readFileSync(path.join(home, 'settings.json'), 'utf8'));
-    assert.deepStrictEqual(Object.keys(after.env), ['HARNESS_HOOK_PROFILE']);
-    assert.strictEqual(after.model, 'keep-me', 'non-env settings are untouched');
+    assert.deepStrictEqual(Object.keys(after.env).sort(), ['HARNESS_HOOK_PROFILE', ...Object.keys(LINEUP_OK.pins)].sort());
+    assert.strictEqual(after.model, 'keep-me', 'the default model is the user\'s choice and is never rewritten');
 
     // 이제 프로파일만 있는 상태에서 죽은 env 만 지우는 경로를 직접 검증한다.
     const settings = { env: { [RETIRED]: '1' } };
@@ -226,6 +235,65 @@ function runTests() {
     applyFixes({ claudeHome: home, settingsPath: target, findings, settings });
     after = JSON.parse(fs.readFileSync(target, 'utf8'));
     assert.ok(!('env' in after), 'an empty env object should not be left behind');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('model lineup: unpinned aliases and a missing allow-list are reported and fixed by --apply', () => {
+    const home = rawHome({ env: { HARNESS_HOOK_PROFILE: 'minimal' } });
+    const before = auditHome(home).findings['model-lineup'];
+    assert.deepStrictEqual(before.map(f => f.name).sort(), [...Object.keys(LINEUP_OK.pins), 'availableModels'].sort());
+    assert.strictEqual(run(home).code, 1, 'an unpinned lineup must fail the read-only check');
+
+    run(home, ['--apply']);
+    const after = JSON.parse(fs.readFileSync(path.join(home, 'settings.json'), 'utf8'));
+    assert.strictEqual(after.env.ANTHROPIC_DEFAULT_FABLE_MODEL, 'claude-fable-5-2');
+    assert.strictEqual(after.env.ANTHROPIC_DEFAULT_OPUS_MODEL, 'claude-opus-5-5');
+    assert.strictEqual(after.env.ANTHROPIC_DEFAULT_SONNET_MODEL, 'claude-sonnet-5-5');
+    assert.strictEqual(after.env.ANTHROPIC_DEFAULT_HAIKU_MODEL, 'claude-haiku-5-5');
+    assert.deepStrictEqual(after.availableModels, LINEUP_OK.availableModels);
+    assert.strictEqual(run(home).code, 0, 'clean after apply');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('model lineup: a previous-generation pin or allow-list entry is replaced', () => {
+    const home = tmpHome(withLineup({
+      env: { HARNESS_HOOK_PROFILE: 'minimal', ANTHROPIC_DEFAULT_HAIKU_MODEL: 'claude-haiku-4-5', ANTHROPIC_DEFAULT_FABLE_MODEL: 'claude-fable-5-1' }
+    }));
+    const settingsPath = path.join(home, 'settings.json');
+    const stale = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    fs.writeFileSync(settingsPath, JSON.stringify({ ...stale, availableModels: [...stale.availableModels, 'claude-opus-5'] }));
+
+    const names = auditHome(home).findings['model-lineup'].map(f => f.name).sort();
+    assert.deepStrictEqual(names, ['ANTHROPIC_DEFAULT_FABLE_MODEL', 'ANTHROPIC_DEFAULT_HAIKU_MODEL', 'availableModels']);
+    run(home, ['--apply']);
+    const after = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+    assert.strictEqual(after.env.ANTHROPIC_DEFAULT_HAIKU_MODEL, 'claude-haiku-5-5');
+    assert.strictEqual(after.env.ANTHROPIC_DEFAULT_FABLE_MODEL, 'claude-fable-5-2');
+    assert.ok(!after.availableModels.includes('claude-opus-5'), 'previous generation removed from the allow-list');
+    fs.rmSync(home, { recursive: true, force: true });
+  })) passed++; else failed++;
+
+  if (test('model lineup: Bedrock settings get prefixed IDs; a legacy default model is reported, not rewritten', () => {
+    const bedrockEnv = { CLAUDE_CODE_USE_BEDROCK: '1', ANTHROPIC_BEDROCK_REGION_PREFIX: 'global' };
+    assert.strictEqual(resolveModelId('fable', bedrockEnv), 'global.anthropic.claude-fable-5-2');
+    assert.strictEqual(resolveModelId('opus', { CLAUDE_CODE_USE_BEDROCK: '1' }), 'global.anthropic.claude-opus-5-5');
+    assert.strictEqual(resolveModelId('sonnet', {}), LINEUP.sonnet);
+    assert.strictEqual(stripVariant('global.anthropic.claude-opus-5-5[1m]'), 'global.anthropic.claude-opus-5-5');
+
+    const home = rawHome({ env: { HARNESS_HOOK_PROFILE: 'minimal', ...bedrockEnv }, model: 'global.anthropic.claude-opus-5[1m]' });
+    run(home, ['--apply']);
+    const after = JSON.parse(fs.readFileSync(path.join(home, 'settings.json'), 'utf8'));
+    assert.strictEqual(after.env.ANTHROPIC_DEFAULT_HAIKU_MODEL, 'global.anthropic.claude-haiku-5-5');
+    assert.ok(after.availableModels.every(id => id.startsWith('global.anthropic.')), after.availableModels.join(','));
+    assert.strictEqual(after.model, 'global.anthropic.claude-opus-5[1m]', 'the default model is left for the user to change');
+
+    const left = auditHome(home).findings['model-lineup'];
+    assert.deepStrictEqual(left.map(f => [f.name, f.fixable]), [['model', false]]);
+    // 현재 세대 기본 모델(별칭·전체 ID·[1m] 변형)은 보고하지 않는다.
+    for (const model of ['opus', 'global.anthropic.claude-opus-5-5', 'global.anthropic.claude-fable-5-2[1m]']) {
+      fs.writeFileSync(path.join(home, 'settings.json'), JSON.stringify({ ...after, model }));
+      assert.deepStrictEqual(auditHome(home).findings['model-lineup'], [], model);
+    }
     fs.rmSync(home, { recursive: true, force: true });
   })) passed++; else failed++;
 

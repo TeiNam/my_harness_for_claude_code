@@ -24,7 +24,7 @@ Automatically select cheaper models for simple tasks, reserving expensive models
 
 ```python
 MODEL_SONNET = "claude-sonnet-5-5"
-MODEL_HAIKU = "claude-haiku-4-5"
+MODEL_HAIKU = "claude-haiku-5-5"
 
 _SONNET_TEXT_THRESHOLD = 10_000  # chars
 _SONNET_ITEM_THRESHOLD = 30     # items
@@ -152,19 +152,24 @@ def process(text: str, config: Config, tracker: CostTracker) -> tuple[Result, Co
     return parse_result(response), tracker
 ```
 
-## Pricing Reference (2026-10)
+## Pricing Reference (2026-11)
 
 | Model | Input ($/1M tokens) | Output ($/1M tokens) | Cache read ($/1M) | Relative Cost |
 |-------|---------------------|----------------------|-------------------|---------------|
-| Haiku 4.5 | $1.00 | $5.00 | $0.10 (0.1×) | 1x |
-| Sonnet 5.5 | $2.00 | $10.00 | $0.20 (0.1×) | ~2x |
-| Opus 5.5 | $4.00 | $20.00 | $0.20 (0.05×) | ~4x |
-| Fable 5.1 | $10.00 | $50.00 | $0.25 (0.025×) | ~10x |
-| Opus 5 / Opus 4.8 (legacy) | $5.00 | $25.00 | $0.50 (0.1×) | ~5x |
+| Haiku 5.5 (prompt ≤ 100k tokens) | $0.10 | $0.50 | $0.01 (0.1×) | 0.05x |
+| Haiku 5.5 (prompt > 100k tokens) | $0.50 | $2.50 | $0.05 (0.1×) | 0.25x |
+| Sonnet 5.5 | $2.00 | $10.00 | $0.20 (0.1×) | 1x |
+| Opus 5.5 | $4.00 | $20.00 | $0.20 (0.05×) | 2x |
+| Fable 5.2 | $8.00 | $40.00 | $0.20 (0.025×) | 4x |
 
-Cache-read multipliers differ per model (0.05× Opus 5.5, 0.025× Fable 5.1, 0.1×
-everyone else), so on cache-heavy agent loops the Fable/Opus gap is mostly the
-output rate. Sonnet 5.5 keeps Sonnet 5's $2/$10 (the planned rise to
+Earlier generations are not routed to (the harness pins the four models above and
+blocks the rest). For reading old usage only: Fable 5.1 $10/$50, Opus 5 / Opus 4.8
+$5/$25, Haiku 4.5 $1/$5.
+
+Relative cost is against Sonnet 5.5. Cache-read multipliers differ per model
+(0.05× Opus 5.5, 0.025× Fable 5.x, 0.1× everyone else): Fable 5.2 and Opus 5.5
+both read cache at $0.20, so on cache-heavy agent loops the Fable/Opus gap is
+almost entirely the output rate. Keep Haiku 5.5 prompts under 100k tokens. Sonnet 5.5 keeps Sonnet 5's $2/$10 (the planned rise to
 $3/$15 was cancelled).
 
 ## Best Practices
